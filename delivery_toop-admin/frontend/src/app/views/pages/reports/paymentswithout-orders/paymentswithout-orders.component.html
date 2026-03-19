@@ -1,0 +1,40 @@
+<div class="example-container mat-elevation-z8">
+	<mat-table #table [dataSource]="dataSource">
+
+		<ng-container matColumnDef="select">
+			<mat-header-cell *matHeaderCellDef>
+				<mat-checkbox [checked]="true" [indeterminate]="true">
+				</mat-checkbox>
+			</mat-header-cell>
+			<mat-cell *matCellDef="let row">
+				<mat-checkbox (click)="$event.stopPropagation()">
+				</mat-checkbox>
+			</mat-cell>
+		</ng-container>
+		<!-- company Column -->
+		<ng-container matColumnDef="company">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.COMPANY' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.company }} </mat-cell>
+		</ng-container>
+		<!-- customer Column -->
+		<ng-container matColumnDef="customer">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.CUSTOMER' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.customer }} </mat-cell>
+		</ng-container>
+		<!-- createdAt Column -->
+		<ng-container matColumnDef="createdAt">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.CREATEDATT' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{element.createdAt}} </mat-cell>
+		</ng-container>
+		<!-- total Column -->
+		<ng-container matColumnDef="total">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.TOTAL' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.total | currency:'BRL':true:'1.2-2' }} </mat-cell>
+		</ng-container>
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns;">
+		</mat-row>
+	</mat-table>
+	<mat-paginator [length]="totalLength" [pageSize]="pageSize" [pageSizeOptions]="pageLimit" (page)="changePage($event)">
+	</mat-paginator>
+</div>

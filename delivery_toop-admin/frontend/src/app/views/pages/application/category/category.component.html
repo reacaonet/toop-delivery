@@ -1,0 +1,370 @@
+<!-- Alert -->
+<p>
+	<ngb-alert *ngIf="alert" [type]="alert.type" (close)="closeAlert()">
+		{{ alert.message }}
+	</ngb-alert>
+</p>
+
+<div class="row justify-content-between">
+	<div class="col-auto align-self-center mb-2">
+		<p class="float-left">{{ "GLOBAL.LABEL.CATEGORY" | translate }}</p>
+	</div>
+	<div class="col-auto">
+		<a (click)="createCategoryModalShow(createcategorymodal)" href="javascript:;"
+			class="float-right btn btn-label-warning btn-bold btn-sm btn-icon-h">
+			{{ "GLOBAL.LABEL.CREATE" | translate }}
+		</a>
+	</div>
+</div>
+
+<div class="example-container mat-elevation-z8">
+	<mat-table #table [dataSource]="dataSource">
+		<!-- Checkbox Column -->
+		<ng-container matColumnDef="select">
+			<mat-header-cell *matHeaderCellDef>
+				<mat-checkbox [checked]="true" [indeterminate]="true"> </mat-checkbox>
+			</mat-header-cell>
+			<mat-cell *matCellDef="let row">
+				<mat-checkbox (click)="$event.stopPropagation()"> </mat-checkbox>
+			</mat-cell>
+		</ng-container>
+		<!-- Images Column -->
+		<ng-container matColumnDef="image">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.IMAGES" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<a [href]="element.image" target="_blank">
+					<img width="50" class="img-thumbnail" [src]="element.image || './assets/media/logo-default.png'"
+						[alt]="element.name" />
+				</a>
+			</mat-cell>
+		</ng-container>
+		<!-- Name Column -->
+		<ng-container matColumnDef="name">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.LABEL" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.name }} </mat-cell>
+		</ng-container>
+		<!-- Type Column -->
+		<!-- <ng-container matColumnDef="type">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.TYPE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				{{ (element.type === 'restaurant') ? ('GLOBAL.LABEL.RESTAURANT' | translate) : 'GLOBAL.LABEL.SUPERMARKET' | translate }}
+			</mat-cell>
+		</ng-container> -->
+		<!-- show In App Column -->
+
+		<!-- SEGMENT-->
+		<ng-container matColumnDef="segment">
+			<mat-header-cell *matHeaderCellDef> Segmento </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				{{ element.segment?.name || "" }}
+			</mat-cell>
+		</ng-container>
+		<!-- SEGMENT-->
+
+		<ng-container matColumnDef="showInApp">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.SHOWINAPP" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i *ngIf="element.showInApp === true" class="flaticon2-accept mr-2"></i>
+				<i *ngIf="element.showInApp === false" class="flaticon2-cancel mr-2"></i>
+			</mat-cell>
+		</ng-container>
+		<!-- show In App Home -->
+		<ng-container matColumnDef="showHome">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.SHOWHOME" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i *ngIf="element.showHome === true" class="flaticon2-accept mr-2"></i>
+				<i *ngIf="element.showHome === false" class="flaticon2-cancel mr-2"></i>
+			</mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="order">
+			<mat-header-cell *matHeaderCellDef> Ordem </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				{{ element.order }}
+			</mat-cell>
+		</ng-container>
+
+		<!-- Status Column -->
+		<ng-container matColumnDef="status">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.STATUS" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i *ngIf="element.status === true" class="flaticon2-accept mr-2"></i>
+				<i *ngIf="element.status === false" class="flaticon2-cancel mr-2"></i>
+			</mat-cell>
+		</ng-container>
+		<!-- Keyword Column -->
+		<ng-container matColumnDef="keyword">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.KEYWORD" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.keyword }} </mat-cell>
+		</ng-container>
+		<!-- Delete Categoria -->
+		<ng-container matColumnDef="delete">
+			<mat-header-cell *matHeaderCellDef>{{ "GLOBAL.LABEL.ACTION" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i class="flaticon2-edit mr-2" (click)="editCategoryModalShow(editcategorymodal, element)"></i>
+				<i class="flaticon2-trash" (click)="confirmDeleteModalShow(confirmdeletemodal, element)"></i>
+			</mat-cell>/
+		</ng-container>
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns"> </mat-row>
+	</mat-table>
+	<mat-paginator [length]="totalLength" [pageSize]="pageSize" [pageSizeOptions]="pageLimit" (page)="changePage($event)">
+	</mat-paginator>
+
+	<!-- Modal Create Categorias -->
+	<ng-template #createcategorymodal let-modal>
+		<form [formGroup]="formData" (ngSubmit)="
+				formSubmitCategory = true;
+				formData.valid && createCategory(formData.value)
+			">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-create-category">
+					{{ "GLOBAL.LABEL.CREATECATEGORY" | translate }}
+				</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div style="margin-top: 10px">
+					<div style="margin-top: 10px">
+						<div class="custom-file">
+							<input type="file" class="custom-file-input" id="customFile" (change)="onChange($event)" [ngClass]="{
+									'is-invalid':
+										formSubmitCategory && formData.get('file').invalid
+								}" multiple />
+							<label class="custom-file-label" for="customFile" id="customFileLabel">
+								{{ "GLOBAL.LABEL.SELECTIMAGE" | translate }}</label>
+						</div>
+					</div>
+				</div>
+				<br />
+				<div class="row">
+					<div class="form-group col-6">
+						<label for="name">{{ "GLOBAL.LABEL.LABEL" | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="name" [ngClass]="{
+									'is-invalid':
+										formSubmitCategory && formData.get('name').invalid
+								}" />
+						</div>
+					</div>
+					<div class="form-group col-6">
+						<label for="keyword">{{
+							"GLOBAL.LABEL.KEYWORD" | translate
+							}}</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="keyword" [ngClass]="{
+									'is-invalid':
+										formSubmitCategory && formData.get('keyword').invalid
+								}" />
+						</div>
+					</div>
+					<!-- <div class="form-group col-5">
+						<label for="type">{{ 'GLOBAL.LABEL.TYPE' | translate }}</label>
+						<div class="form-check form-check-inline">
+							<input class="form-check-input" type="radio" formControlName="type" name="type" id="supermarketType" value="supermarket" [ngClass]="{'is-invalid' : formSubmitCategory && formData.get('type').invalid}">
+							<label class="form-check-label" for="inlineRadio1">{{ 'GLOBAL.LABEL.SUPERMARKET' | translate }}</label>
+						</div>
+						<div class="form-check form-check-inline">
+							<input class="form-check-input" type="radio" formControlName="type" name="type" id="restaurantType" value="restaurant" [ngClass]="{'is-invalid' : formSubmitCategory && formData.get('type').invalid}">
+							<label class="form-check-label" for="inlineRadio2">{{ 'GLOBAL.LABEL.RESTAURANT' | translate }}</label>
+						</div>
+					</div> -->
+					<div class="form-group col-2">
+						<label for="showInApp">{{
+							"GLOBAL.LABEL.SHOWINAPP" | translate
+							}}</label>
+						<div class="input-group">
+							<mat-slide-toggle formControlName="showInApp"></mat-slide-toggle>
+						</div>
+					</div>
+					<div class="form-group col-3">
+						<label for="showHome">{{
+							"GLOBAL.LABEL.SHOWHOME" | translate
+							}}</label>
+						<div class="input-group">
+							<mat-slide-toggle formControlName="showHome"></mat-slide-toggle>
+						</div>
+					</div>
+					<div class="form-group col-1">
+						<label for="status">{{ "GLOBAL.LABEL.STATUS" | translate }}</label>
+						<div class="input-group">
+							<mat-slide-toggle formControlName="status"></mat-slide-toggle>
+						</div>
+					</div>
+					<div class="form-group col-6">
+						<label for="segment">Segmento</label>
+						<div class="input-group">
+							<input type="text" id="segment" class="form-control" matInput placeholder="Escolha um segmento"
+								[matAutocomplete]="autoSegment" formControlName="segment" />
+							<mat-autocomplete [displayWith]="displayFnSegment" #autoSegment="matAutocomplete">
+								<mat-option *ngFor="let segment of segments" [value]="segment">
+									{{ segment.name }}
+								</mat-option>
+							</mat-autocomplete>
+						</div>
+					</div>
+
+					<div class="form-group col-6">
+						<label for="segment">Ordem</label>
+						<input class="form-control" formControlName="order" type="number" />
+						<small id="passwordHelpBlock" class="form-text text-muted">
+							Posições mais baixas tem prioridade na exibição
+						</small>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<input type="submit" value="Criar" class="btn btn-outline-dark" />
+			</div>
+		</form>
+	</ng-template>
+
+	<!-- Modal Edit categoria-->
+	<ng-template #editcategorymodal let-modal>
+		<form [formGroup]="formData" (ngSubmit)="
+				formSubmitCategory = true;
+				formData.valid && updateCategory(formData.value)
+			">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-edit-category">
+					{{ "GLOBAL.LABEL.TOEDIT" | translate }} {{ formData.value.name }}
+				</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div style="margin-top: 10px">
+					<div style="margin-top: 10px">
+						<div class="custom-file">
+							<input type="file" class="custom-file-input" id="customFile" (change)="onChange($event)" [ngClass]="{
+									'is-invalid':
+										formSubmitCategory && formData.get('file').invalid
+								}" multiple />
+							<label class="custom-file-label" for="customFile" id="customFileLabel">
+								{{ "GLOBAL.LABEL.SELECTIMAGE" | translate }}</label>
+						</div>
+					</div>
+				</div>
+				<br />
+				<input type="hidden" class="form-control" formControlName="_id" />
+				<div class="row">
+					<div class="form-group col-6">
+						<label for="name">{{ "GLOBAL.LABEL.LABEL" | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="name" [ngClass]="{
+									'is-invalid':
+										formSubmitCategory && formData.get('name').invalid
+								}" />
+						</div>
+					</div>
+					<div class="form-group col-6">
+						<label for="keyword">{{
+							"GLOBAL.LABEL.KEYWORD" | translate
+							}}</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="keyword" [ngClass]="{
+									'is-invalid':
+										formSubmitCategory && formData.get('keyword').invalid
+								}" />
+						</div>
+					</div>
+					<!-- <div class="form-group col-5">
+						<label for="type">{{ 'GLOBAL.LABEL.TYPE' | translate }}</label>
+						<div class="form-check form-check-inline">
+							<input class="form-check-input" type="radio" formControlName="type" name="type" id="supermarketType" value="supermarket" [ngClass]="{'is-invalid' : formSubmitCategory && formData.get('type').invalid}">
+							<label class="form-check-label" for="inlineRadio1">{{ 'GLOBAL.LABEL.SUPERMARKET' | translate }}</label>
+						</div>
+						<div class="form-check form-check-inline">
+							<input class="form-check-input" type="radio" formControlName="type" name="type" id="restaurantType" value="restaurant" [ngClass]="{'is-invalid' : formSubmitCategory && formData.get('type').invalid}">
+							<label class="form-check-label" for="inlineRadio2">{{ 'GLOBAL.LABEL.RESTAURANT' | translate }}</label>
+						</div>
+					</div> -->
+					<div class="form-group col-2">
+						<label for="showInApp">{{
+							"GLOBAL.LABEL.SHOWINAPP" | translate
+							}}</label>
+						<div class="input-group">
+							<mat-slide-toggle formControlName="showInApp"></mat-slide-toggle>
+						</div>
+					</div>
+					<div class="form-group col-3">
+						<label for="showHome">{{
+							"GLOBAL.LABEL.SHOWHOME" | translate
+							}}</label>
+						<div class="input-group">
+							<mat-slide-toggle formControlName="showHome"></mat-slide-toggle>
+						</div>
+					</div>
+					<div class="form-group col-1">
+						<label for="status">{{ "GLOBAL.LABEL.STATUS" | translate }}</label>
+						<div class="input-group">
+							<mat-slide-toggle formControlName="status"></mat-slide-toggle>
+						</div>
+					</div>
+
+					<div class="form-group col-6">
+						<label for="segment">Segmento</label>
+						<div class="input-group">
+							<input type="text" id="segment" class="form-control" matInput placeholder="Escolha um segmento"
+								[matAutocomplete]="autoSegment" formControlName="segment" />
+							<mat-autocomplete [displayWith]="displayFnSegment" #autoSegment="matAutocomplete">
+								<mat-option *ngFor="let segment of segments" [value]="segment">
+									{{ segment.name }}
+								</mat-option>
+							</mat-autocomplete>
+						</div>
+					</div>
+
+					<div class="form-group col-6">
+						<label for="segment">Ordem</label>
+						<input class="form-control" formControlName="order" type="number" />
+						<small id="passwordHelpBlock" class="form-text text-muted">
+							Posições mais baixas tem prioridade na exibição
+						</small>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<input type="submit" value="Salvar" class="btn btn-outline-dark" />
+			</div>
+		</form>
+	</ng-template>
+</div>
+
+<!-- Modal Delete -->
+<ng-template #confirmdeletemodal let-modal>
+	<div class="modal-header">
+		<h4 class="modal-title" id="modal-delete-category">Confirmar exclusão</h4>
+		<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	<div class="modal-body" class="btn btn-warning">
+		{{ "GLOBAL.LABEL.AREYOUSUREYOUWANTTODELETE" | translate }}
+	</div>
+	<div class="modal-footer">
+		<button type="button" (click)="categoryIdToDelete = undefined; modal.dismiss('Cross click')"
+			class="btn btn-secondary" data-dismiss="modal">
+			{{ "GLOBAL.LABEL.CANCEL" | translate }}
+		</button>
+		<button type="button" (click)="deleteCategory() && modal.dismiss('Cross click')" class="btn btn-primary">
+			{{ "GLOBAL.LABEL.YES" | translate }}
+		</button>
+	</div>
+</ng-template>

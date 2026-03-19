@@ -1,0 +1,42 @@
+{
+  "name": "toop-delivery-mobile",
+  "version": "1.0.0",
+  "description": "Aplicações móveis da ToopDelivery",
+  "private": true,
+  "workspaces": [
+    "delivery_toop-mobile_client",
+    "delivery_toop-mobile_deliveryman",
+    "delivery_toop-mobile_driver",
+    "delivery_toop-mobile_shopper"
+  ],
+  "scripts": {
+    "install:all": "npm install && npm run install:mobile",
+    "install:mobile": "npm run install:client && npm run install:deliveryman && npm run install:driver && npm run install:shopper",
+    "install:client": "cd delivery_toop-mobile_client && npm install",
+    "install:deliveryman": "cd delivery_toop-mobile_deliveryman && npm install",
+    "install:driver": "cd delivery_toop-mobile_driver && npm install",
+    "install:shopper": "cd delivery_toop-mobile_shopper && npm install",
+    "start:client": "cd delivery_toop-mobile_client && npm start",
+    "start:deliveryman": "cd delivery_toop-mobile_deliveryman && npm start",
+    "start:driver": "cd delivery_toop-mobile_driver && npm start",
+    "start:shopper": "cd delivery_toop-mobile_shopper && npm start",
+    "android:client": "cd delivery_toop-mobile_client && npm run android",
+    "android:deliveryman": "cd delivery_toop-mobile_deliveryman && npm run android",
+    "android:driver": "cd delivery_toop-mobile_driver && npm run android",
+    "android:shopper": "cd delivery_toop-mobile_shopper && npm run android",
+    "ios:client": "cd delivery_toop-mobile_client && npm run ios",
+    "ios:deliveryman": "cd delivery_toop-mobile_deliveryman && npm run ios",
+    "ios:driver": "cd delivery_toop-mobile_driver && npm run ios",
+    "ios:shopper": "cd delivery_toop-mobile_shopper && npm run ios"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://bitbucket.org/toopdelivery/toop-delivery.git"
+  },
+  "author": "ToopDelivery Team",
+  "license": "MIT"
+}

@@ -1,0 +1,41 @@
+<div class="row mb-2">
+	<div class="col">
+		<div class="card">
+			<div class="card-body text-center">
+				<span>Total em vendas</span>
+				<h1 class="card-title font-weight-bold text-primary my-2">{{totalOrder | currency:'BRL'}}</h1>
+				<span>últimos 30 dias</span>
+			</div>
+		</div>
+	</div>
+	<div class="col">
+		<div class="card">
+			<div class="card-body text-center">
+				<span>Total em vendas concluidas</span>
+				<h1 class="card-title font-weight-bold text-primary my-2">{{totalOrderSuccess | currency:'BRL':true:'1.2-2'}}
+				</h1>
+				<span>últimos 30 dias</span>
+			</div>
+		</div>
+	</div>
+	<div class="col">
+		<div class="card">
+			<div class="card-body text-center">
+				<span>Ticket médio</span>
+				<h1 class="card-title font-weight-bold text-primary my-2">{{averageTickets | currency:'BRL':true:'1.2-2'}}</h1>
+				<span>últimos 30 dias</span>
+			</div>
+		</div>
+	</div>
+
+</div>
+<div class="row mb-2">
+	<div class="col-12 mt-2">
+		<div class="card">
+			<div class="card-body" *ngIf="data">
+				<h5 class="card-title">Novos Carrinhos x Pedidos Realizados</h5>
+				<kt-dash-report-company-cart [data]="data"></kt-dash-report-company-cart>
+			</div>
+		</div>
+	</div>
+</div>

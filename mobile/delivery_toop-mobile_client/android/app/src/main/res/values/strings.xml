@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">Toop Delivery</string>
+    <string name="facebook_app_id">1214388152603786</string>
+    <string name="facebook_client_token">84236bd0c6c1b8d4b5199e880f9774c8</string>
+    <string name="default_notification_channel_id">high-priority</string>
+</resources>

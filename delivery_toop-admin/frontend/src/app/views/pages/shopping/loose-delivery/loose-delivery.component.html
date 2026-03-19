@@ -1,0 +1,121 @@
+<div class="example-container mat-elevation-z8">
+	<form [formGroup]="formData" (ngSubmit)="
+			formSubmitAttempt = true; formData.valid && createDelivery(formData.value)
+		">
+		<div class="modal-header">
+			<h4 class="modal-title" id="modal-create-company">Nova Entrega</h4>
+		</div>
+
+		<div class="row col-12">
+			<mat-form-field class="col-12">
+				<div class="row col-12" style="
+						margin-left: 5px;
+						padding-bottom: 10px;
+						padding-top: 10px;
+						background-color: white;
+					">
+					<mat-label>Informe um Endereço</mat-label>
+					<input id="addressGoogleMapsString" matInput matGoogleMapsAutocomplete country="br" formControlName="address"
+						(onAutocompleteSelected)="onAutocompleteSelected($event)" [types]="['geocode']"
+						(onLocationSelected)="onLocationSelected($event)" />
+				</div>
+			</mat-form-field>
+		</div>
+
+		<div class="row col-12">
+
+			<div class="form-group col-6">
+
+				<label for="name">Tipo Endereço</label>
+				<select id="city" class="form-control" formControlName="typeAddress" [ngClass]="{
+						'is-invalid':
+							formSubmitAttempt && formData.get('typeAddress').invalid
+					}">
+					<option selected value="HOME">Casa</option>
+					<option value="WORK">Trabalho</option>
+				</select>
+			</div>
+
+
+			<div class="form-group col-6">
+				<label for="name">Tipo Veículo</label>
+				<select id="city" class="form-control" formControlName="typeVehicle"
+					[ngClass]="{'is-invalid': formSubmitAttempt && formData.get('typeVehicle').invalid}">
+					<option selected value="">Todos</option>
+					<option value="MOTO">Moto</option>
+					<option value="CARRO">Carro</option>
+					<option value="BICICLETA">Bicicleta</option>
+				</select>
+			</div>
+
+			<div class="form-group col-6">
+
+				<label for="name">Valor total da encomenda</label>
+				<div class="input-group">
+					<input required class="form-control" currencyMask formControlName="total" [ngClass]="{
+							'is-invalid': formSubmitAttempt && formData.get('total').invalid
+						}" />
+				</div>
+			</div>
+
+
+			<div class="form-group col-6">
+
+				<label for="name">Valor entrega</label>
+				<div class="input-group">
+					<div *ngIf="load" class="spinner-border text-success" role="status">
+						<span class="sr-only">Loading...</span>
+					</div>
+
+					<input *ngIf="!load" required class="form-control" currencyMask formControlName="priceDelivery" [ngClass]="{
+							'is-invalid':
+								formSubmitAttempt && formData.get('priceDelivery').invalid
+						}" />
+				</div>
+			</div>
+
+			<div class="row col-12">
+				<div class="col-12">
+					<div class="row col-12" style="
+							margin-left: 5px;
+							padding-bottom: 10px;
+							padding-top: 10px;
+							background-color: white;
+						">
+						<label>Observação</label>
+						<input class="form-control" formControlName="note" [ngClass]="{
+								'is-invalid': formSubmitAttempt && formData.get('note').invalid
+							}" />
+					</div>
+				</div>
+			</div>
+			<!-- <div class="form-group col-3">
+				<label for="typeOfVehicle">{{ 'GLOBAL.LABEL.TYPEOFVEHICLE' | translate }}</label>
+				<select class="form-control" formControlName="typeOfVehicle"
+					[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('typeOfVehicle').invalid}">
+					<option selected value="MOTO">Moto</option>
+					<option value="CARRO">Carro</option>
+					<option value="BICICLETA">Bicicleta</option>
+				</select>
+			</div> -->
+		</div>
+
+		<div fxFlex *ngIf="latitude !== 0 && longitude !== 0">
+			<agm-map [latitude]="latitude" [longitude]="longitude" [scrollwheel]="false" [zoom]="zoom" #agmMap>
+				<agm-marker [latitude]="latitude" [longitude]="longitude" [markerDraggable]="true"
+					(dragEnd)="markerDragEnd(coord, $event)">
+				</agm-marker>
+			</agm-map>
+		</div>
+
+		<div class="d-flex justify-content-end col-12">
+			<button type="submit" class="col-4 btn btn-primary mb-2 mt-2" *ngIf="!disabled">
+				<div *ngIf="load" class="spinner-border text-success" role="status">
+					<span class="sr-only">Loading...</span>
+				</div>
+
+				<div *ngIf="!load">Gerar pedido</div>
+			</button>
+		</div>
+	</form>
+</div>

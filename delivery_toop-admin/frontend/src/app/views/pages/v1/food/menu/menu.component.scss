@@ -1,0 +1,134 @@
+.menu-category-header {
+	display: flex;
+	align-items: center;
+	padding: 24px 16px;
+	background: #f2f2f2;
+	border-top-left-radius: 0.25rem;
+	border-top-right-radius: 0.25rem;
+	border: 1px solid rgba(149, 149, 149, 0.4);
+	border-bottom: 0;
+}
+
+.card,
+.box-product-complement {
+	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19) !important;
+	margin-bottom: 15px !important;
+}
+
+.btn-add-category {
+	margin-bottom: 20px;
+}
+
+.menu-actions {
+	display: flex;
+	margin-left: 16px;
+	margin-right: 26px;
+}
+
+.button-actions {
+	display: flex;
+	justify-content: center;
+	width: 250px;
+	margin: 16px 0;
+}
+
+// faz com que a resposta das buscas apareça no formcontrol
+.example-form {
+	min-width: 150px;
+	max-width: 500px;
+	width: 100%;
+}
+
+.example-full-width {
+	width: 100%;
+}
+
+::ng-deep .cdk-overlay-container {
+	z-index: 9999;
+}
+
+// item complimento
+.field__label {
+	display: block;
+	margin-bottom: 10px;
+	font-size: 12px;
+	font-weight: 700;
+	line-height: 1;
+	text-transform: uppercase;
+	color: #000;
+	float: left;
+}
+
+//button editar
+
+.button__action {
+	color: #ea1d2c;
+	font-weight: 500;
+	text-decoration: underline;
+}
+
+.field__input {
+	height: 32px;
+	padding: 0.5rem;
+}
+
+.input-group .form-control {
+	z-index: auto;
+}
+
+.input-group .field__input {
+	width: 100%;
+	font-size: 14px;
+}
+
+//tela inicial
+.card-header {
+	display: block;
+	margin-bottom: 10px;
+	font-size: 12px;
+	font-weight: 700;
+	line-height: 1;
+	text-transform: uppercase;
+	color: #000;
+	float: left;
+}
+
+.add-complemento,
+.button__action__category {
+	color: #ea1d2c;
+	font-weight: 500;
+	text-decoration: underline;
+}
+
+.mat-mini-fab {
+	box-sizing: border-box;
+	position: relative;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	cursor: pointer;
+	outline: 0;
+	border: none;
+	-webkit-tap-highlight-color: transparent;
+	display: inline-block;
+	white-space: nowrap;
+	text-decoration: none;
+	vertical-align: baseline;
+	text-align: center;
+	margin: 0;
+	min-width: 64px;
+	line-height: 36px;
+	padding: 0 16px;
+	border-radius: 4px;
+	overflow: visible;
+	transform: translate3d(0, 0, 0);
+	transition: background 0.4s cubic-bezier(0.25, 0.8, 0.25, 1),
+		box-shadow 280ms cubic-bezier(0.4, 0, 0.2, 1);
+	min-width: 0;
+	border-radius: 50%;
+	width: 40px;
+	height: 40px;
+	padding: 0;
+	flex-shrink: 0;
+}

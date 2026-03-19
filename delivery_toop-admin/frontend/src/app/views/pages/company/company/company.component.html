@@ -1,0 +1,1472 @@
+<form [formGroup]="formFilter" formFilter.valid>
+	<div class="row">
+		<div class="form-group row col-6">
+			<label for="company">{{ "GLOBAL.LABEL.COMPANY" | translate }}</label>
+			<div class="input-group">
+				<input type="text" class="form-control" matInput placeholder="Escolha um Empresa"
+					[matAutocomplete]="autoCompany" formControlName="company" />
+				<mat-autocomplete [displayWith]="displayFnFilter" #autoCompany="matAutocomplete">
+					<mat-option *ngFor="let company of companies" [value]="company" (click)="onClickCompanyFilter(company)">
+						{{ company.name }}
+					</mat-option>
+				</mat-autocomplete>
+			</div>
+		</div>
+		<div class="form-group col-6">
+			<label>{{ "GLOBAL.LABEL.GROUP" | translate }}</label>
+			<div class="input-group">
+				<input type="text" class="form-control" matInput placeholder="Escolha um Grupo" [matAutocomplete]="autoGroup"
+					formControlName="group" />
+				<mat-autocomplete [displayWith]="displayFnFilter" #autoGroup="matAutocomplete">
+					<mat-option *ngFor="let group of groups" [value]="group" (click)="onClickGroupFilter(group)">
+						{{ group.name }}
+					</mat-option>
+				</mat-autocomplete>
+			</div>
+		</div>
+	</div>
+</form>
+
+<div class="row justify-content-between">
+	<div class="col-auto align-self-center mb-2">
+		<p class="float-left">{{ "GLOBAL.LABEL.COMPANY" | translate }}</p>
+	</div>
+	<div class="col-auto">
+		<a (click)="createCompanyModalShow(createcompanymodal)" href="javascript:;"
+			class="float-right btn btn-label-warning btn-bold btn-sm btn-icon-h">
+			{{ "GLOBAL.LABEL.CREATE" | translate }}
+		</a>
+	</div>
+</div>
+
+<div class="example-container mat-elevation-z8">
+	<mat-table #table [dataSource]="dataSource">
+		<!-- Checkbox Column -->
+		<ng-container matColumnDef="select">
+			<mat-header-cell *matHeaderCellDef>
+				<mat-checkbox [checked]="true" [indeterminate]="true"> </mat-checkbox>
+			</mat-header-cell>
+			<mat-cell *matCellDef="let row">
+				<mat-checkbox (click)="$event.stopPropagation()"> </mat-checkbox>
+			</mat-cell>
+		</ng-container>
+		<!-- Image Column -->
+		<ng-container matColumnDef="image">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.IMAGES" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<a [href]="element.image" target="_blank">
+					<img width="50" class="img-thumbnail {{
+							element.isHighlighted ? 'isHighlighted' : ''
+						}}" [src]="element.image || './assets/media/logo-default.png'" [alt]="element.name" />
+				</a>
+			</mat-cell>
+		</ng-container>
+		<!-- Name Column -->
+		<ng-container matColumnDef="franchise">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.FRANCHISE" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				{{ element.franchise?.name }}
+			</mat-cell>
+		</ng-container>
+		<!-- Name Column -->
+		<ng-container matColumnDef="name">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.NAME" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.name }} </mat-cell>
+		</ng-container>
+		<!-- Description Column -->
+		<ng-container matColumnDef="description">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.DESCRIPTION" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.description }} </mat-cell>
+		</ng-container>
+		<!-- Status Column -->
+		<ng-container matColumnDef="status">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.STATUS" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i *ngIf="element.status === true" class="flaticon2-accept mr-2"></i>
+				<i *ngIf="element.status === false" class="flaticon2-cancel mr-2"></i>
+			</mat-cell>
+		</ng-container>
+		<!-- Status Column -->
+		<ng-container matColumnDef="approved">
+			<mat-header-cell *matHeaderCellDef>Aprovado</mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i *ngIf="element.approved === true" class="flaticon2-check-mark mr-2"></i>
+				<i *ngIf="element.approved === false" class="flaticon2-information mr-2"></i>
+			</mat-cell>
+		</ng-container>
+		<!-- Lat Column -->
+		<ng-container matColumnDef="lat">
+			<mat-header-cell *matHeaderCellDef> Lat </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.lat }} </mat-cell>
+		</ng-container>
+		<!-- Lng Column -->
+		<ng-container matColumnDef="lng">
+			<mat-header-cell *matHeaderCellDef> Lng </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.lng }} </mat-cell>
+		</ng-container>
+		<!-- Address Column -->
+		<ng-container matColumnDef="address">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.ADDRESS" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.address }} </mat-cell>
+		</ng-container>
+		<!-- Phone Column -->
+		<ng-container matColumnDef="phone">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.PHONE" | translate }}</mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.phone }} </mat-cell>
+		</ng-container>
+		<!-- Segment Column -->
+		<ng-container matColumnDef="segment">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.SEGMENT" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				{{ element.segment?.name }}
+			</mat-cell>
+		</ng-container>
+		<!-- Groups Column -->
+		<ng-container matColumnDef="groups">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.GROUPS" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				{{ element.groups && element.groups.name ? element.groups.name : "-" }}
+			</mat-cell>
+		</ng-container>
+		<!-- Category Column -->
+		<ng-container matColumnDef="category">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.CATEGORY" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.category }} </mat-cell>
+		</ng-container>
+		<!-- Category Column -->
+		<ng-container matColumnDef="companyCategory">
+			<mat-header-cell *matHeaderCellDef>Tipo</mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				{{ element.companyCategory === "delivery" ? "Delivery" : "Serviço" }}
+			</mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="imageHeader">
+			<mat-header-cell *matHeaderCellDef>App Header</mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<a *ngIf="element.imageHeader" [href]="element.imageHeader" target="_blank">
+					<img width="50" class="img-thumbnail" [src]="element.imageHeader" [alt]="element.name" />
+				</a>
+			</mat-cell>
+		</ng-container>
+
+		<!-- Delete Company -->
+		<ng-container matColumnDef="delete">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.ACTION" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i class="flaticon2-edit mr-2" (click)="editCompanyModalShow(editcompanymodal, element)"></i>
+				<i class="flaticon2-trash" (click)="confirmDeleteModalShow(confirmdeletemodal, element)"></i>
+			</mat-cell>
+		</ng-container>
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns"> </mat-row>
+	</mat-table>
+	<mat-paginator [length]="totalLength" [pageSize]="pageSize" [pageSizeOptions]="pageLimit" (page)="changePage($event)">
+	</mat-paginator>
+
+	<!-- Apartir de aqui é o modal -->
+	<!-- Modal Create Company -->
+	<ng-template #createcompanymodal let-modal modal-lg>
+		<form [formGroup]="formData" (ngSubmit)="
+				formSubmitAttempt = true;
+				formData.valid &&
+					createCompany(formData.value, confirmcreateaccounmodal, true)
+			">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-create-company">
+					{{ "GLOBAL.LABEL.CREATECOMPANY" | translate }}
+				</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<mat-tab-group>
+					<mat-tab label="Dados">
+						<div class="row">
+							<div class="form-group col-12">
+								<label for="franchise">{{ "GLOBAL.LABEL.FRANCHISE" | translate }}</label>
+								<div class="input-group">
+									<input type="text" class="form-control" matInput placeholder="Escolha uma franquia"
+										[matAutocomplete]="autoFranchise" formControlName="franchise" />
+									<mat-autocomplete [displayWith]="displayFnFranchise" #autoFranchise="matAutocomplete">
+										<mat-option *ngFor="let franchise of franchises" [value]="franchise">
+											{{ franchise.name }}
+										</mat-option>
+									</mat-autocomplete>
+								</div>
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="form-group col-12">
+								<label for="franchise">{{
+									"GLOBAL.LABEL.IMAGE" | translate
+									}}</label>
+								<div class="input-group">
+									<div class="custom-file">
+										<input type="file" class="custom-file-input" id="customFile" (change)="onChange($event)" multiple
+											[ngClass]="{
+												'is-invalid':
+													formSubmitAttempt && formData.get('file').invalid
+											}" />
+										<label class="custom-file-label" for="customFile" id="customFileLabel">
+											{{ "GLOBAL.LABEL.SELECTIMAGE" | translate }}</label>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="form-group col-12">
+								<label for="imageHeader">Imagem Cabeçalho no Aplicativo</label>
+								<div class="input-group">
+									<div class="custom-file">
+										<input type="file" class="custom-file-input" id="imageHeader" (change)="onChangeImageHeader($event)"
+											multiple [ngClass]="{'is-invalid': formSubmitAttempt && formData.get('imageHeader').invalid}" />
+										<label class="custom-file-label" for="imageHeader" id="imageHeaderLabel">
+											{{ "GLOBAL.LABEL.SELECTIMAGE" | translate }}
+										</label>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="form-group col-5">
+								<label for="name">{{ "GLOBAL.LABEL.NAME" | translate }}</label>
+								<div class="input-group">
+									<input required class="form-control" formControlName="name" [ngClass]="{
+											'is-invalid':
+												formSubmitAttempt && formData.get('name').invalid
+										}" />
+								</div>
+							</div>
+							<div class="form-group col-4">
+								<label for="phone">{{
+									"GLOBAL.LABEL.PHONE" | translate
+									}}</label>
+								<div class="input-group">
+									<input required class="form-control" mask="(00) 00009-0000" formControlName="phone" />
+								</div>
+							</div>
+							<div class="form-group col-3">
+								<label for="cnpj">CPF/CNPJ</label>
+								<div class="input-group">
+									<input class="form-control" mask="CPF_CNPJ" formControlName="cnpj" [validation]="true" [ngClass]="{
+											'is-invalid':
+												formSubmitAttempt && formData.get('cnpj').invalid
+										}" />
+								</div>
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="description">{{
+								"GLOBAL.LABEL.DESCRIPTION" | translate
+								}}</label>
+							<div class="input-group">
+								<textarea class="form-control" formControlName="description" [ngClass]="{
+										'is-invalid':
+											formSubmitAttempt && formData.get('description').invalid
+									}"></textarea>
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="col-12">
+								<div class="form-group">
+									<label for="companyCategory">Tipo Empresa</label>
+									<select id="companyCategory" class="form-control" formControlName="companyCategory" [ngClass]="{
+											'is-invalid': formData.get('companyCategory').invalid
+										}">
+										<option value="">Selecione Tipo da Empresa</option>
+										<option *ngFor="let categoryItem of listCategory" value="{{ categoryItem.key }}">
+											{{ categoryItem.name }}
+										</option>
+									</select>
+								</div>
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="form-group col-12">
+								<label for="address">{{
+									"GLOBAL.LABEL.ADDRESS" | translate
+									}}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="address" [ngClass]="{
+											'is-invalid':
+												formSubmitAttempt && formData.get('address').invalid
+										}" />
+								</div>
+							</div>
+							<div class="form-group col-6">
+								<label for="complement">{{
+									"GLOBAL.LABEL.COMPLEMENT" | translate
+									}}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="complement" [ngClass]="{
+											'is-invalid':
+												formSubmitAttempt && formData.get('complement').invalid
+										}" />
+								</div>
+							</div>
+							<div class="form-group col-3">
+								<label for="lat">Lat</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="lat" [ngClass]="{
+											'is-invalid':
+												formSubmitAttempt && formData.get('lat').invalid
+										}" />
+								</div>
+							</div>
+							<div class="form-group col-3">
+								<label for="lng">Lng</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="lng" [ngClass]="{
+											'is-invalid':
+												formSubmitAttempt && formData.get('lng').invalid
+										}" />
+								</div>
+							</div>
+						</div>
+						<!--row-->
+
+						<div class="row">
+							<!-- <div class="form-group col-4">
+								<label class="col-12" for="type">{{ 'GLOBAL.LABEL.TYPE' | translate }}</label>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" formControlName="type" name="type" id="supermarketType"
+										value="supermarket" [ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('type').invalid}">
+									<label class="form-check-label" for="inlineRadio1">{{ 'GLOBAL.LABEL.SUPERMARKET' | translate
+										}}</label>
+								</div>
+
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" formControlName="type" name="type" id="restaurantType"
+										value="restaurant" [ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('type').invalid}">
+									<label class="form-check-label" for="inlineRadio2">{{ 'GLOBAL.LABEL.RESTAURANT' | translate }}</label>
+								</div>
+								<label style="color: brown;">Tipo será removido em breve, use o SEGMENTO</label>
+							</div> -->
+							<div class="form-group col-4">
+								<label>{{ "GLOBAL.LABEL.SEGMENT" | translate }}</label>
+								<div class="input-group">
+									<input type="text" class="form-control" matInput placeholder="Escolha um Segmento"
+										[matAutocomplete]="autoSegment" formControlName="segment" [ngClass]="{
+											'is-invalid':
+												formSubmitAttempt && formData.get('segment').invalid
+										}" />
+									<mat-autocomplete [displayWith]="displayFnSegment" #autoSegment="matAutocomplete">
+										<mat-option *ngFor="let segment of segments" [value]="segment">
+											{{ segment.name }}
+										</mat-option>
+									</mat-autocomplete>
+								</div>
+							</div>
+							<div class="form-group col-4">
+								<label class="col-12" for="shoppingFlow">{{
+									"GLOBAL.LABEL.SHOPPINGFLOW" | translate
+									}}</label>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" formControlName="shoppingFlow" name="shoppingFlow"
+										id="menu" value="MENU" [ngClass]="{
+											'is-invalid':
+												formSubmitAttempt &&
+												formData.get('shoppingFlow').invalid
+										}" />
+									<label class="form-check-label" for="inlineRadio1">{{
+										"MENU.RESTAURANTSONLINE.MENU" | translate
+										}}</label>
+								</div>
+
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" formControlName="shoppingFlow" name="shoppingFlow"
+										id="products" value="PRODUCT" [ngClass]="{
+											'is-invalid':
+												formSubmitAttempt &&
+												formData.get('shoppingFlow').invalid
+										}" />
+									<label class="form-check-label" for="inlineRadio2">{{
+										"GLOBAL.LABEL.PRODUCT" | translate
+										}}</label>
+								</div>
+							</div>
+							<div class="form-group col-8">
+								<label>{{ "GLOBAL.LABEL.GROUPS" | translate }}</label>
+								<div class="input-group">
+									<input type="text" class="form-control" matInput placeholder="Escolha um Grupo"
+										[matAutocomplete]="autoGroup" formControlName="groups" [ngClass]="{
+											'is-invalid':
+												formSubmitAttempt && formData.get('groups').invalid
+										}" />
+									<mat-autocomplete [displayWith]="displayFn" #autoGroup="matAutocomplete">
+										<mat-option *ngFor="let group of groups" [value]="group">
+											{{ group.name }}
+										</mat-option>
+									</mat-autocomplete>
+								</div>
+							</div>
+							<div class="form-group col-2">
+								<label for="status">{{
+									"GLOBAL.LABEL.STATUS" | translate
+									}}</label>
+								<div class="input-group">
+									<mat-slide-toggle formControlName="status"></mat-slide-toggle>
+								</div>
+							</div>
+
+							<div class="form-group col-2">
+								<label for="isHighlighted">{{
+									"GLOBAL.LABEL.ISHIGHLIGHTED" | translate
+									}}</label>
+								<div class="input-group">
+									<mat-slide-toggle formControlName="isHighlighted"></mat-slide-toggle>
+								</div>
+							</div>
+						</div>
+						<!--row-->
+						<div class="form-group">
+							<label for="category">{{
+								"GLOBAL.LABEL.CATEGORY" | translate
+								}}</label>
+							<div class="input-group">
+								<mat-chip-list #chipList aria-label="Seleção de Categoria">
+									<mat-chip *ngFor="let categoria of categoriaList" [selectable]="selectable" [removable]="removable"
+										(removed)="removeCategoria(categoria)">
+										{{ categoria }}
+										<mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
+									</mat-chip>
+									<input placeholder="Nova Categoria..." [matChipInputFor]="chipList"
+										[matChipInputAddOnBlur]="addOnBlur" (matChipInputTokenEnd)="addCategoria($event)" />
+								</mat-chip-list>
+							</div>
+							<div class="form-group">
+								<br />
+								<strong>Restaurantes:</strong> burguer, pizza, acai,
+								fretegratis, promocoes, doces, bolos, salgados, pastel, sorvete,
+								brasileira <br /><br />
+								<strong>Supermercados:</strong> acougue, express, fretegratis,
+								promocoes, frios, laticinios, limpeza, mercearia, bebidas,
+								congelados,
+								<p style="margin-left: 14%">
+									hortifruti, snaks, padaria, higiene pessoal, pets, acessorios,
+									pescados, bazar, sazonal
+								</p>
+							</div>
+						</div>
+					</mat-tab>
+					<mat-tab label="Financeiro">
+						<!-- <div class="row">
+							<div class="col-12">
+								<h6>:: DADOS BANCÁRIOS (USADOS NO SPLIT)</h6>
+								<div *ngIf="formData.get('recipient_id').value && formData.get('pagar_me_bank_id').value"
+									class="alert alert-success" role="alert">
+									<b>Empresa vinculada ao split com sucesso!</b>
+									<hr>
+									<span><b>ID:</b> {{ formData.get('recipient_id').value }}</span>
+								</div>
+								<div *ngIf="!formData.get('recipient_id').value || !formData.get('pagar_me_bank_id').value"
+									class="alert alert-danger" role="alert">
+									<b>Empresa não está vinculada ao split!</b>
+								</div>
+							</div>
+						</div> -->
+						<div class="row col-12" formGroupName="bankData">
+							<div class="form-group col-5">
+								<label class="" for="favoredName">{{
+									"GLOBAL.LABEL.FAVOREDNAME" | translate
+									}}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="favoredName" [ngClass]="{
+											'is-invalid':
+												formSubmitAttempt &&
+												formData.get('bankData').get('favoredName').invalid
+										}" />
+								</div>
+							</div>
+							<div class="form-group col-4">
+								<label for="documentType">{{
+									"GLOBAL.LABEL.DOCUMENTTYPE" | translate
+									}}</label>
+								<div class="input-group">
+									<select class="form-control" formControlName="documentType" [ngClass]="{
+											'is-invalid':
+												formSubmitAttempt &&
+												formData.get('bankData').get('documentType').invalid
+										}">
+										<option value="CNPJ">CNPJ</option>
+										<option value="CPF">CPF</option>
+									</select>
+								</div>
+							</div>
+							<div class="form-group col-3">
+								<label class="" for="document">{{
+									"GLOBAL.LABEL.DOCUMENT" | translate
+									}}</label>
+								<div class="input-group">
+									<input class="form-control" mask="000.000.000-00||00.000.000/0000-00" formControlName="document"
+										[ngClass]="{
+											'is-invalid':
+												formSubmitAttempt &&
+												formData.get('bankData').get('document').invalid
+										}" />
+								</div>
+							</div>
+							<div class="form-group col-12">
+								<label>{{ "GLOBAL.LABEL.BANK" | translate }}</label>
+								<div class="input-group">
+									<input type="text" class="form-control" matInput placeholder="Escolha um Banco"
+										[matAutocomplete]="autoBrazilianBank" formControlName="brazilianBank" [ngClass]="{
+											'is-invalid':
+												formSubmitAttempt && formData.get('bankData').get('brazilianBank').invalid
+										}" />
+									<mat-autocomplete [displayWith]="displayFnBrazilianBank" #autoBrazilianBank="matAutocomplete">
+										<mat-option *ngFor="let brBank of brBanks" [value]="brBank">
+											{{ brBank.compe }} - {{ brBank.short_name }}
+										</mat-option>
+									</mat-autocomplete>
+								</div>
+								<span *ngIf="formData.get('bankData').get('bankName').value">
+									<b>Registro anterior:</b> {{formData.get('bankData').get('bankName').value}}
+								</span>
+							</div>
+							<div class="form-group col-4">
+								<label for="typeAccount">{{
+									"GLOBAL.LABEL.TYPE" | translate
+									}}</label>
+								<div class="input-group">
+									<select class="form-control" formControlName="typeAccount" [ngClass]="{
+											'is-invalid':
+												formSubmitAttempt &&
+												formData.get('bankData').get('typeAccount').invalid
+										}">
+										<option selected value="CURRENT">Conta Corrente</option>
+										<option value="SAVINGS">Conta Poupança</option>
+									</select>
+								</div>
+							</div>
+							<div class="form-group col-3">
+								<label class="" for="agency">{{
+									"GLOBAL.LABEL.AGENCY" | translate
+									}}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="agency" [ngClass]="{
+											'is-invalid':
+												formSubmitAttempt &&
+												formData.get('bankData').get('agency').invalid
+										}" />
+								</div>
+							</div>
+							<div class="form-group col-1">
+								<label class="" for="agencyDigit">{{
+									"GLOBAL.LABEL.AGENCYDIGIT" | translate
+									}}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="agencyDigit" [ngClass]="{
+											'is-invalid':
+												formSubmitAttempt &&
+												formData.get('bankData').get('agencyDigit').invalid
+										}" />
+								</div>
+							</div>
+							<div class="form-group col-3">
+								<label class="" for="account">{{
+									"GLOBAL.LABEL.ACCOUNT" | translate
+									}}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="account" [ngClass]="{
+											'is-invalid':
+												formSubmitAttempt &&
+												formData.get('bankData').get('account').invalid
+										}" />
+								</div>
+							</div>
+							<div class="form-group col-1">
+								<label class="" for="accountDigit">{{
+									"GLOBAL.LABEL.ACCOUNTDIGIT" | translate
+									}}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="accountDigit" [ngClass]="{
+											'is-invalid':
+												formSubmitAttempt &&
+												formData.get('bankData').get('accountDigit').invalid
+										}" />
+								</div>
+							</div>
+							<div class="form-group col-4">
+								<label for="pixType">{{
+									"GLOBAL.LABEL.PIXTYPE" | translate
+									}}</label>
+								<div class="input-group">
+									<select class="form-control" formControlName="pixType" [ngClass]="{
+											'is-invalid':
+												formSubmitAttempt &&
+												formData.get('bankData').get('pixType').invalid
+										}">
+										<option value="">Selecione...</option>
+										<option value="CNPJ">CNPJ</option>
+										<option value="CPF">CPF</option>
+										<option value="CELLPHONE">CELULAR</option>
+										<option value="EMAIL">E-MAIL</option>
+										<option value="RANDOMKEY">Chave aleatória</option>
+									</select>
+								</div>
+							</div>
+							<div class="form-group col-8">
+								<label class="" for="pixKey">{{
+									"GLOBAL.LABEL.PIXKEY" | translate
+									}}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="pixKey" [ngClass]="{
+											'is-invalid':
+												formSubmitAttempt &&
+												formData.get('bankData').get('pixKey').invalid
+										}" />
+								</div>
+							</div>
+						</div>
+					</mat-tab>
+					<mat-tab label="Formas de pagamento">
+						<div class="row">
+							<ng-container *ngFor="
+									let payment of formData.get('typePayments').controls;
+									index as i
+								">
+								<ng-container [formGroup]="payment">
+									<label class="col-12" *ngIf="i === 0">Pagamento pelo Toop Delivery.</label>
+									<div *ngIf="
+											formData.get('typePayments').controls[i].get('type')
+												.value === 'BRASPAG'
+										" class="form-check col-3">
+										<div class="form-group col">
+											<div class="input-group">
+												<img width="50" class="img-thumbnail col-6" [src]="
+														formData
+															.get('typePayments')
+															.controls[i].get('image').value
+															? formData
+																	.get('typePayments')
+																	.controls[i].get('image').value
+															: './assets/media/logo-default.png'
+													" [alt]="
+														formData
+															.get('typePayments')
+															.controls[i].get('brand').value
+													" />
+												<mat-slide-toggle [checked]="status" labelPosition="before" formControlName="status"
+													class="col-12">{{
+													formData
+													.get("typePayments")
+													.controls[i].get("brand").value
+													}}
+												</mat-slide-toggle>
+												<div>BRASPAG</div>
+											</div>
+										</div>
+									</div>
+
+									<div *ngIf="
+											formData.get('typePayments').controls[i].get('type')
+												.value === 'PAGARME'
+										" class="form-check col-3">
+										<div class="form-group col">
+											<div class="input-group">
+												<img width="50" class="img-thumbnail col-6" [src]="
+														formData
+															.get('typePayments')
+															.controls[i].get('image').value
+															? formData
+																	.get('typePayments')
+																	.controls[i].get('image').value
+															: './assets/media/logo-default.png'
+													" [alt]="
+														formData
+															.get('typePayments')
+															.controls[i].get('brand').value
+													" />
+												<mat-slide-toggle [checked]="status" labelPosition="before" formControlName="status"
+													class="col-12">{{
+													formData
+													.get("typePayments")
+													.controls[i].get("brand").value
+													}}
+												</mat-slide-toggle>
+												<div>Pagar.Me</div>
+											</div>
+										</div>
+									</div>
+								</ng-container>
+							</ng-container>
+							<ng-container *ngFor="
+									let payment of formData.get('typePayments').controls;
+									index as i
+								">
+								<ng-container [formGroup]="payment">
+									<label class="col-12" *ngIf="i === 0">Pagamento na entrega</label>
+									<div *ngIf="
+											formData.get('typePayments').controls[i].get('type')
+												.value !== 'BRASPAG' &&
+											formData.get('typePayments').controls[i].get('type')
+												.value !== 'PAGARME'
+										" class="form-check col-3">
+										<div class="form-group col">
+											<div class="input-group">
+												<img width="50" class="img-thumbnail col-6" [src]="
+														formData
+															.get('typePayments')
+															.controls[i].get('image').value
+															? formData
+																	.get('typePayments')
+																	.controls[i].get('image').value
+															: './assets/media/logo-default.png'
+													" [alt]="
+														formData
+															.get('typePayments')
+															.controls[i].get('brand').value
+													" />
+												<mat-slide-toggle [checked]="status" labelPosition="before" formControlName="status"
+													class="col-12">{{
+													formData
+													.get("typePayments")
+													.controls[i].get("brand").value
+													}}
+												</mat-slide-toggle>
+											</div>
+										</div>
+									</div>
+								</ng-container>
+							</ng-container>
+						</div>
+					</mat-tab>
+
+					<mat-tab label="Rede Social">
+						<div class="row col-12" formGroupName="socialNetwork">
+							<div class="form-group col-4">
+								<label class="" for="whatsapp">Whatsapp</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="whatsapp" mask="(00) 00009-0000" />
+								</div>
+							</div>
+
+							<div class="form-group col-4">
+								<label class="" for="instagram">Link Instagram</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="instagram" />
+								</div>
+							</div>
+
+							<div class="form-group col-4">
+								<label class="" for="facebook">Link Facebook</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="facebook" />
+								</div>
+							</div>
+						</div>
+					</mat-tab>
+				</mat-tab-group>
+			</div>
+			<div class="modal-footer">
+				<!-- <input type="submit" [disabled]="!formData.valid" value="Criar" class="btn btn-outline-dark"> -->
+				<input type="submit" value="Criar" class="btn btn-outline-dark" />
+			</div>
+		</form>
+	</ng-template>
+
+	<!-- Modal Edit Company -->
+	<ng-template #editcompanymodal let-modal modal-lg>
+		<form [formGroup]="formData" (ngSubmit)="
+				formSubmitAttempt = true;
+				formData.valid && updateCompany(formData.value)
+			">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-edit-company">
+					{{ "GLOBAL.LABEL.TOEDIT" | translate }} {{ formData.value.name }}
+				</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<mat-tab-group>
+					<mat-tab label="Dados">
+						<div class="row" *ngIf="!isApproved">
+							<div class="col-12 alert alert-warning" role="alert">
+								Para Aprovar o cadastro marque a Empresa com status ativo
+							</div>
+						</div>
+						<div class="row">
+							<div class="form-group col-12">
+								<label for="franchise">{{ "GLOBAL.LABEL.FRANCHISE" | translate }}</label>
+								<div class="input-group">
+									<input type="text" class="form-control" matInput placeholder="Escolha uma franquia"
+										[matAutocomplete]="autoFranchise" formControlName="franchise" />
+									<mat-autocomplete [displayWith]="displayFnFranchise" #autoFranchise="matAutocomplete">
+										<mat-option *ngFor="let franchise of franchises" [value]="franchise">
+											{{ franchise.name }}
+										</mat-option>
+									</mat-autocomplete>
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="form-group col-12">
+								<label for="franchise">{{
+									"GLOBAL.LABEL.IMAGE" | translate
+									}}</label>
+								<div class="input-group">
+									<div class="custom-file">
+										<input type="file" class="custom-file-input" id="customFile" (change)="onChange($event)" multiple
+											[ngClass]="{
+												'is-invalid':
+													formSubmitAttempt && formData.get('file').invalid
+											}" />
+										<label class="custom-file-label" for="customFile" id="customFileLabel">
+											{{ "GLOBAL.LABEL.SELECTIMAGE" | translate }}</label>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="form-group col-12">
+								<label for="imageHeader">Imagem Cabeçalho no Aplicativo</label>
+								<div class="input-group">
+									<div class="custom-file">
+										<input type="file" class="custom-file-input" id="imageHeader" (change)="onChangeImageHeader($event)"
+											multiple [ngClass]="{'is-invalid': formSubmitAttempt && formData.get('imageHeader').invalid}" />
+										<label class="custom-file-label" for="imageHeader" id="imageHeaderLabel">
+											{{ "GLOBAL.LABEL.SELECTIMAGE" | translate }}
+										</label>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<input type="hidden" class="form-control" formControlName="_id" />
+						<div class="row">
+							<div class="form-group col-5">
+								<label for="name">{{ "GLOBAL.LABEL.NAME" | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="name" [ngClass]="{
+											'is-invalid':
+												formSubmitAttempt && formData.get('name').invalid
+										}" />
+								</div>
+							</div>
+							<div class="form-group col-4">
+								<label for="phone">{{
+									"GLOBAL.LABEL.PHONE" | translate
+									}}</label>
+								<div class="input-group">
+									<input class="form-control" mask="(00) 00009-0000" formControlName="phone" />
+								</div>
+							</div>
+							<div class="form-group col-3">
+								<label for="cnpj">CPF/CNPJ</label>
+								<div class="input-group">
+									<input class="form-control" mask="CPF_CNPJ" formControlName="cnpj" [validation]="true" [ngClass]="{
+											'is-invalid':
+												formSubmitAttempt && formData.get('cnpj').invalid
+										}" />
+								</div>
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="description">{{
+								"GLOBAL.LABEL.DESCRIPTION" | translate
+								}}</label>
+							<div class="input-group">
+								<textarea class="form-control" formControlName="description" [ngClass]="{
+										'is-invalid':
+											formSubmitAttempt && formData.get('description').invalid
+									}"></textarea>
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="col-12">
+								<div class="form-group">
+									<label for="companyCategory">Tipo Empresa</label>
+									<select id="companyCategory" class="form-control" formControlName="companyCategory" [ngClass]="{
+											'is-invalid': formData.get('companyCategory').invalid
+										}">
+										<option value="">Selecione Tipo da Empresa</option>
+										<option *ngFor="let categoryItem of listCategory" value="{{ categoryItem.key }}">
+											{{ categoryItem.name }}
+										</option>
+									</select>
+								</div>
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="form-group col-12">
+								<label for="address">{{
+									"GLOBAL.LABEL.ADDRESS" | translate
+									}}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="address" [ngClass]="{
+											'is-invalid':
+												formSubmitAttempt && formData.get('address').invalid
+										}" />
+								</div>
+							</div>
+							<div class="form-group col-6">
+								<label for="complement">{{
+									"GLOBAL.LABEL.COMPLEMENT" | translate
+									}}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="complement" [ngClass]="{
+											'is-invalid':
+												formSubmitAttempt && formData.get('complement').invalid
+										}" />
+								</div>
+							</div>
+							<div class="form-group col-3">
+								<label for="lat">Lat</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="lat" [ngClass]="{
+											'is-invalid':
+												formSubmitAttempt && formData.get('lat').invalid
+										}" />
+								</div>
+							</div>
+							<div class="form-group col-3">
+								<label for="lng">Lng</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="lng" [ngClass]="{
+											'is-invalid':
+												formSubmitAttempt && formData.get('lng').invalid
+										}" />
+								</div>
+							</div>
+						</div>
+
+						<div class="row">
+							<!-- <div class="form-group col-4">
+								<label class="col-12" for="type">{{ 'GLOBAL.LABEL.TYPE' | translate }}</label>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" formControlName="type" name="type" id="supermarketType"
+										value="supermarket" [ngClass]="{'is-invalid' : formData.get('type').invalid}">
+									<label class="form-check-label" for="inlineRadio1">{{ 'GLOBAL.LABEL.SUPERMARKET' | translate
+										}}</label>
+								</div>
+
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" formControlName="type" name="type" id="restaurantType"
+										value="restaurant" [ngClass]="{'is-invalid' : formData.get('type').invalid}">
+									<label class="form-check-label" for="inlineRadio2">{{ 'GLOBAL.LABEL.RESTAURANT' | translate }}</label>
+								</div>
+								<label style="color: brown;">Tipo será removido em breve, use o SEGMENTO</label>
+							</div> -->
+							<div class="form-group col-4">
+								<label>{{ "GLOBAL.LABEL.SEGMENT" | translate }}</label>
+								<div class="input-group">
+									<input type="text" class="form-control" matInput placeholder="Escolha um Segmento"
+										[matAutocomplete]="autoSegment" formControlName="segment" [ngClass]="{
+											'is-invalid':
+												formSubmitAttempt && formData.get('segment').invalid
+										}" />
+									<mat-autocomplete [displayWith]="displayFnSegment" #autoSegment="matAutocomplete">
+										<mat-option *ngFor="let segment of segments" [value]="segment">
+											{{ segment.name }}
+										</mat-option>
+									</mat-autocomplete>
+								</div>
+							</div>
+							<div class="form-group col-4">
+								<label class="col-12" for="shoppingFlow">{{
+									"GLOBAL.LABEL.SHOPPINGFLOW" | translate
+									}}</label>
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" formControlName="shoppingFlow" name="shoppingFlow"
+										id="menu" value="MENU" [ngClass]="{
+											'is-invalid':
+												formSubmitAttempt &&
+												formData.get('shoppingFlow').invalid
+										}" />
+									<label class="form-check-label" for="inlineRadio1">{{
+										"MENU.RESTAURANTSONLINE.MENU" | translate
+										}}</label>
+								</div>
+
+								<div class="form-check form-check-inline">
+									<input class="form-check-input" type="radio" formControlName="shoppingFlow" name="shoppingFlow"
+										id="products" value="PRODUCT" [ngClass]="{
+											'is-invalid':
+												formSubmitAttempt &&
+												formData.get('shoppingFlow').invalid
+										}" />
+									<label class="form-check-label" for="inlineRadio2">{{
+										"GLOBAL.LABEL.PRODUCT" | translate
+										}}</label>
+								</div>
+							</div>
+							<div class="form-group col-8">
+								<label>{{ "GLOBAL.LABEL.GROUPS" | translate }}</label>
+								<div class="input-group">
+									<input type="text" class="form-control" matInput placeholder="Escolha um Grupo"
+										[matAutocomplete]="autoImagesEdit" formControlName="groups" [ngClass]="{
+											'is-invalid':
+												formSubmitAttempt && formData.get('file').invalid
+										}" />
+									<mat-autocomplete [displayWith]="displayFn" #autoImagesEdit="matAutocomplete">
+										<mat-option *ngFor="let group of groups" [value]="group">
+											{{ group.name }}
+										</mat-option>
+									</mat-autocomplete>
+								</div>
+							</div>
+							<div class="form-group col-2">
+								<label for="status">{{
+									"GLOBAL.LABEL.STATUS" | translate
+									}}</label>
+								<div class="input-group">
+									<mat-slide-toggle formControlName="status"></mat-slide-toggle>
+								</div>
+							</div>
+							<div class="form-group col-2">
+								<label for="isHighlighted">{{
+									"GLOBAL.LABEL.ISHIGHLIGHTED" | translate
+									}}</label>
+								<div class="input-group">
+									<mat-slide-toggle formControlName="isHighlighted"></mat-slide-toggle>
+								</div>
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="category">{{
+								"GLOBAL.LABEL.CATEGORY" | translate
+								}}</label>
+							<div class="input-group">
+								<mat-chip-list #chipList aria-label="Fruit selection">
+									<mat-chip *ngFor="let categoria of categoriaList" [selectable]="selectable" [removable]="removable"
+										(removed)="removeCategoria(categoria)">
+										{{ categoria }}
+										<mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
+									</mat-chip>
+									<input placeholder="Nova Categoria..." [matChipInputFor]="chipList"
+										[matChipInputAddOnBlur]="addOnBlur" (matChipInputTokenEnd)="addCategoria($event)" />
+								</mat-chip-list>
+							</div>
+							<div class="form-group">
+								<br />
+								<strong>Restaurantes:</strong> burguer, pizza, acai,
+								fretegratis, promocoes, doces, bolos, salgados, pastel, sorvete,
+								brasileira <br /><br />
+								<strong>Supermercados:</strong> acougue, express, fretegratis,
+								promocoes, frios, laticinios, limpeza, mercearia, bebidas,
+								congelados,
+								<p style="margin-left: 14%">
+									hortifruti, snaks, padaria, higiene pessoal, pets, acessorios,
+									pescados, bazar, sazonal
+								</p>
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="keywords">{{
+								"GLOBAL.LABEL.KEYWORDS" | translate
+								}}</label>
+							<div class="input-group">
+								<mat-chip-list #chipList aria-label="Palavras-chave">
+									<mat-chip *ngFor="let keyword of keywordsList" [selectable]="selectable" [removable]="removable"
+										(removed)="removeKeyword(keyword)">
+										{{ keyword }}
+										<mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
+									</mat-chip>
+									<input placeholder="Nova Palavra-chave..." [matChipInputFor]="chipList"
+										[matChipInputAddOnBlur]="addOnBlur" (matChipInputTokenEnd)="addKeyword($event)" />
+								</mat-chip-list>
+							</div>
+						</div>
+					</mat-tab>
+					<mat-tab label="Financeiro">
+						<!-- <div class="row">
+							<div class="col-12">
+								<h6>:: DADOS BANCÁRIOS (USADOS NO SPLIT)</h6>
+								<div *ngIf="formData.get('recipient_id').value && formData.get('pagar_me_bank_id').value"
+									class="alert alert-success" role="alert">
+									<b>Empresa vinculada ao split com sucesso!</b>
+									<hr>
+									<span><b>ID:</b> {{ formData.get('recipient_id').value }}</span>
+								</div>
+								<div *ngIf="!formData.get('recipient_id').value || !formData.get('pagar_me_bank_id').value"
+									class="alert alert-danger" role="alert">
+									<b>Empresa não está vinculada ao split!</b>
+								</div>
+							</div>
+						</div> -->
+						<div class="row col-12" formGroupName="bankData">
+							<div class="form-group col-5">
+								<label class="" for="favoredName">{{
+									"GLOBAL.LABEL.FAVOREDNAME" | translate
+									}}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="favoredName" [ngClass]="{
+											'is-invalid':
+												formSubmitAttempt &&
+												formData.get('bankData').get('favoredName').invalid
+										}" />
+								</div>
+							</div>
+							<div class="form-group col-4">
+								<label for="documentType">{{
+									"GLOBAL.LABEL.DOCUMENTTYPE" | translate
+									}}</label>
+								<div class="input-group">
+									<select class="form-control" formControlName="documentType" [ngClass]="{
+											'is-invalid':
+												formSubmitAttempt &&
+												formData.get('bankData').get('documentType').invalid
+										}">
+										<option value="CNPJ">CNPJ</option>
+										<option value="CPF">CPF</option>
+									</select>
+								</div>
+							</div>
+							<div class="form-group col-3">
+								<label class="" for="document">{{
+									"GLOBAL.LABEL.DOCUMENT" | translate
+									}}</label>
+								<div class="input-group">
+									<input class="form-control" mask="000.000.000-00||00.000.000/0000-00" formControlName="document"
+										[ngClass]="{
+											'is-invalid':
+												formSubmitAttempt &&
+												formData.get('bankData').get('document').invalid
+										}" />
+								</div>
+							</div>
+							<div class="form-group col-12">
+								<label>{{ "GLOBAL.LABEL.BANK" | translate }}</label>
+								<div class="input-group">
+									<input type="text" class="form-control" matInput placeholder="Escolha um Banco"
+										[matAutocomplete]="autoBrazilianBank" formControlName="brazilianBank" [ngClass]="{
+											'is-invalid':
+												formSubmitAttempt && formData.get('bankData').get('brazilianBank').invalid
+										}" />
+									<mat-autocomplete [displayWith]="displayFnBrazilianBank" #autoBrazilianBank="matAutocomplete">
+										<mat-option *ngFor="let brBank of brBanks" [value]="brBank">
+											{{ brBank.compe }} - {{ brBank.short_name }}
+										</mat-option>
+									</mat-autocomplete>
+								</div>
+								<span *ngIf="formData.get('bankData').get('bankName').value">
+									<b>Registro anterior:</b> {{formData.get('bankData').get('bankName').value}}
+								</span>
+							</div>
+							<div class="form-group col-4">
+								<label for="typeAccount">{{
+									"GLOBAL.LABEL.TYPE" | translate
+									}}</label>
+								<div class="input-group">
+									<select class="form-control" formControlName="typeAccount" [ngClass]="{
+											'is-invalid':
+												formSubmitAttempt &&
+												formData.get('bankData').get('typeAccount').invalid
+										}">
+										<option selected value="CURRENT">Conta Corrente</option>
+										<option value="SAVINGS">Conta Poupança</option>
+									</select>
+								</div>
+							</div>
+							<div class="form-group col-3">
+								<label class="" for="agency">{{
+									"GLOBAL.LABEL.AGENCY" | translate
+									}}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="agency" [ngClass]="{
+											'is-invalid':
+												formSubmitAttempt &&
+												formData.get('bankData').get('agency').invalid
+										}" />
+								</div>
+							</div>
+							<div class="form-group col-1">
+								<label class="" for="agencyDigit">{{
+									"GLOBAL.LABEL.AGENCYDIGIT" | translate
+									}}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="agencyDigit" [ngClass]="{
+											'is-invalid':
+												formSubmitAttempt &&
+												formData.get('bankData').get('agencyDigit').invalid
+										}" />
+								</div>
+							</div>
+							<div class="form-group col-3">
+								<label class="" for="account">{{
+									"GLOBAL.LABEL.ACCOUNT" | translate
+									}}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="account" [ngClass]="{
+											'is-invalid':
+												formSubmitAttempt &&
+												formData.get('bankData').get('account').invalid
+										}" />
+								</div>
+							</div>
+							<div class="form-group col-1">
+								<label class="" for="accountDigit">{{
+									"GLOBAL.LABEL.ACCOUNTDIGIT" | translate
+									}}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="accountDigit" [ngClass]="{
+											'is-invalid':
+												formSubmitAttempt &&
+												formData.get('bankData').get('accountDigit').invalid
+										}" />
+								</div>
+							</div>
+							<div class="form-group col-4">
+								<label for="pixType">{{
+									"GLOBAL.LABEL.PIXTYPE" | translate
+									}}</label>
+								<div class="input-group">
+									<select class="form-control" formControlName="pixType" [ngClass]="{
+											'is-invalid':
+												formSubmitAttempt &&
+												formData.get('bankData').get('pixType').invalid
+										}">
+										<option value="">Selecione...</option>
+										<option value="CNPJ">CNPJ</option>
+										<option value="CPF">CPF</option>
+										<option value="CELLPHONE">CELULAR</option>
+										<option value="EMAIL">E-MAIL</option>
+										<option value="RANDOMKEY">Chave aleatória</option>
+									</select>
+								</div>
+							</div>
+							<div class="form-group col-8">
+								<label class="" for="pixKey">{{
+									"GLOBAL.LABEL.PIXKEY" | translate
+									}}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="pixKey" [ngClass]="{
+											'is-invalid':
+												formSubmitAttempt &&
+												formData.get('bankData').get('pixKey').invalid
+										}" />
+								</div>
+							</div>
+						</div>
+					</mat-tab>
+					<mat-tab label="Formas de pagamento">
+						<div class="row">
+							<ng-container *ngFor="
+									let payment of formData.get('typePayments').controls;
+									index as i
+								">
+								<ng-container [formGroup]="payment">
+									<label class="col-12" *ngIf="i === 0">Pagamento pelo Toop Delivery.</label>
+									<div *ngIf="
+											formData.get('typePayments').controls[i].get('type')
+												.value === 'BRASPAG'
+										" class="form-check col-3">
+										<div class="form-group col">
+											<div class="input-group">
+												<img width="50" class="img-thumbnail col-6" [src]="
+														formData
+															.get('typePayments')
+															.controls[i].get('image').value
+															? formData
+																	.get('typePayments')
+																	.controls[i].get('image').value
+															: './assets/media/logo-default.png'
+													" [alt]="
+														formData
+															.get('typePayments')
+															.controls[i].get('brand').value
+													" />
+												<mat-slide-toggle [checked]="status" labelPosition="before" formControlName="status"
+													class="col-12">{{
+													formData
+													.get("typePayments")
+													.controls[i].get("brand").value
+													}}
+												</mat-slide-toggle>
+												<div>
+													<b>Braspag</b>
+												</div>
+											</div>
+										</div>
+									</div>
+
+									<div *ngIf="
+											formData.get('typePayments').controls[i].get('type')
+												.value === 'PAGARME'
+										" class="form-check col-3">
+										<div class="form-group col">
+											<div class="input-group">
+												<img width="50" class="img-thumbnail col-6" [src]="
+														formData
+															.get('typePayments')
+															.controls[i].get('image').value
+															? formData
+																	.get('typePayments')
+																	.controls[i].get('image').value
+															: './assets/media/logo-default.png'
+													" [alt]="
+														formData
+															.get('typePayments')
+															.controls[i].get('brand').value
+													" />
+												<mat-slide-toggle [checked]="status" labelPosition="before" formControlName="status"
+													class="col-12">{{
+													formData
+													.get("typePayments")
+													.controls[i].get("brand").value
+													}}
+												</mat-slide-toggle>
+												<div>
+													<b>Pagar.Me</b>
+												</div>
+											</div>
+										</div>
+									</div>
+								</ng-container>
+							</ng-container>
+							<ng-container *ngFor="
+									let payment of formData.get('typePayments').controls;
+									index as i
+								">
+								<ng-container [formGroup]="payment">
+									<label class="col-12" *ngIf="i === 0">Pagamento na entrega</label>
+									<div *ngIf="
+											formData.get('typePayments').controls[i].get('type')
+												.value !== 'BRASPAG' &&
+											formData.get('typePayments').controls[i].get('type')
+												.value !== 'PAGARME'
+										" class="form-check col-3">
+										<div class="form-group col">
+											<div class="input-group">
+												<img width="50" class="img-thumbnail col-6" [src]="
+														formData
+															.get('typePayments')
+															.controls[i].get('image').value
+															? formData
+																	.get('typePayments')
+																	.controls[i].get('image').value
+															: './assets/media/logo-default.png'
+													" [alt]="
+														formData
+															.get('typePayments')
+															.controls[i].get('brand').value
+													" />
+												<mat-slide-toggle [checked]="status" labelPosition="before" formControlName="status"
+													class="col-12">{{
+													formData
+													.get("typePayments")
+													.controls[i].get("brand").value
+													}}
+												</mat-slide-toggle>
+											</div>
+										</div>
+									</div>
+								</ng-container>
+							</ng-container>
+						</div>
+					</mat-tab>
+
+					<mat-tab label="Agendamento">
+						<kt-schedule [company]="formData.value"></kt-schedule>
+					</mat-tab>
+
+					<mat-tab label="Rede Social">
+						<div class="row col-12" formGroupName="socialNetwork">
+							<div class="form-group col-4">
+								<label class="" for="whatsapp">whatsapp</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="whatsapp" mask="(00) 00009-0000" />
+								</div>
+							</div>
+
+							<div class="form-group col-4">
+								<label class="" for="instagram">Link Instagram</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="instagram" />
+								</div>
+							</div>
+
+							<div class="form-group col-4">
+								<label class="" for="facebook">Link Facebook</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="facebook" />
+								</div>
+							</div>
+						</div>
+					</mat-tab>
+				</mat-tab-group>
+			</div>
+			<div class="modal-footer">
+				<input type="submit" value="Salvar" class="btn btn-outline-dark" />
+			</div>
+		</form>
+	</ng-template>
+</div>
+
+<!-- Modal Delete -->
+<ng-template #confirmdeletemodal let-modal>
+	<div class="modal-header">
+		<h4 class="modal-title" id="modal-delete-company">Confirmar exclusão</h4>
+		<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	<div class="modal-body" class="btn btn-warning">
+		{{ "GLOBAL.LABEL.AREYOUSUREYOUWANTTODELETE" | translate }}
+	</div>
+	<div class="modal-footer">
+		<button type="button" (click)="companyIdToDelete = undefined; modal.dismiss('Cross click')"
+			class="btn btn-secondary" data-dismiss="modal">
+			{{ "GLOBAL.LABEL.CANCEL" | translate }}
+		</button>
+		<button type="button" (click)="deleteCompany() && modal.dismiss('Cross click')" class="btn btn-primary">
+			{{ "GLOBAL.LABEL.YES" | translate }}
+		</button>
+	</div>
+</ng-template>
+
+<!-- <ng-template #confirmcreateaccounmodal let-modal>
+	<div class="modal-header">
+		<h4 class="modal-title" id="modal-create-digital-accounts">Deseja criar a conta digital agora?</h4>
+		<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	<div class="modal-body" class="btn btn-success">
+		{{ 'GLOBAL.LABEL.WANTTOCREATEADIGITALACCOUNTNOW' | translate }}
+	</div>
+	<div class="modal-footer">
+		<button type="button"
+			(click)="createDigitalAccount=false; createCompany(formData.value, confirmcreateaccounmodal, true)"
+			class="btn btn-secondary" data-dismiss="modal">{{
+			'GLOBAL.LABEL.NO' | translate }}</button>
+		<button type="button"
+			(click)="createDigitalAccount=true; createCompany(formData.value, confirmcreateaccounmodal, true)"
+			class="btn btn-primary">{{
+			'GLOBAL.LABEL.YES' | translate }}</button>
+	</div>
+</ng-template> -->

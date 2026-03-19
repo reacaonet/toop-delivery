@@ -1,0 +1,10 @@
+export const debug = true;
+export const port = 8100;
+export const apiUrl = `https://admin.toopdelivery.com.br:${port}`;
+export const nameApp = 'TOOP';
+export const timeout = 30000;
+export const tokenAuth = 'USER_AUTH';
+export const FIREBASE_PATH = '';
+export const PACKAGE = 'br.com.toopdelivery.motorista';
+export const apiGeoLocation = 'AIzaSyBKnJQI86pHukHoh7wtGzyRMxJfemZpRGQ';
+export const activePip = false;

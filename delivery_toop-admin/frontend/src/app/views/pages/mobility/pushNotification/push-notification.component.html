@@ -1,0 +1,245 @@
+<form [formGroup]="formFilter" formFilter.valid>
+	<div class="row">
+		<div class="form-group col-6">
+			<label>{{ 'GLOBAL.LABEL.FRANCHISE' | translate }}</label>
+			<div class="input-group">
+				<input type="text" class="form-control" matInput placeholder="Pesquisar por Franquia"
+					[matAutocomplete]="autoFranchise" formControlName="franchise">
+				<mat-autocomplete [displayWith]="displayFnFilter" #autoFranchise="matAutocomplete">
+					<mat-option *ngFor="let franchise of franchises" [value]="franchise"
+						(click)="onClickFranchiseFilter(franchise)">
+						{{ franchise.name }}
+					</mat-option>
+				</mat-autocomplete>
+			</div>
+		</div>
+		<div class="form-group col-6">
+			<label>{{ 'GLOBAL.LABEL.TOPIC' | translate }}</label>
+			<div class="input-group">
+				<select id="type" class="form-control autocomplete" (change)="changeFilterTopic($event.target.value)"
+					formControlName="type">
+					<option selected value="">Selecione</option>
+					<option *ngFor="let topic of topics" [value]="topic.value">
+						{{topic.label}}</option>
+				</select>
+			</div>
+		</div>
+	</div>
+</form>
+
+<div class="row justify-content-between">
+	<div class="col-auto align-self-center mb-2">
+		<h5>
+			<p class="float-left">{{ 'GLOBAL.LABEL.NOTIFICATIONS' | translate }}</p>
+		</h5>
+	</div>
+	<!-- <div>
+		<a target="_blank" [href]="helpdeskUrl">
+			<span class="navmenu-help-icon"><i class="fa fa-question-circle" style="margin-right: 649px;"></i></span>
+		</a>
+	</div> -->
+	<div class="col-auto">
+		<a *ngIf="!loadSync" (click)="syncTopics()" href="javascript:;"
+			class="float-right btn btn-dark  btn-bold btn-sm btn-icon-h ml-3">
+			{{ 'GLOBAL.LABEL.SYNC_TOPICS' | translate }}
+		</a>
+
+		<button *ngIf="loadSync" class="float-right btn btn-dark  btn-bold btn-sm btn-icon-h ml-3" type="button" disabled>
+			<span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+			aguarde...
+		</button>
+
+		<a (click)="upsertModalShow(upserttemplatemodal, undefined, 'create')" href="javascript:;"
+			class="float-right btn btn-primary btn-bold btn-sm btn-icon-h ">
+			{{ 'GLOBAL.LABEL.CREATE' | translate }}
+		</a>
+
+	</div>
+</div>
+
+<div class="example-container mat-elevation-z8">
+	<mat-table #table [dataSource]="dataSource">
+		<!-- franchise Column -->
+		<ng-container matColumnDef="franchise">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.FRANCHISE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element" [ngClass]="getPositionColor(element.position)"> {{element.franchise?.name}}
+			</mat-cell>
+		</ng-container>
+
+		<!-- type Column -->
+		<ng-container matColumnDef="topic">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.TOPIC' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element" [ngClass]="getPositionColor(element.position)">
+				{{element.topic === "driver" ? "Motorista" : element.topic === "passenger" ? "Passageiros": " - "}}
+			</mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="user">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.USER' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element" [ngClass]="getPositionColor(element.position)">
+				{{ element?.user?.name }}
+			</mat-cell>
+		</ng-container>
+
+		<!-- DATESEND Column -->
+		<ng-container matColumnDef="createdAt">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.DATESEND' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element" [ngClass]="getPositionColor(element.position)"> {{element.createdAt}}
+			</mat-cell>
+		</ng-container>
+
+		<!-- description Column -->
+		<ng-container matColumnDef="title">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.TITLE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element" [ngClass]="getPositionColor(element.position)"> {{element.title}}
+			</mat-cell>
+		</ng-container>
+
+
+		<!-- Delete  -->
+		<ng-container matColumnDef="delete">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.ACTION' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element" [ngClass]="getPositionColor(element.position)">
+				<i class="status mr-3" title="Situação" [ngClass]=" getStatusColor(element.status)"></i>
+				<!-- <i class="flaticon2-edit mr-3" (click)="upsertModalShow(upserttemplatemodal, element, 'edit')"></i> -->
+				<!-- <i class="flaticon2-trash" (click)="confirmDeleteModalShow(confirmdeletemodal, element)"></i> -->
+			</mat-cell>
+		</ng-container>
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns;">
+		</mat-row>
+	</mat-table>
+	<mat-paginator [length]="totalLength" [pageSize]="pageSize" [pageSizeOptions]="pageLimit" (page)="changePage($event)">
+	</mat-paginator>
+
+	<!-- Apartir de aqui é o modal -->
+	<!-- Modal Upsert  -->
+	<ng-template #upserttemplatemodal let-modal modal-lg>
+		<form [formGroup]="formData" (ngSubmit)="formSubmit=true; formData.valid && upsert(formData.value)">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-create-data">
+					{{ 'GLOBAL.LABEL.CREATE' | translate }}
+				</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<input formControlName="_id" type="hidden">
+			</div>
+			<div class="modal-body">
+
+				<div class="row">
+					<div class="form-group col-12">
+						<label for="state">{{ 'GLOBAL.LABEL.SHIPPINGTYPE' | translate }}</label>
+
+						<div class="input-group">
+							<select id="shippingType" class="form-control" (change)="selectShippingType($event.target.value)">
+								<option selected value="topic">Tópico</option>
+								<option value="passenger">Usuário Passageiro</option>
+								<option value="driver">Usuário Motorista</option>
+							</select>
+						</div>
+					</div>
+				</div>
+
+				<div *ngIf="shippingType==='topic'" class="row">
+					<div class="form-group col-12">
+						<label for="state">{{ 'GLOBAL.LABEL.TOPIC' | translate }}</label>
+
+						<div class="input-group">
+							<select id="topic" class="form-control autocomplete" formControlName="topic"
+								[ngClass]="{'is-invalid' : formSubmit && formData.get('topic').invalid}">
+								<option selected value="">Selecione</option>
+								<option *ngFor="let topic of topics" [value]="topic.value"> {{topic.label}}</option>
+							</select>
+						</div>
+					</div>
+				</div>
+
+
+				<div *ngIf="shippingType !=='topic'" class="row">
+					<div class="form-group col-12">
+						<label for="user">{{ 'GLOBAL.LABEL.USER' | translate }}</label>
+						<div class="input-group">
+							<input type="text" class="form-control" matInput placeholder="Escolha um usuário"
+								[matAutocomplete]="autoUser" formControlName="user">
+							<mat-autocomplete [displayWith]="displayFnFranchise" #autoUser="matAutocomplete">
+								<mat-option *ngFor="let user of users" [value]="user">
+									{{ user.name }}
+									<b *ngIf="user?.phone"> - {{ user?.phone }}</b>
+									<b *ngIf="user?.email"> - {{ user?.email }}</b>
+								</mat-option>
+							</mat-autocomplete>
+						</div>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="form-group col-6" *ngIf="isRoot">
+						<label for="franchise">{{ 'GLOBAL.LABEL.FRANCHISE' | translate }}</label>
+						<div class="input-group">
+							<input type="text" class="form-control" matInput placeholder="Escolha uma Fanquia"
+								[matAutocomplete]="autoFranchise" formControlName="franchise"
+								[ngClass]="{'is-invalid' : formSubmitPerson && formData.get('franchise').invalid}">
+							<mat-autocomplete [displayWith]="displayFnFranchise" #autoFranchise="matAutocomplete">
+								<mat-option *ngFor="let franchise of franchises" [value]="franchise">
+									{{ franchise.name }}
+								</mat-option>
+							</mat-autocomplete>
+						</div>
+					</div>
+				</div>
+
+				<!-- row 3 -->
+				<div class="row">
+					<div class="form-group col-12">
+						<label for="title">{{ 'GLOBAL.LABEL.TITLE' | translate }}</label>
+						<div class="input-group">
+							<input required class="form-control" formControlName="title"
+								[ngClass]="{'is-invalid' : formSubmit && formData.get('title').invalid}">
+						</div>
+					</div>
+
+					<div class="form-group col-12">
+						<label for="message">{{ 'GLOBAL.LABEL.MESSAGE' | translate }}</label>
+						<div class="input-group">
+							<input required class="form-control" formControlName="message"
+								[ngClass]="{'is-invalid' : formSubmit && formData.get('message').invalid}">
+						</div>
+					</div>
+				</div>
+				<!-- / row 3 -->
+
+			</div>
+			<div class="modal-footer">
+				<!-- <input type="submit" [disabled]="!formData.valid" value="Criar" class="btn btn-outline-dark"> -->
+				<input *ngIf="!load" type="submit" value="{{ 'GLOBAL.LABEL.CREATE' | translate }}"
+					class="btn btn-outline btn-success">
+				<button *ngIf="load" class="btn btn-success" type="button" disabled>
+					<span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+					aguarde...
+				</button>
+			</div>
+		</form>
+	</ng-template>
+
+	<!-- Modal Delete -->
+	<ng-template #confirmdeletemodal let-modal>
+		<div class="modal-header">
+			<h4 class="modal-title" id="modal-delete-data">
+				Confirmar exclusão</h4>
+			<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+		<div class="modal-body" class="btn btn-warning">
+			{{ 'GLOBAL.LABEL.AREYOUSUREYOUWANTTODELETE' | translate }}
+		</div>
+		<div class="modal-footer">
+			<button type="button" (click)="idToDelete=undefined; modal.dismiss('Cross click')" class="btn btn-secondary"
+				data-dismiss="modal">{{ 'GLOBAL.LABEL.CANCEL' | translate }}</button>
+			<button type="button" (click)="delete() && modal.dismiss('Cross click')" class="btn btn-primary">{{
+				'GLOBAL.LABEL.YES' | translate }}</button>
+		</div>
+	</ng-template>
+
+</div>

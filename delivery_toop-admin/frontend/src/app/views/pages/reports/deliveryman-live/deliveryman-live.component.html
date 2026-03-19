@@ -1,0 +1,60 @@
+<div class="row justify-content-between container">
+	<form class="row" [formGroup]="formFilter" formFilter.valid>
+		<div class="row filter">
+			<label for="statusDelivery">{{ 'GLOBAL.LABEL.STATUSDELIVERY' | translate }}</label>
+			<div class="input-group">
+				<select class="form-control" formControlName="statusDelivery">
+					<option value="all" selected>Todos</option>
+					<option value="online">Online</option>
+					<option value="onRoute">Em Corrida</option>
+					<option value="offline">Offline</option>
+					<option value="nothing">Nenhum</option>
+				</select>
+			</div>
+		</div>
+		<div class="row filter">
+			<label for="statusCompany">{{ 'GLOBAL.LABEL.STATUSCOMPANY' | translate }}</label>
+			<div class="input-group">
+				<select class="form-control" formControlName="statusCompany">
+					<option value="all" selected>Todos</option>
+					<option value="online">Online</option>
+					<option value="offline">Offline</option>
+					<option value="nothing">Nenhum</option>
+				</select>
+			</div>
+		</div>
+	</form>
+	<div class=" row refresh">
+		<p id="timer">Atualizando em {{timeLeft}} segundos</p>
+		<button (click)="refreshMarkers()" type="button" class="btn btn-primary btn-refresh">Atualizar</button>
+	</div>
+</div>
+<div class="map-container">
+	<div class="map-frame">
+		<div id="map"></div>
+	</div>
+</div>
+<p class="text-right" id="quantity">O filtro encontrou {{quantityDelivery}} entregadores</p>
+<div class="bg-white p-2 rounded">
+	<h4>Lista de entregadores sem localização</h4>
+	<div class="table-responsive">
+		<table class="table table-striped">
+			<thead>
+				<tr>
+					<th scope="col">#</th>
+					<th scope="col">Nome</th>
+					<th scope="col">Telefone</th>
+					<th scope="col">Status</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr *ngFor="let element of dataDeliverysNoLocationList; index as i">
+					<th scope="row">{{ i + 1 }}</th>
+					<td>{{ element.name }}</td>
+					<td>{{ element.phone }}</td>
+					<td>{{ element.status }}</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>

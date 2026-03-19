@@ -1,0 +1,144 @@
+<!-- Alert -->
+<p>
+	<ngb-alert *ngIf="alert" [type]="alert.type" (close)="closeAlert()">
+		{{ alert.message }}
+	</ngb-alert>
+</p>
+
+<div class="row justify-content-between">
+	<div class="col-auto align-self-center mb-2">
+		<p class="float-left">{{ 'GLOBAL.LABEL.INTEGRATIONS' | translate }}</p>
+	</div>
+	<div class="col-auto">
+		<a (click)="upSertIntegrationsModalShow(upsertintegrationsmodal, undefined)" href="javascript:;" class="float-right btn btn-label-warning btn-bold btn-sm btn-icon-h">
+			{{ 'GLOBAL.LABEL.CREATE' | translate }}
+		</a>
+	</div>
+</div>
+
+
+<div class="example-container mat-elevation-z8">
+	<mat-table #table [dataSource]="dataSource">
+		<!-- Checkbox Column -->
+		<ng-container matColumnDef="select">
+			<mat-header-cell *matHeaderCellDef>
+				<mat-checkbox [checked]="true" [indeterminate]="true">
+				</mat-checkbox>
+			</mat-header-cell>
+			<mat-cell *matCellDef="let row">
+				<mat-checkbox (click)="$event.stopPropagation()">
+				</mat-checkbox>
+			</mat-cell>
+		</ng-container>
+		<!-- Company Column -->
+		<ng-container matColumnDef="company">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.COMPANY' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ (element.company && element.company.name) ? element.company.name : '-' }} </mat-cell>
+		</ng-container>
+		<!-- System Column -->
+		<ng-container matColumnDef="system">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.SYSTEM' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.system }} </mat-cell>
+		</ng-container>
+		<!-- Status Column -->
+		<ng-container matColumnDef="status">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.STATUS' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i *ngIf="element.status === true" class="flaticon2-accept mr-2"></i>
+				<i *ngIf="element.status === false" class="flaticon2-cancel mr-2"></i>
+			</mat-cell>
+		</ng-container>
+		<!-- Delete -->
+		<ng-container matColumnDef="delete">
+			<mat-header-cell *matHeaderCellDef>{{ 'GLOBAL.LABEL.ACTION' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i class="flaticon2-edit mr-2" (click)="upSertIntegrationsModalShow(upsertintegrationsmodal, element, 'edit')"></i>
+				<i class="flaticon2-trash" (click)="confirmDeleteModalShow(confirmdeletemodal, element)"></i>
+
+				<button type="button" class="btn btn-sm btn-primary ml-2" (click)="syncImage(element.company)" *ngIf="!load">Sincronizar</button>
+
+				<button type="button" class="btn btn-sm btn-primary ml-2" *ngIf="load && element.company._id == loadCompany">
+					<span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+					Processando...
+				</button>
+			</mat-cell>/
+		</ng-container>
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns;">
+		</mat-row>
+	</mat-table>
+	<mat-paginator [length]="totalLength" [pageSize]="pageSize" [pageSizeOptions]="pageLimit" (page)="changePage($event)">
+	</mat-paginator>
+
+	<!-- Modal up sert Integrations -->
+	<ng-template #upsertintegrationsmodal let-modal modal-lg>
+		<form [formGroup]="formData" (ngSubmit)="formSubmitIntegrations=true;
+		formData.valid && upSertIntegrations(formData.value)
+         && modal.dismiss('Cross click')">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-create-integrations">{{ (typeAction === 'create') ? ('GLOBAL.LABEL.CREATEINTEGRATIONS' | translate) : ('GLOBAL.LABEL.EDITINTEGRATIONS' | translate) }}
+				</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<input type="hidden" class="form-control" formControlName="_id">
+				<div class="row">
+					<div class="form-group col-6">
+						<label for="company">{{ 'GLOBAL.LABEL.COMPANY' | translate }}</label>
+						<div class="input-group">
+              <input type="text" class="form-control" matInput placeholder="Escolha uma Empresa"
+              [matAutocomplete]="autoCompany" formControlName="company"
+               [ngClass]="{'is-invalid' : formSubmitIntegrations && formData.get('company').invalid}">
+							<mat-autocomplete [displayWith]="displayFn" #autoCompany="matAutocomplete">
+								<mat-option *ngFor="let comp of companies" [value]="comp">
+									{{ comp.name }}
+								</mat-option>
+							</mat-autocomplete>
+						</div>
+          </div>
+					<div class="form-group col-2">
+						<label for="system">{{ 'GLOBAL.LABEL.SYSTEM' | translate }}</label>
+						<div class="input-group">
+							<select class="form-control" formControlName="system"
+							 [ngClass]="{'is-invalid' : formSubmitIntegrations && formData.get('system').invalid}">
+								<option value="JM_Diamante">JM_Diamante</option>
+								<option value="RpInfo">RpInfo</option>
+								<option value="Viva_Sistemas">Viva_Sistemas</option>
+							</select>
+						</div>
+					</div>
+					<div class="form-group col-4">
+						<label for="status">{{ 'GLOBAL.LABEL.STATUS' | translate }}</label>
+						<div class="input-group">
+							<mat-slide-toggle formControlName="status"></mat-slide-toggle>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<input type="submit" value="Criar" class="btn btn-outline-dark">
+				</div>
+			</div>
+		</form>
+	</ng-template>
+</div>
+
+<!-- Modal Delete   -->
+<ng-template #confirmdeletemodal let-modal>
+	<div class="modal-header">
+		<h4 class="modal-title" id="modal-delete-integrations" *ngIf="formData && formData.value && formData.value.name">
+			Confirmar exclusão
+		</h4>
+		<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	<div class="modal-body" class="btn btn-warning">
+		{{ 'GLOBAL.LABEL.AREYOUSUREYOUWANTTODELETE' | translate }}
+	</div>
+	<div class="modal-footer">
+		<button type="button" (click)="integrationsIdToDelete=undefined; modal.dismiss('Cross click')" class="btn btn-secondary" data-dismiss="modal">{{ 'GLOBAL.LABEL.CANCEL' | translate }}</button>
+		<button type="button" (click)="deleteIntegrations() && modal.dismiss('Cross click')" class="btn btn-primary">{{ 'GLOBAL.LABEL.YES' | translate }}</button>
+	</div>
+</ng-template>

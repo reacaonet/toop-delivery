@@ -1,0 +1,171 @@
+// @page {
+//   size: 8cm 20cm;
+//   margin: 0;
+// }
+
+@media print {
+	* {
+		margin:0;
+		padding: 0;
+	}
+  html, body {
+    width: 12cm;
+		height: auto;
+		margin: 0;
+		padding: 0;
+		background: transparent;
+		display: flex;
+		flex: 1;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+	}
+	.box {
+		display: none;
+	}
+}
+
+.box {
+	display: flex;
+	// flex: 1;
+	// flex-direction: column;
+	// align-items: center;
+	// justify-content: center;
+}
+
+.contentPrint {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	width: 10cm;
+	height: auto;
+	min-height: 10cm;
+	background-color: white;
+	// margin-top: 20px;
+	padding: 10px;
+}
+
+img {
+	width: 136px;
+	height: 76px;
+}
+
+.txtCompany {
+	font-size: 16px;
+	font-weight: bold;
+	font-family: Arial, Helvetica, sans-serif;
+	margin-top: 12px;
+	color: black;
+}
+
+.containerCustomer {
+	width: 100%;
+	margin-left: 30px;
+	margin-right: 20px;
+}
+
+
+.txtCustomer {
+	font-size: 16px;
+	font-weight: bold;
+	font-family: Arial, Helvetica, sans-serif;
+	color: black;
+}
+
+.txtAddress {
+	font-size: 16px;
+	font-weight: bold;
+	font-family: Arial, Helvetica, sans-serif;
+	color: black;
+}
+
+.txtInfo {
+	font-size: 14px;
+	font-family: Arial, Helvetica, sans-serif;
+	font-weight: bold;
+	color: black;
+}
+
+.table {
+	margin-top: 12px;
+}
+
+table td th {
+	font-size: 14px;
+	font-family: Arial, Helvetica, sans-serif;
+	color: black;
+	font-weight: bold;
+}
+
+table tr td {
+	font-size: 14px;
+	font-family: Arial, Helvetica, sans-serif;
+	color: black;
+	font-weight: bold;
+}
+
+table {
+	border: 0;
+}
+
+table tbody {
+	border: 0;
+}
+
+table tbody tr {
+	border: 0;
+}
+
+table tbody tr td {
+	border: 0;
+}
+
+table tr {
+	border: 0;
+}
+
+table tr td {
+	border: 0;
+}
+
+table thead {
+	border: 0;
+}
+
+table thead tr {
+	border: 0;
+}
+
+table thead tr th {
+	border: 0;
+}
+
+table tr.noBorder td {
+  border: 0;
+}
+
+
+
+.divider {
+	border-top: 1px dashed black;
+	width: 100%;
+	margin: 10 0 10 0;
+}
+
+.centered {
+	font-size: 14px;
+	color: black;
+	font-weight: bold;
+}
+
+.titleComplement {
+	text-align: center;
+	font-size: 16px;
+	font-weight: bold;
+	color: black;
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+.lastTd {
+	margin-bottom: 20px;
+}

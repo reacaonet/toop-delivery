@@ -1,0 +1,95 @@
+<div class="row">
+	<div class="col-4">
+		<kt-portlet [class]="'kt-portlet--height-fluid'">
+			<div class="row">
+				<kt-portlet-header class="col-10" [title]="'Novos pedidos'">
+					<ng-container ktPortletTools>
+					</ng-container>
+				</kt-portlet-header>
+				<div class="refresh-button d-flex align-items-center justify-content-end col-2">
+					<p class="m-0" id="timer">{{timeLeftOrder}}</p>
+					<i class="flaticon-refresh mr-4 ml-2" (click)="clickRefleshOrders()"></i>
+				</div>
+			</div>
+			<kt-portlet-body>
+				<kt-widget4 [data]="widget4_2">
+					<ng-template #actionTemplate let-item="item">
+						<a href="javascript:;" (click)="toSee(item._id)" [attr.href]="item.url"
+						class="kt-widget4__title" *ngIf="item.title && !item.desc">
+							{{item.title}}
+						</a>
+
+						<div class="kt-widget4__info" *ngIf="item.desc">
+							<p class="kt-widget4__username m-0" *ngIf="item.username">{{item.username}}</p>
+							<a href="javascript:;" [attr.href]="item.url" (click)="toSee(item._id)">
+								<p class="kt-widget4__title m-0" *ngIf="item.title">{{item.title}}</p>
+							</a>
+							<p class="kt-widget4__value m-0" *ngIf="item.value">{{item.value | currency:'BRL':true:'1.2-2'}}</p>
+							<p class="kt-widget4__situation m-0" *ngIf="item.situation">{{item.situation}}</p>
+							<p class="kt-widget4__text m-0" *ngIf="item.desc">{{item.desc}}</p>
+							<p class="kt-widget4__date m-0" *ngIf="item.date">{{item.date}}</p>
+						</div>
+
+						<button (click)="toSee(item._id)" class="btn btn-sm">Ver</button>
+					</ng-template>
+				</kt-widget4>
+			</kt-portlet-body>
+		</kt-portlet>
+	</div>
+	<div class="col-4">
+		<kt-portlet [class]="'kt-portlet--height-fluid'">
+			<div class="row">
+				<kt-portlet-header class="col-10" [title]="'Pedido detalhado'">
+					<ng-container ktPortletTools>
+					</ng-container>
+				</kt-portlet-header>
+				<div class="refresh-button d-flex align-items-center justify-content-end col-2" *ngIf="orderIdSelected">
+					<p class="m-0" id="timerDetail">{{timeLeftOrderDetail}}</p>
+					<i class="flaticon-refresh mr-4 ml-2" (click)="clickRefleshOrdersDetail()"></i>
+				</div>
+			</div>
+			<kt-portlet-body *ngIf="orderIdSelected && !showLoadingDetail">
+				<kt-timeline2 [data]="orderHours"></kt-timeline2>
+			</kt-portlet-body>
+			<div class="text-center" *ngIf="showLoadingDetail">
+				<img width="50%" src="./assets/icon/loading.gif" alt="">
+			</div>
+		</kt-portlet>
+	</div>
+	<div class="col-4" *ngIf="dateSales" >
+		<kt-portlet>
+			<kt-portlet-body [class]="'kt-portlet__body--fit'">
+				<div class="row row-no-padding row-col-separator-xl">
+					<div class="col">
+						<kt-widget14 [data]="dateSales" [title]="'Vendas diárias'"></kt-widget14>
+					</div>
+				</div>
+			</kt-portlet-body>
+		</kt-portlet>
+	</div>
+</div>
+<kt-portlet>
+	<kt-portlet-body [class]="'kt-portlet__body--fit p-2'">
+		<div class="row row-no-padding row-col-separator-xl">
+			<div class="col-12">
+				<apx-chart [series]="dailyAccess.series" [chart]="dailyAccess.chart" [xaxis]="dailyAccess.xaxis"
+					[title]="dailyAccess.title"></apx-chart>
+			</div>
+			<div class="col-12 mt-2">
+				<apx-chart [series]="registeredCompanies?.series" [chart]="registeredCompanies?.chart" [xaxis]="registeredCompanies?.xaxis"
+					[title]="registeredCompanies?.title"></apx-chart>
+			</div>
+		</div>
+	</kt-portlet-body>
+</kt-portlet>
+
+<div class="row mb-2">
+	<div class="col-12 mt-2">
+		<div class="card">
+			<div class="card-body">
+				<h5 class="card-title">Novos Usuários</h5>
+				<kt-noc-created-users></kt-noc-created-users>
+			</div>
+		</div>
+	</div>
+</div>

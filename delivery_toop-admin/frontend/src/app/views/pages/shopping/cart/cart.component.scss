@@ -1,0 +1,142 @@
+.example-form {
+	min-width: 150px;
+	max-width: 500px;
+	width: 100%;
+}
+.example-full-width {
+	width: 100%;
+}
+
+::ng-deep .cdk-overlay-container {
+	z-index: 9999;
+}
+
+.boxOrders {
+	overflow-y: scroll;
+	max-height: 500px;
+	width: 18rem;
+}
+
+.warning-select-order {
+	font-size: 16px;
+}
+
+.pricePromotion {
+	color: #ea1d2c;
+	text-decoration: line-through;
+}
+
+.totalCompany {
+	p {
+		font-size: 22px;
+	}
+}
+
+.cursorMouse {
+	cursor: pointer;
+}
+
+.alertChatNew {
+	display: none;
+}
+
+.check-size {
+	font-size: 14px !important;
+	margin: 0 !important;
+	padding: 0 !important;
+}
+
+.check-title {
+	font-weight: bold !important;
+}
+
+.chat {
+	position: absolute;
+	top: 5px;
+	right: 20px;
+	width: 400px;
+	z-index: 9999;
+	.chat-close {
+		span {
+			font-size: 20px;
+		}
+	}
+	.chat-body {
+		height: 400px;
+		.chat-messages {
+			overflow-y: auto;
+			&::-webkit-scrollbar {
+				width: 3px;
+			}
+			&::-webkit-scrollbar-track {
+				background: #f1f1f1;
+			}
+			&::-webkit-scrollbar-thumb {
+				background: #888;
+			}
+		}
+		.send {
+			text-align: right;
+		}
+		p {
+			max-width: 90%;
+		}
+	}
+	.chat-footer {
+		input {
+			color: #646c9a;
+			outline: none;
+			&::-webkit-input-placeholder {
+				color: #ccc;
+			}
+		}
+	}
+	.lds-ring {
+		position: relative;
+		width: 45px;
+		height: 45px;
+		margin: 0 auto 5px;
+		display: block;
+		div {
+			box-sizing: border-box;
+			display: block;
+			position: absolute;
+			width: 30px;
+			height: 30px;
+			margin: 8px;
+			border: 3px solid #5867dd;
+			border-radius: 50%;
+			animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+			border-color: #5867dd transparent transparent transparent;
+			&:nth-child(1) {
+				animation-delay: -0.45s;
+			}
+			&:nth-child(2) {
+				animation-delay: -0.3s;
+			}
+			&:nth-child(3) {
+				animation-delay: -0.15s;
+			}
+		}
+	}
+}
+
+@keyframes lds-ring {
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
+.action-menu-cart {
+	list-style: none;
+	li {
+		cursor: pointer;
+	}
+}
+
+.action-menu-cart {
+	list-style: none;
+}

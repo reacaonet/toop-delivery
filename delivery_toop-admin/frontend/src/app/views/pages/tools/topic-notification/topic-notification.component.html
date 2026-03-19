@@ -1,0 +1,185 @@
+<div class="row justify-content-between">
+	<div class="col-auto align-self-center mb-2">
+		<p class="float-left">{{ 'GLOBAL.LABEL.TOPIC_NOTIFICATION' | translate }}</p>
+	</div>
+
+	<!-- <div class="col-6 mb-2">
+		<button type="button" class="float-right btn btn-primary" (click)="newTopicShow(newTopicModal)">Novo</button>
+	</div> -->
+</div>
+
+
+<div class="example-container mat-elevation-z8">
+	<mat-table #table [dataSource]="dataSource">
+		<ng-container matColumnDef="select">
+			<mat-header-cell *matHeaderCellDef>
+				<mat-checkbox [checked]="true" [indeterminate]="true">
+				</mat-checkbox>
+			</mat-header-cell>
+			<mat-cell *matCellDef="let row">
+				<mat-checkbox (click)="$event.stopPropagation()">
+				</mat-checkbox>
+			</mat-cell>
+		</ng-container>
+
+			<!-- Name Topic -->
+			<ng-container matColumnDef="name">
+				<mat-header-cell *matHeaderCellDef>Nome</mat-header-cell>
+				<mat-cell *matCellDef="let element">{{element.name}}</mat-cell>
+			</ng-container>
+
+			<!-- Type of topic Column -->
+			<ng-container matColumnDef="topic">
+				<mat-header-cell *matHeaderCellDef>Topico</mat-header-cell>
+				<mat-cell *matCellDef="let element">
+					<div>{{element.topic}}</div>
+				</mat-cell>
+			</ng-container>
+
+
+		<!-- Topic Total -->
+		<ng-container matColumnDef="topic_total">
+			<mat-header-cell *matHeaderCellDef>Total Vinculado</mat-header-cell>
+			<mat-cell *matCellDef="let element">{{element.total}}</mat-cell>
+		</ng-container>
+
+		<!-- Detalhe -->
+		<ng-container matColumnDef="detail">
+			<mat-header-cell *matHeaderCellDef>{{ 'GLOBAL.LABEL.ACTION' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element" >
+				<a href="#" onclick="return false;">
+					<i class="flaticon-multimedia-2 mr-2" (click)="detailModalShow(detailModal, element)"></i>
+				</a>
+				<a href="#" onclick="return false;">
+					<i class="flaticon-add-circular-button mr-2" (click)="detailModalShow(newCustomerTopicModal, element)"></i>
+				</a>
+			</mat-cell>
+		</ng-container>
+
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns;">
+		</mat-row>
+	</mat-table>
+
+	<mat-paginator [length]="totalLength" [pageSize]="pageSize" [pageSizeOptions]="pageLimit" (page)="changePage($event)">
+	</mat-paginator>
+
+
+	<!-- Modal Send Message -->
+	<ng-template #detailModal let-modal modal-lg>
+		<div class="modal-header">
+			<h4 class="modal-title" id="modal-topic-notification">Tópico
+				<b>{{topicCurrent?.topic}}</b>
+			</h4>
+			<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+
+		<div class="modal-body">
+			<form style="margin-top: 10px" [formGroup]="topicForm" (ngSubmit)="topicForm.valid && sendTopic()" >
+				<div class="row">
+					<div class="col-12">
+						<div class="form-group">
+							<label for="title">Título</label>
+							<input type="text" class="form-control" id="title"  formControlName="title" required placeholder="Informe um título"
+								[ngClass]="{'is-invalid' : topicForm.get('title').invalid}">
+						</div>
+					</div>
+
+					<div class="col-12">
+						<div class="form-group">
+							<label for="title">Mensagem</label>
+							<textarea class="form-control" id="mensagem"
+								formControlName="message" required rows="3" [ngClass]="{'is-invalid' : topicForm.get('message').invalid}" ></textarea>
+						</div>
+					</div>
+
+					<div class="col-12">
+						<input type="submit" value="Enviar" class="btn btn-primary" *ngIf="!load" >
+
+						<button type="button" class="btn btn-primary" *ngIf="load">
+							<span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+							Enviando...
+						</button>
+
+					</div>
+				</div>
+			</form>
+		</div>
+	</ng-template>
+	<!-- Modal Send Message -->
+
+	<!-- Modal new Topic -->
+	<ng-template #newTopicModal let-modal modal-lg>
+		<div class="modal-header">
+			<h4 class="modal-title" id="modal-topic-notification">Tópico Mensagem</h4>
+			<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+		<div class="modal-body">
+			<form style="margin-top: 10px" [formGroup]="newTopicForm" (ngSubmit)="newTopicForm.valid && addNewTopic()" >
+				<div class="row">
+					<div class="col-12">
+						<div class="form-group">
+							<label for="title">Título</label>
+							<input type="text" class="form-control" id="title"  formControlName="name" required placeholder="Informe um título"
+								[ngClass]="{'is-invalid' : newTopicForm.get('name').invalid}">
+						</div>
+					</div>
+
+					<div class="col-12">
+						<input type="submit" value="Cadastrar" class="btn btn-primary" *ngIf="!load" >
+
+						<button type="button" class="btn btn-primary" *ngIf="load">
+							<span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+							Enviando...
+						</button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</ng-template>
+	<!-- Modal new Topic -->
+
+	<!-- Modal Add User In Topic -->
+	<ng-template #newCustomerTopicModal let-modal modal-lg>
+		<div class="modal-header">
+			<h4 class="modal-title" id="modal-topic-notification">Adicionar em
+				<b>{{topicCurrent?.topic}}</b>
+			</h4>
+			<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+
+		<div class="modal-body">
+			<form style="margin-top: 10px" [formGroup]="customerTopicForm" (ngSubmit)="customerTopicForm.valid && addCustomerInTopic()" >
+				<div class="row">
+					<div class="form-group col-12">
+						<div class="input-group">
+							<input type="text" class="form-control" matInput placeholder="Informe um E-mail ou Telefone do usuário" [matAutocomplete]="autoCustomer" formControlName="customer">
+							<mat-autocomplete [displayWith]="displayFn" #autoCustomer="matAutocomplete" class="col-12">
+								<mat-option *ngFor="let customer of customerList" [value]="customer" (click)="selectCustomer(customer)" >
+									{{ customer?.email }}
+								</mat-option>
+							</mat-autocomplete>
+						</div>
+					</div>
+
+					<div class="col-12">
+						<input type="submit" value="Cadastrar" class="btn btn-primary" *ngIf="!load" >
+
+						<button type="button" class="btn btn-primary" *ngIf="load">
+							<span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+							Enviando...
+						</button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</ng-template>
+</div>
+
+<!-- <kt-users-topic></kt-users-topic> -->

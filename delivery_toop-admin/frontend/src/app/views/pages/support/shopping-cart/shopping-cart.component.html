@@ -1,0 +1,38 @@
+<div class="refresh-button d-flex align-items-center justify-content-end mb-3">
+	<p class="m-0" id="timer">Atualizando em {{timeLeft}} segundos</p>
+	<button (click)="getCarts()" type="button" class="btn btn-primary ml-2">Atualizar</button>
+</div>
+
+<div class="bg-white p-2 rounded">
+	<h4>Lista de carrinhos</h4>
+	<div class="table-responsive">
+		<table class="table table-striped">
+			<thead>
+				<tr>
+					<th scope="col">#</th>
+					<th scope="col">Status</th>
+					<th scope="col">Finger Print</th>
+					<th scope="col">Company</th>
+					<th scope="col">Customer</th>
+					<th scope="col">Data Atualização</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr *ngFor="let element of dataCartsList; index as i"
+					[ngClass]="{'table-danger': !element.fingerPrint || element.status === 'pending'}">
+					<th scope="row">{{ i + 1 }}</th>
+					<td>{{ element.status | translate }}</td>
+					<th scope="row">
+						<div class="custom-control custom-checkbox">
+							<i *ngIf="element.fingerPrint === true" class="flaticon2-accept mr-2"></i>
+							<i *ngIf="element.fingerPrint === false" class="flaticon2-cancel mr-2"></i>
+						</div>
+					</th>
+					<td>{{ element.company }}</td>
+					<td>{{ element.person }}</td>
+					<td>{{ element.updatedAt | date:'dd/MM/yyyy HH:mm'}}</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>

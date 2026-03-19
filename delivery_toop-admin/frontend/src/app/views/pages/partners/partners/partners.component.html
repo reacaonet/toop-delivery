@@ -1,0 +1,194 @@
+<div class="example-container mat-elevation-z8">
+	<mat-table class="table-braspag-transactions" #table [dataSource]="dataSource">
+		<!-- Checkbox Column -->
+		<ng-container matColumnDef="select">
+			<mat-header-cell *matHeaderCellDef>
+				<mat-checkbox [checked]="true" [indeterminate]="true">
+				</mat-checkbox>
+			</mat-header-cell>
+			<mat-cell *matCellDef="let row">
+				<mat-checkbox (click)="$event.stopPropagation()">
+				</mat-checkbox>
+			</mat-cell>
+		</ng-container>
+		<!-- Column name -->
+		<ng-container matColumnDef="name">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.NAME' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.name }} </mat-cell>
+		</ng-container>
+		<!-- Column cpf -->
+		<ng-container matColumnDef="cpf">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.CPF' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.cpf }} </mat-cell>
+		</ng-container>
+		<!-- Column phone -->
+		<ng-container matColumnDef="phone">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.PHONE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.phone }} </mat-cell>
+		</ng-container>
+		<!-- Column status -->
+		<ng-container matColumnDef="status">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.STATUS' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.status }} </mat-cell>
+		</ng-container>
+		<!-- To see Partners -->
+		<ng-container matColumnDef="view">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.VIEW' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i class="flaticon-eye mr-2" (click)="viewPartnersModalShow(viewpartnermodal, element)"></i>
+			</mat-cell>
+		</ng-container>
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns;">
+		</mat-row>
+	</mat-table>
+	<mat-paginator [length]="totalLength" [pageSize]="pageSize" [pageSizeOptions]="pageLimit" (page)="changePage($event)">
+	</mat-paginator>
+
+
+	<!-- Modal view -->
+	<ng-template #viewpartnermodal let-modal>
+		<form [formGroup]="formData" (ngSubmit)="formData.valid && viewPartners(formData.value)
+       && modal.dismiss('Cross click')">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-view-partners">{{ 'GLOBAL.LABEL.VIEWPARTNERS' | translate }}</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div class="row">
+					<div class="form-group col-8">
+						<label for="name">{{ 'GLOBAL.LABEL.NAME' | translate }}</label>
+						<div class="input-group">
+							<input [readonly]="!childmessage" class="form-control" formControlName="name">
+						</div>
+					</div>
+					<div class="form-group col-4">
+						<label for="cpf">{{ 'GLOBAL.LABEL.CPF' | translate }}</label>
+						<div class="input-group">
+							<input [readonly]="!childmessage" class="form-control" formControlName="cpf">
+						</div>
+					</div>
+					<div class="form-group col-4">
+						<label for="phone">{{ 'GLOBAL.LABEL.PHONE' | translate }}</label>
+						<div class="input-group">
+							<input [readonly]="!childmessage" class="form-control" formControlName="phone">
+						</div>
+					</div>
+					<div class="form-group col-4">
+						<label for="status">{{ 'GLOBAL.LABEL.STATUS' | translate }}</label>
+						<div class="input-group">
+							<input [readonly]="!childmessage" class="form-control" formControlName="status">
+						</div>
+					</div>
+					<div class="form-group col-8">
+						<label for="email">{{ 'GLOBAL.LABEL.EMAIL' | translate }}</label>
+						<div class="input-group">
+							<input [readonly]="!childmessage" class="form-control" formControlName="email">
+						</div>
+					</div>
+					<div class="form-group col-4">
+						<label for="city">{{ 'GLOBAL.LABEL.CITY' | translate }}</label>
+						<div class="input-group">
+							<input [readonly]="!childmessage" class="form-control" formControlName="city">
+						</div>
+					</div>
+					<div class="form-group col-4">
+						<label for="typeOfVehicle">{{ 'GLOBAL.LABEL.TYPEOFVEHICLE' | translate }}</label>
+						<div class="input-group">
+							<input [readonly]="!childmessage" class="form-control" formControlName="typeOfVehicle">
+						</div>
+					</div>
+					<div class="form-group col-4">
+						<label for="createdAt">{{ 'GLOBAL.LABEL.CREATEDAT' | translate }}</label>
+						<div class="input-group">
+							<input [readonly]="!childmessage" class="form-control" formControlName="createdAt">
+						</div>
+					</div>
+				</div>
+				<div class="row d-flex justify-content-around">
+					<!-- Image Column -->
+					<div *ngFor="let selfie of imagesSelfies; index as i" class="card col-2" style="width: 10rem;">
+						<img class="card-img-top" [src]='selfie || "./assets/media/logo-default.png"' alt="Card image cap">
+						<div class="card-body">
+							<h6 class="card-title">Foto Selfie Nº {{i + 1}}</h6>
+							<a target="_blank" [href]='selfie || "./assets/media/logo-default.png"' class="btn btn-primary">Ver
+								imagem</a>
+						</div>
+					</div>
+					<div *ngFor="let Cnh of imagesCnh; index as i" class="card col-2" style="width: 10rem;">
+						<img class="card-img-top" [src]='Cnh || "./assets/media/logo-default.png"' alt="Card image cap">
+						<div class="card-body">
+							<h6 class="card-title">Foto CNH Nº {{i + 1}}</h6>
+							<a target="_blank" [href]='Cnh || "./assets/media/logo-default.png"' class="btn btn-primary">Ver
+								imagem</a>
+						</div>
+					</div>
+					<div *ngFor="let docs of imagesDocs; index as i" class="card col-2" style="width: 10rem;">
+						<img class="card-img-top" [src]='docs || "./assets/media/logo-default.png"' alt="Card image cap">
+						<div class="card-body">
+							<h6 class="card-title">Foto Documento Nº {{i + 1}}</h6>
+							<a target="_blank" [href]='docs || "./assets/media/logo-default.png"' class="btn btn-primary">Ver
+								imagem</a>
+						</div>
+					</div>
+				</div>
+				<div class="row mt-1" *ngIf="formData.value.status === 'AGUARDANDO'">
+					<div class="form-group col-12">
+						<label for="createdAt">Última Mensagem</label>
+						<div class="input-group">
+							<textarea [readonly]="!childmessage" class="form-control" formControlName="message">
+									</textarea>
+						</div>
+					</div>
+
+				</div>
+			</div>
+			<div class="modal-footer d-flex justify-content-between" *ngIf="formData.value.status !== 'RECUSADO'">
+				<button type="button" class="btn btn-danger" (click)="cancelDeliveryman(formData.value)">
+					<span *ngIf="formData.value.status !== 'APROVADO'">Recusar cadastro</span>
+					<span *ngIf="formData.value.status === 'APROVADO'">Cancelar cadastro</span>
+				</button>
+				<!-- <button
+					type="button"
+					class="btn btn-secondary"
+					*ngIf="formData.value.status !== 'APROVADO'"
+					(click)="createMessage(messagemodal, formData.value)"
+				>
+					Solicitar alterações
+				</button> -->
+				<button type="button" class="btn btn-primary"
+					(click)="acceptDeliveryman(formData.value) && modal.dismiss('Cross click')">
+					Aceitar cadastro
+				</button>
+			</div>
+		</form>
+	</ng-template>
+
+	<ng-template #messagemodal let-modal>
+		<form [formGroup]="formData">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-message-deliveryman">Deixe uma mensagem para o entregador</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+
+			<div class="modal-body">
+
+				<div class="form-group">
+					<label for="description"></label>
+					<div class="input-group">
+						<textarea placeholder="Digite aqui a mensagem" class="form-control" formControlName="message"></textarea>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-danger" (click)="sendMessage(formData.value)">
+					Enviar
+				</button>
+			</div>
+		</form>
+	</ng-template>
+</div>

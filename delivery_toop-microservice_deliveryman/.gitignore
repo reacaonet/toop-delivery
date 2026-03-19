@@ -1,0 +1,39 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Diagnostic reports (https://nodejs.org/api/report.html)
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# === Rules for `node_modules` ===
+!**/node_modules/**
+/node_modules
+/tools/doc/node_modules
+/tools/clang-format/node_modules
+
+# === Rules for test artifacts ===
+/*.tap
+/*.xml
+/node_trace.*.log
+# coverage related
+/gcovr
+/build
+/coverage
+
+# === environment ===
+.env
+
+# === build ===
+/dist
+
+# === Global Rules ===
+# Keep last to avoid being excluded
+*.pyc
+__pycache__
+.DS_Store
+*~
+yarn.lock*

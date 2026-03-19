@@ -1,0 +1,161 @@
+<!-- Alert -->
+<p>
+	<ngb-alert *ngIf="alert" [type]="alert.type" (close)="closeAlert()">
+		{{ alert.message }}
+	</ngb-alert>
+</p>
+
+<div class="row justify-content-between">
+	<div class="col-auto align-self-center mb-2">
+		<p class="float-left">{{ 'GLOBAL.LABEL.INVOICE_TRANSACTION' | translate }}</p>
+	</div>
+</div>
+
+<div class="example-container mat-elevation-z8">
+	<mat-table #table [dataSource]="dataSource">
+		<ng-container matColumnDef="select">
+			<mat-header-cell *matHeaderCellDef>
+				<mat-checkbox [checked]="true" [indeterminate]="true">
+				</mat-checkbox>
+			</mat-header-cell>
+			<mat-cell *matCellDef="let row">
+				<mat-checkbox (click)="$event.stopPropagation()">
+				</mat-checkbox>
+			</mat-cell>
+		</ng-container>
+
+		<!-- Type of vehicle Column -->
+		<ng-container matColumnDef="status">
+			<mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
+			<mat-cell *matCellDef="let element" [ngClass]="checkPrevOrder(element.typeInvoice)">
+				<div *ngIf="element.statusInvoice=='WAITING'">Aguard. Confirmação</div>
+				<div *ngIf="element.statusInvoice=='CONFIRMED'">Confirmado</div>
+				<div class="text-danger" *ngIf="element.statusInvoice=='CANCELED'">Pedido Cancelado</div>
+			</mat-cell>
+		</ng-container>
+
+		<!-- Status Column -->
+		<ng-container matColumnDef="date">
+			<mat-header-cell *matHeaderCellDef>Data</mat-header-cell>
+			<mat-cell *matCellDef="let element" [ngClass]="checkPrevOrder(element.typeInvoice)">
+				{{ element.dateOrder | date:'dd/MM/yyyy HH:mm' }} </mat-cell>
+		</ng-container>
+		
+		<ng-container matColumnDef="owner" *ngIf="!removeColumns || !removeColumns.owner">
+			<mat-header-cell *matHeaderCellDef>Proprietário</mat-header-cell>
+			<mat-cell *matCellDef="let element" [ngClass]="checkPrevOrder(element.typeInvoice)">
+				<div *ngIf="element?.ownerCompany">{{element?.ownerCompany}}</div>
+				<div *ngIf="element?.ownerPerson">{{element?.ownerPerson}}</div>
+			</mat-cell>
+		</ng-container>
+		
+		<ng-container matColumnDef="destiny">
+			<mat-header-cell *matHeaderCellDef>Empresa / Cliente</mat-header-cell>
+			<mat-cell *matCellDef="let element" [ngClass]="checkPrevOrder(element.typeInvoice)">
+				<div *ngIf="element?.company">{{element?.company}}</div>
+				<div *ngIf="element?.person">{{element?.person}}</div>
+			</mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="amount">
+			<mat-header-cell *matHeaderCellDef class="text-center">Valor</mat-header-cell>
+			<mat-cell *matCellDef="let element" [ngClass]="checkPrevOrder(element.typeInvoice)">
+				<div class="text-danger" *ngIf="element.typeInvoice=='debitPrice'">
+					- {{ element.debitPrice | currency:"BRL":"symbol" }} <span *ngIf="element.porcent">({{ element.porcent }}%)</span>
+					<i class="flaticon2-arrow-down ml-2 text-danger"></i>
+				</div>
+		
+				<div class="text-success" *ngIf="element.typeInvoice=='amount'">
+					{{ element.amount | currency:"BRL":"symbol" }}
+					<i class="flaticon2-arrow-up ml-2 text-success"></i>
+				</div>
+			</mat-cell>
+		</ng-container>
+
+		<!-- Delete -->
+		<ng-container matColumnDef="detail">
+			<mat-header-cell *matHeaderCellDef>{{ 'GLOBAL.LABEL.ACTION' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element" [ngClass]="checkPrevOrder(element.typeInvoice)">
+				<i class="flaticon2-edit mr-2" (click)="detailModalShow(detailModal, element)"></i>
+			</mat-cell>/
+		</ng-container>
+
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns;">
+		</mat-row>
+	</mat-table>
+	<mat-paginator [length]="totalLength" [pageSize]="pageSize" [pageSizeOptions]="pageLimit" (page)="changePage($event)">
+	</mat-paginator>
+
+	<!-- Modal Detail -->
+	<ng-template #detailModal let-modal modal-lg>
+		<div class="modal-header">
+			<h4 class="modal-title" id="modal-detail-invoice">Detalhes</h4>
+			<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+
+		<div class="modal-body">
+			<div style="margin-top: 10px">
+				<div class="row">
+					<!-- <b>Número do Pedido: </b> &nbsp;123 -->
+					<!-- <pre>{{detail | json}}</pre> -->
+					<div class="col-12">
+						<h3>Número do Pedido
+							<span class="badge badge-secondary">{{detail?.order?.order_number}}</span>
+						</h3>
+					</div>
+
+					<div class="col-12 card">
+						<table class="table">
+							<tbody>
+								<tr>
+									<th scope="col">Tipo</th>
+									<td scope="col">
+										{{detail?.invoice?.typeInvoice === "INPUT" ? "Entrada" :  "Saída"}}
+									</td>
+								</tr>
+								<tr>
+									<th scope="col">Pagamento</th>
+									<td scope="col">
+										{{detail?.order?.typePayment === "BRASPAG" ? "Online" : ""}}
+										{{detail?.order?.typePayment !== "BRASPAG" ? "Dinheiro" : ""}}
+									</td>
+								</tr>
+								<tr>
+									<th>
+										Status do Pedido
+									</th>
+									<td>{{ detail?.order?.status | translate }}</td>
+								</tr>
+								<tr>
+									<th scope="col">ID Transação</th>
+									<td scope="col">{{detail?.order?.payment?._id}}</td>
+								</tr>
+								<tr>
+									<th scope="col">Data</th>
+									<td scope="col">{{ detail?.invoice?.createdAt | date:'dd/MM/yyyy' }}</td>
+								</tr>
+								<tr>
+									<th scope="col">Total</th>
+									<td scope="col"> {{ detail?.invoice?.amount | currency:"BRL":"symbol" }} </td>
+								</tr>
+								<tr>
+									<th scope="col">Cupon</th>
+									<td scope="col">{{ detail?.payment?.couponPrice }}</td>
+								</tr>
+								<tr>
+									<th scope="col">Status</th>
+									<td scope="col">{{detail?.invoice?.statusInvoice === "CONFIRMED" ? "Confirmado" :  "Aguardando Confirmação"}}</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</ng-template>
+
+</div>

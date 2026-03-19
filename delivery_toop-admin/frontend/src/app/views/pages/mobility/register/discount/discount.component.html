@@ -1,0 +1,214 @@
+<div class="row justify-content-between">
+	<div class="col align-self-center mb-2">
+		<h5>
+			<p><label for="discounts">{{ 'GLOBAL.LABEL.DISCOUNTS' | translate }}</label></p>
+		</h5>
+	</div>
+	<div class="col-auto">
+		<a (click)="createModalShow(insertEditModal)" href="javascript:;"
+			class="float-right btn btn-label-warning btn-bold btn-sm btn-icon-h">
+			<p><label for="register">{{ 'GLOBAL.LABEL.REGISTER' | translate }}</label></p>
+		</a>
+	</div>
+</div>
+
+<div class="example-container mat-elevation-z8">
+	<mat-table #table [dataSource]="dataSource">
+		<ng-container matColumnDef="select">
+			<mat-header-cell *matHeaderCellDef>
+				<mat-checkbox [checked]="true" [indeterminate]="true">
+				</mat-checkbox>
+			</mat-header-cell>
+			<mat-cell *matCellDef="let row">
+				<mat-checkbox (click)="$event.stopPropagation()">
+				</mat-checkbox>
+			</mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="franchise">
+			<mat-header-cell *matHeaderCellDef>Franquia</mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{element?.franchise?.name}}
+			</mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="name">
+			<mat-header-cell *matHeaderCellDef>Nome</mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{element?.name}}
+			</mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="active">
+			<mat-header-cell *matHeaderCellDef>Ativo</mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{element?.active ? 'Sim' : 'Não'}}
+			</mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="amountUsed">
+			<mat-header-cell *matHeaderCellDef>Utilizados</mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{element?.amountUsed}}
+			</mat-cell>
+		</ng-container>
+
+		<!-- Action -->
+		<ng-container matColumnDef="action">
+			<mat-header-cell *matHeaderCellDef>Ação</mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i class="flaticon2-edit mr-3" (click)="editModalShow(insertEditModal, element)"></i>
+			</mat-cell>
+		</ng-container>
+
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns;">
+		</mat-row>
+	</mat-table>
+	<mat-paginator [length]="totalLength" [pageSize]="pageSize" [pageSizeOptions]="pageLimit" (page)="changePage($event)">
+	</mat-paginator>
+
+	<ng-template #insertEditModal let-modal modal-lg>
+		<form [formGroup]="formData" (ngSubmit)="formSubmitAttempt=true; formData.valid && sendForm(formData.value)">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-edit-data">
+					Cadastrar/Editar Desconto
+				</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<input formControlName="_id" type="hidden">
+			</div>
+			<div class="modal-body">
+				<div class="form-group col-12">
+					<label for="franchise">{{ 'GLOBAL.LABEL.FRANCHISE' | translate }}</label>
+					<div class="input-group">
+						<input required type="text" class="form-control" [matAutocomplete]="autoFranchise" matInput
+							placeholder="{{ 'GLOBAL.LABEL.CHOOSEAFRANCHISE' | translate }}" formControlName="franchise"
+							[ngClass]="{ 'is-invalid' : formSubmitAttempt && formData.get('franchise').invalid }">
+						<mat-autocomplete #autoFranchise="matAutocomplete" [displayWith]="displayFn">
+							<mat-option *ngFor="let fran of franchises" [value]="fran">
+								{{ fran.name }}
+							</mat-option>
+						</mat-autocomplete>
+					</div>
+				</div>
+
+				<div class="form-group col-12">
+					<label for="service">{{ 'GLOBAL.LABEL.SERVICE' | translate }}</label>
+					<div class="input-group">
+						<input type="text" class="form-control" [matAutocomplete]="autoService" matInput
+							placeholder="{{ 'GLOBAL.LABEL.SERVICE' | translate }}" formControlName="service"
+							[ngClass]="{ 'is-invalid' : formSubmitAttempt && formData.get('service').invalid }">
+						<mat-autocomplete #autoService="matAutocomplete" [displayWith]="displayFn">
+							<mat-option *ngFor="let serve of services" [value]="serve">
+								{{ serve.name }}
+								<b *ngIf="serve?.franchise?.name"> - {{ serve?.franchise?.name }}</b>
+							</mat-option>
+						</mat-autocomplete>
+					</div>
+				</div>
+
+				<!-- <div class="form-group col-12">
+					<label for="passenger">{{ 'GLOBAL.LABEL.PASSENGER' | translate }}</label>
+					<div class="input-group">
+						<input required type="text" class="form-control" [matAutocomplete]="autoPassenger" matInput
+							placeholder="{{ 'GLOBAL.LABEL.PASSENGER' | translate }}" formControlName="passenger"
+							[ngClass]="{ 'is-invalid' : formSubmitAttempt && formData.get('passenger').invalid }">
+						<mat-autocomplete #autoPassenger="matAutocomplete" [displayWith]="displayFn">
+							<mat-option *ngFor="let pas of passengers" [value]="pas">
+								{{ pas.name }}
+							</mat-option>
+						</mat-autocomplete>
+					</div>
+				</div> -->
+
+				<div class="row">
+					<div class="form-group col-12">
+						<label for="name">Nome</label>
+						<div class="input-group">
+							<input required class="form-control" formControlName="name"
+								[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('name').invalid}">
+						</div>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="form-group col-12">
+						<h5 style="margin-right: 14%" class="legend">
+							Insira o Preço ou a Porcentagem do desconto
+						</h5>
+					</div>
+
+					<div class="form-group col-6">
+						<label for="name">Preço</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="price" [options]="optionsCurrencyMask"
+								[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('price').invalid}" currencyMask>
+						</div>
+					</div>
+
+					<div class="form-group col-6">
+						<label for="name">Porcentagem</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="percent" type="number"
+								[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('percent').invalid}">
+						</div>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="form-group col-6">
+						<label for="name">Data Inicio</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="startDate" type="date"
+								[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('startDate').invalid}">
+						</div>
+					</div>
+
+					<div class="form-group col-6">
+						<label for="name">Data Fim</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="endDate" type="date"
+								[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('endDate').invalid}">
+						</div>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="form-group col-6">
+						<label for="state">{{ 'GLOBAL.LABEL.TYPE' | translate }}</label>
+						<select id="type" class="form-control" formControlName="type"
+							[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('type').invalid}">
+							<option value="single">Uso Unico</option>
+							<option value="monthly">Uso Mensal</option>
+							<option value="period">Periodo</option>
+						</select>
+					</div>
+
+					<div class="form-group col-6">
+						<label for="state">Quantidade Disponível</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="amountAvailable" type="number"
+								[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('amountAvailable').invalid}">
+						</div>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="form-group col-4">
+						<label for="active">{{ 'GLOBAL.LABEL.ACTIVE' | translate }}</label>
+						<div class="input-group">
+							<mat-slide-toggle formControlName="active"></mat-slide-toggle>
+						</div>
+					</div>
+				</div>
+
+				<div class="modal-footer">
+					<input *ngIf="!load" type="submit" value="{{ 'GLOBAL.LABEL.SAVE' | translate }}" class="btn btn-success">
+
+					<button *ngIf="load" class="btn btn-success" type="button" disabled>
+						<span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+						aguarde...
+					</button>
+				</div>
+			</div>
+		</form>
+	</ng-template>
+</div>

@@ -1,0 +1,45 @@
+<!-- begin:: Header Topbar -->
+<div class="kt-header__topbar">
+	<!--begin: Language bar -->
+	<div class="menu">
+		<div class="position-relative" *ngIf="loggedCompany">
+			<mat-slide-toggle type="checkbox" [checked]="establishment" value="true" id="checkValue" name="isOpen"
+				(change)="toggleeCompany($event, areYouSure)" labelPosition="before"
+				[ngClass]="{'is-open' : establishment, 'is-closed' : !establishment}">
+				{{ establishment ? 'Estabelecimento aberto' : 'Estabelecimento fechado' }}
+			</mat-slide-toggle>
+			<div class="d-flex align-items-center bg-light rounded p-2 position-absolute" *ngIf="manual" style="
+				right: 0;
+				width: 400px;
+			">
+				<p class="m-0">{{ 'GLOBAL.LABEL.MSGNOTMANUAL' | translate }}</p>
+				<button class="btn btn-success p-1 ml-2" (click)="removeIsManual()">{{ 'GLOBAL.LABEL.YES' | translate
+					}}</button>
+			</div>
+		</div>
+	</div>
+
+	<kt-language-selector></kt-language-selector>
+	<!--end: Language bar -->
+	<!--begin: User bar -->
+	<kt-user-profile></kt-user-profile>
+	<!--end: User bar -->
+</div>
+<!-- end:: Header Topbar -->
+<ng-template #areYouSure let-modal>
+	<div class="modal-header">
+		<h4 class="modal-title" id="modal-create-user">{{ 'GLOBAL.LABEL.ATENTION' | translate }}</h4>
+		<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	<div class="modal-body">
+		<p>{{ 'GLOBAL.LABEL.MSGISMANUAL' | translate }}</p>
+	</div>
+	<div class="modal-footer">
+		<button type="button" (click)="cityIdToDelete=undefined; modal.dismiss('Cross click')" class="btn btn-secondary"
+			data-dismiss="modal">{{ 'GLOBAL.LABEL.CANCEL' | translate }}</button>
+		<button type="button" (click)="confirmIsManual() && modal.dismiss('Cross click')" class="btn btn-primary">{{
+			'GLOBAL.LABEL.YES' | translate }}</button>
+	</div>
+</ng-template>

@@ -1,0 +1,49 @@
+<div class="example-container mat-elevation-z8">
+	<mat-table #table [dataSource]="dataSource">
+
+		<ng-container matColumnDef="select">
+			<mat-header-cell *matHeaderCellDef>
+				<mat-checkbox [checked]="true" [indeterminate]="true">
+				</mat-checkbox>
+			</mat-header-cell>
+			<mat-cell *matCellDef="let row">
+				<mat-checkbox (click)="$event.stopPropagation()">
+				</mat-checkbox>
+			</mat-cell>
+		</ng-container>
+		<!-- Image Column -->
+		<ng-container matColumnDef="image">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.IMAGES' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<a [href]='element.image' target="_blank">
+					<img width="50" class="img-thumbnail" [src]='element.image || "./assets/media/logos/logo-versao/logo-default.png"' [alt]="element.name" />
+				</a>
+			</mat-cell>
+		</ng-container>
+		<!-- Name Column -->
+		<ng-container matColumnDef="name">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.NAME' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{element.name}} </mat-cell>
+		</ng-container>
+		<!-- Price Column -->
+		<ng-container matColumnDef="price">
+			<mat-header-cell *matHeaderCellDef>{{ 'GLOBAL.LABEL.PRICE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<span class="price">
+					{{ 'R$: ' + (element.price || 0).toFixed(2).replace('.',',') }}
+				</span>
+			</mat-cell>
+		</ng-container>
+		<!-- QTD Column -->
+		<ng-container matColumnDef="qtd">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.AMOUNT' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{element.qtd}} </mat-cell>
+		</ng-container>
+		<!-- Delete modal -->
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns;">
+		</mat-row>
+	</mat-table>
+	<mat-paginator [length]="totalLength" [pageSize]="pageSize" [pageSizeOptions]="pageLimit" (page)="changePage($event)">
+	</mat-paginator>
+</div>

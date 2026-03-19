@@ -1,0 +1,20 @@
+version: "2"
+services:
+  base:
+    image: node:14
+    volumes:
+      - .:/home/node/app
+    working_dir: /home/node/app
+
+  install:
+    extends:
+      service: base
+    command: npm i
+  build:
+    extends:
+      service: base
+    command: npm run build
+  create-bundles:
+    extends:
+      service: base
+    command: npm run create-bundles

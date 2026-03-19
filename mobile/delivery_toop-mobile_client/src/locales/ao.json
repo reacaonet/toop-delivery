@@ -1,0 +1,53 @@
+{
+  "monetary": "Kz",
+  "phone": "Telemóvel",
+  "nif": "NIF",
+  "races": "viagens",
+  "confirmRace": "Confirmar viagem",
+  "raceStart": "A viagem começou",
+  "tariffsRace": "Tarifa da viagem",
+  "youRated": "A Sua Avaliação",
+  "termsOfUse": "Termos e Condições de Utilização",
+  "wereGoing": "Onde queres ir ?",
+  "newUser": {
+    "enterYourName": "Insira o teu nome",
+    "msgRegisterPhone": "E para começar, o número do seu Telemóvel"
+  },
+  "login": {
+    "informYourPhone": "Insira o número de telemóvel",
+    "placeholder": "Telemóvel",
+    "infoDDI": "Você selecionou o DDI {ddi} referente {country}, caso você esteja em outra localidade, clique no ícone e selecione seu pais"
+  },
+  "editUser": {
+    "phoneTitle": "Telemóvel do titular"
+  },
+  "wallet": {
+    "infoAddWallet": "Carregue a sua carteira com saldo, \n receba bónus de utilização ou devoluções de crédito"
+  },
+  "raceFare": {
+    "estimatedTool": "Portagens estimadas"
+  },
+  "autoBoard": {
+    "enterCode": "Insira código",
+    "longText": "Combinou uma viagem pessoalmente?"
+  },
+  "genre": {
+    "title": "Insira o género",
+    "message": "Selecione um género",
+    "male": "MASCULINO",
+    "female": "FEMININO"
+  },
+  "selectRide": {
+    "enterTripType": "Selecione o tipo de viagem",
+    "textSelectServiceDriver": "Escolha o tipo de sua viagem com Motorista"
+  },
+  "rideScreen": {
+    "cancelTitle": "Estamos a tentar ser breves a arranjar um motorista",
+    "cancelExplication": "Tem certeza que deseja cancelar ?",
+    "cancelRace": "Cancelar Viagem",
+    "lookingForDrivers": "A procurar motoristas"
+  },
+  "confirmRideScreen": {
+    "textWomenService": "Este Serviço permite que você solicite uma viagem com uma motorista mulher"
+  }
+}

@@ -1,0 +1,310 @@
+<div>
+	<mat-horizontal-stepper linear=true #stepper>
+		<mat-step [stepControl]="stepOneFormGroup" label="Detalhes">
+			<mat-card class="form-group col-12">
+				<mat-card-header>
+					<div style="background-image: url('./assets/icon/pizza-icon.png'); background-size: cover;"
+						mat-card-avatar class="food-header-image"></div>
+					<mat-card-title>Modelo: Item personalizado</mat-card-title>
+					<mat-card-subtitle *ngIf="!values?._id" class="btn-alter-type-category"
+						(click)="alterCategorySelected()">
+						Alterar</mat-card-subtitle>
+				</mat-card-header>
+				<form [formGroup]="stepOneFormGroup">
+					<div class="row mt-2">
+						<input type="hidden" class="form-control" formControlName="_id">
+						<div class="form-group form-check col-12">
+							<label class="" for="name">{{ 'GLOBAL.LABEL.NAME' | translate }}</label>
+							<div class="input-group">
+								<input class="form-control" formControlName="name"
+									[ngClass]="{'is-invalid' : formSubmitOne && stepOneFormGroup.get('name').invalid}">
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="form-group form-check col-12">
+							<label class="" for="billing_mode">{{ 'GLOBAL.LABEL.BILLING_MODE' | translate }}</label>
+							<div class="input-group">
+								<select id="billing_mode" class="form-control" formControlName="billing_mode"
+									[ngClass]="{'is-invalid' : formSubmitOne && stepOneFormGroup.get('billing_mode').invalid}">
+									<option value="PROPORTIONAL_VALUE">Média dos valores</option>
+									<option value="HIGHEST_VALUE">Maior valor</option>
+								</select>
+							</div>
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="form-group form-check col-12">
+							<div class="mat-card-header-text m-0">
+								<mat-card-title>Disponibilidade</mat-card-title>
+								<mat-card-subtitle>Aqui você define em que momentos os clientes poderão comprar itens
+									que estejam dentro
+									dessa categoria.</mat-card-subtitle>
+							</div>
+							<div class="col-12 p-0">
+								<div class="form-group">
+									<label for="alwaysAvailable" class="font-weight-bold"
+										*ngIf="stepOneFormGroup.get('alwaysAvailable').value">Sempre
+										disponível</label>
+									<label for="alwaysAvailable" class="font-weight-bold"
+										*ngIf="!stepOneFormGroup.get('alwaysAvailable').value">Disponível em
+										dias e horários específicos</label>
+									<div class="input-group">
+										<mat-slide-toggle formControlName="alwaysAvailable"></mat-slide-toggle>
+									</div>
+								</div>
+							</div>
+							<div class="col-12 p-0" *ngIf="!stepOneFormGroup.get('alwaysAvailable').value">
+								<div class="form-group">
+									<label class="font-weight-bold">Dias da semana</label>
+									<section class="example-section">
+										<span class="example-list-section">
+											<mat-checkbox class="example-margin" [checked]="allComplete"
+												[color]="daysOfWeek.color" [indeterminate]="someComplete()"
+												(change)="setAll($event.checked)">
+												{{daysOfWeek.name}}
+											</mat-checkbox>
+										</span>
+										<span class="example-list-section">
+											<ul class="d-flex flex-row flex-wrap" style="gap: 25px;">
+												<li *ngFor="let day of daysOfWeek.days; index as i">
+													<mat-checkbox [checked]="day.available" color="primary"
+														(change)="updateAllComplete(i)">
+														{{day.name}}
+													</mat-checkbox>
+												</li>
+											</ul>
+										</span>
+									</section>
+								</div>
+
+								<div class="form-group">
+									<label class="font-weight-bold">Horários <a class="text-primary ml-5"
+											(click)="addAvailableHours()" style="cursor: pointer;">+
+											Adicionar</a></label>
+									<div class="d-flex flex-row mb-2 align-items-center" style="gap: 10px;"
+										*ngFor="let availableHour of availableHours; index as i">
+										<section class="example-section" style="width: 150px;">
+											<select class="form-control"
+												(change)="changeAvailableHours(i, 'start', $event.target.value)">
+												<option *ngFor="let hour of getHours()"
+													[selected]="availableHour.start == hour" [value]="hour">
+													{{hour}}</option>
+											</select>
+										</section>
+
+										<section class="example-section" style="width: 150px;">
+											<select class="form-control"
+												(change)="changeAvailableHours(i, 'end', $event.target.value)">
+												<option *ngFor="let hour of getHours()"
+													[selected]="availableHour.end == hour" [value]="hour">
+													{{hour}}</option>
+											</select>
+										</section>
+
+										<i *ngIf="i > 0" class="flaticon2-trash text-danger" style="cursor: pointer;"
+											(click)="removeAvailableHours(i)"></i>
+									</div>
+								</div>
+							</div>
+						</div>
+
+					</div>
+				</form>
+			</mat-card>
+			<div class="form-group row btn-steps">
+				<button (click)="formSubmitOne=true" class="btn btn-primary" mat-button matStepperNext>Próximo</button>
+			</div>
+		</mat-step>
+		<mat-step [stepControl]="stepTwoFormGroup" label="Tamanhos">
+			<div class="row form-group">
+				<div class="col-12">
+					<h3>Tamanhos</h3>
+					<span>Indique os tipos e quantidades.</span>
+				</div>
+			</div>
+			<div class="row form-group" *ngFor="let sizes of stepTwoFormGroup.get('sizes').controls; index as i">
+				<ng-container [formGroup]="sizes">
+					<div class="form-group col-3">
+						<label for="name">{{ 'GLOBAL.LABEL.NAME' | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="name"
+								[ngClass]="{'is-invalid' : formSubmitTwo && sizes.get('name').invalid}">
+						</div>
+					</div>
+					<div class="form-group col-2">
+						<label for="pieces">{{ 'GLOBAL.LABEL.QTNPIECES' | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" type="number" max="16" formControlName="pieces"
+								[ngClass]="{'is-invalid' : formSubmitTwo && sizes.get('pieces').invalid}">
+						</div>
+					</div>
+					<div class="form-group col-2">
+						<label for="flavors">{{ 'GLOBAL.LABEL.QTNFLAVORS' | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" type="number" max="4" formControlName="flavors"
+								[ngClass]="{'is-invalid' : formSubmitTwo && sizes.get('flavors').invalid}">
+						</div>
+					</div>
+					<div class="form-group col-2">
+						<label for="codPdv">{{ 'GLOBAL.LABEL.CODPDV' | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="codPdv"
+								[ngClass]="{'is-invalid' : formSubmitTwo && sizes.get('codPdv').invalid}">
+						</div>
+					</div>
+					<div class="form-group text-center col-2">
+						<label for="delete"></label>
+						<div class="input-group">
+							<mat-icon (click)="removeSize(i)" style="cursor: pointer; margin-top: 15px;"
+								class="mat-icon notranslate material-icons mat-icon-no-color" role="img"
+								aria-hidden="true">
+								delete
+							</mat-icon>
+						</div>
+					</div>
+				</ng-container>
+			</div>
+			<div class="row form-group">
+				<div class="col-12">
+					<button (click)="addNewSize()" type="button" class="btn btn-sm btn-outline-primary">
+						<mat-icon class="mat-icon notranslate material-icons mat-icon-no-color" role="img"
+							aria-hidden="true">
+							add_circle
+						</mat-icon>
+						Novo tamanho
+					</button>
+				</div>
+			</div>
+			<div class="form-group row btn-steps">
+				<button (click)="formSubmitOne=false" class="btn btn-warning" mat-button
+					matStepperPrevious>Anterior</button>
+				<button (click)="formSubmitTwo=true" class="btn btn-primary" mat-button matStepperNext>Próximo</button>
+			</div>
+		</mat-step>
+		<mat-step [stepControl]="stepThreeFormGroup" label="Itens">
+			<div class="row form-group">
+				<div class="col-12">
+					<h3>Itens</h3>
+				</div>
+			</div>
+			<div class="row form-group" *ngFor="let dough of stepThreeFormGroup.get('dough').controls; index as i">
+				<ng-container [formGroup]="dough">
+					<div class="form-group col-3">
+						<label for="name">{{ 'GLOBAL.LABEL.NAME' | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="name"
+								[ngClass]="{'is-invalid' : formSubmitThree && dough.get('name').invalid}">
+						</div>
+					</div>
+					<div class="form-group col-2">
+						<label for="price">{{ 'GLOBAL.LABEL.PRICE' | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" currencyMask formControlName="price"
+								[ngClass]="{'is-invalid' : formSubmitThree && dough.get('price').invalid}">
+						</div>
+					</div>
+					<div class="form-group col-2">
+						<label for="flavors">{{ 'GLOBAL.LABEL.STATUS' | translate }}</label>
+						<div class="input-group">
+							<mat-slide-toggle formControlName="status"></mat-slide-toggle>
+						</div>
+					</div>
+					<div class="form-group col-2">
+						<label for="codPdv">{{ 'GLOBAL.LABEL.CODPDV' | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="codPdv"
+								[ngClass]="{'is-invalid' : formSubmitThree && dough.get('codPdv').invalid}">
+						</div>
+					</div>
+					<div class="form-group text-center col-2">
+						<label for="delete"></label>
+						<div class="input-group">
+							<mat-icon (click)="removeDough(i)" style="cursor: pointer; margin-top: 15px;"
+								class="mat-icon notranslate material-icons mat-icon-no-color" role="img"
+								aria-hidden="true">
+								delete
+							</mat-icon>
+						</div>
+					</div>
+				</ng-container>
+			</div>
+			<div class="row form-group">
+				<div class="col-12">
+					<button (click)="addNewDough()" type="button" class="btn btn-sm btn-outline-primary">
+						<mat-icon class="mat-icon notranslate material-icons mat-icon-no-color" role="img"
+							aria-hidden="true">
+							add_circle
+						</mat-icon>
+						Adicionar item
+					</button>
+				</div>
+			</div>
+			<div class="form-group row btn-steps">
+				<button (click)="formSubmitTwo=false" class="btn btn-warning" mat-button
+					matStepperPrevious>Anterior</button>
+				<button (click)="formSubmitThree=true" class="btn btn-primary" mat-button
+					matStepperNext>Próximo</button>
+			</div>
+		</mat-step>
+		<mat-step [stepControl]="stepFourFormGroup" label="Tipos">
+			<div class="row form-group">
+				<div class="col-12">
+					<h3>Tipos</h3>
+				</div>
+			</div>
+			<div class="row form-group" *ngFor="let edge of stepFourFormGroup.get('edges').controls; index as i">
+				<ng-container [formGroup]="edge">
+					<div class="form-group col-3">
+						<label for="name">{{ 'GLOBAL.LABEL.NAME' | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="name"
+								[ngClass]="{'is-invalid' : formSubmitFour && edge.get('name').invalid}">
+						</div>
+					</div>
+					<div class="form-group col-2">
+						<label for="price">{{ 'GLOBAL.LABEL.PRICE' | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" currencyMask formControlName="price"
+								[ngClass]="{'is-invalid' : formSubmitFour && edge.get('price').invalid}">
+						</div>
+					</div>
+					<div class="form-group col-2">
+						<label for="flavors">{{ 'GLOBAL.LABEL.STATUS' | translate }}</label>
+						<div class="input-group">
+							<mat-slide-toggle formControlName="status"></mat-slide-toggle>
+						</div>
+					</div>
+					<div class="form-group text-center col-2">
+						<label for="delete"></label>
+						<div class="input-group">
+							<mat-icon (click)="removeEdge(i)" style="cursor: pointer; margin-top: 15px;"
+								class="mat-icon notranslate material-icons mat-icon-no-color" role="img"
+								aria-hidden="true">
+								delete
+							</mat-icon>
+						</div>
+					</div>
+				</ng-container>
+			</div>
+			<div class="row form-group">
+				<div class="col-12">
+					<button (click)="addNewEdge()" type="button" class="btn btn-sm btn-outline-primary">
+						<mat-icon class="mat-icon notranslate material-icons mat-icon-no-color" role="img"
+							aria-hidden="true">
+							add_circle
+						</mat-icon>
+						Adicionar tipo
+					</button>
+				</div>
+			</div>
+			<div class="form-group row btn-steps">
+				<button (click)="formSubmitThree=false" class="btn btn-warning" mat-button
+					matStepperPrevious>Anterior</button>
+				<button (click)="saveCategory()" class="btn btn-success" mat-button>Salvar</button>
+				<!-- <button mat-button (click)="stepper.reset()">Reset</button> -->
+			</div>
+		</mat-step>
+	</mat-horizontal-stepper>
+</div>

@@ -1,0 +1,987 @@
+<form [formGroup]="formFilter" formFilter.valid>
+	<div class="row">
+		<div class="form-group row col-12">
+			<label for="name">{{ "GLOBAL.LABEL.SEARCH" | translate }}
+				{{ "GLOBAL.LABEL.FRANCHISE" | translate }}:</label>
+			<div class="input-group">
+				<input required class="form-control" placeholder="Digite para Pesquisar" formControlName="name" />
+			</div>
+		</div>
+	</div>
+</form>
+
+<div class="row justify-content-between">
+	<div class="col-auto align-self-center mb-2">
+		<h5>
+			<p class="float-left">{{ "GLOBAL.LABEL.FRANCHISES" | translate }}</p>
+		</h5>
+	</div>
+	<div class="col-auto">
+		<a (click)="createFranchiseModalShow(createfranchisemodal)" href="javascript:;"
+			class="float-right btn btn-label-warning btn-bold btn-sm btn-icon-h">
+			{{ "GLOBAL.LABEL.CREATE" | translate }}
+		</a>
+	</div>
+</div>
+
+<div class="example-container mat-elevation-z8">
+	<mat-table #table [dataSource]="dataSource">
+		<!-- Checkbox Column -->
+		<ng-container matColumnDef="select">
+			<mat-header-cell *matHeaderCellDef>
+				<mat-checkbox [checked]="true" [indeterminate]="true"> </mat-checkbox>
+			</mat-header-cell>
+			<mat-cell *matCellDef="let row">
+				<mat-checkbox (click)="$event.stopPropagation()"> </mat-checkbox>
+			</mat-cell>
+		</ng-container>
+
+		<!-- Image Column -->
+		<ng-container matColumnDef="image">
+			<mat-header-cell *matHeaderCellDef></mat-header-cell>
+			<mat-cell *matCellDef="let element" [ngClass]="getPositionColor(element.position)">
+				<a [href]="element.image" target="_blank">
+					<img width="50" class="img-thumbnail" [src]="element.image || './assets/media/logo-default.png'"
+						[alt]="element.name" />
+				</a>
+			</mat-cell>
+		</ng-container>
+
+		<!-- Name Column -->
+		<ng-container matColumnDef="name">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.NAME" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element" [ngClass]="getPositionColor(element.position)">
+				{{ element.name }}
+			</mat-cell>
+		</ng-container>
+
+		<!-- Company Column -->
+		<ng-container matColumnDef="company">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.COMPANY" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element" [ngClass]="getPositionColor(element.position)">
+				{{ element.companyName }}
+			</mat-cell>
+		</ng-container>
+
+		<!-- City Column -->
+		<ng-container matColumnDef="city">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.CITY" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element" [ngClass]="getPositionColor(element.position)">
+				{{ element?.city?.name }}/{{ element?.state?.uf }}
+			</mat-cell>
+		</ng-container>
+
+		<!-- Phone Column -->
+		<ng-container matColumnDef="phone">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.PHONE" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element" [ngClass]="getPositionColor(element.position)">
+				{{ element.phone }}
+			</mat-cell>
+		</ng-container>
+
+		<!-- Delete Franchise -->
+		<ng-container matColumnDef="delete">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.ACTION" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element" [ngClass]="getPositionColor(element.position)">
+				<i class="status mr-3" title="Situação" [ngClass]="getStatusColor(element.status)"></i>
+				<i class="flaticon2-edit mr-3" (click)="editFranchiseModalShow(editfranchisemodal, element)"></i>
+				<i class="flaticon2-trash" (click)="confirmDeleteModalShow(confirmdeletemodal, element)"></i>
+			</mat-cell>
+		</ng-container>
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns"> </mat-row>
+	</mat-table>
+	<mat-paginator [length]="totalLength" [pageSize]="pageSize" [pageSizeOptions]="pageLimit" (page)="changePage($event)">
+	</mat-paginator>
+</div>
+
+<!-- Apartir de aqui é o modal -->
+<!-- Modal Create Franchise -->
+<ng-template #createfranchisemodal let-modal modal-lg>
+	<form [formGroup]="formData" (ngSubmit)="
+			formSubmitAttempt = true;
+			formData.valid &&
+				createFranchise(formData.value, confirmcreateaccounmodal, true)
+		">
+		<div class="modal-header">
+			<h4 class="modal-title" id="modal-create-franchise">
+				{{ "GLOBAL.LABEL.CREATEFRANCHISE" | translate }}
+			</h4>
+			<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+				<span aria-hidden="true">&times;</span>
+			</button>
+			<input formControlName="_id" type="hidden" />
+		</div>
+		<div class="modal-body">
+			<mat-tab-group>
+				<!-- row 1 -->
+				<mat-tab label="Dados">
+					<div class="row">
+						<!-- image -->
+						<div class="form-group col-12" style="margin-top: 10px; margin-bottom: 10px">
+							<label for="customFile">{{
+								"GLOBAL.LABEL.IMAGE" | translate
+								}}</label>
+							<div class="custom-file">
+								<input type="file" class="custom-file-input" id="customFile" (change)="onChange($event)" multiple
+									[ngClass]="{
+										'is-invalid':
+											formSubmitAttempt && formData.get('file').invalid
+									}" />
+								<label class="custom-file-label" for="customFile" id="customFileLabel">
+									{{ "GLOBAL.LABEL.SELECTIMAGE" | translate }}</label>
+							</div>
+						</div>
+						<!-- / image -->
+					</div>
+					<!-- /row 1 -->
+
+					<!-- row 2 -->
+
+					<div class="row">
+						<!-- estado -->
+						<div class="form-group col-4">
+							<label for="state">{{ "GLOBAL.LABEL.STATE" | translate }}</label>
+
+							<div class="input-group">
+								<input type="text" class="form-control autocomplete" matInput placeholder="Estado" matInput
+									formControlName="state" [matAutocomplete]="auto" [ngClass]="{
+										'is-invalid':
+											formSubmitAttempt && formData.get('state').invalid
+									}" />
+								<mat-autocomplete [displayWith]="displayFn" #auto="matAutocomplete">
+									<mat-option *ngFor="let state of states" [value]="state" (click)="onClickState(state)">
+										{{ state.name }}
+									</mat-option>
+								</mat-autocomplete>
+							</div>
+						</div>
+						<!-- / estado -->
+						<!-- cidade -->
+						<div class="form-group col-4">
+							<label for="city">{{ "GLOBAL.LABEL.CITY" | translate }}</label>
+							<div class="input-group">
+								<input type="text" class="form-control autocomplete" matInput placeholder="Cidade" matInput
+									formControlName="city" [matAutocomplete]="autocity" [ngClass]="{
+										'is-invalid':
+											formSubmitAttempt && formData.get('city').invalid
+									}" />
+								<mat-autocomplete [displayWith]="displayFn" #autocity="matAutocomplete">
+									<mat-option *ngFor="let city of cities" [value]="city">
+										{{ city.name }}
+									</mat-option>
+								</mat-autocomplete>
+							</div>
+						</div>
+						<!-- cidade -->
+						<!-- CEP -->
+						<div class="form-group col-4">
+							<label for="cep">CEP</label>
+							<div class="input-group">
+								<input class="form-control" formControlName="cep" mask="00000-000" [ngClass]="{
+										'is-invalid':
+											formSubmitAttempt && formData.get('cep').invalid
+									}" />
+							</div>
+						</div>
+						<!-- CEP -->
+					</div>
+					<!-- / row 2 -->
+
+					<!-- / row 3 -->
+					<div class="row">
+						<div class="form-group col-6">
+							<label for="name">{{
+								"GLOBAL.LABEL.FRANCHISENAME" | translate
+								}}</label>
+							<div class="input-group">
+								<input required class="form-control" formControlName="name" [ngClass]="{
+										'is-invalid':
+											formSubmitAttempt && formData.get('name').invalid
+									}" />
+							</div>
+						</div>
+						<div class="form-group col-6">
+							<label for="companyName">{{
+								"GLOBAL.LABEL.COMPANYNAME" | translate
+								}}</label>
+							<div class="input-group">
+								<input required class="form-control" formControlName="companyName" [ngClass]="{
+										'is-invalid':
+											formSubmitAttempt && formData.get('companyName').invalid
+									}" />
+							</div>
+						</div>
+					</div>
+					<!-- / row 3 -->
+
+					<!-- / row 4 -->
+					<div class="row">
+						<div class="form-group col-6">
+							<label for="phone">{{ "GLOBAL.LABEL.PHONE" | translate }}</label>
+							<div class="input-group">
+								<input required class="form-control" formControlName="phone" mask="(00) 00009-0000" [ngClass]="{
+										'is-invalid':
+											formSubmitAttempt && formData.get('phone').invalid
+									}" />
+							</div>
+						</div>
+						<div class="form-group col-6">
+							<label for="email">{{ "GLOBAL.LABEL.EMAIL" | translate }}</label>
+							<div class="input-group">
+								<input required class="form-control" formControlName="email" type="email" [ngClass]="{
+										'is-invalid':
+											formSubmitAttempt && formData.get('email').invalid
+									}" />
+							</div>
+						</div>
+					</div>
+					<!-- / row 4 -->
+					<div class="row">
+						<div class="form-group col-4">
+							<label for="languageDefault">{{
+								"GLOBAL.LABEL.LANGUAGE" | translate
+								}}</label>
+							<div class="input-group">
+								<select id="languageDefault" class="form-control" formControlName="languageDefault" [ngClass]="{
+										'is-invalid':
+											formSubmitAttempt &&
+											formData.get('languageDefault').invalid
+									}">
+									<option selected value='pt-BR'>Português - Brasil</option>
+									<option value='pt-PT'>Português - Portugal</option>
+									<option value='pt-AO'>Português - Angola</option>
+								</select>
+							</div>
+						</div>
+						<div class="form-group col-4">
+							<label for="coin">{{
+								"GLOBAL.LABEL.COIN" | translate
+								}}</label>
+							<div class="input-group">
+								<select id="coin" class="form-control" formControlName="coin" [ngClass]="{
+										'is-invalid':
+											formSubmitAttempt &&
+											formData.get('coin').invalid
+									}">
+									<option value="R$">Real (R$)</option>
+									<option value="€">Euro (€)</option>
+									<option value="Kz">Kwanza (Kz)</option>
+								</select>
+							</div>
+						</div>
+						<div class="form-group col-4">
+							<label for="percentService">Porcentagem pelo Serviço</label>
+							<div class="input-group">
+								<input required class="form-control" formControlName="percentService" mask="09" [ngClass]="{
+										'is-invalid':
+											formSubmitAttempt &&
+											formData.get('percentService').invalid
+									}" />
+							</div>
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="form-group col-4">
+							<label for="onlyMultiplesOf50">{{
+								"GLOBAL.LABEL.ONLYMULTIPLESOF50" | translate
+								}}</label>
+							<div class="input-group">
+								<select class="form-control" formControlName="onlyMultiplesOf50" [ngClass]="{
+											'is-invalid':
+												formSubmitAttempt &&
+												formData.get('onlyMultiplesOf50').invalid
+										}">
+									<option value="true">Sim</option>
+									<option value="false">Não</option>
+								</select>
+							</div>
+						</div>
+					</div>
+				</mat-tab>
+				<mat-tab label="Financeiro">
+					<div class="row">
+						<div class="col-12">
+							<h6>:: DADOS BANCÁRIOS (USADOS NO SPLIT)</h6>
+						</div>
+					</div>
+					<div class="row col-12" formGroupName="bankData">
+						<div class="form-group col-5">
+							<label class="" for="favoredName">{{
+								"GLOBAL.LABEL.FAVOREDNAME" | translate
+								}}</label>
+							<div class="input-group">
+								<input class="form-control" formControlName="favoredName" [ngClass]="{
+										'is-invalid':
+											formSubmitAttempt &&
+											formData.get('bankData').get('favoredName').invalid
+									}" />
+							</div>
+						</div>
+						<div class="form-group col-4">
+							<label for="documentType">{{
+								"GLOBAL.LABEL.DOCUMENTTYPE" | translate
+								}}</label>
+							<div class="input-group">
+								<select class="form-control" formControlName="documentType" [ngClass]="{
+										'is-invalid':
+											formSubmitAttempt &&
+											formData.get('bankData').get('documentType').invalid
+									}">
+									<option value="CNPJ">CNPJ</option>
+									<option value="CPF">CPF</option>
+								</select>
+							</div>
+						</div>
+						<div class="form-group col-3">
+							<label class="" for="document">{{
+								"GLOBAL.LABEL.DOCUMENT" | translate
+								}}</label>
+							<div class="input-group">
+								<input class="form-control" mask="000.000.000-00||00.000.000/0000-00" formControlName="document"
+									[ngClass]="{
+										'is-invalid':
+											formSubmitAttempt &&
+											formData.get('bankData').get('document').invalid
+									}" />
+							</div>
+						</div>
+						<div class="form-group col-12">
+							<label>{{ "GLOBAL.LABEL.BANK" | translate }}</label>
+							<div class="input-group">
+								<input type="text" class="form-control" matInput placeholder="Escolha um Banco"
+									[matAutocomplete]="autoBrazilianBank" formControlName="brazilianBank" [ngClass]="{
+										'is-invalid':
+											formSubmitAttempt && formData.get('bankData').get('brazilianBank').invalid
+									}" />
+								<mat-autocomplete [displayWith]="displayFnBrazilianBank" #autoBrazilianBank="matAutocomplete">
+									<mat-option *ngFor="let brBank of brBanks" [value]="brBank">
+										{{ brBank.compe }} - {{ brBank.short_name }}
+									</mat-option>
+								</mat-autocomplete>
+							</div>
+						</div>
+						<div class="form-group col-4">
+							<label for="typeAccount">{{
+								"GLOBAL.LABEL.TYPE" | translate
+								}}</label>
+							<div class="input-group">
+								<select class="form-control" formControlName="typeAccount" [ngClass]="{
+										'is-invalid':
+											formSubmitAttempt &&
+											formData.get('bankData').get('typeAccount').invalid
+									}">
+									<option selected value="CURRENT">Conta Corrente</option>
+									<option value="SAVINGS">Conta Poupança</option>
+								</select>
+							</div>
+						</div>
+						<div class="form-group col-3">
+							<label class="" for="agency">{{
+								"GLOBAL.LABEL.AGENCY" | translate
+								}}</label>
+							<div class="input-group">
+								<input class="form-control" formControlName="agency" [ngClass]="{
+										'is-invalid':
+											formSubmitAttempt &&
+											formData.get('bankData').get('agency').invalid
+									}" />
+							</div>
+						</div>
+						<div class="form-group col-1">
+							<label class="" for="agencyDigit">{{
+								"GLOBAL.LABEL.AGENCYDIGIT" | translate
+								}}</label>
+							<div class="input-group">
+								<input class="form-control" formControlName="agencyDigit" [ngClass]="{
+										'is-invalid':
+											formSubmitAttempt &&
+											formData.get('bankData').get('agencyDigit').invalid
+									}" />
+							</div>
+						</div>
+						<div class="form-group col-3">
+							<label class="" for="account">{{
+								"GLOBAL.LABEL.ACCOUNT" | translate
+								}}</label>
+							<div class="input-group">
+								<input class="form-control" formControlName="account" [ngClass]="{
+										'is-invalid':
+											formSubmitAttempt &&
+											formData.get('bankData').get('account').invalid
+									}" />
+							</div>
+						</div>
+						<div class="form-group col-1">
+							<label class="" for="accountDigit">{{
+								"GLOBAL.LABEL.ACCOUNTDIGIT" | translate
+								}}</label>
+							<div class="input-group">
+								<input class="form-control" formControlName="accountDigit" [ngClass]="{
+										'is-invalid':
+											formSubmitAttempt &&
+											formData.get('bankData').get('accountDigit').invalid
+									}" />
+							</div>
+						</div>
+						<div class="form-group col-4">
+							<label for="pixType">{{
+								"GLOBAL.LABEL.PIXTYPE" | translate
+								}}</label>
+							<div class="input-group">
+								<select class="form-control" formControlName="pixType" [ngClass]="{
+										'is-invalid':
+											formSubmitAttempt &&
+											formData.get('bankData').get('pixType').invalid
+									}">
+									<option value="">Selecione...</option>
+									<option value="CNPJ">CNPJ</option>
+									<option value="CPF">CPF</option>
+									<option value="CELLPHONE">CELULAR</option>
+									<option value="EMAIL">E-MAIL</option>
+									<option value="RANDOMKEY">Chave aleatória</option>
+								</select>
+							</div>
+						</div>
+						<div class="form-group col-8">
+							<label class="" for="pixKey">{{
+								"GLOBAL.LABEL.PIXKEY" | translate
+								}}</label>
+							<div class="input-group">
+								<input class="form-control" formControlName="pixKey" [ngClass]="{
+										'is-invalid':
+											formSubmitAttempt &&
+											formData.get('bankData').get('pixKey').invalid
+									}" />
+							</div>
+						</div>
+					</div>
+				</mat-tab>
+				<mat-tab label="Aplicativo">
+					<mat-card class="mb-3">
+						<mat-card-content class="row">
+							<div class="form-group col-12">
+								<h3>{{ 'GLOBAL.LABEL.PASSENGER' | translate }} | {{ 'GLOBAL.LABEL.DRIVER' | translate }}</h3>
+							</div>
+
+							<div class="row col-12" formGroupName="routeSettings">
+								<div class="form-group col-12">
+									<label for="showReportCardTravel">Exibir nos relatórios Card com informação (Tempo e Distância)
+										?</label>
+									<div class="input-group">
+										<mat-slide-toggle formControlName="showReportCardTravel"></mat-slide-toggle>
+									</div>
+								</div>
+							</div>
+						</mat-card-content>
+					</mat-card>
+				</mat-tab>
+			</mat-tab-group>
+		</div>
+		<div class="modal-footer">
+			<input type="submit" value="{{ 'GLOBAL.LABEL.CREATEFRANCHISE' | translate }}"
+				class="btn btn-outline btn-success" />
+		</div>
+	</form>
+</ng-template>
+
+<!-- Modal EDIT Franchise -->
+<ng-template #editfranchisemodal let-modal modal-lg>
+	<form [formGroup]="formData" (ngSubmit)="
+			formSubmitAttempt = true; formData.valid && editFranchise(formData.value)
+		">
+		<div class="modal-header">
+			<h4 class="modal-title" id="modal-edit-franchise">
+				{{ "GLOBAL.LABEL.EDITFRANCHISE" | translate }}
+			</h4>
+			<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+				<span aria-hidden="true">&times;</span>
+			</button>
+			<input formControlName="_id" type="hidden" />
+		</div>
+		<div class="modal-body">
+			<mat-tab-group>
+				<mat-tab label="Dados">
+					<!-- row 1 -->
+					<div class="row">
+						<!-- image -->
+						<div class="form-group col-12" style="margin-top: 10px; margin-bottom: 10px">
+							<label for="customFile">{{
+								"GLOBAL.LABEL.IMAGE" | translate
+								}}</label>
+							<div class="custom-file">
+								<input type="file" class="custom-file-input" id="customFile" (change)="onChange($event)" multiple
+									[ngClass]="{
+										'is-invalid':
+											formSubmitAttempt && formData.get('file').invalid
+									}" />
+								<label class="custom-file-label" for="customFile" id="customFileLabel">
+									{{ "GLOBAL.LABEL.SELECTIMAGE" | translate }}</label>
+							</div>
+						</div>
+						<!-- / image -->
+					</div>
+					<!-- /row 1 -->
+
+					<!-- row 2 -->
+
+					<div class="row">
+						<!-- estado -->
+						<div class="form-group col-4">
+							<label for="state">{{ "GLOBAL.LABEL.STATE" | translate }}</label>
+
+							<div class="input-group">
+								<input type="text" class="form-control autocomplete" matInput placeholder="Estado" matInput
+									formControlName="state" [matAutocomplete]="auto" [ngClass]="{
+										'is-invalid':
+											formSubmitAttempt && formData.get('state').invalid
+									}" />
+								<mat-autocomplete [displayWith]="displayFn" #auto="matAutocomplete">
+									<mat-option *ngFor="let state of states" [value]="state" (click)="onClickState(state)">
+										{{ state.name }}
+									</mat-option>
+								</mat-autocomplete>
+							</div>
+						</div>
+						<!-- / estado -->
+						<!-- cidade -->
+						<div class="form-group col-4">
+							<label for="city">{{ "GLOBAL.LABEL.CITY" | translate }}</label>
+							<div class="input-group">
+								<input type="text" class="form-control autocomplete" matInput placeholder="Cidade" matInput
+									formControlName="city" [matAutocomplete]="autocity" [ngClass]="{
+										'is-invalid':
+											formSubmitAttempt && formData.get('city').invalid
+									}" />
+								<mat-autocomplete [displayWith]="displayFn" #autocity="matAutocomplete">
+									<mat-option *ngFor="let city of cities" [value]="city">
+										{{ city.name }}
+									</mat-option>
+								</mat-autocomplete>
+							</div>
+						</div>
+						<!-- cidade -->
+						<!-- CEP -->
+						<div class="form-group col-4">
+							<label for="cep">CEP</label>
+							<div class="input-group">
+								<input class="form-control" formControlName="cep" mask="00000-000" [ngClass]="{
+										'is-invalid':
+											formSubmitAttempt && formData.get('cep').invalid
+									}" />
+							</div>
+						</div>
+						<!-- CEP -->
+					</div>
+					<!-- / row 2 -->
+
+					<!-- / row 3 -->
+					<div class="row">
+						<div class="form-group col-6">
+							<label for="name">{{
+								"GLOBAL.LABEL.FRANCHISENAME" | translate
+								}}</label>
+							<div class="input-group">
+								<input required class="form-control" formControlName="name" [ngClass]="{
+										'is-invalid':
+											formSubmitAttempt && formData.get('name').invalid
+									}" />
+							</div>
+						</div>
+						<div class="form-group col-6">
+							<label for="companyName">{{
+								"GLOBAL.LABEL.COMPANYNAME" | translate
+								}}</label>
+							<div class="input-group">
+								<input required class="form-control" formControlName="companyName" [ngClass]="{
+										'is-invalid':
+											formSubmitAttempt && formData.get('companyName').invalid
+									}" />
+							</div>
+						</div>
+					</div>
+					<!-- / row 3 -->
+
+					<!-- / row 4 -->
+					<div class="row">
+						<div class="form-group col-6">
+							<label for="phone">{{ "GLOBAL.LABEL.PHONE" | translate }}</label>
+							<div class="input-group">
+								<input required class="form-control" formControlName="phone" mask="(00) 00009-0000" [ngClass]="{
+										'is-invalid':
+											formSubmitAttempt && formData.get('phone').invalid
+									}" />
+							</div>
+						</div>
+						<div class="form-group col-6">
+							<label for="email">{{ "GLOBAL.LABEL.EMAIL" | translate }}</label>
+							<div class="input-group">
+								<input required class="form-control" formControlName="email" type="email" [ngClass]="{
+										'is-invalid':
+											formSubmitAttempt && formData.get('email').invalid
+									}" />
+							</div>
+						</div>
+					</div>
+					<!-- / row 4 -->
+
+					<!-- row 12 -->
+					<div class="row">
+						<div class="form-group col-3">
+							<label for="languageDefault">{{
+								"GLOBAL.LABEL.LANGUAGE" | translate
+								}}</label>
+							<div class="input-group">
+								<select class="form-control" formControlName="languageDefault" [ngClass]="{
+										'is-invalid':
+											formSubmitAttempt &&
+											formData.get('languageDefault').invalid
+									}">
+									<option selected value='pt-BR'>Português - Brasil</option>
+									<option value='pt-PT'>Português - Portugal</option>
+									<option value='pt-AO'>Português - Angola</option>
+								</select>
+							</div>
+						</div>
+						<div class="form-group col-3">
+							<label for="coin">{{
+								"GLOBAL.LABEL.COIN" | translate
+								}}</label>
+							<div class="input-group">
+								<select class="form-control" formControlName="coin" [ngClass]="{
+											'is-invalid':
+												formSubmitAttempt &&
+												formData.get('coin').invalid
+										}">
+									<option value="R$">Real (R$)</option>
+									<option value="€">Euro (€)</option>
+									<option value="Kz">Kwanza (Kz)</option>
+								</select>
+							</div>
+						</div>
+						<div class="form-group col-3">
+							<label for="percentService">Porcentagem pelo Serviço</label>
+							<div class="input-group">
+								<input required class="form-control" formControlName="percentService" mask="09" [ngClass]="{
+										'is-invalid':
+											formSubmitAttempt &&
+											formData.get('percentService').invalid
+									}" />
+							</div>
+						</div>
+						<div class="form-group col-3">
+							<label for="own_delivery">{{
+								"GLOBAL.LABEL.STATUS" | translate
+								}}</label>
+							<div class="input-group">
+								<mat-slide-toggle formControlName="status"></mat-slide-toggle>
+							</div>
+						</div>
+					</div>
+					<!-- row 6 -->
+
+					<div class="row">
+						<div class="form-group col-4">
+							<label for="onlyMultiplesOf50">{{
+								"GLOBAL.LABEL.EMERGENCYPHONE" | translate
+								}} APP</label>
+							<div class="input-group">
+								<input required class="form-control" formControlName="emergencyPhone" mask="9999" [ngClass]="{
+										'is-invalid':
+											formSubmitAttempt &&
+											formData.get('emergencyPhone').invalid
+									}" />
+							</div>
+						</div>
+						<div class="form-group col-4">
+							<label for="onlyMultiplesOf50">{{
+								"GLOBAL.LABEL.ONLYMULTIPLESOF50" | translate
+								}}</label>
+							<div class="input-group">
+								<select class="form-control" formControlName="onlyMultiplesOf50" [ngClass]="{
+											'is-invalid':
+												formSubmitAttempt &&
+												formData.get('onlyMultiplesOf50').invalid
+										}">
+									<option value="true">Sim</option>
+									<option value="false">Não</option>
+								</select>
+							</div>
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="form-group col-6">
+							<label for="showPassenger">{{ "GLOBAL.LABEL.SHOWPHONERACEPASSENGER" | translate }}</label>
+							<div class="input-group">
+								<mat-slide-toggle formControlName="showPhonePassenger"></mat-slide-toggle>
+							</div>
+						</div>
+
+						<div class="form-group col-6">
+							<label for="showPhoneDriver">{{ "GLOBAL.LABEL.SHOWPHONERACEDRIVER" | translate }}</label>
+							<div class="input-group">
+								<mat-slide-toggle formControlName="showPhoneDriver"></mat-slide-toggle>
+							</div>
+						</div>
+					</div>
+				</mat-tab>
+				<mat-tab label="Financeiro">
+					<!-- <div class="row">
+						<div class="col-12">
+							<h6>:: DADOS BANCÁRIOS (USADOS NO SPLIT)</h6>
+							<div *ngIf="formData.get('recipient_id').value && formData.get('pagar_me_bank_id').value"
+								class="alert alert-success" role="alert">
+								<b>Empresa vinculada ao split com sucesso!</b>
+								<hr>
+								<span><b>ID:</b> {{ formData.get('recipient_id').value }}</span>
+							</div>
+							<div *ngIf="!formData.get('recipient_id').value || !formData.get('pagar_me_bank_id').value"
+								class="alert alert-danger" role="alert">
+								<b>Empresa não está vinculada ao split!</b>
+							</div>
+						</div>
+					</div> -->
+					<div class="row col-12" formGroupName="bankData">
+						<div class="form-group col-5">
+							<label class="" for="favoredName">{{
+								"GLOBAL.LABEL.FAVOREDNAME" | translate
+								}}</label>
+							<div class="input-group">
+								<input class="form-control" formControlName="favoredName" [ngClass]="{
+										'is-invalid':
+											formSubmitAttempt &&
+											formData.get('bankData').get('favoredName').invalid
+									}" />
+							</div>
+						</div>
+						<div class="form-group col-4">
+							<label for="documentType">{{
+								"GLOBAL.LABEL.DOCUMENTTYPE" | translate
+								}}</label>
+							<div class="input-group">
+								<select class="form-control" formControlName="documentType" [ngClass]="{
+										'is-invalid':
+											formSubmitAttempt &&
+											formData.get('bankData').get('documentType').invalid
+									}">
+									<option value="CNPJ">CNPJ</option>
+									<option value="CPF">CPF</option>
+								</select>
+							</div>
+						</div>
+						<div class="form-group col-3">
+							<label class="" for="document">{{
+								"GLOBAL.LABEL.DOCUMENT" | translate
+								}}</label>
+							<div class="input-group">
+								<input class="form-control" mask="000.000.000-00||00.000.000/0000-00" formControlName="document"
+									[ngClass]="{
+										'is-invalid':
+											formSubmitAttempt &&
+											formData.get('bankData').get('document').invalid
+									}" />
+							</div>
+						</div>
+						<div class="form-group col-12">
+							<label>{{ "GLOBAL.LABEL.BANK" | translate }}</label>
+							<div class="input-group">
+								<input type="text" class="form-control" matInput placeholder="Escolha um Banco"
+									[matAutocomplete]="autoBrazilianBank" formControlName="brazilianBank" [ngClass]="{
+										'is-invalid':
+											formSubmitAttempt && formData.get('bankData').get('brazilianBank').invalid
+									}" />
+								<mat-autocomplete [displayWith]="displayFnBrazilianBank" #autoBrazilianBank="matAutocomplete">
+									<mat-option *ngFor="let brBank of brBanks" [value]="brBank">
+										{{ brBank.compe }} - {{ brBank.short_name }}
+									</mat-option>
+								</mat-autocomplete>
+							</div>
+							<span *ngIf="formData.get('bankData').get('bankName').value">
+								<b>Registro anterior:</b> {{formData.get('bankData').get('bankName').value}}
+							</span>
+						</div>
+						<div class="form-group col-4">
+							<label for="typeAccount">{{
+								"GLOBAL.LABEL.TYPE" | translate
+								}}</label>
+							<div class="input-group">
+								<select class="form-control" formControlName="typeAccount" [ngClass]="{
+										'is-invalid':
+											formSubmitAttempt &&
+											formData.get('bankData').get('typeAccount').invalid
+									}">
+									<option selected value="CURRENT">Conta Corrente</option>
+									<option value="SAVINGS">Conta Poupança</option>
+								</select>
+							</div>
+						</div>
+						<div class="form-group col-3">
+							<label class="" for="agency">{{
+								"GLOBAL.LABEL.AGENCY" | translate
+								}}</label>
+							<div class="input-group">
+								<input class="form-control" formControlName="agency" [ngClass]="{
+										'is-invalid':
+											formSubmitAttempt &&
+											formData.get('bankData').get('agency').invalid
+									}" />
+							</div>
+						</div>
+						<div class="form-group col-1">
+							<label class="" for="agencyDigit">{{
+								"GLOBAL.LABEL.AGENCYDIGIT" | translate
+								}}</label>
+							<div class="input-group">
+								<input class="form-control" formControlName="agencyDigit" [ngClass]="{
+										'is-invalid':
+											formSubmitAttempt &&
+											formData.get('bankData').get('agencyDigit').invalid
+									}" />
+							</div>
+						</div>
+						<div class="form-group col-3">
+							<label class="" for="account">{{
+								"GLOBAL.LABEL.ACCOUNT" | translate
+								}}</label>
+							<div class="input-group">
+								<input class="form-control" formControlName="account" [ngClass]="{
+										'is-invalid':
+											formSubmitAttempt &&
+											formData.get('bankData').get('account').invalid
+									}" />
+							</div>
+						</div>
+						<div class="form-group col-1">
+							<label class="" for="accountDigit">{{
+								"GLOBAL.LABEL.ACCOUNTDIGIT" | translate
+								}}</label>
+							<div class="input-group">
+								<input class="form-control" formControlName="accountDigit" [ngClass]="{
+										'is-invalid':
+											formSubmitAttempt &&
+											formData.get('bankData').get('accountDigit').invalid
+									}" />
+							</div>
+						</div>
+						<div class="form-group col-4">
+							<label for="pixType">{{
+								"GLOBAL.LABEL.PIXTYPE" | translate
+								}}</label>
+							<div class="input-group">
+								<select class="form-control" formControlName="pixType" [ngClass]="{
+										'is-invalid':
+											formSubmitAttempt &&
+											formData.get('bankData').get('pixType').invalid
+									}">
+									<option value="">Selecione...</option>
+									<option value="CNPJ">CNPJ</option>
+									<option value="CPF">CPF</option>
+									<option value="CELLPHONE">CELULAR</option>
+									<option value="EMAIL">E-MAIL</option>
+									<option value="RANDOMKEY">Chave aleatória</option>
+								</select>
+							</div>
+						</div>
+						<div class="form-group col-8">
+							<label class="" for="pixKey">{{
+								"GLOBAL.LABEL.PIXKEY" | translate
+								}}</label>
+							<div class="input-group">
+								<input class="form-control" formControlName="pixKey" [ngClass]="{
+										'is-invalid':
+											formSubmitAttempt &&
+											formData.get('bankData').get('pixKey').invalid
+									}" />
+							</div>
+						</div>
+					</div>
+				</mat-tab>
+				<mat-tab label="Aplicativo">
+					<mat-card class="mb-3">
+						<mat-card-content class="row">
+							<div class="form-group col-12">
+								<h3>{{ 'GLOBAL.LABEL.PASSENGER' | translate }} | {{ 'GLOBAL.LABEL.DRIVER' | translate }}</h3>
+							</div>
+
+							<div class="row col-12" formGroupName="routeSettings">
+								<div class="form-group col-12">
+									<label for="showReportCardTravel">Exibir nos relatórios Card com informação (Tempo e Distância)
+										?</label>
+									<div class="input-group">
+										<mat-slide-toggle formControlName="showReportCardTravel"></mat-slide-toggle>
+									</div>
+								</div>
+							</div>
+						</mat-card-content>
+					</mat-card>
+				</mat-tab>
+			</mat-tab-group>
+		</div>
+		<div class="modal-footer">
+			<input type="submit" value="{{ 'GLOBAL.LABEL.EDITFRANCHISE' | translate }}" class="btn btn-outline btn-success" />
+		</div>
+	</form>
+</ng-template>
+
+<!-- Modal Delete -->
+<ng-template #confirmdeletemodal let-modal>
+	<div class="modal-header">
+		<h4 class="modal-title" id="modal-delete-franchise">Confirmar exclusão</h4>
+		<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	<div class="modal-body" class="btn btn-warning">
+		{{ "GLOBAL.LABEL.AREYOUSUREYOUWANTTODELETE" | translate }}
+	</div>
+	<div class="modal-footer">
+		<button type="button" (click)="franchiseIdToDelete = undefined; modal.dismiss('Cross click')"
+			class="btn btn-secondary" data-dismiss="modal">
+			{{ "GLOBAL.LABEL.CANCEL" | translate }}
+		</button>
+		<button type="button" (click)="deleteFranchise() && modal.dismiss('Cross click')" class="btn btn-primary">
+			{{ "GLOBAL.LABEL.YES" | translate }}
+		</button>
+	</div>
+</ng-template>
+
+<!-- Modal Delete -->
+<ng-template #confirmcreateaccounmodal let-modal>
+	<div class="modal-header">
+		<h4 class="modal-title" id="modal-create-account-franchise">
+			Deseja criar a conta digital agora?
+		</h4>
+		<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	<div class="modal-body" class="btn btn-success">
+		{{ "GLOBAL.LABEL.WANTTOCREATEADIGITALACCOUNTNOW" | translate }}
+	</div>
+	<div class="modal-footer">
+		<button type="button" (click)="
+				createAccountFranchise = false;
+				createFranchise(formData.value, confirmcreateaccounmodal, true)
+			" class="btn btn-secondary" data-dismiss="modal">
+			{{ "GLOBAL.LABEL.NO" | translate }}
+		</button>
+		<button type="button" (click)="
+				createAccountFranchise = true;
+				createFranchise(formData.value, confirmcreateaccounmodal, true)
+			" class="btn btn-primary">
+			{{ "GLOBAL.LABEL.YES" | translate }}
+		</button>
+	</div>
+</ng-template>

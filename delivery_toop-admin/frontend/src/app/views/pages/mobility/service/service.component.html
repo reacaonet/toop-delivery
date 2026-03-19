@@ -1,0 +1,157 @@
+<form [formGroup]="formFilter" formFilter.valid>
+	<div class="row">
+		<div class="form-group row col-6">
+			<label for="name">{{ "GLOBAL.LABEL.SEARCH" | translate }}
+				{{ "GLOBAL.LABEL.NAME" | translate }}:</label>
+			<div class="input-group">
+				<input required class="form-control" placeholder="{{ 'GLOBAL.LABEL.TYPETOSEARCH' | translate }}"
+					formControlName="name" />
+			</div>
+		</div>
+		<div class="form-group col-6">
+			<label for="category">{{ "GLOBAL.LABEL.FRANCHISE" | translate }}</label>
+			<div class="input-group">
+				<input type="text" class="form-control" matInput placeholder="{{ 'GLOBAL.LABEL.CHOOSEAFRANCHISE' | translate }}"
+					[matAutocomplete]="autoCompany" formControlName="franchise" [ngClass]="{
+						'is-invalid': formFilter && formFilter.get('franchise').invalid
+					}" />
+				<mat-autocomplete [displayWith]="displayFn" #autoCompany="matAutocomplete">
+					<mat-option *ngFor="let franchise of listFranchise" [value]="franchise"
+						(click)="onClickFranchiseFilter(franchise)">
+						{{ franchise.name }}
+					</mat-option>
+				</mat-autocomplete>
+			</div>
+		</div>
+	</div>
+</form>
+
+<div class="row justify-content-between">
+	<div class="col-auto align-self-center mb-2">
+		<h5>
+			<p class="float-left">{{ "GLOBAL.LABEL.SERVICES" | translate }}</p>
+		</h5>
+	</div>
+	<div class="col-auto">
+		<a href="/mobility/services/new" class="float-right btn btn-label-warning btn-bold btn-sm btn-icon-h">
+			{{ "GLOBAL.LABEL.CREATE" | translate }}
+		</a>
+	</div>
+</div>
+
+<div class="example-container mat-elevation-z8">
+	<mat-table #table [dataSource]="dataSource">
+		<!-- Checkbox Column -->
+		<ng-container matColumnDef="select">
+			<mat-header-cell *matHeaderCellDef>
+				<mat-checkbox [checked]="true" [indeterminate]="true"> </mat-checkbox>
+			</mat-header-cell>
+			<mat-cell *matCellDef="let row">
+				<mat-checkbox (click)="$event.stopPropagation()"> </mat-checkbox>
+			</mat-cell>
+		</ng-container>
+
+		<!-- Image Column -->
+		<ng-container matColumnDef="image">
+			<mat-header-cell *matHeaderCellDef>#</mat-header-cell>
+			<mat-cell *matCellDef="let element" [ngClass]="getPositionColor(element.position)">
+				<a [href]="element.image" target="_blank">
+					<img width="50" class="img-thumbnail" [src]="element.image || './assets/media/logo-default.png'"
+						[alt]="element.name" />
+				</a>
+			</mat-cell>
+		</ng-container>
+
+		<!-- maker Column -->
+		<ng-container matColumnDef="maker">
+			<mat-header-cell *matHeaderCellDef>#</mat-header-cell>
+			<mat-cell *matCellDef="let element" [ngClass]="getPositionColor(element.position)">
+				<a [href]="element.maker" target="_blank">
+					<img width="50" class="img-thumbnail" [src]="element.maker || './assets/media/logo-default.png'"
+						[alt]="element.name" />
+				</a>
+			</mat-cell>
+		</ng-container>
+
+		<!-- name Column -->
+		<ng-container matColumnDef="name">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.NAME" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element" [ngClass]="getPositionColor(element.position)">
+				{{ element.name }}
+			</mat-cell>
+		</ng-container>
+
+		<!-- franchise Column -->
+		<ng-container matColumnDef="franchise">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.FRANCHISE" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element" [ngClass]="getPositionColor(element.position)">
+				{{ element.franchise }}
+			</mat-cell>
+		</ng-container>
+
+		<!-- capacity Column -->
+		<ng-container matColumnDef="capacity">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.CAPACITY" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element" [ngClass]="getPositionColor(element.position)">
+				{{ element.capacity }}
+			</mat-cell>
+		</ng-container>
+
+		<!-- priceCalculation Rate Column -->
+		<!-- <ng-container matColumnDef="priceCalculation">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.PRICECALCULATION" | translate }}
+			</mat-header-cell>
+			<mat-cell
+				*matCellDef="let element"
+				[ngClass]="getPositionColor(element.position)"
+			>
+				{{ element.priceCalculation }}
+			</mat-cell>
+		</ng-container> -->
+
+		<!-- Delete  -->
+		<ng-container matColumnDef="delete">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.ACTION" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element" [ngClass]="getPositionColor(element.position)">
+				<i class="status mr-3" title="Situação" [ngClass]="getStatusColor(element.status)"></i>
+				<a href="/mobility/services/details/{{ element._id }}"><i class="flaticon2-edit mr-3"></i></a>
+				<i class="flaticon2-trash" (click)="confirmDeleteModalShow(confirmdeletemodal, element)"></i>
+			</mat-cell>
+		</ng-container>
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns"> </mat-row>
+	</mat-table>
+	<mat-paginator [length]="totalLength" [pageSize]="pageSize" [pageSizeOptions]="pageLimit" (page)="changePage($event)">
+	</mat-paginator>
+
+	<!-- Modal Delete -->
+	<ng-template #confirmdeletemodal let-modal>
+		<div class="modal-header">
+			<h4 class="modal-title" id="modal-delete-data">{{ "GLOBAL.LABEL.CONFIRMDELETION" | translate }}</h4>
+			<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+		<div class="modal-body" class="btn btn-warning">
+			{{ "GLOBAL.LABEL.AREYOUSUREYOUWANTTODELETE" | translate }}
+		</div>
+		<div class="modal-footer">
+			<button type="button" (click)="idToDelete = undefined; modal.dismiss('Cross click')" class="btn btn-secondary"
+				data-dismiss="modal">
+				{{ "GLOBAL.LABEL.CANCEL" | translate }}
+			</button>
+			<button type="button" (click)="delete() && modal.dismiss('Cross click')" class="btn btn-primary">
+				{{ "GLOBAL.LABEL.YES" | translate }}
+			</button>
+		</div>
+	</ng-template>
+</div>

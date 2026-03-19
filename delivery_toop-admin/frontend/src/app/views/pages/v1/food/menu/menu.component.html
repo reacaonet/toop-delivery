@@ -1,0 +1,510 @@
+<!-- Alert -->
+<p>
+	<ngb-alert *ngIf="alert" [type]="alert.type" (close)="closeAlert()">
+		{{ alert.message }}
+	</ngb-alert>
+</p>
+
+<div>
+	<div>
+
+		<button (click)="addCategory(createfoodcategorymodal)" type="button"
+			class="btn btn-primary btn-add-category">Adicionar Categoria</button>
+
+		<div *ngIf="!categories || categories.length <= 0" class="alert alert-warning" role="alert">
+			Nenhuma categoria cadastrada!
+		</div>
+		<div *ngIf="categories && categories.length > 0">
+			<!--   <div *ngFor="let category of categories" class="card bg-primary" style="width: 100%;">  -->
+			<div class="row">
+				<div *ngFor="let category of categories" class="card" style="width: 100%;">
+					<div class="card-header">
+						{{category.name}}
+						<button class="btn btn-primary btn-add-category" style="float: right; margin-right: 10%;"
+							type="button">Ver</button>
+					</div>
+					<ul class="list-group list-group-flush">
+						<li *ngIf="!category.products || category.products.length <= 0" class="list-group-item">Nenhum item
+							cadastrado</li>
+						<li *ngFor="let product of category.products" class="list-group-item">
+							<div class="row">
+								<div class="col-2">
+									<a [href]='product.images[0]' target="_blank">
+										<img width="50" class="img-thumbnail" [src]='product.images[0] || "./assets/media/logo-default.png"'
+											[alt]='product.name || ""' />
+									</a>
+								</div>
+								<div class="col-6">
+									{{product.name}}
+								</div>
+								<div class="col-2">
+									{{ 'R$: ' + (product.price || 0).toFixed(2).replace('.',',') }}
+								</div>
+								<div class="col-2">
+									<button class="btn btn-primary btn-add-category"
+										(click)="editFoodProductModalShow(editfoodproductmodal, product, category._id, category.name)"
+										type="button">Editar
+									</button>
+								</div>
+							</div>
+						</li>
+					</ul>
+					<div>
+						<div class="card-footer">
+							<button class="btn btn-primary btn-add-category"
+								(click)="addProduct(createfoodproductmodal, category._id, category.name)" type="button">Adicionar
+								Item</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="example-container mat-elevation-z8">
+	<!-- Apartir de aqui é o modal -->
+	<!-- Modal Create Category -->
+	<ng-template #createfoodcategorymodal let-modal>
+		<form [formGroup]="formData" (ngSubmit)="formSubmitAttempt=true;
+		 formData.valid && createFoodCategory(formData.value)
+         && modal.dismiss('Cross click')">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-create-product">{{ 'GLOBAL.LABEL.CREATECATEGORY' | translate }}</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div class="form-group">
+					<label for="name">{{ 'GLOBAL.LABEL.NAME' | translate }}</label>
+					<div class="input-group">
+						<input class="form-control" formControlName="name"
+							[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('name').invalid}">
+					</div>
+				</div>
+				<div class="form-group">
+					<label>{{ 'GLOBAL.LABEL.COMPANY' | translate }}</label>
+					<div class="input-group">
+						<input type="hidden" formControlName="company">
+						<input type="text" (focus)="focusInCompany($event)"
+							[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('company').invalid}"
+							(focusout)="focusOutCompany($event)" class="form-control" aria-label="Number" matInput
+							[formControl]="myControl" [matAutocomplete]="auto">
+						<mat-autocomplete autoActiveFirstOption #auto="matAutocomplete">
+							<mat-option *ngFor="let comp of company" [value]="comp.name">
+								{{ comp.name }}
+							</mat-option>
+						</mat-autocomplete>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<input type="submit" value="Criar Categoria" class="btn btn-outline-dark">
+			</div>
+		</form>
+	</ng-template>
+</div>
+
+<div class="example-container mat-elevation-z8">
+	<!-- Apartir de aqui é o modal -->
+	<!-- Modal Create Produto adicional -->
+	<ng-template #createfoodproductmodal let-modal modal-lg>
+		<p>
+			<ngb-alert *ngIf="alertModal" [type]="alertModal.type" (close)="closeAlertModal()">
+				{{ alertModal.message }}
+			</ngb-alert>
+		</p>
+		<form [formGroup]="formDataProduct" (ngSubmit)="formSubmitProduct=true;
+			validPricePromotion(formDataProduct.value) &&
+			 formDataProduct.valid
+			  && createFoodProduct(formDataProduct.value)">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-create-foodProduct">
+					{{ 'GLOBAL.LABEL.CREATEPRODUCT' | translate }}
+				</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<mat-tab-group>
+					<mat-tab label="Produto">
+						<div style="margin-top: 10px">
+							<div class="custom-file">
+								<input type="file" class="custom-file-input" id="customFile" (change)="onChange($event)" multiple
+									[ngClass]="{'is-invalid' : formSubmitProduct && formDataProduct.get('file').invalid}">
+								<label class="custom-file-label" for="customFile" id="customFileLabel">
+									{{ 'GLOBAL.LABEL.SELECTIMAGE' | translate }}</label>
+							</div>
+						</div>
+						<br>
+						<div class="row">
+							<div class="form-group form-check col-6">
+								<label class="" for="name">{{ 'GLOBAL.LABEL.NAME' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="name"
+										[ngClass]="{'is-invalid' : formSubmitProduct && formDataProduct.get('name').invalid}">
+								</div>
+							</div>
+							<div class="form-group form-check col-6">
+								<label class="" for="foodCategory">
+									{{ 'GLOBAL.LABEL.FOODCATEGORY' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" type="hidden" formControlName="foodCategoryId">
+									<input readonly class="form-control" formControlName="foodCategory"
+										[ngClass]="{'is-invalid' : formSubmitProduct && formDataProduct.get('foodCategory').invalid}">
+								</div>
+							</div>
+							<div class="form-group form-check col-6">
+								<label class="" for="description">{{ 'GLOBAL.LABEL.DESCRIPTION' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="description">
+								</div>
+							</div>
+							<div class="form-group form-check col-6">
+								<label class="" for="price">{{ 'GLOBAL.LABEL.PRICE' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" currencyMask formControlName="price"
+										[ngClass]="{'is-invalid' : formSubmitProduct && formDataProduct.get('price').invalid}">
+								</div>
+							</div>
+							<div class="form-group form-check col-6">
+								<label class="" for="pricePromotion">{{ 'GLOBAL.LABEL.PRICEPROMOTION' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" currencyMask formControlName="pricePromotion">
+								</div>
+							</div>
+							<div class="form-group form-check col-6">
+								<label class="" for="codPdv">{{ 'GLOBAL.LABEL.CODPDV' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="codPdv" style="width: 94px;">
+								</div>
+							</div>
+						</div>
+					</mat-tab>
+					<mat-tab label="Complemento">
+						<div>
+							<div class="col-6">
+								<button class="button__action__category" (click)="addComplementForm()" type="button">
+									Adicionar Categoria
+								</button>
+							</div>
+							<br>
+							<div *ngFor="let complement of formDataProduct.get('complements').controls; index as i">
+								<div id="box-card-complement-${countBox}" class="card box-product-complement form-inline"
+									style="box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19) !important; margin-bottom: 15px !important;">
+									<ng-container [formGroup]="complement">
+										<div class="card-body row box-product-complement2">
+											<div class="form-group col-12">
+												<label class="" for="name">{{ 'GLOBAL.LABEL.NAME' | translate }}</label>
+												<div class="input-group col">
+													<input required class="form-control" formControlName="name"
+														[ngClass]="{'is-invalid' : formSubmitProduct && complement.get('name').invalid}">
+												</div>
+											</div>
+											<!-- row justify-content-between Alinha pra direita-->
+											<div class="form-inline justify-content-between">
+												<div class="form-group  col-3">
+													<label class="" for="amountMin">{{ 'GLOBAL.LABEL.AMOUNTMIN' | translate }}</label>
+													<div class="input-group">
+														<input class="form-control" formControlName="amountMin"
+															[ngClass]="{'is-invalid' : formSubmitProduct && complement.get('amountMin').invalid}">
+													</div>
+												</div>
+												<div class="form-group col-3">
+													<label class="" for="amountMax">{{ 'GLOBAL.LABEL.AMOUNTMAX' | translate }}</label>
+													<div class="input-group">
+														<input class="form-control" formControlName="amountMax"
+															[ngClass]="{'is-invalid' : formSubmitProduct && complement.get('amountMax').invalid}">
+													</div>
+												</div>
+												<div class="form-check col-4">
+													<label class="form-check-label"
+														for="isRequired">{{ 'GLOBAL.LABEL.ISREQUIRED' | translate }}</label>
+													<input type="checkbox" class="form-check-input" formControlName="isRequired">
+												</div>
+											</div>
+										</div>
+										<br>
+										<hr>
+										<ul>
+											<li *ngFor="let item of complement.get('items').controls; index as j" class="row"
+												[formGroup]="item">
+												<!-- {{j}} -->
+												<div class="form-inline col-3">
+													<label class="" for="name">{{ 'GLOBAL.LABEL.NAME' | translate }}</label>
+													<div class="input-group">
+														<input class="form-control form-control-sm" formControlName="name"
+															[ngClass]="{'is-invalid' : formSubmitProduct && item.get('name').invalid}">
+													</div>
+												</div>
+												<div class="form-inline col-1">
+													<label class="" for="codPdv">{{ 'GLOBAL.LABEL.CODPDV' | translate }}</label>
+													<div class="input-group">
+														<input class="form-control form-control-sm" style="width: 94px;" formControlName="codPdv">
+													</div>
+												</div>
+												<div class="form-inline col-2">
+													<label class="" for="description">{{ 'GLOBAL.LABEL.DESCRIPTION' | translate }}</label>
+													<div class="input-group">
+														<input class="form-control form-control-sm" formControlName="description">
+													</div>
+												</div>
+												<div class="form-inline col-2">
+													<label class="" for="price">{{ 'GLOBAL.LABEL.PRICE' | translate }}</label>
+													<div class="input-group">
+														<input class="form-control form-control-sm" style="width: 94px;" currencyMask
+															formControlName="price"
+															[ngClass]="{'is-invalid' : formSubmitProduct && item.get('price').invalid}">
+													</div>
+												</div>
+												<div class="form-check form-check-inline col-2">
+													<label class="form-check-label"
+														for="isPaused">{{ 'GLOBAL.LABEL.ISPAUSED' | translate }}</label>
+													<input type="checkbox" class="form-check-input" formControlName="isPaused">
+												</div>
+												<div class="form-group text-center col-1">
+													<label class="col-12" for="fee">{{ 'GLOBAL.LABEL.ACTION' | translate }}</label>
+													<button type="button" (click)="removeFeeItem(i, j)" mat-mini-fab color="warn"
+														class="col-12 mat-mini-fab mat-button-base mat-accent">
+														<span class="mat-button-wrapper">
+															<mat-icon class="mat-icon notranslate material-icons mat-icon-no-color" role="img"
+																aria-hidden="true">
+																delete
+															</mat-icon>
+														</span>
+														<div class="mat-button-ripple mat-ripple mat-button-ripple-round" matripple>
+														</div>
+														<div class="mat-button-focus-overlay">
+														</div>
+													</button>
+												</div>
+											</li>
+										</ul>
+										<div class="card-footer text-left">
+											<button class="add-complemento"
+												(click)="addComplement(i, formDataProduct.get('complements').controls[i])" type="button">
+												Adicionar complemento
+											</button>
+										</div>
+									</ng-container>
+									<!-- {{i}} -->
+								</div>
+							</div>
+							<br>
+							<div class="row">
+							</div>
+							<div id="list-product-complement"></div>
+						</div>
+					</mat-tab>
+				</mat-tab-group>
+			</div>
+			<div class="modal-footer">
+				<input type="submit" value="Salvar Item" class="btn btn-outline-dark">
+			</div>
+		</form>
+	</ng-template>
+</div>
+
+<div class="example-container mat-elevation-z8">
+	<!-- Apartir de aqui é o modal -->
+	<!-- Modal Edit Produto adicional -->
+	<ng-template #editfoodproductmodal let-modal modal-lg>
+		<p>
+			<ngb-alert *ngIf="alertModal" [type]="alertModal.type" (close)="closeAlertModal()">
+				{{ alertModal.message }}
+			</ngb-alert>
+		</p>
+		<form [formGroup]="formDataProduct" (ngSubmit)="formSubmitProduct=true;
+		  validPricePromotion(formDataProduct.value);
+			formDataProduct.valid
+			 && updateFoodProduct(formDataProduct.value)">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-edit-foodProduct">
+					{{ 'GLOBAL.LABEL.TOEDIT' | translate }}
+				</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<mat-tab-group>
+					<mat-tab label="Produto">
+						<div style="margin-top: 10px">
+							<div class="custom-file">
+								<input type="file" class="custom-file-input" id="customFile" (change)="onChange($event)" multiple
+									[ngClass]="{'is-invalid' : formSubmitProduct && formDataProduct.get('file').invalid}">
+								<label class="custom-file-label" for="customFile" id="customFileLabel">
+									{{ 'GLOBAL.LABEL.SELECTIMAGE' | translate }}</label>
+							</div>
+						</div>
+						<br>
+						<div class="row">
+							<input type="hidden" class="form-control" formControlName="_id">
+							<div class="form-group form-check col-6">
+								<label class="" for="name">{{ 'GLOBAL.LABEL.NAME' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="name"
+										[ngClass]="{'is-invalid' : formSubmitProduct && formDataProduct.get('name').invalid}">
+								</div>
+							</div>
+							<div class="form-group form-check col-6">
+								<label class="" for="foodCategory">
+									{{ 'GLOBAL.LABEL.FOODCATEGORY' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" type="hidden" formControlName="foodCategoryId">
+									<input readonly class="form-control" formControlName="foodCategory"
+										[ngClass]="{'is-invalid' : formSubmitProduct && formDataProduct.get('foodCategory').invalid}">
+								</div>
+							</div>
+							<div class="form-group form-check col-6">
+								<label class="" for="description">{{ 'GLOBAL.LABEL.DESCRIPTION' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="description">
+								</div>
+							</div>
+							<div class="form-group form-check col-6">
+								<label class="" for="price">{{ 'GLOBAL.LABEL.PRICE' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" currencyMask formControlName="price"
+										[ngClass]="{'is-invalid' : formSubmitProduct && formDataProduct.get('price').invalid}">
+								</div>
+							</div>
+							<div class="form-group form-check col-6">
+								<label class="" for="pricePromotion">{{ 'GLOBAL.LABEL.PRICEPROMOTION' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" currencyMask formControlName="pricePromotion">
+								</div>
+							</div>
+							<div class="form-group form-check col-6">
+								<label class="" for="codPdv">{{ 'GLOBAL.LABEL.CODPDV' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" style="width: 94px;" formControlName="codPdv">
+								</div>
+							</div>
+						</div>
+					</mat-tab>
+					<mat-tab label="Complemento">
+						<div>
+							<div class="col-6">
+								<button class="button__action__category" (click)="addComplementForm()" type="button">
+									Adicionar Categoria
+								</button>
+							</div>
+							<br>
+							<div *ngFor="let complement of formDataProduct.get('complements').controls; index as i">
+								<div id="box-card-complement-${countBox}" class="card box-product-complement form-inline"
+									style="box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19) !important; margin-bottom: 15px !important;">
+									<ng-container [formGroup]="complement">
+										<div class="card-body box-product-complement2">
+											<div class="form-group col-12">
+												<label class="" for="name">{{ 'GLOBAL.LABEL.NAME' | translate }}</label>
+												<div class="input-group">
+													<input required class="form-control" formControlName="name"
+														[ngClass]="{'is-invalid' : formSubmitProduct && complement.get('name').invalid}">
+												</div>
+											</div>
+											<!-- row justify-content-between Alinha pra direita-->
+											<div class="form-inline justify-content-between">
+												<div class="form-group  col-3">
+													<label class="" for="amountMin">{{ 'GLOBAL.LABEL.AMOUNTMIN' | translate }}</label>
+													<div class="input-group">
+														<input class="form-control" formControlName="amountMin"
+															[ngClass]="{'is-invalid' : formSubmitProduct && complement.get('amountMin').invalid}">
+													</div>
+												</div>
+												<div class="form-group col-3">
+													<label class="" for="amountMax">{{ 'GLOBAL.LABEL.AMOUNTMAX' | translate }}</label>
+													<div class="input-group">
+														<input class="form-control" formControlName="amountMax"
+															[ngClass]="{'is-invalid' : formSubmitProduct && complement.get('amountMax').invalid}">
+													</div>
+												</div>
+												<div class="form-check col-4">
+													<input type="checkbox" class="form-check-input" formControlName="isRequired">
+													<label class="form-check-label"
+														for="isRequired">{{ 'GLOBAL.LABEL.ISREQUIRED' | translate }}</label>
+												</div>
+											</div>
+										</div>
+										<br>
+										<hr>
+										<ul>
+											<li *ngFor="let item of complement.get('items').controls; index as j" class="row"
+												[formGroup]="item">
+												<!-- {{j}} -->
+												<div class="form-inline col-3">
+													<label class="" for="name">{{ 'GLOBAL.LABEL.NAME' | translate }}</label>
+													<div class="input-group">
+														<input class="form-control form-control-sm" formControlName="name"
+															[ngClass]="{'is-invalid' : formSubmitProduct && item.get('name').invalid}">
+													</div>
+												</div>
+												<div class="form-inline col-1">
+													<label class="" for="codPdv">{{ 'GLOBAL.LABEL.CODPDV' | translate }}</label>
+													<div class="input-group">
+														<input class="form-control form-control-sm" formControlName="codPdv" style="width: 94px;">
+													</div>
+												</div>
+												<div class="form-inline col-2">
+													<label class="" for="description">{{ 'GLOBAL.LABEL.DESCRIPTION' | translate }}</label>
+													<div class="input-group">
+														<input class="form-control form-control-sm" formControlName="description">
+													</div>
+												</div>
+												<div class="form-inline col-2">
+													<label class="" for="price">{{ 'GLOBAL.LABEL.PRICE' | translate }}</label>
+													<div class="input-group">
+														<input class="form-control form-control-sm" style="width: 94px;" currencyMask
+															formControlName="price"
+															[ngClass]="{'is-invalid' : formSubmitProduct && item.get('price').invalid}">
+													</div>
+												</div>
+												<div class="form-check form-check-inline col-2">
+													<label class="form-check-label"
+														for="isPaused">{{ 'GLOBAL.LABEL.ISPAUSED' | translate }}</label>
+													<input type="checkbox" class="form-check-input" formControlName="isPaused">
+												</div>
+												<div class="form-group text-center col-1">
+													<label class="col-12" for="fee">{{ 'GLOBAL.LABEL.ACTION' | translate }}</label>
+													<button type="button" (click)="removeFeeItem(i, j)" mat-mini-fab color="warn"
+														class="col-12 mat-mini-fab mat-button-base mat-accent">
+														<span class="mat-button-wrapper">
+															<mat-icon class="mat-icon notranslate material-icons mat-icon-no-color" role="img"
+																aria-hidden="true">
+																delete
+															</mat-icon>
+														</span>
+														<div class="mat-button-ripple mat-ripple mat-button-ripple-round" matripple>
+														</div>
+														<div class="mat-button-focus-overlay">
+														</div>
+													</button>
+												</div>
+											</li>
+										</ul>
+										<div class="card-footer text-left">
+											<button class="add-complemento"
+												(click)="addComplement(i, formDataProduct.get('complements').controls[i])" type="button">
+												Adicionar complemento
+											</button>
+										</div>
+									</ng-container>
+									<!-- {{i}} -->
+								</div>
+							</div>
+							<br>
+							<div class="row">
+							</div>
+							<div id="list-product-complement"></div>
+						</div>
+					</mat-tab>
+				</mat-tab-group>
+			</div>
+			<div class="modal-footer">
+				<input type="submit" value="Salvar" class="btn btn-outline-dark">
+			</div>
+		</form>
+
+	</ng-template>
+</div>

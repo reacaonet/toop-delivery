@@ -1,0 +1,27 @@
+export const GET_USER = 'GET_USER';
+export const GET_ADDRESS = 'GET_ADDRESS';
+
+export const LOCATION = 'LOCATION';
+export const GET_LOCATION = 'GET_LOCATION';
+export const SET_LOCATION = 'SET_LOCATION';
+
+export const GET_TO_CART = 'GET_TO_CART';
+export const ADD_TO_CART = 'ADD_TO_CART';
+export const ADD_TO_CART_RESTAURANT = 'ADD_TO_CART_RESTAURANT';
+export const CLEAN_TO_CART = 'CLEAN_TO_CART';
+export const LOAD_TO_CART = 'LOAD_TO_CART';
+export const MESSAGE_TO_CART = 'MESSAGE_TO_CART';
+
+export const GET_SERVICE_CHARGE = 'GET_SERVICE_CHARGE';
+export const GET_DELIVERY_FEE = 'GET_DELIVERY_FEE';
+
+export const TAB_GET_CATEGORY = 'TAB_GET_CATEGORY';
+export const TAB_SET_CATEGORY = 'TAB_SET_CATEGORY';
+
+export const GET_BOOKING = 'GET_BOOKING';
+export const SET_BOOKING = 'SET_BOOKING';
+export const UPDATE_BOOKING = 'UPDATE_BOOKING';
+export const CLEAN_BOOKING = 'CLEAN_BOOKING';
+
+export const GET_CONFIGURATIONS = 'GET_CONFIGURATIONS';
+export const SET_CONFIGURATIONS = 'SET_CONFIGURATIONS';

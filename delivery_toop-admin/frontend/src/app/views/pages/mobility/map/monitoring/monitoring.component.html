@@ -1,0 +1,189 @@
+<form [formGroup]="formFilter" *ngIf="formFilter" formFilter.valid class="col-12 mb-3">
+	<div class="row col-12 shadow pt-2 bg-light">
+		<div class="form-group col-12 col-md-3">
+			<label for="category">{{ 'GLOBAL.LABEL.INFORMREGION' | translate }}: ({{ 'GLOBAL.LABEL.FRANCHISE' |
+				translate
+				}})</label>
+			<div class="input-group">
+				<input type="text" class="form-control" matInput placeholder="{{ 'GLOBAL.LABEL.CHOOSEAFRANCHISE' | translate }}"
+					[matAutocomplete]="autoCompany" formControlName="franchise" [ngClass]="{
+						'is-invalid': formFilter && formFilter.get('franchise').invalid
+					}" />
+				<mat-autocomplete [displayWith]="displayFn" #autoCompany="matAutocomplete">
+					<mat-option *ngFor="let franchise of listFranchise" [value]="franchise"
+						(click)="onClickFranchiseFilter(franchise)">
+						{{ franchise.name }}
+					</mat-option>
+				</mat-autocomplete>
+			</div>
+		</div>
+
+		<div class="col-12 col-md-3 mb-2">
+			<label for="category">{{ 'GLOBAL.LABEL.COVERAGERADIUS' | translate }}</label>
+			<div class="input-group">
+				<select class="form-control" formControlName="radius">
+					<option value="20000">20 KM</option>
+					<option value="30000">30 KM</option>
+					<option value="50000">50 KM</option>
+					<option value="75000">75 KM</option>
+					<option value="100000">100 KM</option>
+					<option value="200000">200 KM</option>
+					<option value="500000">500 KM</option>
+				</select>
+			</div>
+		</div>
+
+		<div class="col-12 col-md-3 d-flex align-items-center justify-content-center mb-2">
+			<button type="button" class="btn btn-info col-10" (click)="searchDriver(true)" [disabled]="loadDriver">
+				<span *ngIf="!loadDriver">Buscar</span>
+				<span *ngIf="loadDriver">Aguarde ...</span>
+				<div *ngIf="loadDriver" class="spinner-border text-primary" role="status" style=" width: 1em; height: 1em;">
+					<span class="visually-hidden"></span>
+				</div>
+			</button>
+		</div>
+	</div>
+
+	<div class="row col-12 shadow pt-2 bg-light">
+		<div class="form-group col-12 col-md-3">
+			<label for="category">{{ 'GLOBAL.LABEL.DRIVER' | translate }}:</label>
+			<div class="input-group">
+				<input type="text" class="form-control" matInput placeholder="{{ 'GLOBAL.LABEL.CHOOSEADRIVER' | translate }}"
+					[matAutocomplete]="autoDriver" formControlName="driver" [ngClass]="{
+						'is-invalid': formFilter && formFilter.get('driver').invalid
+					}" />
+				<mat-autocomplete [displayWith]="displayFn" #autoDriver="matAutocomplete">
+					<mat-option *ngFor="let driver of drivers" [value]="driver" (click)="onClickDriverFilter(driver)">
+						{{ driver.name }}
+					</mat-option>
+				</mat-autocomplete>
+			</div>
+		</div>
+	</div>
+</form>
+
+<div class="row content">
+	<div
+		class="{{ bookings && bookings?.length > 0 ? 'col-12 col-md-4 card listBooking no-border' : 'col-12 col-md-4 card listBooking' }}">
+		<div class="card-body cardList">
+			<div class="col-12 mt-2" *ngFor="let booking of bookings">
+				<div class="card border-secondary">
+					<div class="card-header text-white bg-info pt-2 pb-2 d-flex justify-content-between">
+						<h5 class="">{{ getStatus(booking?.status) }}</h5>
+						<i class="flaticon-more btnOptions" *ngIf="showOptionsEndAndCancelRace === true"
+							(click)="showModalOptions(modalOptions , booking)"></i>
+					</div>
+					<div class="card-body pt-0 pb-0">
+						<p class="cardLine">
+							<b>Valor: </b> {{ booking?.payment?.currencySymbol }} {{ booking?.priceOfferDriver ||
+							booking?.price }} |
+							{{ getMethodPayment(booking?.payment?.typePayment, booking?.directPayment) }}
+						</p>
+						<p class="cardLine">
+							<b>Origem: </b> {{ booking?.origin?.address }}
+						</p>
+						<p class="cardLine">
+							<b>Destino:</b> {{ getDestiny(booking?.destiny) }}
+						</p>
+						<p class="cardLine">
+							<b>Serviço: </b> {{ booking?.service?.name }}
+						</p>
+						<p class="cardLine" *ngIf="booking?.startRaceAt">
+							<b>{{ 'GLOBAL.LABEL.STARTTRIP' | translate }}: </b> {{
+							formatDateStartRace(booking?.startRaceAt) }}
+						</p>
+						<p class="cardLine">
+							<img *ngIf="booking?.passenger?.person?.image"
+								src="{{ booking?.passenger?.person?.image ? booking?.passenger?.person?.image : '' }}"
+								style="height: 50px;" alt="..." class="img-thumbnail">
+							<b> Passageiro: </b> {{ booking?.passenger?.person?.name }}
+						</p>
+						<p class="cardLine" *ngIf="booking?.driver">
+							<img src="{{ booking?.driver?.selfiePhoto ? booking?.driver?.selfiePhoto[0] : '' }}" style="height: 50px;"
+								alt="..." class="img-thumbnail">
+							<b> Motorista: </b> {{ booking?.driver?.name }}
+						</p>
+					</div>
+					<div class="card-footer text-white bg-dark pt-2 pb-2">
+						{{ getDate(booking?.createdAt) }} - <b>Previsão: </b> {{ booking?.routeTime }} / {{
+						booking?.distance }}
+					</div>
+				</div>
+			</div>
+
+			<div class="col-12 d-flex justify-content-center" *ngIf="!loading && bookings && bookings?.length > 0 ">
+				<div class="col-9 contentListMore" (click)="viewMore()">
+					<div class="contentListMoreTxt">ver Mais</div>
+				</div>
+			</div>
+
+			<div class="col-12 d-flex justify-content-center" *ngIf="loading">
+				<div class="spinner-border" role="status">
+					<span class="sr-only">Loading...</span>
+				</div>
+			</div>
+
+			<div *ngIf="bookings && bookings?.length === 0" class="d-flex justify-content-center">
+				{{ 'GLOBAL.LABEL.NOTRIPSSINPROGRESS' | translate }}
+			</div>
+		</div>
+	</div>
+
+	<div class="col-12 col-md-8 card map-container no-border">
+		<div class="card-body no-mp">
+			<div *ngIf="apiLoaded | async" style="width: 100% !important;">
+				<google-map [height]="windowHeight" width="100%" [center]="center" [zoom]="zoom">
+					<map-circle *ngIf="radius > 0" [center]="center" [radius]="radius" [options]="circleOptions"></map-circle>
+					<map-marker #marker="mapMarker" *ngFor="let markerPosition of markerPositions"
+						[position]="markerPosition.position" [options]="markerPosition.options"
+						(mapClick)="openInfoWindow(marker, markerPosition)">
+					</map-marker>
+					<map-info-window>
+						<p *ngIf="infoCurrent?.passenger">Passageiro: {{ infoCurrent?.passenger || '' }}</p>
+						<p *ngIf="infoCurrent?.driver">Motorista: {{ infoCurrent.driver || '' }}</p>
+						<p>Status: {{ infoCurrent.status }}</p>
+						<p *ngIf="infoCurrent.startRaceAt">{{ 'GLOBAL.LABEL.STARTTRIP' | translate }}: {{
+							infoCurrent.startRaceAt }}
+						</p>
+						<p>{{ 'GLOBAL.LABEL.UPDATED' | translate }}: {{ infoCurrent.update }}</p>
+					</map-info-window>
+				</google-map>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Modal Options -->
+<ng-template #modalOptions let-modal modal-sm>
+	<div class="modal-header">
+		<h4 class="modal-title" id="modal-create-schedule">{{ getStatus(bookingCurrent?.status) }}</h4>
+		<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	<div class="modal-body">
+		<div class="row">
+			<div class="col-12 mt-3"
+				*ngIf="bookingCurrent?.status === 'accepted' || bookingCurrent?.status === 'in_progress'">
+				<button type="button" class="btn btn-primary col-12" (click)="finishRace()" [disabled]="loadFinal">
+					<span *ngIf="!loadFinal">Finalizar Viagem</span>
+					<span *ngIf="loadFinal">Aguarde ...</span>
+					<div *ngIf="loadFinal" class="spinner-border text-primary" role="status" style=" width: 1em; height: 1em;">
+						<span class="visually-hidden"></span>
+					</div>
+				</button>
+			</div>
+
+			<div class="col-12 mt-3">
+				<button type="button" class="btn btn-danger col-12" (click)="cancelRace()" [disabled]="loadCancel">
+					<i class="flaticon2-cancel mr-2"></i>
+					<span *ngIf="!loadCancel">Cancelar Viagem</span>
+					<span *ngIf="loadCancel">Aguarde ...</span>
+					<div *ngIf="loadCancel" class="spinner-border text-primary" role="status" style=" width: 1em; height: 1em;">
+						<span class="visually-hidden"></span>
+					</div>
+				</button>
+			</div>
+		</div>
+	</div>
+</ng-template>

@@ -1,0 +1,98 @@
+<form [formGroup]="formFilter" formFilter.valid>
+	<div class="row">
+		<div class="alert alert-primary col" role="alert">
+			Primeiro selecione uma empresa para ver os resultado.
+		</div>
+	</div>
+	<div class="row">
+		<div class="form-group col-5">
+			<label>{{ 'GLOBAL.LABEL.COMPANY' | translate }}</label>
+			<div class="input-group">
+				<input type="text" class="form-control" matInput placeholder="Pesquise uma Empresa" [matAutocomplete]="autoCompany" formControlName="company">
+				<mat-autocomplete [displayWith]="displayFnFilter" #autoCompany="matAutocomplete">
+					<mat-option *ngFor="let companyItem of companies" [value]="companyItem" (click)="onClickCompanyFilter(companyItem)">
+						{{ companyItem.name }}
+					</mat-option>
+				</mat-autocomplete>
+			</div>
+		</div>
+	</div>
+</form>
+
+<!-- Alert -->
+<p>
+	<ngb-alert *ngIf="alert" [type]="alert.type" (close)="closeAlert()">
+		{{ alert.message }}
+	</ngb-alert>
+</p>
+
+<div class="row justify-content-between">
+	<div class="col-auto align-self-center mb-2">
+		<p class="float-left">{{ 'GLOBAL.LABEL.INTEGRATIONS' | translate }}</p>
+	</div>
+</div>
+
+
+<div class="example-container mat-elevation-z8">
+	<mat-table #table [dataSource]="dataSource">
+		<ng-container matColumnDef="select">
+			<mat-header-cell *matHeaderCellDef>
+				<mat-checkbox [checked]="true" [indeterminate]="true">
+				</mat-checkbox>
+			</mat-header-cell>
+			<mat-cell *matCellDef="let row">
+				<mat-checkbox (click)="$event.stopPropagation()">
+				</mat-checkbox>
+			</mat-cell>
+		</ng-container>
+		<ng-container matColumnDef="_id">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.NAME' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element._id }} </mat-cell>
+		</ng-container>
+		<ng-container matColumnDef="total">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.TOTAL' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.total }} </mat-cell>
+		</ng-container>
+		<ng-container matColumnDef="action">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.ACTION' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i class="flaticon-shopping-basket mr-2" (click)="getListDepartmentsModal(departmentmodal, element._id, element.total)"></i>
+			</mat-cell>
+		</ng-container>
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns;">
+		</mat-row>
+	</mat-table>
+	<mat-paginator [length]="totalLength" [pageSize]="pageSize" [pageSizeOptions]="pageLimit" (page)="changePage($event)">
+	</mat-paginator>
+</div>
+
+<ng-template #departmentmodal let-modal modal-lg>
+	<div class="modal-header">
+		<h4 class="modal-title" id="modal-list-department">{{ 'GLOBAL.LABEL.LISTDEPARTMENTS' | translate }}</h4>
+		<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	<div class="modal-body">
+		<h3 *ngIf="departmentName" >Departamento: {{ departmentName }}</h3>
+		<table class="table">
+			<thead>
+				<tr>
+					<th scope="col">#</th>
+					<th scope="col">Nome</th>
+					<th scope="col">Preço</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr *ngFor="let department of listProductsDepartments; index as i">
+					<th scope="row">{{ i + 1 }}</th>
+					<td>{{department.nome}}</td>
+					<td>{{department.preco}}</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	<div class="modal-footer">
+	</div>
+</ng-template>

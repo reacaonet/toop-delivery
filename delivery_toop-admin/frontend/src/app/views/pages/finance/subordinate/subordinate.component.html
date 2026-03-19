@@ -1,0 +1,410 @@
+<div class="row justify-content-between">
+	<div class="col-auto align-self-center mb-2">
+		<p class="float-left">{{ 'GLOBAL.LABEL.SUBORDINATE' | translate }}</p>
+	</div>
+	<div class="col-auto">
+		<a (click)="upSertSubordinateModalShow(upsertsubordinatemodal, undefined, 'create')" href="javascript:;" class="float-right btn btn-label-warning btn-bold btn-sm btn-icon-h">
+			{{ 'GLOBAL.LABEL.CREATE' | translate }}
+		</a>
+	</div>
+</div>
+
+<div class="example-container mat-elevation-z8">
+	<mat-table #table [dataSource]="dataSource">
+		<!-- Checkbox Column -->
+		<ng-container matColumnDef="select">
+			<mat-header-cell *matHeaderCellDef>
+				<mat-checkbox [checked]="true" [indeterminate]="true">
+				</mat-checkbox>
+			</mat-header-cell>
+			<mat-cell *matCellDef="let row">
+				<mat-checkbox (click)="$event.stopPropagation()">
+				</mat-checkbox>
+			</mat-cell>
+		</ng-container>
+		<!-- physical person Column -->
+		<ng-container matColumnDef="physicalPerson">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.PHYSICALPERSON' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ (element.physicalPerson && element.physicalPerson.name) ? element.physicalPerson.name : '-' }} </mat-cell>
+		</ng-container>
+		<!-- legal person Column -->
+		<ng-container matColumnDef="legalPerson">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.LEGALPERSON' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ (element.legalPerson && element.legalPerson.name) ? element.legalPerson.name : '-' }} </mat-cell>
+		</ng-container>
+		<!-- Delete Delivery Man -->
+		<ng-container matColumnDef="delete">
+			<mat-header-cell *matHeaderCellDef>{{ 'GLOBAL.LABEL.ACTION' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i class="flaticon2-edit mr-2" (click)="upSertSubordinateModalShow(upsertsubordinatemodal, element, 'edit')"></i>
+				<i class="flaticon2-trash" (click)="confirmDeleteModalShow(confirmdeletemodal, element)"></i>
+			</mat-cell>/
+		</ng-container>
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns;">
+		</mat-row>
+	</mat-table>
+
+	<!-- Modal up sert Subordinates -->
+	<ng-template #upsertsubordinatemodal let-modal modal-lg>
+		<form [formGroup]="formData" (ngSubmit)="formSubmitSubordinate=true; formData.valid && upSertSubordinate(formData.value)
+         && modal.dismiss('Cross click')">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-create-subordinate">{{ (typeAction === 'create') ? ('GLOBAL.LABEL.CREATESUBORDINATES' | translate) : ('GLOBAL.LABEL.EDITSUBORDINATES' | translate) }}
+				</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<input type="hidden" class="form-control" formControlName="_id">
+				<mat-tab-group>
+					<mat-tab label="Dados">
+						<h5 class="card-title">Para começar o cadastro indique se o seu subordinado é uma pessoa jurídica ou física</h5>
+						<div class="row">
+							<div class="col-sm-6">
+								<div class="card">
+									<div class="card-body">
+										<p class="card-text">{{ 'GLOBAL.LABEL.LEGALPERSON' | translate }}</p>
+										<button type="button" class="btn btn-sm btn-info" (click)="newFormDataLegalPerson()">
+											<span aria-hidden="true">P.JURÍDICA</span>
+										</button>
+									</div>
+								</div>
+							</div>
+							<div class="col-sm-6">
+								<div class="card">
+									<div class="card-body">
+										<p class="card-text">{{ 'GLOBAL.LABEL.PHYSICALPERSON' | translate }}</p>
+										<button type="button" class="btn btn-sm btn-info" (click)="newFormDataPhysicalPerson()">
+											<span aria-hidden="true">P.FÍSICA</span>
+										</button>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="row" *ngFor="let leg of formData.get('legal').controls; index as i">
+							<ng-container [formGroup]="leg">
+								<div class="form-group col-8">
+									<label>{{ 'GLOBAL.LABEL.LEGALPERSONTWO' | translate }}</label>
+									<div class="input-group">
+										<input type="text" class="form-control" matInput placeholder="Pesquisar por Empresa"
+										 [matAutocomplete]="autoCompany" formControlName="legalPerson"
+										 [ngClass]="{'is-invalid' : formSubmitSubordinate && leg.get('legalPerson').invalid}">
+										<mat-autocomplete [displayWith]="displayFnFilter" #autoCompany="matAutocomplete">
+											<mat-option *ngFor="let company of companies" [value]="company">
+												{{ company.name }}
+											</mat-option>
+										</mat-autocomplete>
+									</div>
+								</div>
+								<div class="form-group col-4">
+									<label for="socialReason">{{ 'GLOBAL.LABEL.SOCIALREASON' | translate }}</label>
+									<div class="input-group">
+										<input class="form-control" formControlName="socialReason" rows="3"
+										 [ngClass]="{'is-invalid' : formSubmitSubordinate && leg.get('socialReason').invalid}">
+									</div>
+								</div>
+								<div class="form-group col-8">
+									<label for="fantasyName">{{ 'GLOBAL.LABEL.FANTASYNAME' | translate }}</label>
+									<div class="input-group">
+										<input class="form-control" formControlName="fantasyName" rows="3"
+										 [ngClass]="{'is-invalid' : formSubmitSubordinate && leg.get('fantasyName').invalid}">
+									</div>
+								</div>
+								<div class="form-group col-4">
+									<label for="cnpj">{{ 'GLOBAL.LABEL.CNPJ' | translate }}</label>
+									<div class="input-group">
+										<input class="form-control" formControlName="cnpj" rows="3"
+										 [ngClass]="{'is-invalid' : formSubmitSubordinate && leg.get('cnpj').invalid}">
+									</div>
+								</div>
+								<div class="form-group col-8">
+									<label for="representativesName">{{ 'GLOBAL.LABEL.REPRESENTATIVESNAME' | translate }}</label>
+									<div class="input-group">
+										<input class="form-control" formControlName="representativesName" rows="3"
+										 [ngClass]="{'is-invalid' : formSubmitSubordinate && leg.get('representativesName').invalid}">
+									</div>
+								</div>
+								<div class="form-group col-4">
+									<label for="representativePhone">{{ 'GLOBAL.LABEL.REPRESENTATIVEPHONE' | translate }}</label>
+									<div class="input-group">
+										<input class="form-control" mask="(00) 00009-0000" formControlName="representativePhone" rows="3"
+										 [ngClass]="{'is-invalid' : formSubmitSubordinate && leg.get('representativePhone').invalid}">
+									</div>
+								</div>
+								<div class="form-group col-8">
+									<label for="representativeEmail">{{ 'GLOBAL.LABEL.REPRESENTATIVEEMAIL' | translate }}</label>
+									<div class="input-group">
+										<input class="form-control" formControlName="representativeEmail" rows="3"
+										 [ngClass]="{'is-invalid' : formSubmitSubordinate && leg.get('representativeEmail').invalid}">
+									</div>
+								</div>
+								<div class="form-group text-center col-md-2 ml-auto">
+									<label class="col-12">{{ 'GLOBAL.LABEL.ACTION' | translate }}</label>
+									<button (click)="clearFormLegalOrPhysical()" mat-mini-fab color="warn"
+									 class="col-12 mat-mini-fab mat-button-base mat-accent">
+										<span class="mat-button-wrapper">
+											<mat-icon class="mat-icon notranslate material-icons mat-icon-no-color" role="img" aria-hidden="true">
+												arrow_back
+											</mat-icon>
+										</span>
+										<div class="mat-button-ripple mat-ripple mat-button-ripple-round" matripple>
+										</div>
+										<div class="mat-button-focus-overlay">
+										</div>
+									</button>
+								</div>
+							</ng-container>
+						</div>
+						<div class="row" *ngFor="let phys of formData.get('physical').controls; index as j">
+							<ng-container [formGroup]="phys">
+								<div class="form-group col-8">
+									<label>{{ 'GLOBAL.LABEL.PHYSYCALPERSONTWO' | translate }}</label>
+									<div class="input-group">
+										<input type="text" class="form-control" matInput placeholder="Escolha uma Pessoa"
+											[matAutocomplete]="autoPerson" formControlName="physicalPerson"
+											[ngClass]="{'is-invalid' : formSubmitSubordinate && phys.get('physicalPerson').invalid}">
+										<mat-autocomplete [displayWith]="displayFnPerson" #autoPerson="matAutocomplete">
+											<mat-option *ngFor="let pers of person" [value]="pers">
+												{{ pers.name }}
+											</mat-option>
+										</mat-autocomplete>
+									</div>
+								</div>
+								<div class="form-group col-8">
+									<label for="name">{{ 'GLOBAL.LABEL.NAME' | translate }}</label>
+									<div class="input-group">
+										<input class="form-control" formControlName="name" rows="3"
+										 [ngClass]="{'is-invalid' : formSubmitSubordinate && phys.get('name').invalid}">
+									</div>
+								</div>
+								<div class="form-group col-4">
+									<label for="cpf">{{ 'GLOBAL.LABEL.CPF' | translate }}</label>
+									<div class="input-group">
+										<input class="form-control" mask="000.000.000-00" formControlName="cpf" rows="3"
+										 [ngClass]="{'is-invalid' : formSubmitSubordinate && phys.get('cpf').invalid}">
+									</div>
+								</div>
+								<div class="form-group col-8">
+									<label for="email">{{ 'GLOBAL.LABEL.EMAIL' | translate }}</label>
+									<div class="input-group">
+										<input class="form-control" formControlName="email" rows="3"
+										 [ngClass]="{'is-invalid' : formSubmitSubordinate && phys.get('email').invalid}">
+									</div>
+								</div>
+								<div class="form-group col-4">
+									<label for="phone">{{ 'GLOBAL.LABEL.PHONE' | translate }}</label>
+									<div class="input-group">
+										<input class="form-control" mask="(00) 00009-0000" formControlName="phone" rows="3"
+										 [ngClass]="{'is-invalid' : formSubmitSubordinate && phys.get('phone').invalid}">
+									</div>
+								</div>
+								<div class="form-group col-4">
+									<label for="dateOfBirth">{{ 'GLOBAL.LABEL.DATEOFBIRTH' | translate }}</label>
+									<div class="input-group">
+										<input mask="d0/M0/0000" class="form-control" formControlName="dateOfBirth" rows="3"
+										 [ngClass]="{'is-invalid' : formSubmitSubordinate && phys.get('dateOfBirth').invalid}">
+									</div>
+								</div>
+								<div class="form-group text-center col-md-2 ml-auto">
+									<label class="col-12">{{ 'GLOBAL.LABEL.ACTION' | translate }}</label>
+									<button (click)="clearFormLegalOrPhysical()" mat-mini-fab color="warn"
+									 class="col-12 mat-mini-fab mat-button-base mat-accent">
+										<span class="mat-button-wrapper">
+											<mat-icon class="mat-icon notranslate material-icons mat-icon-no-color" role="img" aria-hidden="true">
+												arrow_back
+											</mat-icon>
+										</span>
+										<div class="mat-button-ripple mat-ripple mat-button-ripple-round" matripple>
+										</div>
+										<div class="mat-button-focus-overlay">
+										</div>
+									</button>
+								</div>
+							</ng-container>
+						</div>
+					</mat-tab>
+					<mat-tab label="Endereço">
+						<div class="row" *ngFor="let addre of formData.get('address').controls; index as k">
+							<ng-container [formGroup]="addre">
+								<div class="form-group col-3">
+									<label for="cep">{{ 'GLOBAL.LABEL.CEP' | translate }}</label>
+									<div class="input-group">
+										<input class="form-control" formControlName="cep" rows="3"
+										 [ngClass]="{'is-invalid' : formSubmitSubordinate && addre.get('cep').invalid}">
+									</div>
+								</div>
+								<div class="form-group col-6">
+									<label for="publicPlace">{{ 'GLOBAL.LABEL.PUBLICPLACE' | translate }}</label>
+									<div class="input-group">
+										<input class="form-control" formControlName="publicPlace" rows="3"
+										 [ngClass]="{'is-invalid' : formSubmitSubordinate && addre.get('publicPlace').invalid}">
+									</div>
+								</div>
+								<div class="form-group col-3">
+									<label for="number">{{ 'GLOBAL.LABEL.NUMBER' | translate }}</label>
+									<div class="input-group">
+										<input class="form-control" formControlName="number" rows="3" 
+										[ngClass]="{'is-invalid' : formSubmitSubordinate && addre.get('number').invalid}">
+									</div>
+								</div>
+								<div class="form-group col-6">
+									<label for="complement">{{ 'GLOBAL.LABEL.COMPLEMENT' | translate }}</label>
+									<div class="input-group">
+										<input class="form-control" formControlName="complement" rows="3"
+										 [ngClass]="{'is-invalid' : formSubmitSubordinate && addre.get('complement').invalid}">
+									</div>
+								</div>
+								<div class="form-group col-6">
+									<label for="neighborhood">{{ 'GLOBAL.LABEL.NEIGHBORHOOD' | translate }}</label>
+									<div class="input-group">
+										<input class="form-control" formControlName="neighborhood" rows="3"
+										 [ngClass]="{'is-invalid' : formSubmitSubordinate && addre.get('neighborhood').invalid}">
+									</div>
+								</div>
+								<div class="form-group col-6">
+									<label>{{ 'GLOBAL.LABEL.CITY' | translate }}</label>
+									<div class="input-group">
+										<input type="text" class="form-control" matInput placeholder="Escolha uma cidade"
+										 [matAutocomplete]="autoCity" formControlName="city"
+										  [ngClass]="{'is-invalid' : formSubmitSubordinate && addre.get('city').invalid}">
+										<mat-autocomplete [displayWith]="displayFnCity" #autoCity="matAutocomplete">
+											<mat-option *ngFor="let cit of listCity" [value]="cit">
+												{{ cit.name }}
+											</mat-option>
+										</mat-autocomplete>
+									</div>
+								</div>
+								<div class="form-group col-6">
+									<label for="uf">{{ 'GLOBAL.LABEL.UF' | translate }}</label>
+									<div class="input-group">
+										<input type="text" class="form-control" matInput placeholder="Escolha um Estado" 
+										[matAutocomplete]="autoState" formControlName="uf"
+										 [ngClass]="{'is-invalid' : formSubmitSubordinate && addre.get('uf').invalid}">
+										<mat-autocomplete [displayWith]="displayFnState" #autoState="matAutocomplete">
+											<mat-option *ngFor="let stat of stateList" [value]="stat">
+												{{ stat.name }}
+											</mat-option>
+										</mat-autocomplete>
+									</div>
+								</div>
+							</ng-container>
+						</div>
+					</mat-tab>
+					<mat-tab label="Banco/Taxas">
+						<div class="row" *ngFor="let fe of formData.get('feesTypes').controls; index as l">
+							<ng-container [formGroup]="fe">
+								<div class="form-group col-6">
+									<label for="bank">{{ 'GLOBAL.LABEL.BANK' | translate }}</label>
+									<div class="input-group">
+										<input class="form-control" formControlName="bank" rows="3"
+										 [ngClass]="{'is-invalid' : formSubmitSubordinate && fe.get('bank').invalid}">
+									</div>
+								</div>
+								<div class="form-group col-6">
+									<label for="accountType">{{ 'GLOBAL.LABEL.ACCOUNTTYPE' | translate }}</label>
+									<select id="accountType" class="form-control" formControlName="accountType"
+									[ngClass]="{'is-invalid' : formSubmitSubordinate && fe.get('accountType').invalid}">
+										<option selected>...</option>
+										<option value="Conta corrente">Conta corrente</option>
+										<option value="Conta poupança">Conta poupança</option>
+									</select>
+								</div>
+								<div class="form-group col-4">
+									<label for="agency">{{ 'GLOBAL.LABEL.AGENCY' | translate }}</label>
+									<div class="input-group">
+										<input class="form-control" formControlName="agency" rows="3"
+										 [ngClass]="{'is-invalid' : formSubmitSubordinate && fe.get('agency').invalid}">
+									</div>
+								</div>
+								<div class="form-group col-2">
+									<label for="agencyDigit">{{ 'GLOBAL.LABEL.AGENCYDIGIT' | translate }}</label>
+									<div class="input-group">
+										<input class="form-control" formControlName="agencyDigit" rows="3"
+										[ngClass]="{'is-invalid' : formSubmitSubordinate && fe.get('agencyDigit').invalid}">
+									</div>
+								</div>
+								<div class="form-group col-4">
+									<label for="account">{{ 'GLOBAL.LABEL.ACCOUNT' | translate }}</label>
+									<div class="input-group">
+										<input class="form-control" formControlName="account" rows="3"
+										 [ngClass]="{'is-invalid' : formSubmitSubordinate && fe.get('account').invalid}">
+									</div>
+								</div>
+								<div class="form-group col-2">
+									<label for="accountDigit">{{ 'GLOBAL.LABEL.ACCOUNTDIGIT' | translate }}</label>
+									<div class="input-group">
+										<input class="form-control" formControlName="accountDigit" rows="3" 
+										[ngClass]="{'is-invalid' : formSubmitSubordinate && fe.get('accountDigit').invalid}">
+									</div>
+								</div>
+								<div class="col-1">
+									<h5>Taxas</h5>
+								</div>
+								<div class="card-text col-12">
+									<p>Primeiro escolha como irá cadastrar as taxas para o subordinado</p>
+								</div>
+								<div class="card-deck col-12">
+									<div class="card border-primary col-6">
+										<div class="form-check form-check-inline card-body">
+											<input class="form-check-input" type="radio" formControlName="fees" id="fees" value="NÃO CADASTRAR TAXA" 
+											[ngClass]="{'is-invalid' : formSubmitSubordinate && fe.get('fees').invalid}">
+											<label class="form-check-label" for="fees">NÃO CADASTRAR TAXA</label>
+										</div>
+									</div>
+									<div class="card border-primary col-6">
+										<div class="form-check form-check-inline card-body">
+											<input class="form-check-input" type="radio" formControlName="fees" id="fees" value="TAXA GLOBAL" 
+											[ngClass]="{'is-invalid' : formSubmitSubordinate && fe.get('fees').invalid}">
+											<label class="form-check-label" for="fees">TAXA GLOBAL</label>
+										</div>
+									</div>
+									<div class="card-text col-12">
+										<p>Agora preencha o valor da tarifa e o percentual que serão cobrados de qualquer transação indepedente do meio de pagamento.</p>
+									</div>
+								</div>
+								<div class="form-group col-3">
+									<label for="tariff">{{ 'GLOBAL.LABEL.TARIFF' | translate}}</label>
+									<div class="input-group">
+										<input class="form-control" formControlName="tariff"
+										 [ngClass]="{'is-invalid' : formSubmitSubordinate && fe.get('tariff').invalid}">
+									</div>
+								</div>
+								<div class="form-group col-3">
+									<label for="percentage">{{ 'GLOBAL.LABEL.PERCENTAGEE' | translate }}</label>
+									<div class="input-group">
+										<input class="form-control" formControlName="percentage"
+										 [ngClass]="{'is-invalid' : formSubmitSubordinate && fe.get('percentage').invalid}">
+									</div>
+								</div>
+							</ng-container>
+						</div>
+					</mat-tab>
+				</mat-tab-group>
+			</div>
+			<div class="modal-footer">
+				<input type="submit" value="Criar" class="btn btn-outline-dark">
+			</div>
+		</form>
+	</ng-template>
+</div>
+
+<!-- Modal Delete   -->
+<ng-template #confirmdeletemodal let-modal>
+	<div class="modal-header">
+		<h4 class="modal-title" id="modal-delete-subotdinate" *ngIf="formData && formData.value && formData.value.name">
+			Confirmar exclusão
+		</h4>
+		<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	<div class="modal-body" class="btn btn-warning">
+		{{ 'GLOBAL.LABEL.AREYOUSUREYOUWANTTODELETE' | translate }}
+	</div>
+	<div class="modal-footer">
+		<button type="button" (click)="subordinateIdToDelete=undefined; modal.dismiss('Cross click')" class="btn btn-secondary" data-dismiss="modal">{{ 'GLOBAL.LABEL.CANCEL' | translate }}</button>
+		<button type="button" (click)="deleteSubordinate() && modal.dismiss('Cross click')" class="btn btn-primary">{{ 'GLOBAL.LABEL.YES' | translate }}</button>
+	</div>
+</ng-template>

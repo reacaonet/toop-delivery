@@ -1,0 +1,346 @@
+<div class="row justify-content-between">
+	<div class="col-auto align-self-center mb-2">
+		<p class="float-left">{{ 'GLOBAL.LABEL.IMAGEBANK' | translate }}</p>
+	</div>
+	<div class="col-auto">
+		<a (click)="createImageBankModalShow(createimageBankmodal)" href="javascript:;" class="float-right btn btn-label-warning btn-bold btn-sm btn-icon-h">
+			{{ 'GLOBAL.LABEL.CREATE' | translate }}
+		</a>
+	</div>
+</div>
+
+<!-- Alert -->
+<p>
+	<ngb-alert *ngIf="alert" [type]="alert.type" (close)="closeAlert()">
+		{{ alert.message }}
+	</ngb-alert>
+</p>
+<div>
+	<div class="card">
+		<div class="card-body">
+			<h5 class="card-title">Filtros</h5>
+			<div class="row">
+				<div class="col-xs-12 col-sm-4">
+					<label>{{ 'GLOBAL.LABEL.BARCODE' | translate }}</label>
+					<div class="input-group">
+						<input class="form-control" #box (keyup)="onEnter(box.value)">
+					</div>
+				</div>
+				<div class="col-xs-12 col-sm-4">
+					<label>{{ 'GLOBAL.LABEL.PRODUCTACCENT' | translate }}</label>
+					<div class="input-group">
+						<input class="form-control" #boxNome (keyup)="onEnterNome(boxNome.value)">
+					</div>
+				</div>
+
+				<div class="col-xs-12 col-sm-4">
+					<label>{{ 'GLOBAL.LABEL.CATEGORY' | translate }}</label>
+					<div class="input-group">
+						<input class="form-control" #boxCategory (keyup)="onEnterCategory(boxCategory.value)">
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<br />
+<div class="example-container mat-elevation-z8">
+
+	<mat-table #table [dataSource]="dataSource">
+		<!-- Checkbox Column -->
+		<ng-container matColumnDef="select">
+			<mat-header-cell *matHeaderCellDef>
+				<mat-checkbox [checked]="true" [indeterminate]="true">
+				</mat-checkbox>
+			</mat-header-cell>
+			<mat-cell *matCellDef="let row">
+				<mat-checkbox (click)="$event.stopPropagation()">
+				</mat-checkbox>
+			</mat-cell>
+		</ng-container>
+		<ng-container matColumnDef="image">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.IMAGES' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<a [href]='element.image' target="_blank">
+					<img width="50" [src]='element.image || "./assets/media/logo-default.png"' alt="Logo do grupo" />
+				</a>
+			</mat-cell>
+		</ng-container>
+		<!-- Bar code Column -->
+		<ng-container matColumnDef="barcode">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.BARCODE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.barcode }} </mat-cell>
+		</ng-container>
+		<!-- Product Name Column -->
+		<ng-container matColumnDef="productName">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.PRODUCTNAME' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.productName }} </mat-cell>
+		</ng-container>
+		<!-- Product Accent Column -->
+		<ng-container matColumnDef="productAccent">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.PRODUCTACCENT' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.productAccent }} </mat-cell>
+		</ng-container>
+		<!-- Key Words Column -->
+		<ng-container matColumnDef="keywords">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.KEYWORDS' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.keywords }} </mat-cell>
+		</ng-container>
+		<!-- Packing Column -->
+		<ng-container matColumnDef="packing">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.PACKING' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ (element.packing && element.packing.name) ? element.packing.name : '-' }} </mat-cell>
+		</ng-container>
+		<!-- Packing Agamount Column -->
+		<ng-container matColumnDef="packingAmount">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.PACKINGAMOUNT' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.packingAmount }} </mat-cell>
+		</ng-container>
+		<!-- Category Column -->
+		<ng-container matColumnDef="category">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.CATEGORY' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.category }} </mat-cell>
+		</ng-container>
+		<!-- Brand Column -->
+		<ng-container matColumnDef="brand">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.BRAND' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.brand }} </mat-cell>
+		</ng-container>
+		<!-- Delete Offers -->
+		<ng-container matColumnDef="delete">
+			<mat-header-cell *matHeaderCellDef>{{ 'GLOBAL.LABEL.ACTION' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i class="flaticon2-edit mr-2" (click)="editImageBankModalShow(editimageBankmodal, element)"></i>
+				<i class="flaticon2-trash" (click)="confirmDeleteModalShow(confirmdeletemodal, element)"></i>
+			</mat-cell>/
+		</ng-container>
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns;">
+		</mat-row>
+	</mat-table>
+	<mat-paginator [length]="totalLength" [pageSize]="pageSize" [pageSizeOptions]="pageLimit" (page)="changePage($event)"></mat-paginator>
+
+	<!-- Apartir de aqui é o modal -->
+	<!-- Modal Create Image Bank -->
+	<ng-template #createimageBankmodal let-modal>
+		<form [formGroup]="formData" (ngSubmit)="createImageBank(formData.value)
+			 && modal.dismiss('Cross click')">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-create-imageBank">{{ 'GLOBAL.LABEL.CREATEIMAGEBANK' | translate }}
+				</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div style="margin-top: 10px">
+					<div style="margin-top: 10px">
+						<div class="custom-file">
+							<input type="file" class="custom-file-input" id="customFile" (change)="onChange($event)" multiple>
+							<label class="custom-file-label" for="customFile" id="customFileLabel">
+								{{ 'GLOBAL.LABEL.SELECTIMAGE' | translate }}</label>
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="barcode">{{ 'GLOBAL.LABEL.BARCODE' | translate }}</label>
+					<div class="input-group">
+						<input class="form-control" formControlName="barcode">
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="productName">{{ 'GLOBAL.LABEL.PRODUCTNAME' | translate }}</label>
+					<div class="input-group">
+						<input class="form-control" formControlName="productName">
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="productAccent">{{ 'GLOBAL.LABEL.DESCRIPTION' | translate }}</label>
+					<div class="input-group">
+						<input class="form-control" formControlName="description">
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="productAccent">{{ 'GLOBAL.LABEL.PRODUCTACCENT' | translate }}</label>
+					<div class="input-group">
+						<input class="form-control" formControlName="productAccent">
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="keywords">{{ 'GLOBAL.LABEL.KEYWORDS' | translate }}</label>
+					<div class="input-group">
+						<mat-chip-list #chipList aria-label="Seleção de Palavras Chaves">
+							<mat-chip *ngFor="let palavraChave of palavraChaveList" [selectable]="selectable" [removable]="removable" (removed)="removePalavraChave(categoria)">
+								{{palavraChave}}
+								<mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
+							</mat-chip>
+							<input placeholder="Nova Palavra Chave..." [matChipInputFor]="chipList" [matChipInputAddOnBlur]="addOnBlur" (matChipInputTokenEnd)="addPalavraChave($event)">
+						</mat-chip-list>
+					</div>
+				</div>
+				<div class="form-group">
+					<label>{{ 'GLOBAL.LABEL.PACKING' | translate }}</label>
+					<div class="input-group">
+						<input type="text" class="form-control"
+						 matInput placeholder="Escolha uma Embalagem"
+						 [matAutocomplete]="auto" formControlName="packing">
+						<mat-autocomplete [displayWith]="displayFn" #auto="matAutocomplete">
+							<mat-option *ngFor="let pack of packings" [value]="pack">
+								{{ pack.name }}
+							</mat-option>
+						</mat-autocomplete>
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="packingAmount">{{ 'GLOBAL.LABEL.PACKINGAMOUNT' | translate }}</label>
+					<div class="input-group">
+						<input class="form-control" formControlName="packingAmount">
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="category">{{ 'GLOBAL.LABEL.CATEGORY' | translate }}</label>
+					<div class="input-group">
+						<mat-chip-list #chipList aria-label="Fruit selection">
+							<mat-chip *ngFor="let categoria of categoriaList" [selectable]="selectable" [removable]="removable" (removed)="removeCategoria(categoria)">
+								{{categoria}}
+								<mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
+							</mat-chip>
+							<input placeholder="Nova Categoria..." [matChipInputFor]="chipList" [matChipInputAddOnBlur]="addOnBlur" (matChipInputTokenEnd)="addCategoria($event)">
+						</mat-chip-list>
+
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="brand">{{ 'GLOBAL.LABEL.BRAND' | translate }}</label>
+					<div class="input-group">
+						<input class="form-control" formControlName="brand">
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<input type="submit" [disabled]="!formData.valid" value="Criar" class="btn btn-outline-dark">
+			</div>
+		</form>
+	</ng-template>
+
+	<!-- Modal Edit Image Bank-->
+	<ng-template #editimageBankmodal let-modal>
+		<form [formGroup]="formData" (ngSubmit)="updateImageBank(formData.value) && modal.dismiss('Cross click')">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-edit-imageBank">{{ 'GLOBAL.LABEL.TOEDIT' | translate }}
+					{{formData.value.name}}</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div style="margin-top: 10px">
+					<div style="margin-top: 10px">
+						<div class="custom-file">
+							<input type="file" class="custom-file-input" id="customFile" (change)="onChange($event)" multiple>
+							<label class="custom-file-label" for="customFile" id="customFileLabel">
+								{{ 'GLOBAL.LABEL.SELECTIMAGE' | translate }}</label>
+						</div>
+					</div>
+				</div>
+				<input type="hidden" class="form-control" formControlName="_id">
+
+				<div class="form-group">
+					<label for="barcode">{{ 'GLOBAL.LABEL.BARCODE' | translate }}</label>
+					<div class="input-group">
+						<input class="form-control" formControlName="barcode">
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="productName">{{ 'GLOBAL.LABEL.PRODUCTNAME' | translate }}</label>
+					<div class="input-group">
+						<input class="form-control" formControlName="productName">
+					</div>
+				</div>
+
+				<div class="form-group">
+					<label for="productAccent">{{ 'GLOBAL.LABEL.PRODUCTACCENT' | translate }}</label>
+					<div class="input-group">
+						<input class="form-control" formControlName="productAccent">
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="productAccent">{{ 'GLOBAL.LABEL.DESCRIPTION' | translate }}</label>
+					<div class="input-group">
+						<input class="form-control" formControlName="description">
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="keywords">{{ 'GLOBAL.LABEL.KEYWORDS' | translate }}</label>
+					<div class="input-group">
+						<mat-chip-list #chipList aria-label="Seleção de Palavras Chaves">
+							<mat-chip *ngFor="let palavraChave of palavraChaveList" [selectable]="selectable" [removable]="removable" (removed)="removePalavraChave(palavraChave)">
+								{{palavraChave}}
+								<mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
+							</mat-chip>
+							<input placeholder="Nova Palavra Chave..." [matChipInputFor]="chipList" [matChipInputAddOnBlur]="addOnBlur" (matChipInputTokenEnd)="addPalavraChave($event)">
+						</mat-chip-list>
+					</div>
+				</div>
+				<div class="form-group">
+					<label>{{ 'GLOBAL.LABEL.PACKING' | translate }}</label>
+					<div class="input-group">
+						<input type="text" class="form-control"
+						 matInput placeholder="Escolha uma Embalagem"
+						 [matAutocomplete]="auto" formControlName="packing">
+						<mat-autocomplete [displayWith]="displayFn" #auto="matAutocomplete">
+							<mat-option *ngFor="let pack of packings" [value]="pack">
+								{{ pack.name }}
+							</mat-option>
+						</mat-autocomplete>
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="packingAmount">{{ 'GLOBAL.LABEL.PACKINGAMOUNT' | translate }}</label>
+					<div class="input-group">
+						<input class="form-control" formControlName="packingAmount">
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="category">{{ 'GLOBAL.LABEL.CATEGORY' | translate }}</label>
+					<div class="input-group">
+						<mat-chip-list #chipList aria-label="Seleção de Categoria">
+							<mat-chip *ngFor="let categoria of categoriaList" [selectable]="selectable" [removable]="removable" (removed)="removeCategoria(categoria)">
+								{{categoria}}
+								<mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
+							</mat-chip>
+							<input placeholder="Nova Categoria..." [matChipInputFor]="chipList" [matChipInputAddOnBlur]="addOnBlur" (matChipInputTokenEnd)="addCategoria($event)">
+						</mat-chip-list>
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="brand">{{ 'GLOBAL.LABEL.BRAND' | translate }}</label>
+					<div class="input-group">
+						<input class="form-control" formControlName="brand">
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<input type="submit" [disabled]="!formData.valid" value="Salvar" class="btn btn-outline-dark">
+			</div>
+		</form>
+	</ng-template>
+</div>
+
+<!-- Modal Delete -->
+<ng-template #confirmdeletemodal let-modal>
+	<div class="modal-header">
+		<h4 class="modal-title" id="modal-delete-imageBank">
+			Confirmar exclusão</h4>
+		<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	<div class="modal-body" class="btn btn-warning">
+		{{ 'GLOBAL.LABEL.AREYOUSUREYOUWANTTODELETE' | translate }}
+	</div>
+	<div class="modal-footer">
+		<button type="button" (click)="imageBankIdToDelete=undefined; modal.dismiss('Cross click')" class="btn btn-secondary" data-dismiss="modal">{{ 'GLOBAL.LABEL.CANCEL' | translate }}</button>
+		<button type="button" (click)="deleteImageBank() && modal.dismiss('Cross click')" class="btn btn-primary">{{ 'GLOBAL.LABEL.YES' | translate }}</button>
+	</div>
+</ng-template>

@@ -1,0 +1,97 @@
+<div class="example-container mat-elevation-z8">
+	<mat-table class="table-braspag-transactions" #table [dataSource]="dataSource">
+		<!-- Checkbox Column -->
+		<ng-container matColumnDef="select">
+			<mat-header-cell *matHeaderCellDef>
+				<mat-checkbox [checked]="true" [indeterminate]="true">
+				</mat-checkbox>
+			</mat-header-cell>
+			<mat-cell *matCellDef="let row">
+				<mat-checkbox (click)="$event.stopPropagation()">
+				</mat-checkbox>
+			</mat-cell>
+		</ng-container>
+		<!-- Person Column -->
+		<ng-container matColumnDef="person">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.PERSON' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ (element.person && element.person.name) ? element.person.name : '-' }} </mat-cell>
+		</ng-container>
+		<!-- customer Column -->
+		<ng-container matColumnDef="email">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.EMAIL' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.email }} </mat-cell>
+		</ng-container>
+		<ng-container matColumnDef="phone">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.PHONE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.phone}} </mat-cell>
+		</ng-container>
+		<!-- History Column -->
+		<ng-container matColumnDef="history">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.HISTORY' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.history }} </mat-cell>
+		</ng-container>
+		<ng-container matColumnDef="updatedAt">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.UPDATEAT' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.updatedAt }} </mat-cell>
+		</ng-container>
+		<!-- To see  coluna -->
+		<ng-container matColumnDef="view">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.VIEW' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i class="flaticon-eye mr-2" (click)="viewAccessModalShow(viewaccessmodal, element)"></i>
+			</mat-cell>
+		</ng-container>
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns;">
+		</mat-row>
+	</mat-table>
+	<mat-paginator [length]="totalLength" [pageSize]="pageSize" [pageSizeOptions]="pageLimit" (page)="changePage($event)">
+	</mat-paginator>
+
+
+	<!-- Modal view -->
+	<ng-template #viewaccessmodal let-modal>
+		<form [formGroup]="formData" (ngSubmit)="formData.valid">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-view-access">{{ 'GLOBAL.LABEL.VIEWACCESSFLOW' | translate }}</h4>
+				<button type="button" class="close" aria-label="Close" (click)="historyAtual=undefined; modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div class="row">
+					<div class="form-group col-6">
+						<label for="person">{{ 'GLOBAL.LABEL.PERSON' | translate }}</label>
+						<div class="input-group">
+							<input [readonly]="!childmessage" class="form-control" formControlName="person">
+						</div>
+					</div>
+					<div class="form-group col-4">
+						<label for="phone">{{ 'GLOBAL.LABEL.PHONE' | translate }}</label>
+						<div class="input-group">
+							<input [readonly]="!childmessage" class="form-control" formControlName="phone">
+						</div>
+					</div>
+					<div class="form-group col-6">
+						<label for="email">{{ 'GLOBAL.LABEL.EMAIL' | translate }}</label>
+						<div class="input-group">
+							<input [readonly]="!childmessage" class="form-control" formControlName="email">
+						</div>
+					</div>
+					<div class="form-group col-4">
+						<label for="updatedAt">{{ 'GLOBAL.LABEL.UPDATEAT' | translate }}</label>
+						<div class="input-group">
+							<input [readonly]="!childmessage" class="form-control" formControlName="updatedAt">
+						</div>
+					</div>
+					<div class="form-group col-12">
+						<label for="history">{{ 'GLOBAL.LABEL.HISTORY' | translate }}</label>
+						<div *ngFor="let history of historyAtual; index as i">
+							Tipo: {{ history.type || '-' }} - Chave: {{ history.key || '-' }}
+						</div>
+					</div>
+				</div>
+			</div>
+		</form>
+	</ng-template>
+</div>

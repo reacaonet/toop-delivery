@@ -1,0 +1,56 @@
+const router = require("express").Router();
+
+//const Franchises = require('./Franchises');
+const SupportSubject = require("./SupportSubject");
+const DocumentType = require("./DocumentType");
+const PeakHour = require("./PeakHour");
+const Service = require("./Service");
+const Passenger = require("./Passenger");
+const Notification = require("./Notification");
+const PushNotification = require("./PushNotification");
+const Driver = require("./Driver");
+const Drivers = require("./Drivers");
+const Slider = require("./Slider");
+const Booking = require("./Booking");
+const Maps = require("./Maps");
+const evaluation = require("./Evaluation");
+const message = require("./Message");
+const vehicleDocuments = require("./VehicleDocuments");
+const indication = require("./Indication");
+const extract = require("./Extract");
+const report = require("./Report");
+const qrcode = require("./QrCode");
+const chosenDestinations = require("./ChosenDestinations");
+const typePaymentService = require("./typePaymentService");
+const favoritesPlaces = require("./favoritePlaces");
+const Topic = require("./Topic");
+const discount = require("./discount");
+
+//router.use('/franchises', Franchises);
+router.use("/supportsubjects", SupportSubject);
+router.use("/documenttypes", DocumentType);
+router.use("/peakhours", PeakHour);
+router.use("/services", Service);
+router.use("/passengers", Passenger);
+router.use("/driver", Driver);
+router.use("/drivers", Drivers);
+router.use("/slider", Slider);
+router.use("/notifications", Notification);
+router.use("/push-notification", PushNotification);
+router.use("/topic", Topic);
+
+router.use("/booking", Booking);
+router.use("/maps", Maps);
+router.use("/evaluation", evaluation);
+router.use("/vehicle-documents", vehicleDocuments);
+router.use("/message", message);
+router.use("/extract", extract);
+router.use("/indication", indication);
+router.use("/report", report);
+router.use("/qrcode", qrcode);
+router.use("/chosen-destinations", chosenDestinations);
+router.use("/type-payment-service", typePaymentService);
+router.use("/favorite-place", favoritesPlaces);
+router.use("/discount", discount);
+
+module.exports = router;

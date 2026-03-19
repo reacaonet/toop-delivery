@@ -1,0 +1,315 @@
+<form [formGroup]="formFilter" formFilter.valid>
+	<div class="row">
+		<div class="form-group row col-6">
+			<label for="subject">{{ 'GLOBAL.LABEL.SEARCH' | translate }} {{ 'GLOBAL.LABEL.SUBJECTMOTIVE' | translate
+				}}:</label>
+			<div class="input-group">
+				<input required class="form-control" placeholder="Digite para Pesquisar" formControlName="subject">
+			</div>
+		</div>
+
+		<div class="form-group col-6">
+			<label for="category">{{ 'GLOBAL.LABEL.FRANCHISE' | translate
+				}}</label>
+			<div class="input-group">
+				<input type="text" class="form-control" matInput placeholder="{{ 'GLOBAL.LABEL.CHOOSEAFRANCHISE' | translate
+			}}" [matAutocomplete]="autoCompany" formControlName="franchise" [ngClass]="{
+						'is-invalid': formFilter && formFilter.get('franchise').invalid
+					}" />
+				<mat-autocomplete [displayWith]="displayFn" #autoCompany="matAutocomplete">
+					<mat-option *ngFor="let franchise of listFranchise" [value]="franchise"
+						(click)="onClickFranchiseFilter(franchise)">
+						{{ franchise.name }}
+					</mat-option>
+				</mat-autocomplete>
+			</div>
+		</div>
+	</div>
+</form>
+
+<div class="row justify-content-between">
+	<div class="col-auto align-self-center mb-2">
+		<h5>
+			<p class="float-left">{{ 'GLOBAL.LABEL.SUBJECTSMOTIVES' | translate }}</p>
+		</h5>
+	</div>
+	<div class="col-auto">
+		<a (click)="createModalShow(createdatamodal)" href="javascript:;"
+			class="float-right btn btn-label-warning btn-bold btn-sm btn-icon-h">
+			{{ 'GLOBAL.LABEL.CREATE' | translate }}
+		</a>
+
+	</div>
+</div>
+
+<div class="example-container mat-elevation-z8">
+	<mat-table #table [dataSource]="dataSource">
+		<!-- Checkbox Column -->
+		<ng-container matColumnDef="select">
+			<mat-header-cell *matHeaderCellDef>
+				<mat-checkbox [checked]="true" [indeterminate]="true">
+				</mat-checkbox>
+			</mat-header-cell>
+			<mat-cell *matCellDef="let row">
+				<mat-checkbox (click)="$event.stopPropagation()">
+				</mat-checkbox>
+			</mat-cell>
+		</ng-container>
+
+		<!-- subject Column -->
+		<ng-container matColumnDef="subject">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.SUBJECTMOTIVE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element" [ngClass]="getPositionColor(element.position)"> {{element.subject}}
+			</mat-cell>
+		</ng-container>
+
+		<!-- type Column -->
+		<ng-container matColumnDef="type">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.TYPE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element" [ngClass]="getPositionColor(element.position)">
+				{{element.type === "PASSENGER" ? "PASSAGEIRO" : "MOTORISTA"}}
+			</mat-cell>
+		</ng-container>
+
+		<!-- target Column -->
+		<ng-container matColumnDef="target">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.TARGET' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element" [ngClass]="getPositionColor(element.position)">
+				{{element.target === "CANCEL" ? "CANCELAMENTO" : "SUPORTE"}}
+			</mat-cell>
+		</ng-container>
+
+		<!-- Franchise Column -->
+		<ng-container matColumnDef="franchise">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.FRANCHISE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element" [ngClass]="getPositionColor(element.position)">
+				{{element?.franchise?.name }}
+			</mat-cell>
+		</ng-container>
+
+		<!-- Delete  -->
+		<ng-container matColumnDef="delete">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.ACTION' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element" [ngClass]="getPositionColor(element.position)">
+				<i class="status mr-3" title="Situação" [ngClass]=" getStatusColor(element.status)"></i>
+				<i class="flaticon2-edit mr-3" (click)="editModalShow(editdatamodal, element)"></i>
+				<i class="flaticon2-trash" (click)="confirmDeleteModalShow(confirmdeletemodal, element)"></i>
+			</mat-cell>
+		</ng-container>
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns;">
+		</mat-row>
+	</mat-table>
+	<mat-paginator [length]="totalLength" [pageSize]="pageSize" [pageSizeOptions]="pageLimit" (page)="changePage($event)">
+	</mat-paginator>
+
+	<!-- Apartir de aqui é o modal -->
+	<!-- Modal Create  -->
+	<ng-template #createdatamodal let-modal modal-lg>
+		<form [formGroup]="formData" (ngSubmit)="formSubmitAttempt=true; formData.valid && create(formData.value)">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-create-data">
+					{{ 'GLOBAL.LABEL.CREATE' | translate }}
+				</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<input formControlName="_id" type="hidden">
+			</div>
+			<div class="modal-body">
+
+				<div class="row">
+					<div class="form-group col-8">
+						<label for="franchise">{{ 'GLOBAL.LABEL.FRANCHISE' | translate }}</label>
+						<div class="input-group">
+							<input type="text" class="form-control" matInput
+								placeholder="{{ 'GLOBAL.LABEL.CHOOSEAFRANCHISE' | translate }}" [matAutocomplete]="autoFranchise"
+								formControlName="franchise"
+								[ngClass]="{'is-invalid' : formSubmitPerson && formData.get('franchise').invalid}">
+							<mat-autocomplete [displayWith]="displayFnFranchise" #autoFranchise="matAutocomplete">
+								<mat-option *ngFor="let franchise of franchises" [value]="franchise">
+									{{ franchise.name }}
+								</mat-option>
+							</mat-autocomplete>
+						</div>
+					</div>
+				</div>
+
+				<!-- row 1 -->
+				<div class="row">
+					<!-- type -->
+					<div class="form-group col-6">
+						<label for="state">{{ 'GLOBAL.LABEL.TYPE' | translate }}</label>
+
+						<div class="input-group">
+							<select id="type" class="form-control autocomplete" formControlName="type"
+								[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('type').invalid}">
+								<option selected value="">Selecione</option>
+								<option *ngFor="let type of types" [value]="type.value"> {{type.label}}</option>
+							</select>
+
+						</div>
+
+					</div>
+					<!-- / type -->
+
+					<!-- target -->
+					<div class="form-group col-6">
+						<label for="state">{{ 'GLOBAL.LABEL.TARGET' | translate }}</label>
+
+						<div class="input-group">
+							<select id="target" class="form-control autocomplete" formControlName="target"
+								[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('target').invalid}">
+								<option selected value="">Selecione</option>
+								<option *ngFor="let target of targets" [value]="target.value"> {{target.label}}</option>
+							</select>
+						</div>
+
+					</div>
+					<!-- / target -->
+				</div>
+				<!-- / row 1 -->
+
+				<!-- row 2 -->
+				<div class="row">
+
+					<!-- subject -->
+					<div class="form-group col-12">
+						<label for="city">{{ 'GLOBAL.LABEL.SUBJECTMOTIVE' | translate }}</label>
+						<div class="input-group">
+							<input required class="form-control" formControlName="subject"
+								[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('subject').invalid}">
+						</div>
+					</div>
+					<!-- subject -->
+				</div>
+				<!-- / row 2 -->
+
+			</div>
+			<div class="modal-footer">
+				<!-- <input type="submit" [disabled]="!formData.valid" value="Criar" class="btn btn-outline-dark"> -->
+				<input type="submit" value="{{ 'GLOBAL.LABEL.CREATE' | translate }}" class="btn btn-outline btn-success">
+			</div>
+		</form>
+	</ng-template>
+
+	<!-- Modal EDIT  -->
+	<ng-template #editdatamodal let-modal modal-lg>
+		<form [formGroup]="formData" (ngSubmit)="formSubmitAttempt=true; formData.valid && edit(formData.value)">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-edit-data">
+					{{ 'GLOBAL.LABEL.EDIT' | translate }}
+				</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<input formControlName="_id" type="hidden">
+			</div>
+			<div class="modal-body">
+
+				<div class="row">
+					<div class="form-group col-8">
+						<label for="franchise">{{ 'GLOBAL.LABEL.FRANCHISE' | translate }}</label>
+						<div class="input-group">
+							<input type="text" class="form-control" matInput
+								placeholder="{{ 'GLOBAL.LABEL.CHOOSEAFRANCHISE' | translate }}" [matAutocomplete]="autoFranchise"
+								formControlName="franchise"
+								[ngClass]="{'is-invalid' : formSubmitPerson && formData.get('franchise').invalid}">
+							<mat-autocomplete [displayWith]="displayFnFranchise" #autoFranchise="matAutocomplete">
+								<mat-option *ngFor="let franchise of franchises" [value]="franchise">
+									{{ franchise.name }}
+								</mat-option>
+							</mat-autocomplete>
+						</div>
+					</div>
+				</div>
+
+				<!-- row 1 -->
+				<div class="row">
+					<!-- type -->
+					<div class="form-group col-6">
+						<label for="state">{{ 'GLOBAL.LABEL.TYPE' | translate }}</label>
+
+						<div class="input-group">
+							<select id="type" class="form-control autocomplete" formControlName="type"
+								[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('type').invalid}">
+								<option selected value="">Selecione</option>
+								<option *ngFor="let type of types" [value]="type.value"> {{type.label}}</option>
+							</select>
+
+						</div>
+
+					</div>
+					<!-- / type -->
+
+					<!-- target -->
+					<div class="form-group col-6">
+						<label for="state">{{ 'GLOBAL.LABEL.TARGET' | translate }}</label>
+
+						<div class="input-group">
+							<select id="target" class="form-control autocomplete" formControlName="target"
+								[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('target').invalid}">
+								<option selected value="">Selecione</option>
+								<option *ngFor="let target of targets" [value]="target.value"> {{target.label}}</option>
+							</select>
+						</div>
+
+					</div>
+					<!-- / target -->
+				</div>
+				<!-- / row 1 -->
+
+				<!-- row 2 -->
+				<div class="row">
+
+					<!-- subject -->
+					<div class="form-group col-12">
+						<label for="city">{{ 'GLOBAL.LABEL.SUBJECTMOTIVE' | translate }}</label>
+						<div class="input-group">
+							<input required class="form-control" formControlName="subject"
+								[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('subject').invalid}">
+						</div>
+					</div>
+					<!-- subject -->
+				</div>
+				<!-- / row 2 -->
+
+				<!-- row 3 -->
+				<div class="row">
+					<div class="form-group col-4">
+						<label for="own_delivery">{{ 'GLOBAL.LABEL.STATUS' | translate }}</label>
+						<div class="input-group">
+							<mat-slide-toggle formControlName="status"></mat-slide-toggle>
+						</div>
+					</div>
+				</div>
+				<!-- row 3 -->
+			</div>
+			<div class="modal-footer">
+				<!-- <input type="submit" [disabled]="!formData.valid" value="Criar" class="btn btn-outline-dark"> -->
+				<input type="submit" value="{{ 'GLOBAL.LABEL.EDIT' | translate }}" class="btn btn-outline btn-success">
+			</div>
+		</form>
+	</ng-template>
+
+	<!-- Modal Delete -->
+	<ng-template #confirmdeletemodal let-modal>
+		<div class="modal-header">
+			<h4 class="modal-title" id="modal-delete-data">
+				Confirmar exclusão</h4>
+			<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+		<div class="modal-body" class="btn btn-warning">
+			{{ 'GLOBAL.LABEL.AREYOUSUREYOUWANTTODELETE' | translate }}
+		</div>
+		<div class="modal-footer">
+			<button type="button" (click)="idToDelete=undefined; modal.dismiss('Cross click')" class="btn btn-secondary"
+				data-dismiss="modal">{{ 'GLOBAL.LABEL.CANCEL' | translate }}</button>
+			<button type="button" (click)="delete() && modal.dismiss('Cross click')" class="btn btn-primary">{{
+				'GLOBAL.LABEL.YES' | translate }}</button>
+		</div>
+	</ng-template>
+
+</div>

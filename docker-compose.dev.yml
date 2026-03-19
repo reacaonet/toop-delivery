@@ -1,0 +1,183 @@
+version: '3.8'
+
+services:
+  # MongoDB - Admin Database
+  admin-mongodb:
+    container_name: "toop-admin-mongodb-dev"
+    image: "mongo:5.0"
+    command: [--auth]
+    ports:
+      - "27017:27017"
+    restart: unless-stopped
+    volumes:
+      - mongo_data:/data/db
+      - ./scripts/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ADMIN_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ADMIN_PASSWORD}
+      MONGO_INITDB_DATABASE: ecbr
+    networks:
+      - toop-network
+
+  # PostgreSQL - Payment Database
+  payment-postgres:
+    container_name: "toop-payment-postgres-dev"
+    image: postgres:13
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database-postgres-payment.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    networks:
+      - toop-network
+
+  # Redis - Cache and Queues
+  redis:
+    container_name: "toop-redis-dev"
+    hostname: "toop-redis-dev"
+    image: redis:7-alpine
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    networks:
+      - toop-network
+
+  # Redis Commander - Management UI
+  redis-commander:
+    container_name: "toop-redis-commander-dev"
+    hostname: "toop-redis-commander-dev"
+    image: rediscommander/redis-commander:latest
+    restart: unless-stopped
+    environment:
+      - REDIS_PORT=6379
+      - REDIS_HOST=redis
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    ports:
+      - "8181:8081"
+    depends_on:
+      - redis
+    networks:
+      - toop-network
+
+  # Admin API Service
+  admin-api:
+    container_name: "toop-admin-api-dev"
+    build:
+      context: ./delivery_toop-admin/backend
+      dockerfile: Dockerfile
+      target: development
+    ports:
+      - "8100:8100"
+    restart: unless-stopped
+    volumes:
+      - ./delivery_toop-admin/backend:/home/node/app
+      - /home/node/app/node_modules
+    environment:
+      NODE_ENV: development
+      PORT: 8100
+      MONGO_DB_CONNECTION_STRING: mongodb://${MONGO_ADMIN_USER}:${MONGO_ADMIN_PASSWORD}@admin-mongodb:27017/ecbr?retryWrites=true&authSource=admin
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    depends_on:
+      - admin-mongodb
+      - redis
+    networks:
+      - toop-network
+
+  # Payment Microservice
+  payment-microservice:
+    container_name: "toop-payment-microservice-dev"
+    build:
+      context: ./delivery_toop-microservice_payment
+      dockerfile: Dockerfile
+      target: development
+    ports:
+      - "8400:8400"
+    restart: unless-stopped
+    volumes:
+      - ./delivery_toop-microservice_payment:/usr/src/app
+      - /usr/src/app/node_modules
+    environment:
+      NODE_ENV: development
+      PORT: 8400
+      POSTGRES_HOST: payment-postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    depends_on:
+      - payment-postgres
+      - redis
+    networks:
+      - toop-network
+
+  # Notification Microservice
+  notification-microservice:
+    container_name: "toop-notification-microservice-dev"
+    build:
+      context: ./delivery_toop-microservice_notification
+      dockerfile: Dockerfile
+      target: development
+    ports:
+      - "8200:8200"
+    restart: unless-stopped
+    volumes:
+      - ./delivery_toop-microservice_notification:/usr/src/app
+      - /usr/src/app/node_modules
+    environment:
+      NODE_ENV: development
+      PORT: 8200
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    depends_on:
+      - redis
+    networks:
+      - toop-network
+
+  # Deliveryman Microservice
+  deliveryman-microservice:
+    container_name: "toop-deliveryman-microservice-dev"
+    build:
+      context: ./delivery_toop-microservice_deliveryman
+      dockerfile: Dockerfile
+      target: development
+    ports:
+      - "8300:8300"
+    restart: unless-stopped
+    volumes:
+      - ./delivery_toop-microservice_deliveryman:/usr/src/app
+      - /usr/src/app/node_modules
+    environment:
+      NODE_ENV: development
+      PORT: 8300
+      MONGO_DB_CONNECTION_STRING: mongodb://${MONGO_ADMIN_USER}:${MONGO_ADMIN_PASSWORD}@admin-mongodb:27017/ecbr?retryWrites=true&authSource=admin
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    depends_on:
+      - admin-mongodb
+      - redis
+    networks:
+      - toop-network
+
+volumes:
+  mongo_data:
+  postgres_data:
+  redis_data:
+
+networks:
+  toop-network:
+    driver: bridge

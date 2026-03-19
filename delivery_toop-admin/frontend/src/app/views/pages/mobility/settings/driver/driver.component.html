@@ -1,0 +1,280 @@
+<div class="row">
+	<div class="col-6 mb-4">
+		<mat-card class="example-card" (click)="upsertModalShow(upsertmodal)">
+			<mat-card-header class="p-2 justify-content-center">
+				<mat-card-title class="text-center mb-0">{{ 'GLOBAL.LABEL.DRIVER' | translate }}</mat-card-title>
+			</mat-card-header>
+			<!-- <div mat-card-avatar class="example-header-image">
+			</div> -->
+		</mat-card>
+	</div>
+
+	<div class="col-6 mb-4">
+		<mat-card class="example-card" (click)="upSertRacesModalShow(upsertRacesmodal)">
+			<mat-card-header class="p-2 justify-content-center">
+				<mat-card-title class="text-center mb-0">{{ 'GLOBAL.LABEL.RACE' | translate }}</mat-card-title>
+			</mat-card-header>
+			<!-- <div mat-card-avatar class="example-header-image">
+			</div> -->
+		</mat-card>
+	</div>
+</div>
+
+<!-- Modal up sert Races -->
+<ng-template #upsertRacesmodal let-modal modal-lg>
+	<div class="modal-body">
+		<form [formGroup]="formData" (ngSubmit)="formSubmit=true; upsertSettingsRaces(formData.value)">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-create-data">{{ 'GLOBAL.LABEL.PARAMETERS' | translate }} {{
+					'GLOBAL.LABEL.RACE'
+					| translate }}</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="card p-4 mb-4 bg-light" formGroupName="recalculate">
+				<div class="row">
+					<div class="form-group col-12">
+						<h5 for="status">{{ 'GLOBAL.LABEL.RECALCULATETRIP' | translate }} ?
+							<b>(Em fase de Testes - App Motorista >= 1.0.40 | Dinheiro | Android)</b>
+						</h5>
+						<div class="input-group">
+							<mat-slide-toggle formControlName="status"></mat-slide-toggle>
+						</div>
+						<small class="text-danger">{{ 'GLOBAL.LABEL.RECALCULATETRIPINFO' | translate }} ?</small>
+					</div>
+				</div>
+
+				<div class="row" *ngIf="formData.get('recalculate').get('status').value === true">
+					<div class="col-12 col-md-6 mt-3">
+						<label for="name">{{ 'GLOBAL.LABEL.MINUTETOLERANCEABOVE' | translate }}</label>
+						<div class="input-group">
+							<input formControlName="timeAbove" type="number" class="form-control text-right"
+								[ngClass]="{'is-invalid' : formData.get('recalculate').get('timeAbove').invalid}" />
+						</div>
+					</div>
+
+					<div class="col-12 col-md-6 mt-3">
+						<label for="name">{{ 'GLOBAL.LABEL.MINUTETOLERANCEBELOW' | translate }}</label>
+						<div class="input-group">
+							<input formControlName="timeBelow" type="number" class="form-control text-right"
+								[ngClass]="{'is-invalid' : formData.get('recalculate').get('timeBelow').invalid}" />
+						</div>
+					</div>
+
+					<div class="col-12 col-md-6 mt-3">
+						<label for="name">{{ 'GLOBAL.LABEL.TOLERANCEDISTABOVE' | translate }} ({{
+							'GLOBAL.LABEL.METERS' |
+							translate }} )</label>
+						<div class="input-group">
+							<input formControlName="distanceAbove" type="number" class="form-control text-right"
+								[ngClass]="{'is-invalid' : formData.get('recalculate').get('distanceAbove').invalid}" />
+						</div>
+					</div>
+
+					<div class="col-12 col-md-6 mt-3">
+						<label for="name">{{ 'GLOBAL.LABEL.TOLERANCEDISTBELOW' | translate }} ({{
+							'GLOBAL.LABEL.METERS' |
+							translate }} )</label>
+						<div class="input-group">
+							<input formControlName="distanceBelow" type="number" class="form-control text-right"
+								[ngClass]="{'is-invalid' : formData.get('recalculate').get('distanceBelow').invalid}" />
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-body">
+				<input type="hidden" class="form-control" formControlName="_id">
+				<!-- <div class="row">
+					<div class="form-group col-12">
+						<label for="name">{{ 'GLOBAL.LABEL.EXPIRESNEWRACETIME' | translate }}</label>
+						<div class="input-group">
+							<input formControlName="expiresNewRaceTime" type="number" class="form-control text-right"
+								[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('expiresNewRaceTime').invalid}" />
+						</div>
+						<small class="text-danger">{{ 'GLOBAL.LABEL.EXPIRESNEWRACETIME_TEXT' | translate }}</small>
+					</div>
+				</div> -->
+
+				<div class="card p-4">
+					<div class="row ">
+						<div class="col-9  mb-5">
+							<h6>{{ 'GLOBAL.LABEL.DYNAMIC_PRICE' | translate }}</h6><br />
+							<small>{{ 'GLOBAL.LABEL.TIME' | translate }} {{ 'GLOBAL.LABEL.IN' | translate }} <b class="text-danger">{{
+									'GLOBAL.LABEL.MINUTES' | translate }}</b> | {{ 'GLOBAL.LABEL.RAY' | translate }} {{
+								'GLOBAL.LABEL.IN'
+								| translate }} <b class="text-danger">{{ 'GLOBAL.LABEL.METERS' | translate
+									}}</b></small>
+						</div>
+						<div class="col-3 text-right mb-5">
+							<button type="button" class="btn btn-sm btn-info" (click)="addDynamic()">
+								<span aria-hidden="true">{{ 'GLOBAL.LABEL.NEW' | translate }} {{
+									'GLOBAL.LABEL.DYNAMIC_PRICE' |
+									translate }}</span>
+							</button>
+						</div>
+
+						<div class="col-12 row" *ngFor="let dynamic of formData.get('dynamics').controls; index as i">
+							<ng-container [formGroup]="dynamic">
+								<div class="form-group col-2">
+									<label for="timeRange">{{ 'GLOBAL.LABEL.TIME_IN_MINUTES' | translate }}</label>
+									<div class="input-group">
+										<input type="number" class="form-control text-right" formControlName="timeRange"
+											[ngClass]="{'is-invalid' : formSubmit && dynamic.get('timeRange').invalid}" />
+									</div>
+								</div>
+
+								<div class="form-group col-2">
+									<label for="ray">{{ 'GLOBAL.LABEL.RAY' | translate }}</label>
+									<div class="input-group">
+										<input type="number" class="form-control text-right" formControlName="ray"
+											[ngClass]="{'is-invalid' : formSubmit && dynamic.get('ray').invalid}" />
+									</div>
+								</div>
+
+								<div class="form-group col-3">
+									<label for="amoutStart">{{ 'GLOBAL.LABEL.RACE' | translate }} {{ 'GLOBAL.LABEL.OF' |
+										translate
+										}}</label>
+									<div class="input-group">
+										<input type="number" class="form-control text-right" formControlName="amoutStart"
+											[ngClass]="{'is-invalid' : formSubmit && dynamic.get('amoutStart').invalid}" />
+									</div>
+								</div>
+
+								<div class="form-group col-2">
+									<label for="amoutEnd">{{ 'GLOBAL.LABEL.FOR' | translate }}</label>
+									<div class="input-group">
+										<input type="number" class="form-control text-right" formControlName="amoutEnd"
+											[ngClass]="{'is-invalid' : formSubmit && dynamic.get('amoutEnd').invalid}">
+									</div>
+								</div>
+
+								<div class="form-group col-2">
+									<label for="percent">{{ "GLOBAL.LABEL.VALUEBYPERCENTAGE" | translate }}</label>
+									<div class="input-group">
+										<input type="number" class="form-control text-right" formControlName="percent"
+											[ngClass]="{'is-invalid' : formSubmit && dynamic.get('percent').invalid}">
+									</div>
+								</div>
+
+								<div class="form-group col-1">
+									<label for="remove"></label>
+									<div class="input-group mt-3">
+										<i class="flaticon2-trash" (click)="removeDynamic(dynamic, i)"></i>
+									</div>
+								</div>
+							</ng-container>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<input type="submit" value="{{ 'GLOBAL.LABEL.UPDATE' | translate }}" class="btn btn-warning btn-refresh">
+			</div>
+		</form>
+	</div>
+</ng-template>
+
+<!-- Modal up sert Driver -->
+<ng-template #upsertmodal let-modal modal-lg>
+	<div>
+		<form [formGroup]="formData" (ngSubmit)="formSubmit=true; upsertSettingsDriver(formData.value)">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-create-data">{{ 'GLOBAL.LABEL.DRIVER' | translate }}</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="row modal-body">
+				<input type="hidden" class="form-control" formControlName="_id">
+
+				<!-- <div class="card p-4 mb-4 bg-light col-12">
+					<h5 class="mb-4" for="status ">{{ 'GLOBAL.LABEL.SYSTEMCREDIT' | translate }}</h5>
+
+					<div class="row">
+						<div class="form-group col-12">
+							<label for="name">{{ 'GLOBAL.LABEL.CREDITENABLE' | translate }}</label>
+							<div class="input-group">
+								<mat-slide-toggle formControlName="creditEnableMode"></mat-slide-toggle>
+							</div>
+						</div>
+
+						<div class="form-group col-12" *ngIf="formData.get('creditEnableMode').value === true">
+							<div class="row">
+								<div class="col-6">
+									<label for="name">{{ 'GLOBAL.LABEL.ALLOWS_TO_ACCEPT_RACES_WITH_A_NEGATIVE_BALANCE' |
+										translate
+										}}</label>
+									<div class="input-group">
+										<select id="allowAcceptRacesNegativeBalance" class="form-control"
+											formControlName="allowAcceptRacesNegativeBalance">
+											<option value="true">{{ "GLOBAL.LABEL.YES" | translate }}</option>
+											<option value="false">{{ "GLOBAL.LABEL.NO" | translate }}</option>
+										</select>
+									</div>
+								</div>
+
+								<div class="col-6"
+									*ngIf="formData.get('allowAcceptRacesNegativeBalance').value === 'true'">
+									<label for="name">{{ 'GLOBAL.LABEL.BALANCE_LIMIT' | translate
+										}}
+									</label>
+									<div class="input-group">
+										<input min="0" max="1000" formControlName="balanceLimit" type="number"
+											class="form-control"
+											[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('balanceLimit').invalid}" />
+									</div>
+								</div>
+
+							</div>
+						</div>
+					</div>
+				</div> -->
+
+				<!-- <hr /> -->
+
+				<div class="form-group col-12">
+					<label for="name">{{ 'GLOBAL.LABEL.ACTIVEPERCENTSERVICE' | translate }}</label>
+					<div class="input-group">
+						<mat-slide-toggle formControlName="activePercentService"></mat-slide-toggle>
+					</div>
+				</div>
+
+				<!-- <div class="form-group col-12">
+					<label for="name">{{ 'GLOBAL.LABEL.PASSTOPASSENGER' | translate }}</label>
+					<div class="input-group">
+						<mat-slide-toggle formControlName="passAdditionalStopsToPassenger"></mat-slide-toggle>
+					</div>
+				</div> -->
+
+				<!-- <div class="form-group col-4" *ngIf="formData.get('activePercentService').value !== true"> NAO UTILIZADO NO TILARY
+					<label for="name">{{ 'GLOBAL.LABEL.CREDITPRACE' | translate }}</label>
+					<div class="input-group">
+						<input formControlName="creditPrice" type="number" class="form-control"
+							[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('creditPrice').invalid}" />
+					</div>
+				</div> -->
+
+				<div class="form-group col-4" *ngIf="formData.get('activePercentService').value !== true">
+					<label for="name">{{ 'GLOBAL.LABEL.CREDITMOUNTPERRUN' | translate }}</label>
+					<div class="input-group">
+						<input formControlName="creditAmountPerRice" [options]="optionsCurrencyMask" currencyMask
+							class="form-control"
+							[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('creditAmountPerRice').invalid}" />
+					</div>
+				</div>
+				<div class="form-group col-4" *ngIf="formData.get('activePercentService').value !== true">
+					<label for="name">{{ 'GLOBAL.LABEL.CREDITAMOUNTPERADDITIONALSTOP' | translate }}</label>
+					<div class="input-group">
+						<input formControlName="creditAmountPerAdditionalStop" type="number" class="form-control"
+							[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('creditAmountPerAdditionalStop').invalid}" />
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<input type="submit" value="{{ 'GLOBAL.LABEL.UPDATE' | translate }}" class="btn btn-primary btn-refresh">
+			</div>
+		</form>
+	</div>
+</ng-template>

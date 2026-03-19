@@ -1,0 +1,429 @@
+<form [formGroup]="formFilter" formFilter.valid>
+	<div class="row">
+		<div class="form-group col-4">
+			<label>{{ 'GLOBAL.LABEL.PERSON' | translate
+				}}:</label>
+			<div class="input-group">
+				<input type="text" class="form-control" matInput placeholder="{{ 'GLOBAL.LABEL.SEARCHBYPERSON' | translate }}"
+					[matAutocomplete]="autoPerson" formControlName="person">
+				<mat-autocomplete [displayWith]="displayFnFilterTwo" #autoPerson="matAutocomplete">
+					<mat-option *ngFor="let pers of person" [value]="pers" (click)="onClickPersonFilter(pers)">
+						{{ pers.name }}
+					</mat-option>
+				</mat-autocomplete>
+			</div>
+		</div>
+
+		<div class="form-group col-4">
+			<label for="franchise">{{ "GLOBAL.LABEL.FRANCHISE" | translate }}</label>
+			<div class="input-group">
+				<input type="text" class="form-control" matInput
+					placeholder='{{ "GLOBAL.LABEL.SEARCHBYFRANCHISE" | translate }}' [matAutocomplete]="autoFranchise"
+					formControlName="franchise" [ngClass]="{
+					'is-invalid': formFilter && formFilter.get('franchise').invalid
+				}" />
+				<mat-autocomplete [displayWith]="displayFn" #autoFranchise="matAutocomplete">
+					<mat-option *ngFor="let franchise of listFranchise" [value]="franchise"
+						(click)="onClickFranchiseFilter(franchise)">
+						{{ franchise.name }}
+					</mat-option>
+				</mat-autocomplete>
+			</div>
+		</div>
+
+		<div class="form-group col-4">
+			<label>{{ 'GLOBAL.LABEL.COMPANY' | translate }}</label>
+			<div class="input-group">
+				<input type="text" class="form-control" matInput placeholder="Pesquisar por Empresa"
+					[matAutocomplete]="autoCompany" formControlName="company">
+				<mat-autocomplete [displayWith]="displayFnCompany" #autoCompany="matAutocomplete">
+					<mat-option *ngFor="let company of companies" [value]="company" (click)="onClickCompanyFilter(company)">
+						{{ company.name }}
+					</mat-option>
+				</mat-autocomplete>
+			</div>
+		</div>
+
+		<div class="form-group col-4" *ngIf="isColumApproved">
+			<label for="approved">Aprovados</label>
+			<div class="input-group">
+				<select class="form-control" formControlName="approved">
+					<option value="all">{{ 'GLOBAL.LABEL.ALLSTATUS' | translate }}</option>
+					<option value="true">{{ 'GLOBAL.LABEL.YES' | translate }}</option>
+					<option value="false">{{ 'GLOBAL.LABEL.NO' | translate }}</option>
+				</select>
+			</div>
+		</div>
+
+		<div class="form-group col-4">
+			<label for="start_date">{{ 'GLOBAL.LABEL.STARTDATE' | translate }}</label>
+			<div class="input-group">
+				<input required mask="d0/M0/0000" class="form-control" placeholder="Escolha uma data inicial"
+					formControlName="start_date">
+			</div>
+		</div>
+		<div class="form-group col-4">
+			<label for="end_date">{{ 'GLOBAL.LABEL.ENDDATE' | translate }}</label>
+			<div class="input-group">
+				<input required mask="d0/M0/0000" class="form-control" placeholder="Escolha uma data final"
+					formControlName="end_date">
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="form-group col-12">
+			<p style="float: left;" class="legend">
+				Para filtrar por data é necessário preencher data inicial e data final
+			</p>
+		</div>
+	</div>
+</form>
+
+<div class="row justify-content-between" *ngIf="showPaginator">
+	<div class="form-group col-12">
+		<span class="alert alert-danger"><b>{{ 'GLOBAL.LABEL.CONFIRMPAGINATOR' | translate }}</b></span>
+	</div>
+</div>
+
+<div class="row justify-content-between">
+	<div class="col align-self-center mb-2">
+		<h5>
+			<p class="float-left"><b>{{ 'GLOBAL.LABEL.PASSENGER' | translate }} </b></p>
+		</h5>
+		<div style="margin-left: 15px;display: table-caption;margin-top: -5px;">
+			<a target="_blank" [href]="helpdeskUrl">
+				<span class="navmenu-help-icon"><i class="fa fa-question-circle"></i></span>
+			</a>
+		</div>
+	</div>
+	<div class="col-auto">
+		<a (click)="upsertModalShow(upserttemplatemodal, undefined, 'create')" href="javascript:;"
+			class="float-right btn btn-label-warning btn-bold btn-sm btn-icon-h">
+			{{ 'GLOBAL.LABEL.CREATE' | translate }}
+		</a>
+		<button class="float-right btn btn-sm btn-warning mb-2 ml-2" (click)="generateExcel()"
+			style="display: flex; gap: 5px; align-items: center; justify-content: center; ">
+			<i class="flaticon2-document mr-2"></i>
+			<span *ngIf="!exporting">Gerar Excel</span>
+			<span *ngIf="exporting">Gerando excel ...</span>
+			<div *ngIf="exporting" class="spinner-border text-primary" role="status" style=" width: 1em; height: 1em;">
+				<span class="visually-hidden"></span>
+			</div>
+		</button>
+	</div>
+</div>
+
+<div class="example-container mat-elevation-z8" *ngIf="pageLimit">
+	<mat-table #table [dataSource]="dataSource">
+		<!-- Image Column -->
+		<ng-container matColumnDef="image">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.IMAGES' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<a [href]='element?.person?.image || "./assets/media/logo-default.png"' target="_blank">
+					<img width="50" class="img-thumbnail" [src]='element?.person?.image || "./assets/media/logo-default.png"'
+						[alt]="element?.person?.name" />
+				</a>
+			</mat-cell>
+		</ng-container>
+
+		<!-- Person Column -->
+		<ng-container matColumnDef="person">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.PERSON' | translate }} </mat-header-cell>
+			<!-- <mat-cell *matCellDef="let element"> {{ getNamePerson(element?.person) }} -->
+			<mat-cell *matCellDef="let element"> {{ element?.person?.name ? element?.person?.name
+				: ' - ' }}
+			</mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="franchise">
+			<mat-header-cell *matHeaderCellDef>{{ 'GLOBAL.LABEL.FRANCHISE' | translate }}</mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element?.franchise?.name ? element?.franchise?.name
+				: ' - ' }}
+			</mat-cell>
+		</ng-container>
+
+		<!-- company Column -->
+		<ng-container matColumnDef="company">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.COMPANY' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ (element.company && element.company.name) ? element?.company?.name :
+				'-'
+				}}
+			</mat-cell>
+		</ng-container>
+
+		<!-- Status Column -->
+		<ng-container matColumnDef="approved">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.APPROVED' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i *ngIf="element.approved === true" class="flaticon2-accept mr-2"></i>
+				<i *ngIf="element.approved === false" class="flaticon2-cancel mr-2"></i>
+			</mat-cell>
+		</ng-container>
+
+		<!-- createdAt Column -->
+		<ng-container matColumnDef="createdAt">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.CREATEDATT' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element?.createdAt }} </mat-cell>
+		</ng-container>
+
+		<!-- Status Column -->
+		<ng-container matColumnDef="status">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.STATUS' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i *ngIf="element.status === true" class="flaticon2-accept mr-2"></i>
+				<i *ngIf="element.status === false" class="flaticon2-cancel mr-2"></i>
+			</mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="block">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.BLOCK' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i *ngIf="element.block === true" class="flaticon2-accept mr-2"></i>
+				<!-- <i *ngIf="element.block === false" class="flaticon2-cancel mr-2"></i> -->
+			</mat-cell>
+		</ng-container>
+
+		<!-- Delete Slide -->
+		<ng-container matColumnDef="delete">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.ACTION' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i class="flaticon2-edit mr-2" (click)="upsertModalShow(upserttemplatemodal, element, 'edit')"></i>
+				<i class="flaticon2-trash" (click)="confirmDeleteModalShow(confirmdeletemodal, element)"></i>
+			</mat-cell>
+		</ng-container>
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns;">
+		</mat-row>
+	</mat-table>
+	<mat-paginator [length]="totalLength" [pageSize]="pageSize" [pageSizeOptions]="pageLimit"
+		(page)="changePage($event, confirmpaginacaomodal)">
+	</mat-paginator>
+</div>
+
+<!-- Apartir de aqui é o modal -->
+<!-- Modal upsert data -->
+<ng-template #upserttemplatemodal let-modal>
+	<form [formGroup]="formData" (ngSubmit)="formSubmit=true; upsert(formData.value)">
+		<div class="modal-header">
+			<h4 class="modal-title" id="modal-create-data">{{ 'GLOBAL.LABEL.CREATEPASSENGER' | translate }}</h4>
+			<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+		<div class="modal-body">
+			<input type="hidden" class="form-control" formControlName="_id">
+			<div class="row">
+				<div class="form-group col-12" *ngIf="isRoot">
+					<label for="franchise">{{ 'GLOBAL.LABEL.FRANCHISE' | translate }}</label>
+					<div class="input-group">
+						<input id="franchise" type="text" class="form-control matInput autocomplete"
+							placeholder="Escolha uma Fanquia" [matAutocomplete]="autoFranchise" formControlName="franchise"
+							[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('franchise').invalid}">
+						<mat-autocomplete [displayWith]="displayFnFranchise" #autoFranchise="matAutocomplete">
+							<mat-option *ngFor="let franchise of franchises" [value]="franchise"
+								(click)="onClickFranchise(franchise)">
+								{{ franchise.name }}
+							</mat-option>
+						</mat-autocomplete>
+					</div>
+				</div>
+
+				<div class="form-group col-12">
+					<label for="company">{{ 'GLOBAL.LABEL.COMPANY' | translate }}</label>
+					<div class="input-group">
+						<input type="text" class="form-control" matInput placeholder="Escolha uma Empresa"
+							[matAutocomplete]="autoCompany" formControlName="company"
+							[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('company').invalid}">
+						<mat-autocomplete [displayWith]="displayFnCompany" #autoCompany="matAutocomplete">
+							<mat-option *ngFor="let comp of companies" [value]="comp">
+								{{ comp.name }}
+							</mat-option>
+						</mat-autocomplete>
+					</div>
+				</div>
+
+				<div class="form-group col-12">
+					<label>{{ 'GLOBAL.LABEL.PERSON' | translate }}</label>
+					<div class="input-group">
+						<input type="text" class="form-control" matInput
+							placeholder="{{ 'GLOBAL.LABEL.SEARCHBYPERSON' | translate }}" [matAutocomplete]="autoPerson"
+							formControlName="personId">
+						<mat-autocomplete [displayWith]="displayFnPersonId" #autoPerson="matAutocomplete">
+							<mat-option *ngFor="let pers of person" [value]="pers" (click)="onClickPerson(pers)">
+								{{ pers.name }}
+							</mat-option>
+						</mat-autocomplete>
+					</div>
+				</div>
+				<div class="form-group">
+					<p style="margin-right: 14%" class="legend">
+						{{ 'GLOBAL.LABEL.INSTRUCTION' | translate }}
+					</p>
+				</div>
+			</div>
+			<div class="row" formGroupName="person">
+				<input type="hidden" class="form-control" formControlName="_id">
+				<div class="form-group col-8">
+					<label for="name">{{ 'GLOBAL.LABEL.NAME' | translate }}</label>
+					<div class="input-group">
+						<input class="form-control" formControlName="name" type="text" class="form-control"
+							[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('person').get('name').invalid}">
+					</div>
+				</div>
+
+				<div class="form-group col-4">
+					<label for="cpf">CPF</label>
+					<div class="input-group">
+						<input class="form-control" formControlName="cpf" mask="000.000.000-00" class="form-control"
+							[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('person').get('cpf').invalid}">
+					</div>
+				</div>
+
+				<div class="form-group col-4">
+					<label for="ddi">DDI</label>
+					<div class="input-group">
+						<select class="form-control" formControlName="ddi" (change)="setMaskPhone($event)">
+							<option value="+55">Brasil</option>
+							<option value="+244">Angola</option>
+						</select>
+					</div>
+				</div>
+
+				<div class="form-group col-4">
+					<label for="phone">{{ 'GLOBAL.LABEL.PHONE' | translate }}</label>
+					<div class="input-group">
+						<input class="form-control" formControlName="phone" mask="{{ maskPhone }}" class="form-control"
+							[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('person').get('phone').invalid}">
+					</div>
+				</div>
+
+				<!-- <div class="form-group col-5">
+					<label>{{ 'GLOBAL.LABEL.CITY' | translate }}</label>
+					<div class="input-group">
+						<input type="text" class="form-control" matInput placeholder="Escolha uma cidade"
+							[matAutocomplete]="autoImagesEdit" formControlName="city"
+							[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('person').get('city').invalid}">
+						<mat-autocomplete [displayWith]="displayFn" #autoImagesEdit="matAutocomplete">
+							<mat-option *ngFor="let city of listCity" [value]="city">
+								{{ city.name }}
+							</mat-option>
+						</mat-autocomplete>
+					</div>
+				</div> -->
+
+				<div class="form-group col-6">
+					<label for="email">{{ 'GLOBAL.LABEL.EMAIL' | translate }}</label>
+					<div class="input-group">
+						<input class="form-control" formControlName="email" type="text" class="form-control"
+							[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('person').get('email').invalid}">
+					</div>
+				</div>
+
+				<div class="form-group col-4" *ngIf="selectedPerson">
+					<label>E-mail</label>
+					<div class="input-group">
+						<input type="text" class="form-control" matInput placeholder="" readonly
+							[value]="selectedPerson?.email?selectedPerson?.email:''">
+					</div>
+				</div>
+
+				<div class="form-group col-6" *ngIf="selectedPerson">
+					<label>CPF</label>
+					<div class="input-group">
+						<input type="text" class="form-control" matInput placeholder="" readonly
+							[value]="selectedPerson?.cpf?selectedPerson?.cpf:''">
+					</div>
+				</div>
+
+			</div>
+
+			<div class="row">
+				<div class="form-group col-4">
+					<label for="status">{{ 'GLOBAL.LABEL.STATUS' | translate }}</label>
+					<div class="input-group">
+						<mat-slide-toggle formControlName="status"></mat-slide-toggle>
+					</div>
+				</div>
+
+				<div class="form-group col-4">
+					<label for="status">{{ 'GLOBAL.LABEL.APPROVED' | translate }}</label>
+					<div class="input-group">
+						<mat-slide-toggle formControlName="approved"></mat-slide-toggle>
+					</div>
+				</div>
+
+				<div class="form-group col-4">
+					<label for="status">{{ 'GLOBAL.LABEL.BLOCK' | translate }}</label>
+					<div class="input-group">
+						<mat-slide-toggle formControlName="block"></mat-slide-toggle>
+					</div>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="col-12">
+					<hr />
+				</div>
+				<div class="form-group col-4">
+					<label for="appversion"><strong>OS</strong></label>
+					<div class="input-group">
+						<label for="appversion">{{ operationalSystem }}</label>
+					</div>
+				</div>
+
+				<div class="form-group col-4">
+					<label for="appversion"><strong>Versão</strong></label>
+					<div class="input-group">
+						<label for="appversion">{{ appversion }}</label>
+					</div>
+				</div>
+				<!-- image -->
+				<div class="form-group col-12" style="margin-top: 10px; margin-bottom: 10px">
+					<label for="customFile">{{
+						"GLOBAL.LABEL.IMAGE" | translate
+						}}</label>
+					<div class="custom-file">
+						<input type="file" class="custom-file-input" id="customFile" (change)="onChange($event)" multiple [ngClass]="{
+													'is-invalid':
+														formSubmitAttempt && formData.get('file').invalid
+												}" />
+						<label class="custom-file-label" for="customFile" id="customFileLabel">
+							{{ "GLOBAL.LABEL.SELECTIMAGE" | translate }}</label>
+					</div>
+				</div>
+				<div class="col-12">
+					<hr />
+				</div>
+			</div>
+
+
+			<div class="form-group col-4" *ngIf="personImage">
+				<img style="width:200px; height:200px;" [src]="personImage" />
+			</div>
+		</div>
+
+		<div class="modal-footer">
+			<input type="submit" value='{{ "GLOBAL.LABEL.CREATESLIDE" | translate }}' class="btn btn-outline-dark">
+		</div>
+	</form>
+</ng-template>
+
+<!-- Modal Delete -->
+<ng-template #confirmdeletemodal let-modal>
+	<div class="modal-header">
+		<h4 class="modal-title" id="modal-delete-data">
+			{{toDelete?.person?.name}}</h4>
+		<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	<div class="modal-body" class="btn btn-warning">
+		{{ 'GLOBAL.LABEL.AREYOUSUREYOUWANTTODELETE' | translate }}
+	</div>
+	<div class="modal-footer">
+		<button type="button" (click)="idToDelete=undefined; modal.dismiss('Cross click')" class="btn btn-secondary"
+			data-dismiss="modal">{{ 'GLOBAL.LABEL.CANCEL' | translate }}</button>
+		<button type="button" (click)="delete() && modal.dismiss('Cross click')" class="btn btn-primary">{{
+			'GLOBAL.LABEL.YES' | translate }}</button>
+	</div>
+</ng-template>

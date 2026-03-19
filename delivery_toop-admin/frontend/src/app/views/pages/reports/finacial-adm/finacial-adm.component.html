@@ -1,0 +1,297 @@
+<form [formGroup]="formFilter" *ngIf="formFilter" formFilter.valid>
+	<div class="row">
+		<div class="form-group col-2">
+			<label for="dateInit">{{ "GLOBAL.LABEL.DATEINIT" | translate }}</label>
+			<div class="input-group">
+				<input class="form-control" mask="d0/M0/0000" formControlName="dateInit" />
+			</div>
+		</div>
+
+		<div class="form-group col-3">
+			<label for="dateFinal">{{ "GLOBAL.LABEL.DATEFINISH" | translate }}</label>
+			<div class="input-group">
+				<input class="form-control" mask="d0/M0/0000" formControlName="dateFinal" />
+			</div>
+		</div>
+
+		<div class="form-group col-3">
+			<label for="category">Franquia</label>
+			<div class="input-group">
+				<input type="text" class="form-control" matInput placeholder="Selecione a Franquia"
+					[matAutocomplete]="autoCompany" formControlName="franchise" [ngClass]="{
+						'is-invalid': formFilter && formFilter.get('franchise').invalid
+					}" />
+				<mat-autocomplete [displayWith]="displayFn" #autoCompany="matAutocomplete">
+					<mat-option *ngFor="let franchise of listFranchise" [value]="franchise"
+						(click)="onClickFranchiseFilter(franchise)">
+						{{ franchise.name }}
+					</mat-option>
+				</mat-autocomplete>
+			</div>
+		</div>
+
+		<div class="form-group col-4">
+			<label for="images">Tipo Pagamento</label>
+			<div class="input-group">
+				<select class="form-control" formControlName="typePayment">
+					<option value="all" selected>Mostrar Todos</option>
+					<option value="APP">Pelo App</option>
+					<option value="MONEY">Dinheiro</option>
+					<option value="PIX">PIX</option>
+					<option value="CARD">Maquininha</option>
+				</select>
+			</div>
+		</div>
+
+		<div class="form-group col-4">
+			<label for="images">Status</label>
+			<div class="input-group">
+				<select class="form-control" formControlName="status">
+					<option value="all" selected>Mostrar Todos</option>
+					<option value="FINISHED">Pagos</option>
+					<option value="CANCELED">Cancelados</option>
+					<option value="WAIT_DELIVERYMAN">Procurando Entregador</option>
+					<option value="ACCEPT_DELIVERYMAN">Aguardando Retirada</option>
+					<option value="IN_PROGRESS_DELIVERYMAN">Rota de Entrega</option>
+				</select>
+			</div>
+		</div>
+	</div>
+</form>
+
+<div class="row justify-content-between">
+	<div class="col-12">
+
+		<button class="float-right btn btn-sm btn-warning mb-2 ml-2" (click)="generateExcel()"
+			style="display: flex; gap: 5px; align-items: center; justify-content: center; ">
+			<i class="flaticon2-document mr-2"></i>
+			<span *ngIf="!exporting">Gerar Excel</span>
+			<span *ngIf="exporting">Gerando excel ...</span>
+			<div *ngIf="exporting" class="spinner-border text-primary" role="status" style=" width: 1em; height: 1em;">
+				<span class="visually-hidden"></span>
+			</div>
+		</button>
+
+		<button class="float-right btn btn-sm btn-primary mb-2 ml-2" style="cursor: default">
+			Receber Franquias
+			<i class="flaticon-price-tag mr-2"></i>
+			{{ receiveFranchise | currency: "BRL":"symbol" }}
+		</button>
+
+		<button class="float-right btn btn-sm btn-danger mb-2 ml-2" style="cursor: default">
+			Repassar Franquias
+			<i class="flaticon-price-tag mr-2"></i>
+			{{ passAlongFranchise | currency: "BRL":"symbol" }}
+		</button>
+
+		<button class="float-right btn btn-sm btn-danger mb-2 ml-2" style="cursor: default">
+			Taxas Adm
+			<i class="flaticon-price-tag mr-2"></i>
+			{{ fees | currency: "BRL":"symbol" }}
+		</button>
+
+		<button class="float-right btn btn-sm btn-primary mb-2 ml-2" style="cursor: default">
+			Total Aprovados
+			<i class="flaticon-price-tag mr-2"></i> {{ aprovedCount }}
+		</button>
+	</div>
+</div>
+
+<div class="example-container mat-elevation-z8">
+	<mat-table #table [dataSource]="dataSource" class="responsive-table">
+		<!-- Checkbox Column -->
+		<ng-container matColumnDef="select">
+			<mat-header-cell *matHeaderCellDef>
+				<mat-checkbox [checked]="true" [indeterminate]="true"> </mat-checkbox>
+			</mat-header-cell>
+			<mat-cell *matCellDef="let row">
+				<mat-checkbox (click)="$event.stopPropagation()"> </mat-checkbox>
+			</mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="date">
+			<mat-header-cell *matHeaderCellDef>Data</mat-header-cell>
+			<mat-cell *matCellDef="let element">{{ element?.date }}</mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="order_number">
+			<mat-header-cell *matHeaderCellDef>N.º</mat-header-cell>
+			<mat-cell *matCellDef="let element">{{ element?.order_number }}</mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="status">
+			<mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
+			<mat-cell *matCellDef="let element">{{ element?.status }}</mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="methodPayment">
+			<mat-header-cell *matHeaderCellDef>Met. Pagamento</mat-header-cell>
+			<mat-cell *matCellDef="let element">{{
+				element?.methodPayment
+				}}</mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="franchise">
+			<mat-header-cell *matHeaderCellDef>Franquia</mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<ul style="list-style-type: none;margin: 0;padding: 0;">
+					<li style="margin-bottom: 2px">
+						<b>{{ element?.franchise }}</b>
+					</li>
+					<li>{{ element?.company }}</li>
+				</ul>
+			</mat-cell>
+		</ng-container>
+
+		<!-- <ng-container matColumnDef="company">
+			<mat-header-cell *matHeaderCellDef>Empresa</mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				{{ element?.company }}
+			</mat-cell>
+		</ng-container> -->
+
+		<ng-container matColumnDef="total">
+			<mat-header-cell *matHeaderCellDef>Vl. Pedido</mat-header-cell>
+			<mat-cell *matCellDef="let element">{{ element?.total | currency:"BRL":"symbol" }}&nbsp;/&nbsp;<small style="
+				padding-top: 4px;" title="Vl. Pedido - Valor da entrega">{{
+					element?.totalBase
+					|
+					currency:"BRL":"symbol" }}</small></mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="delivery">
+			<mat-header-cell *matHeaderCellDef>Taxa Entrega</mat-header-cell>
+			<mat-cell *matCellDef="let element">{{ element?.delivery}}&nbsp;/&nbsp;<small style="
+				padding-top: 2px;" title="Modalidade da entrega">{{
+					element?.deliveryType?element?.deliveryType:"-" }}</small></mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="franchiseValue">
+			<mat-header-cell *matHeaderCellDef>Taxa Franquia</mat-header-cell>
+			<mat-cell *matCellDef="let element"><span title="Valor liquido (Já subtraído a taxa adm)">{{
+					element?.franchiseValue |
+					currency:"BRL":"symbol" }}</span>&nbsp;/&nbsp;<small style="
+				padding-top: 4px;" title="Taxa Franquia sob Vl. Pedido liquido">{{
+					element?.franchiseTax?element?.franchiseTax.toFixed(2):0.00 }}%</small></mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="admValue">
+			<mat-header-cell *matHeaderCellDef>Taxa Adm</mat-header-cell>
+			<mat-cell *matCellDef="let element"><span title="Valor liquido (Já subtraído a taxa franquia)">{{
+					element?.admValue |
+					currency:"BRL":"symbol" }}</span>&nbsp;/&nbsp;<small style="
+			padding-top: 4px;" title="Taxa Adm sob Taxa da franquia">{{
+					element?.admTax?element?.admTax.toFixed(2):0.00 }}%</small></mat-cell>
+		</ng-container>
+
+
+		<ng-container matColumnDef="passAlongFranchise">
+			<mat-header-cell *matHeaderCellDef>Repassar</mat-header-cell>
+			<mat-cell *matCellDef="let element">{{
+				element?.passAlongFranchise | currency: "BRL":"symbol"
+				}}</mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="receiveFranchise">
+			<mat-header-cell *matHeaderCellDef>Receber</mat-header-cell>
+			<mat-cell *matCellDef="let element">{{
+				element?.receiveFranchise | currency: "BRL":"symbol"
+				}}</mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="action">
+			<mat-header-cell *matHeaderCellDef>Ação</mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<div *ngIf="!load" class="sm-col-3 form-check">
+					<input *ngIf="!element.franchisePaid && element.orderStatus === 'FINISHED'" type="checkbox"
+						class="form-check-input" (change)="checkItemList($event, element)" />
+					<i *ngIf="element.franchisePaid" style="color: green" class="flaticon2-check-mark mr-4"
+						(click)="editCompanyModalShow(editcompanymodal, element)"></i>
+
+					<i *ngIf="element.paymentStatus != 'CHARGEBACK' && element.orderStatus === 'CANCELED' && (element.methodPayment === 'APP' || element.methodPayment === 'PIX')"
+						style="color: red;cursor: pointer;" title="Estornar pagamento" class="flaticon2-refresh-arrow"
+						(click)="chargebackModalShow(chargebackmodal, element)"></i>
+
+
+					<i class="flaticon2-add-1 ml-2 mt-1" style="cursor: pointer;" (click)="infoModalShow(infomodal, element)"></i>
+				</div>
+
+				<div *ngIf="load" class="spinner-border text-primary" role="status">
+					<span class="visually-hidden"></span>
+				</div>
+
+
+			</mat-cell>
+		</ng-container>
+
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns"> </mat-row>
+	</mat-table>
+	<mat-paginator [length]="totalLength" [pageSize]="pageSize" [pageSizeOptions]="pageLimit" (page)="changePage($event)">
+	</mat-paginator>
+</div>
+
+<ng-template #chargebackmodal let-modal>
+	<div class="modal-header">
+		<h4 class="modal-title" id="modal-chargeback">
+			Realizar estorno</h4>
+		<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	<div class="modal-body">
+		<div class="row">
+			<div class="col-12" *ngIf="!chargebacking">
+				<label><strong>TEM CERTEZA QUE DESEJA REALIZAR O ESTORNO DESSE PAGAMENTO?</strong></label>
+			</div>
+			<div class="col-12" *ngIf="chargebacking">
+				<label><strong>AGUARDE, REALIZANDO ESTORNO...</strong></label>
+			</div>
+		</div>
+	</div>
+	<div class="modal-footer">
+		<button *ngIf="!chargebacking" type="button" (click)="modal.dismiss('Cross click')" class="btn btn-secondary"
+			data-dismiss="modal">FECHAR</button>
+
+		<button *ngIf="!chargebacking" type="button" (click)="chargeback()" class="btn btn-danger"
+			data-dismiss="modal">ESTORNAR</button>
+	</div>
+</ng-template>
+
+<ng-template #infomodal let-modal>
+	<div class="modal-header">
+		<h4 class="modal-title" id="modal-info">
+			+ info</h4>
+		<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	<div class="modal-body">
+		<div class="row">
+			<div class="col-12">
+				<label><strong>Valor total do pedido:</strong>: {{infoTotal}}</label>
+			</div>
+			<div class="col-12">
+				<label><strong>Tipo de pagamento:</strong>: {{infoType}}</label>
+			</div>
+			<div class="col-12">
+				<label><strong>Taxa:</strong>: {{inforTax}}</label>
+			</div>
+			<div class="col-12">
+				<label><strong>Valor Taxa:</strong>: {{infoValueTax}}</label>
+			</div>
+			<br />
+			<div class="col-12 mt-4">
+				<label><strong>Valor à repassar:</strong>: {{totalPassFranchise}}</label>
+			</div>
+			<div class="col-12 mt-0">
+				<label><strong>Valor à receber:</strong>: {{totalReceiveFranchise}}</label>
+			</div>
+		</div>
+
+	</div>
+	<div class="modal-footer">
+		<button type="button" (click)="modal.dismiss('Cross click')" class="btn btn-secondary"
+			data-dismiss="modal">FECHAR</button>
+	</div>
+</ng-template>

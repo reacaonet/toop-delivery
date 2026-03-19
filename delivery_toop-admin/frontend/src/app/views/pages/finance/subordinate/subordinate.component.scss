@@ -1,0 +1,32 @@
+.example-form {
+	min-width: 150px;
+	max-width: 500px;
+	width: 100%;
+}
+
+.example-full-width {
+	width: 100%;
+}
+
+::ng-deep .cdk-overlay-container {
+	z-index: 9999;
+}
+
+.card-header {
+	color: red !important;
+}
+
+.card-text {
+	color: black !important;
+}
+
+.colorIcon {
+	color: blue !important;
+}
+
+// .card.col {
+//   border: 1px solid #ccc;
+//   background-color: #f3f3f3;
+//   margin: 0 5px;
+//   padding: 10px;
+// }

@@ -1,0 +1,79 @@
+<div class="row justify-content-between">
+	<div class="col-auto align-self-center mb-2">
+		<p class="float-left">{{ "GLOBAL.LABEL.CITY" | translate }}</p>
+	</div>
+	<div class="col-auto">
+		<a (click)="upSertCityModalShow('upsertcitymodal', undefined, 'create')" href="javascript:;"
+			class="float-right btn btn-label-warning btn-bold btn-sm btn-icon-h">
+			{{ "GLOBAL.LABEL.CREATE" | translate }}
+		</a>
+	</div>
+</div>
+
+<div class="example-container mat-elevation-z8">
+	<mat-table #table [dataSource]="dataSource">
+		<ng-container matColumnDef="select">
+			<mat-header-cell *matHeaderCellDef>
+				<mat-checkbox [checked]="true" [indeterminate]="true"> </mat-checkbox>
+			</mat-header-cell>
+			<mat-cell *matCellDef="let row">
+				<mat-checkbox (click)="$event.stopPropagation()"> </mat-checkbox>
+			</mat-cell>
+		</ng-container>
+		<!-- Name Column -->
+		<ng-container matColumnDef="name">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.NAME" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.name }} </mat-cell>
+		</ng-container>
+		<!-- State Column -->
+		<ng-container matColumnDef="state">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.STATE" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				{{ element.state && element.state.name ? element.state.name : "-" }}
+			</mat-cell>
+		</ng-container>
+		<!-- Delete City -->
+		<ng-container matColumnDef="delete">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.ACTION" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i class="flaticon2-edit mr-2" (click)="upSertCityModalShow(upsertcitymodal, element, 'edit')"></i>
+				<i class="flaticon2-trash" (click)="confirmDeleteModalShow(confirmdeletemodal, element)"></i>
+			</mat-cell>
+		</ng-container>
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns"> </mat-row>
+	</mat-table>
+
+	<mat-paginator [length]="totalLength" [pageSize]="pageSize" [pageSizeOptions]="pageLimit" (page)="changePage($event)">
+	</mat-paginator>
+</div>
+
+<!-- Modal Delete -->
+<ng-template #confirmdeletemodal let-modal>
+	<div class="modal-header">
+		<h4 class="modal-title" id="modal-delete-city">
+			{{ formData.value.name }}
+		</h4>
+		<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	<div class="modal-body" class="btn btn-warning">
+		{{ "GLOBAL.LABEL.AREYOUSUREYOUWANTTODELETE" | translate }}
+	</div>
+	<div class="modal-footer">
+		<button type="button" (click)="cityIdToDelete = undefined; modal.dismiss('Cross click')" class="btn btn-secondary"
+			data-dismiss="modal">
+			{{ "GLOBAL.LABEL.CANCEL" | translate }}
+		</button>
+		<button type="button" (click)="deleteCity() && modal.dismiss('Cross click')" class="btn btn-primary">
+			{{ "GLOBAL.LABEL.YES" | translate }}
+		</button>
+	</div>
+</ng-template>

@@ -1,0 +1,10 @@
+export const debug = true;
+export const port = 443;
+export const apiUrl = 'http://192.168.80.151:8100';
+export const nameApp = 'TOOP';
+export const timeout = 30000;
+export const tokenAuth = 'USER_AUTH';
+export const FIREBASE_PATH = 'homolog/';
+export const PACKAGE = 'br.com.toopdelivery.motorista';
+export const apiGeoLocation = '';
+export const activePip = false;

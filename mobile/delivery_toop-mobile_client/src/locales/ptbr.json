@@ -1,0 +1,53 @@
+{
+  "monetary": "R$",
+  "phone": "Celular",
+  "nif": "CPF",
+  "races": "corridas",
+  "confirmRace": "Confirmar corrida",
+  "raceStart": "A corrida começou",
+  "tariffsRace": "Tarifa da corrida",
+  "youRated": "Você Avaliou",
+  "termsOfUse": "Termos de uso",
+  "wereGoing": "Para onde vamos ?",
+  "newUser": {
+    "enterYourName": "Informe seu nome",
+    "msgRegisterPhone": "E para começar, o número do seu Telefone"
+  },
+  "login": {
+    "informYourPhone": "Digite seu número de celular",
+    "placeholder": "Seu número",
+    "infoDDI": "Você selecionou o DDI {ddi} referente {country}, caso você esteja em outra localidade, clique no ícone e selecione seu pais"
+  },
+  "editUser": {
+    "phoneTitle": "Celular do titular"
+  },
+  "wallet": {
+    "infoAddWallet": "Carregue a sua carteira com saldo, receba bónus de utilização ou devoluções de crédito"
+  },
+  "raceFare": {
+    "estimatedTool": "Pedágio estimados"
+  },
+  "autoBoard": {
+    "enterCode": "Digite código",
+    "longText": "Combinou uma corrida pessoalmente?"
+  },
+  "genre": {
+    "title": "Informe um Gênero",
+    "message": "Selecione um gênero",
+    "male": "MASCULINO",
+    "female": "FEMININO"
+  },
+  "selectRide": {
+    "enterTripType": "Selecione o tipo de viagem",
+    "textSelectServiceDriver": "Escolha o tipo de sua corrida com Motorista"
+  },
+  "rideScreen": {
+    "cancelTitle": "Sua Solicitação será aceita em breve",
+    "cancelExplication": "Tem certeza que deseja cancelar ?",
+    "cancelRace": "Cancelar Corrida",
+    "lookingForDrivers": "Buscando motoristas"
+  },
+  "confirmRideScreen": {
+    "textWomenService": "Este Serviço permite que você solicite uma corrida com uma motorista mulher"
+  }
+}

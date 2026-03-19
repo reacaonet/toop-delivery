@@ -1,0 +1,333 @@
+<form [formGroup]="formFilter" formFilter.valid>
+	<div class="row">
+		<div class="form-group col-6">
+			<label>{{ 'GLOBAL.LABEL.FRANCHISE' | translate }}</label>
+			<div class="input-group">
+				<input type="text" class="form-control" matInput placeholder="Pesquisar por Franquia"
+					[matAutocomplete]="autoFranchise" formControlName="franchise">
+				<mat-autocomplete [displayWith]="displayFnFilter" #autoFranchise="matAutocomplete">
+					<mat-option *ngFor="let franchise of franchises" [value]="franchise"
+						(click)="onClickFranchiseFilter(franchise)">
+						{{ franchise.name }}
+					</mat-option>
+				</mat-autocomplete>
+			</div>
+		</div>
+		<div class="form-group col-6">
+			<label>{{ 'GLOBAL.LABEL.TYPE' | translate }}</label>
+			<div class="input-group">
+				<select id="type" class="form-control autocomplete" (change)="changeFilterType($event.target.value)"
+					formControlName="type">
+					<option selected value="">Selecione</option>
+					<option *ngFor="let type of types" [value]="type.value">
+						{{type.label}}</option>
+				</select>
+			</div>
+		</div>
+	</div>
+</form>
+
+<div class="row justify-content-between">
+	<div class="col-auto align-self-center mb-2">
+		<h5>
+			<p class="float-left">{{ 'GLOBAL.LABEL.NOTIFICATIONS' | translate }}</p>
+		</h5>
+	</div>
+	<div class="col-auto">
+		<a (click)="createModalShow(createdatamodal)" href="javascript:;"
+			class="float-right btn btn-label-warning btn-bold btn-sm btn-icon-h">
+			{{ 'GLOBAL.LABEL.CREATE' | translate }}
+		</a>
+
+	</div>
+</div>
+
+<div class="example-container mat-elevation-z8">
+	<mat-table #table [dataSource]="dataSource">
+		<!-- Checkbox Column -->
+		<ng-container matColumnDef="select">
+			<mat-header-cell *matHeaderCellDef>
+				<mat-checkbox [checked]="true" [indeterminate]="true">
+				</mat-checkbox>
+			</mat-header-cell>
+			<mat-cell *matCellDef="let row">
+				<mat-checkbox (click)="$event.stopPropagation()">
+				</mat-checkbox>
+			</mat-cell>
+		</ng-container>
+
+		<!-- Image Column -->
+		<ng-container matColumnDef="image">
+			<mat-header-cell *matHeaderCellDef></mat-header-cell>
+			<mat-cell *matCellDef="let element" [ngClass]="getPositionColor(element.position)">
+				<a [href]='element.image' target="_blank">
+					<img width="50" class="img-thumbnail" [src]='element.image || "./assets/media/logo-default.png"'
+						[alt]="element.description" />
+				</a>
+			</mat-cell>
+		</ng-container>
+
+		<!-- franchise Column -->
+		<ng-container matColumnDef="franchise">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.FRANCHISE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element" [ngClass]="getPositionColor(element.position)"> {{element.franchise?.name}}
+			</mat-cell>
+		</ng-container>
+
+		<!-- type Column -->
+		<ng-container matColumnDef="type">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.TYPE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element" [ngClass]="getPositionColor(element.position)">
+				{{element.type === "DRIVER" ? "Motorista" : element.type === "PASSENGER" ? "Passageiros": "Todos"}}
+			</mat-cell>
+		</ng-container>
+
+		<!-- expirationDate Column -->
+		<ng-container matColumnDef="expirationDate">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.EXPIRATIONDATE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element" [ngClass]="getPositionColor(element.position)"> {{element.expirationDate |
+				date:'dd/MM/yyyy HH:mm'}}
+			</mat-cell>
+		</ng-container>
+
+		<!-- description Column -->
+		<ng-container matColumnDef="description">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.DESCRIPTION' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element" [ngClass]="getPositionColor(element.position)"> {{element.description}}
+			</mat-cell>
+		</ng-container>
+
+
+		<!-- Delete  -->
+		<ng-container matColumnDef="delete">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.ACTION' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element" [ngClass]="getPositionColor(element.position)">
+				<i class="status mr-3" title="Situação" [ngClass]=" getStatusColor(element.status)"></i>
+				<i class="flaticon2-edit mr-3" (click)="editModalShow(editdatamodal, element)"></i>
+				<i class="flaticon2-trash" (click)="confirmDeleteModalShow(confirmdeletemodal, element)"></i>
+			</mat-cell>
+		</ng-container>
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns;">
+		</mat-row>
+	</mat-table>
+	<mat-paginator [length]="totalLength" [pageSize]="pageSize" [pageSizeOptions]="pageLimit" (page)="changePage($event)">
+	</mat-paginator>
+
+	<!-- Apartir de aqui é o modal -->
+	<!-- Modal Create  -->
+	<ng-template #createdatamodal let-modal modal-lg>
+		<form [formGroup]="formData" (ngSubmit)="formSubmit=true; formData.valid && create(formData.value)">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-create-data">
+					{{ 'GLOBAL.LABEL.CREATE' | translate }}
+				</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<input formControlName="_id" type="hidden">
+			</div>
+			<div class="modal-body">
+
+				<div class="row">
+					<!-- image -->
+					<div class="form-group col-12" style="margin-top: 10px; margin-bottom: 10px;">
+						<label for="customFile">{{ 'GLOBAL.LABEL.IMAGE' | translate }}</label>
+						<div class="custom-file">
+							<input type="file" class="custom-file-input" id="customFile" (change)="onChange($event)" multiple
+								[ngClass]="{'is-invalid' : formSubmit && formData.get('file').invalid}">
+							<label class="custom-file-label" for="customFile" id="customFileLabel">
+								{{ 'GLOBAL.LABEL.SELECTIMAGE' | translate }}</label>
+						</div>
+					</div>
+					<!-- / image -->
+				</div>
+
+				<!-- row 1 -->
+				<div class="row">
+					<!-- type -->
+					<div class="form-group col-12">
+						<label for="state">{{ 'GLOBAL.LABEL.TYPE' | translate }}</label>
+
+						<div class="input-group">
+							<select id="type" class="form-control autocomplete" formControlName="type"
+								[ngClass]="{'is-invalid' : formSubmit && formData.get('type').invalid}">
+								<option selected value="">Selecione</option>
+								<option *ngFor="let type of types" [value]="type.value"> {{type.label}}</option>
+							</select>
+
+						</div>
+
+					</div>
+					<!-- / type -->
+				</div>
+				<div class="row">
+
+					<!-- target -->
+					<div class="form-group col-6">
+						<label for="state">{{ 'GLOBAL.LABEL.FRANCHISE' | translate }}</label>
+						<div class="input-group">
+							<input type="text" class="form-control" matInput placeholder="Pesquisar por Franquia"
+								[matAutocomplete]="autoFranchise" formControlName="franchise">
+							<mat-autocomplete [displayWith]="displayFnFilter" #autoFranchise="matAutocomplete">
+								<mat-option *ngFor="let franchise of franchises" [value]="franchise">
+									{{ franchise.name }}
+								</mat-option>
+							</mat-autocomplete>
+						</div>
+
+					</div>
+					<!-- / target -->
+
+					<!-- expirationDate -->
+					<div class="form-group col-6">
+						<label for="expirationDate">{{ 'GLOBAL.LABEL.EXPIRATIONDATE' | translate }}</label>
+						<div class="input-group">
+							<input required class="form-control" formControlName="expirationDate" type="datetime-local"
+								[ngClass]="{'is-invalid' : formSubmit && formData.get('expirationDate').invalid}">
+						</div>
+					</div>
+					<!-- / expirationDate -->
+				</div>
+				<!-- / row 2 -->
+
+				<!-- row 3 -->
+				<div class="row">
+
+					<!-- description -->
+					<div class="form-group col-12">
+						<label for="description">{{ 'GLOBAL.LABEL.DESCRIPTION' | translate }}</label>
+						<div class="input-group">
+							<input required class="form-control" formControlName="description"
+								[ngClass]="{'is-invalid' : formSubmit && formData.get('description').invalid}">
+						</div>
+					</div>
+					<!-- description -->
+				</div>
+				<!-- / row 3 -->
+
+			</div>
+			<div class="modal-footer">
+				<!-- <input type="submit" [disabled]="!formData.valid" value="Criar" class="btn btn-outline-dark"> -->
+				<input type="submit" value="{{ 'GLOBAL.LABEL.CREATE' | translate }}" class="btn btn-outline btn-success">
+			</div>
+		</form>
+	</ng-template>
+
+	<!-- Modal EDIT  -->
+	<ng-template #editdatamodal let-modal modal-lg>
+		<form [formGroup]="formData" (ngSubmit)="formSubmit=true; formData.valid && edit(formData.value)">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-edit-data">
+					{{ 'GLOBAL.LABEL.EDIT' | translate }}
+				</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<input formControlName="_id" type="hidden">
+			</div>
+			<div class="modal-body">
+				<div class="row">
+					<!-- image -->
+					<div class="form-group col-12" style="margin-top: 10px; margin-bottom: 10px;">
+						<label for="customFile">{{ 'GLOBAL.LABEL.IMAGE' | translate }}</label>
+						<div class="custom-file">
+							<input type="file" class="custom-file-input" id="customFile" (change)="onChange($event)" multiple
+								[ngClass]="{'is-invalid' : formSubmit && formData.get('file').invalid}">
+							<label class="custom-file-label" for="customFile" id="customFileLabel">
+								{{ 'GLOBAL.LABEL.SELECTIMAGE' | translate }}</label>
+						</div>
+					</div>
+					<!-- / image -->
+				</div>
+				<!-- row 1 -->
+				<div class="row">
+					<!-- type -->
+					<div class="form-group col-12">
+						<label for="state">{{ 'GLOBAL.LABEL.TYPE' | translate }}</label>
+
+						<div class="input-group">
+							<select id="type" class="form-control autocomplete" formControlName="type"
+								[ngClass]="{'is-invalid' : formSubmit && formData.get('type').invalid}">
+								<option selected value="">Selecione</option>
+								<option *ngFor="let type of types" [value]="type.value"> {{type.label}}</option>
+							</select>
+
+						</div>
+
+					</div>
+					<!-- / type -->
+				</div>
+				<div class="row">
+
+					<!-- target -->
+					<div class="form-group col-6">
+						<label for="state">{{ 'GLOBAL.LABEL.FRANCHISE' | translate }}</label>
+						<div class="input-group">
+							<input type="text" class="form-control" matInput placeholder="Pesquisar por Franquia"
+								[matAutocomplete]="autoFranchise" formControlName="franchise">
+							<mat-autocomplete [displayWith]="displayFnFilter" #autoFranchise="matAutocomplete">
+								<mat-option *ngFor="let franchise of franchises" [value]="franchise"
+									(click)="onClickFranchiseFilter(franchise)">
+									{{ franchise.name }}
+								</mat-option>
+							</mat-autocomplete>
+						</div>
+					</div>
+					<!-- / target -->
+
+					<!-- expirationDate -->
+					<div class="form-group col-6">
+						<label for="expirationDate">{{ 'GLOBAL.LABEL.EXPIRATIONDATE' | translate }}</label>
+						<div class="input-group">
+							<input required class="form-control" formControlName="expirationDate" type="datetime-local"
+								[ngClass]="{'is-invalid' : formSubmit && formData.get('expirationDate').invalid}">
+						</div>
+					</div>
+					<!-- / expirationDate -->
+				</div>
+				<!-- / row 2 -->
+
+				<!-- row 3 -->
+				<div class="row">
+
+					<!-- description -->
+					<div class="form-group col-12">
+						<label for="description">{{ 'GLOBAL.LABEL.DESCRIPTION' | translate }}</label>
+						<div class="input-group">
+							<input required class="form-control" formControlName="description"
+								[ngClass]="{'is-invalid' : formSubmit && formData.get('description').invalid}">
+						</div>
+					</div>
+					<!-- description -->
+				</div>
+				<!-- / row 3 -->
+			</div>
+			<div class="modal-footer">
+				<!-- <input type="submit" [disabled]="!formData.valid" value="Criar" class="btn btn-outline-dark"> -->
+				<input type="submit" value="{{ 'GLOBAL.LABEL.EDIT' | translate }}" class="btn btn-outline btn-success">
+			</div>
+		</form>
+	</ng-template>
+
+	<!-- Modal Delete -->
+	<ng-template #confirmdeletemodal let-modal>
+		<div class="modal-header">
+			<h4 class="modal-title" id="modal-delete-data">
+				Confirmar exclusão</h4>
+			<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+		<div class="modal-body" class="btn btn-warning">
+			{{ 'GLOBAL.LABEL.AREYOUSUREYOUWANTTODELETE' | translate }}
+		</div>
+		<div class="modal-footer">
+			<button type="button" (click)="idToDelete=undefined; modal.dismiss('Cross click')" class="btn btn-secondary"
+				data-dismiss="modal">{{ 'GLOBAL.LABEL.CANCEL' | translate }}</button>
+			<button type="button" (click)="delete() && modal.dismiss('Cross click')" class="btn btn-primary">{{
+				'GLOBAL.LABEL.YES' | translate }}</button>
+		</div>
+	</ng-template>
+
+</div>

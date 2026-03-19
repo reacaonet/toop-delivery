@@ -1,0 +1,186 @@
+<div class="row justify-content-between">
+	<div class="col-auto align-self-center mb-2">
+		<p class="float-left">{{ 'GLOBAL.LABEL.SLIDER' | translate }}</p>
+	</div>
+	<div class="col-auto">
+		<a (click)="upsertModalShow(upsertmodel, undefined, 'create')" href="javascript:;"
+			class="float-right btn btn-label-warning btn-bold btn-sm btn-icon-h">
+			{{ 'GLOBAL.LABEL.CREATESLIDE' | translate }}
+		</a>
+	</div>
+</div>
+<div class="example-container mat-elevation-z8">
+	<mat-table class="table-braspag-transactions" #table [dataSource]="dataSource">
+		<!-- Checkbox Column -->
+		<ng-container matColumnDef="select">
+			<mat-header-cell *matHeaderCellDef>
+				<mat-checkbox [checked]="true" [indeterminate]="true">
+				</mat-checkbox>
+			</mat-header-cell>
+			<mat-cell *matCellDef="let row">
+				<mat-checkbox (click)="$event.stopPropagation()">
+				</mat-checkbox>
+			</mat-cell>
+		</ng-container>
+		<!-- Image Column -->
+		<ng-container matColumnDef="image">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.IMAGES" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<a [href]="element.image" target="_blank">
+					<img width="50" class="img-thumbnail" [src]="element.image || './assets/media/logo-default.png'"
+						[alt]="element.name" />
+				</a>
+			</mat-cell>
+		</ng-container>
+		<!-- Column name -->
+		<ng-container matColumnDef="name">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.NAME' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.name }} </mat-cell>
+		</ng-container>
+		<!-- franchise Column -->
+		<ng-container matColumnDef="franchise">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.FRANCHISE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element?.franchise?.name }} </mat-cell>
+		</ng-container>
+		<!-- Column impressions -->
+		<ng-container matColumnDef="impressions">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.IMPRESSIONS' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.impressions }} </mat-cell>
+		</ng-container>
+		<!-- Target Column
+		<ng-container matColumnDef="target">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.TARGET' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.target || '-' }} </mat-cell>
+		</ng-container> -->
+		<!-- Column status -->
+		<ng-container matColumnDef="status">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.STATUS' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i *ngIf="element.status === true" class="flaticon2-accept mr-2"></i>
+				<i *ngIf="element.status === false" class="flaticon2-cancel mr-2"></i>
+			</mat-cell>
+		</ng-container>
+		<!-- Delete Slider -->
+		<ng-container matColumnDef="actions">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.ACTION' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i class="flaticon2-edit mr-2" (click)="upsertModalShow(upsertmodel, element, 'edit')"></i>
+				<i class="flaticon2-trash" (click)="confirmDeleteModalShow(confirmdeletemodal, element)"></i>
+			</mat-cell>
+		</ng-container>
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns;">
+		</mat-row>
+	</mat-table>
+	<mat-paginator [length]="totalLength" [pageSize]="pageSize" [pageSizeOptions]="pageLimit" (page)="changePage($event)">
+	</mat-paginator>
+
+
+	<!-- Modal upsert Slider -->
+	<ng-template #upsertmodel let-modal modal-lg>
+		<form [formGroup]="formData" (ngSubmit)="formSubmitSlider=true; formData.valid && upsert(formData.value)">
+
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-create-slider">{{ (typeAction === 'create') ? ('GLOBAL.LABEL.CREATE' |
+					translate) : ('GLOBAL.LABEL.EDIT' | translate) }}</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<input type="hidden" class="form-control" formControlName="_id">
+				<div class="row">
+					<div class="form-group col-12">
+						<label for="image">{{ 'GLOBAL.LABEL.IMAGEDIMENSION' | translate }}</label>
+						<div class="input-group">
+							<div class="custom-file">
+								<input type="file" class="custom-file-input" id="customFile" (change)="onChange($event)" multiple
+									[ngClass]="{'is-invalid' : formSubmitSlider && formData.get('file').invalid}">
+								<label class="custom-file-label" for="customFile" id="customFileLabel">
+									{{ 'GLOBAL.LABEL.SELECTIMAGE' | translate }}</label>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="form-group col-6" *ngIf="isRoot">
+						<label for="franchise">{{ 'GLOBAL.LABEL.FRANCHISE' | translate }}</label>
+						<div class="input-group">
+							<input type="text" class="form-control" matInput
+								placeholder="{{ 'GLOBAL.LABEL.CHOOSEAFRANCHISE' | translate }}" [matAutocomplete]="autoFranchise"
+								formControlName="franchise"
+								[ngClass]="{'is-invalid' : formSubmitPerson && formData.get('franchise').invalid}">
+							<mat-autocomplete [displayWith]="displayFnFranchise" #autoFranchise="matAutocomplete">
+								<mat-option *ngFor="let franchise of franchises" [value]="franchise">
+									{{ franchise.name }}
+								</mat-option>
+							</mat-autocomplete>
+						</div>
+					</div>
+					<div class="form-group col-6">
+						<label for="name">{{ 'GLOBAL.LABEL.NAME' | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="name">
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="form-group col-3">
+						<label for="impressions">{{ 'GLOBAL.LABEL.IMPRESSIONS' | translate }}</label>
+						<div class="input-group">
+							<input type="number" class="form-control" formControlName="impressions">
+						</div>
+					</div>
+					<div class="form-group col-5">
+						<label for="destinationurl">{{ 'GLOBAL.LABEL.DESTINATIONURL' | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="destinationurl"
+								[ngClass]="{'is-invalid' : formSubmitSlider && formData.get('destinationurl').invalid}">
+						</div>
+					</div>
+					<div class="form-group col-4">
+						<label for="target">{{ 'GLOBAL.LABEL.TARGET' | translate }}</label>
+						<div class="input-group">
+							<select class="form-control" formControlName="target"
+								[ngClass]="{'is-invalid' : formSubmitSlider && formData.get('target').invalid}">
+								<option value=driver>{{ 'GLOBAL.LABEL.DRIVER' | translate }}</option>
+								<option value=passenger>{{ 'GLOBAL.LABEL.PASSENGER' | translate }}</option>
+							</select>
+						</div>
+					</div>
+					<div class="form-group col-4">
+						<label for="status">{{ 'GLOBAL.LABEL.STATUS' | translate }}</label>
+						<div class="input-group">
+							<mat-slide-toggle formControlName="status"></mat-slide-toggle>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<input type="submit" value="{{ 'GLOBAL.LABEL.CREATESLIDE' | translate }}" class="btn btn-outline-dark">
+			</div>
+		</form>
+	</ng-template>
+
+	<!-- Modal Delete   -->
+	<ng-template #confirmdeletemodal let-modal>
+		<div class="modal-header">
+			<h4 class="modal-title" id="modal-delete-slider" *ngIf="formData && formData.value && formData.value.name">
+				{{ 'GLOBAL.LABEL.CONFIRMDELETION' | translate }}
+			</h4>
+			<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+		<div class="modal-body" class="btn btn-warning">
+			{{ 'GLOBAL.LABEL.AREYOUSUREYOUWANTTODELETE' | translate }}
+		</div>
+		<div class="modal-footer">
+			<button type="button" (click)="sliderIdToDelete=undefined; modal.dismiss('Cross click')" class="btn btn-secondary"
+				data-dismiss="modal">{{ 'GLOBAL.LABEL.CANCEL' | translate }}</button>
+			<button type="button" (click)="deleteSlider() && modal.dismiss('Cross click')" class="btn btn-primary">{{
+				'GLOBAL.LABEL.YES' | translate }}</button>
+		</div>
+	</ng-template>

@@ -1,0 +1,150 @@
+<div class="row justify-content-between">
+	<div class="col-auto align-self-center mb-2">
+		<p class="float-left">{{ 'GLOBAL.LABEL.OPENINGHOURS' | translate }} </p>
+	</div>
+	<div class="col-auto">
+		<a (click)="createScheduleModalShow(createschedulemodal)" href="javascript:;"
+			class="float-right btn btn-label-warning btn-bold btn-sm btn-icon-h">
+			{{ 'GLOBAL.LABEL.CREATE' | translate }}
+		</a>
+	</div>
+</div>
+
+<!-- Alert -->
+<p>
+	<ngb-alert *ngIf="alert" [type]="alert.type" (close)="closeAlert()">
+		{{ alert.message }}
+	</ngb-alert>
+</p>
+
+<div class="example-container mat-elevation-z8">
+	<mat-table #table [dataSource]="dataSource">
+		<ng-container matColumnDef="select">
+			<mat-header-cell *matHeaderCellDef>
+				<mat-checkbox [checked]="true" [indeterminate]="true">
+				</mat-checkbox>
+			</mat-header-cell>
+			<mat-cell *matCellDef="let row">
+				<mat-checkbox (click)="$event.stopPropagation()">
+				</mat-checkbox>
+			</mat-cell>
+		</ng-container><!-- Company Column -->
+		<ng-container matColumnDef="company">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.COMPANY' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{element.company}} </mat-cell>
+		</ng-container>
+		<!-- Start Hours Column -->
+		<ng-container matColumnDef="StartHours">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.STARTHOURS' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{element.openingHours}} </mat-cell>
+		</ng-container>
+		<!-- Stop Hours Column -->
+		<ng-container matColumnDef="StopHours">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.STOPHOURS' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.closingHours }} </mat-cell>
+		</ng-container>
+		<!-- Stop Hours Column -->
+		<ng-container matColumnDef="DayWeek">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.DAYWEEK' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.dayWeek | translate }} </mat-cell>
+		</ng-container>
+		<!-- Actions City -->
+		<ng-container matColumnDef="Actions">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.ACTION' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i class="flaticon2-trash" (click)="confirmDeleteModalShow(confirmdeletemodal, element)"></i>
+			</mat-cell>
+		</ng-container>
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns;">
+		</mat-row>
+	</mat-table>
+
+	<!-- Modal Create Hours -->
+	<ng-template #createschedulemodal let-modal>
+		<p>
+			<ngb-alert *ngIf="alertModal" [type]="alertModal.type" (close)="closeAlertModal()">
+				{{ alertModal.message }}
+			</ngb-alert>
+		</p>
+		<form [formGroup]="formDataDay"
+			(ngSubmit)="formSubmitDay=true; ValidatorsHours(formDataDay.value); formDataDay.valid  && createSchedule(formDataDay.value)">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-edit-schedule">{{ 'GLOBAL.LABEL.OPENINGHOURS' | translate }}</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<input type="hidden" class="form-control" formControlName="_id">
+				<div class="form-group">
+					<label for="dayWeek">{{ 'GLOBAL.LABEL.DAYWEEK' | translate }}</label>
+					<div class="input-group row">
+						<div class="col" *ngFor="let day of formDataDay.get('dayWeek').controls; let i=index">
+							<input type="checkbox" [formControl]="day" /> {{user.days[i].name}}
+						</div>
+					</div>
+				</div>
+				<div>
+					<div class="col-12 text-right">
+						<button class="btn btn-primary" (click)="addHourForm()" type="button">
+							Adicionar novo horário
+						</button>
+					</div>
+				</div>
+				<br>
+				<div *ngFor="let hour of formDataDay.get('hours').controls; index as i">
+					<div id="box-card-hour-${countBox}" class="card box-day-hour form-inline"
+						style="box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19) !important; margin-bottom: 15px !important;">
+						<ng-container [formGroup]="hour">
+							<div class="card-body box-day-hour2">
+								<div class="row justify-content-between">
+									<div class="form-group col-6">
+										<label class="field__label" for="openingHours">{{ 'GLOBAL.LABEL.STARTHOURS' | translate }}</label>
+										<div class="input-group">
+											<input class="form-control" mask="Hh:00" formControlName="openingHours"
+												[ngClass]="{'is-invalid' : formSubmitDay && hour.get('openingHours').invalid}">
+										</div>
+									</div>
+									<div class="form-group col-6">
+										<label class="field__label" for="closingHours">{{ 'GLOBAL.LABEL.STOPHOURS' | translate }}</label>
+										<div class="input-group">
+											<input class="form-control" mask="Hh:00" formControlName="closingHours"
+												[ngClass]="{'is-invalid' : formSubmitDay && hour.get('closingHours').invalid}">
+										</div>
+									</div>
+								</div>
+							</div>
+						</ng-container>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<input class="btn btn-primary" type="submit" value="Salvar" class="btn btn-outline-dark">
+			</div>
+		</form>
+		<div class="alert alert-warning" role="alert">
+			ATENÇÃO: Ao colocar o horário de fechamento, leve em consideração o tempo de preparo e tempo do entregador ir até
+			o seu estabelecimento para buscar o produto.
+		</div>
+	</ng-template>
+	<!-- Modal Delete -->
+	<ng-template #confirmdeletemodal let-modal>
+		<div class="modal-header">
+			<h4 class="modal-title" id="modal-delete-schedule">{{ 'GLOBAL.LABEL.OPENINGHOURS' | translate }}</h4>
+			<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+		<div class="modal-body" class="btn btn-warning">
+			{{ 'GLOBAL.LABEL.AREYOUSUREYOUWANTTODELETE' | translate }}
+		</div>
+		<div class="modal-footer">
+			<button type="button" (click)="scheduleIdToDelete=undefined;
+			 modal.dismiss('Cross click')" class="btn btn-secondary" data-dismiss="modal">{{ 'GLOBAL.LABEL.CANCEL' | translate
+				}}</button>
+			<button type="button" (click)="deleteSchedule() && modal.dismiss('Cross click')" class="btn btn-primary">{{
+				'GLOBAL.LABEL.YES' | translate }}</button>
+		</div>
+	</ng-template>
+</div>

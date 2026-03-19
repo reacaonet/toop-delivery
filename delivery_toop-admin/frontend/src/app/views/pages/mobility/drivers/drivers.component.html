@@ -1,0 +1,523 @@
+<form [formGroup]="formFilter" formFilter.valid>
+	<div class="row">
+		<div class="form-group col-3">
+			<label for="name">{{ "GLOBAL.LABEL.NAME" | translate }}</label>
+			<input class="form-control" placeholder="{{ 'GLOBAL.LABEL.TYPETOSEARCH' | translate }}" formControlName="name">
+		</div>
+
+		<div class="form-group col-3">
+			<label for="franchise">{{ "GLOBAL.LABEL.FRANCHISE" | translate }}</label>
+			<div class="input-group">
+				<input type="text" class="form-control" matInput placeholder="{{ 'GLOBAL.LABEL.CHOOSEAFRANCHISE' | translate }}"
+					[matAutocomplete]="autoFranchise" formControlName="franchise" />
+				<mat-autocomplete [displayWith]="displayFnFranchise" #autoFranchise="matAutocomplete">
+					<mat-option *ngFor="let franchise of franchises" [value]="franchise"
+						(click)="onClickFranchiseFilter(franchise)">
+						{{ franchise.name }}
+					</mat-option>
+				</mat-autocomplete>
+			</div>
+		</div>
+
+		<div class=" form-group col-3">
+			<label for="approved">{{ 'GLOBAL.LABEL.APPROVED' | translate }}?</label>
+			<select class="form-control" formControlName="approved">
+				<option value="undefined">{{ 'GLOBAL.LABEL.ALL' | translate }}</option>
+				<option value="true">{{ 'GLOBAL.LABEL.APPROVED' | translate }}</option>
+				<option value="false">{{ 'GLOBAL.LABEL.DISAPPROVED' | translate }}</option>
+			</select>
+		</div>
+
+		<div class="form-group col-3">
+			<label for="online">Online?</label>
+			<div class="input-group">
+				<select class="form-control" formControlName="online">
+					<option value="undefined">{{ 'GLOBAL.LABEL.ALL' | translate }}</option>
+
+					<option value="true">Online</option>
+					<option value="false">Offline</option>
+				</select>
+			</div>
+		</div>
+	</div>
+</form>
+
+<div class="row justify-content-between">
+	<div class="col-auto align-self-center mb-2">
+		<p class="float-left">{{ 'GLOBAL.LABEL.DRIVER' | translate }}</p>
+	</div>
+	<div class="col-auto">
+		<a (click)="upsertModalShow(upsertmodal, undefined, 'create')" href="javascript:;"
+			class="float-right btn btn-label-warning btn-bold btn-sm btn-icon-h">
+			{{ 'GLOBAL.LABEL.CREATE' | translate }}
+		</a>
+	</div>
+</div>
+
+<div class="example-container mat-elevation-z8">
+	<mat-table #table [dataSource]="dataSource">
+		<!-- Is Online Column -->
+		<ng-container matColumnDef="isOnline">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.ISONLINE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i *ngIf="element.online === true" class="flaticon2-user-outline-symbol online mr-2"></i>
+				<i *ngIf="element.online === false" class="flaticon2-user-outline-symbol offline mr-2"></i>
+			</mat-cell>
+		</ng-container>
+		<!-- name Column -->
+		<ng-container matColumnDef="name">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.NAME' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ (element.name && element.name) ? element.name : '-' }} </mat-cell>
+		</ng-container>
+		<!-- franquia column -->
+		<ng-container matColumnDef="franchise">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.FRANCHISE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ (element.franchise && element.franchise.name) ? element.franchise.name :
+				'-' }}
+			</mat-cell>
+		</ng-container>
+		<!-- Service column -->
+		<ng-container matColumnDef="service">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.SERVICES' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<ul style="list-style-type: none; margin: 0; padding: 0;">
+					<li *ngFor="let service of element.services" style="margin-bottom: 2px;">{{ service?.name || '' }}</li>
+				</ul>
+			</mat-cell>
+		</ng-container>
+		<!-- Approved Column -->
+		<ng-container matColumnDef="approved">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.APPROVED' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i *ngIf="element.approved === true" class="flaticon2-accept mr-2"></i>
+				<i *ngIf="element.approved === false" class="flaticon2-cancel mr-2"></i>
+			</mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="delete">
+			<mat-header-cell *matHeaderCellDef>{{ 'GLOBAL.LABEL.ACTION' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i class="flaticon2-edit mr-2" (click)="upsertModalShow(upsertmodal, element, 'edit')"></i>
+				<i class="flaticon2-trash" (click)="confirmDeleteModalShow(confirmdeletemodal, element)"></i>
+			</mat-cell>/
+		</ng-container>
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns;">
+		</mat-row>
+	</mat-table>
+	<mat-paginator [length]="totalLength" [pageSize]="pageSize" [pageSizeOptions]="pageLimit" (page)="changePage($event)">
+	</mat-paginator>
+</div>
+<!-- Modal up sert Drivers -->
+<ng-template #upsertmodal let-modal modal-lg>
+	<div class="modal-header">
+		<h4 class="modal-title" id="modal-create-group">{{ (typeAction === 'create') ? ('GLOBAL.LABEL.CREATE' |
+			translate) : ('GLOBAL.LABEL.EDIT' | translate) }}</h4>
+		<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	<div class="modal-body">
+		<mat-horizontal-stepper linear=true #stepper>
+			<mat-step [stepControl]="firstFormData" label="{{ 'GLOBAL.LABEL.PERSONALDATA' | translate }}">
+				<mat-card class="formGroup col-12">
+					<form id="form1" [formGroup]="firstFormData" (ngSubmit)="formSubmitDriversOne=true; firstFormData.valid">
+						<input type="hidden" class="form-control" formControlName="_id">
+						<div class="row">
+							<div class="form-group col-12">
+								<label for="franchise">{{ 'GLOBAL.LABEL.FRANCHISE' | translate }}</label>
+								<div class="input-group">
+									<input type="text" class="form-control" [matAutocomplete]="autoFranchise" matInput
+										placeholder="{{ 'GLOBAL.LABEL.CHOOSEAFRANCHISE' | translate }}" formControlName="franchise"
+										[ngClass]="{ 'is-invalid' : formSubmitDriversOne && firstFormData.get('franchise').invalid }">
+									<mat-autocomplete #autoFranchise="matAutocomplete" [displayWith]="displayFn">
+										<mat-option *ngFor="let fran of franchises" [value]="fran">
+											{{ fran.name }}
+										</mat-option>
+									</mat-autocomplete>
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="form-group col-12">
+								<label for="name">{{ 'GLOBAL.LABEL.NAME' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="name" [ngClass]="{'is-invalid' : formSubmitDriversOne &&
+										firstFormData.get('name').invalid}">
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="form-group col-6">
+								<label for="address">{{ 'GLOBAL.LABEL.ADDRESS' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="address" rows="3" [ngClass]="{'is-invalid' : formSubmitDriversOne &&
+										firstFormData.get('address').invalid}">
+								</div>
+							</div>
+							<div class="form-group col-6">
+								<label for="phone">{{
+									"GLOBAL.LABEL.PHONE" | translate }}</label>
+								<div class="input-group">
+									<input required class="form-control" mask="(00) 00009-0000" formControlName="phone" [ngClass]="{'is-invalid' : formSubmitDriversOne &&
+										firstFormData.get('phone').invalid}" />
+								</div>
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="form-group col-12">
+								<label for="genre">{{"GLOBAL.LABEL.GENRE" | translate }}</label>
+								<div class="input-group">
+									<select class="form-control" formControlName="genre"
+										[ngClass]="{'is-invalid' : formSubmitDriversOne && firstFormData.get('genre').invalid}">
+										<option>{{"GLOBAL.LABEL.SELECT" | translate }}</option>
+										<option value="H">{{"GLOBAL.LABEL.MALE" | translate }}</option>
+										<option value="M">{{"GLOBAL.LABEL.FEMININE" | translate }}</option>
+									</select>
+								</div>
+							</div>
+						</div>
+
+						<div class="row">
+							<!-- image -->
+							<div class="form-group col-12" style="margin-top: 10px; margin-bottom: 10px">
+								<label for="customFile">{{
+									"GLOBAL.LABEL.IDENTITYDOCUMENTS" | translate
+									}}</label>
+								<div class="custom-file">
+									<input type="file" class="custom-file-input form-control" id="customFile"
+										(change)="onChange($event, 'identityDocuments')" multiple
+										[ngClass]="{'is-invalid' : formSubmitDriversOne && firstFormData.get('identityDocuments').invalid}" />
+									<label class="custom-file-label" for="customFile" id="identityDocuments">
+										{{ "GLOBAL.LABEL.SELECTIMAGE" | translate }}</label>
+								</div>
+							</div>
+							<!-- / image -->
+						</div>
+
+						<div class="row">
+							<div class="form-group col-12">
+								<div style="margin-top: 10px">
+									<div style="margin-top: 10px">
+										<label for="customFile">{{
+											"GLOBAL.LABEL.SELFIEPHOTO" | translate
+											}}</label>
+										<div class="custom-file">
+											<input type="file" class="custom-file-input" id="customFile"
+												(change)="onChange($event, 'selfiePhoto')" multiple
+												[ngClass]="{'is-invalid' : formSubmitDriversOne && firstFormData.get('selfiePhoto').invalid}">
+											<label class="custom-file-label" for="customFile" id="selfiePhoto">
+												{{ 'GLOBAL.LABEL.SELECTIMAGE' | translate }}</label>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="form-group col-6">
+								<label for="approved">{{ 'GLOBAL.LABEL.APPROVED' | translate }}</label>
+								<div class="input-group">
+									<div class="form-group col-2">
+										<mat-slide-toggle formControlName="approved">
+										</mat-slide-toggle>
+									</div>
+								</div>
+							</div>
+
+							<div class="form-group col-6">
+								<label for="block">{{ 'GLOBAL.LABEL.BLOCK' | translate }}</label>
+								<div class="input-group">
+									<div class="form-group col-2">
+										<mat-slide-toggle formControlName="block">
+										</mat-slide-toggle>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="form-group col-4">
+								<label for="email">{{ 'GLOBAL.LABEL.EMAIL' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="email"
+										[ngClass]="{'is-invalid' : formSubmitDriversOne && firstFormData.get('email').invalid}">
+								</div>
+							</div>
+
+							<div class="form-group col-4">
+								<label for="password">{{ 'GLOBAL.LABEL.PASSWORD' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="password" type="password"
+										[ngClass]="{'is-invalid' : formSubmitDriversOne && firstFormData.get('password').invalid}">
+								</div>
+							</div>
+
+							<div class="form-group col-4">
+								<label for="confirmPassword">{{ 'GLOBAL.LABEL.CONFIRMPASSWORD' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="confirmPassword" type="password"
+										[ngClass]="{'is-invalid' : formSubmitDriversOne && firstFormData.get('confirmPassword').invalid}">
+								</div>
+							</div>
+						</div>
+					</form>
+				</mat-card>
+				<div class="form-group row btn-steps">
+					<button (click)="formSubmitDriversOne=true" class="btn btn-primary" mat-button matStepperNext>{{
+						'GLOBAL.LABEL.NEXT' | translate }}</button>
+				</div>
+			</mat-step>
+
+			<!--SEGUNDO FORMULÁRIO-->
+			<mat-step [stepControl]="secondFormData" label="{{
+				'GLOBAL.LABEL.VEHICLEDATA' | translate }}">
+				<mat-card class="formGroup col-12">
+					<form id="form2" [formGroup]="secondFormData" (ngSubmit)="formSubmitDriversTwo=true; secondFormData.valid">
+						<div class="form-group col-12">
+							<div style="margin-top: 10px">
+								<div style="margin-top: 10px">
+									<label for="customFile">{{
+										"GLOBAL.LABEL.CARSDOCUMENT" | translate
+										}}</label>
+									<div class="custom-file">
+										<input type="file" class="custom-file-input" id="customFile"
+											(change)="onChange($event, 'carsDocument')" multiple
+											[ngClass]="{'is-invalid' : formSubmitDriversTwo && secondFormData.get('carsDocument').invalid}">
+										<label class="custom-file-label" for="customFileDoc" id="carsDocument">
+											{{ 'GLOBAL.LABEL.SELECTIMAGE' | translate }}</label>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="form-group col-12">
+							<div style="margin-top: 10px">
+								<div style="margin-top: 10px">
+									<label for="customFile">{{
+										"GLOBAL.LABEL.CNHDOCUMENT" | translate
+										}}</label>
+									<div class="custom-file">
+										<input type="file" class="custom-file-input" id="customFile"
+											(change)="onChange($event, 'cnhDocuments')" multiple
+											[ngClass]="{'is-invalid' : formSubmitDriversTwo && secondFormData.get('cnhDocuments').invalid}">
+										<label class="custom-file-label" for="customFile" id="cnhDocuments">
+											{{ 'GLOBAL.LABEL.SELECTIMAGE' | translate }}</label>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="form-group col-6">
+								<label for="vehicleManufacturer">{{ 'GLOBAL.LABEL.MANUFACTURER' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="vehicleManufacturer"
+										[ngClass]="{'is-invalid' : formSubmitDriversTwo && secondFormData.get('vehicleManufacturer').invalid}">
+								</div>
+							</div>
+							<div class="form-group col-6">
+								<label for="vehicleModel">{{ 'GLOBAL.LABEL.MODEL' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="vehicleModel"
+										[ngClass]="{'is-invalid' : formSubmitDriversTwo && secondFormData.get('vehicleModel').invalid}">
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="form-group col-4">
+								<label for="vehicleNameplate">{{ 'GLOBAL.LABEL.BOARD' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="vehicleNameplate"
+										[ngClass]="{'is-invalid' : formSubmitDriversTwo && secondFormData.get('vehicleNameplate').invalid}">
+								</div>
+							</div>
+							<div class="form-group col-4">
+								<label for="vehicleYear">{{ 'GLOBAL.LABEL.VEHICLEYEAR' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="vehicleYear" mask="0000"
+										[ngClass]="{'is-invalid' : formSubmitDriversTwo && secondFormData.get('vehicleYear').invalid}">
+								</div>
+							</div>
+							<div class="form-group col-4">
+								<label for="vehicleColor">{{ 'GLOBAL.LABEL.VEHICLECOLOR' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="vehicleColor"
+										[ngClass]="{'is-invalid' : formSubmitDriversTwo && secondFormData.get('vehicleColor').invalid}">
+								</div>
+							</div>
+						</div>
+						<div class="row">
+							<div class="form-group col-4">
+								<label for="online">{{ 'GLOBAL.LABEL.ISONLINE' | translate }}</label>
+								<div class="input-group">
+									<div class="form-group col-2">
+										<mat-slide-toggle formControlName="online">
+										</mat-slide-toggle>
+									</div>
+								</div>
+							</div>
+							<div class="form-group col-4">
+								<label for="activeRunStatus">{{ 'GLOBAL.LABEL.STATUS' | translate }}</label>
+								<div class="input-group">
+									<select class="form-control" formControlName="activeRunStatus"
+										[ngClass]="{'is-invalid' : formSubmitDriversTwo && secondFormData.get('activeRunStatus').invalid}">
+										<option>{{ 'GLOBAL.LABEL.SELECT' | translate }}</option>
+										<option value="available">{{ 'GLOBAL.LABEL.AVAILABLE' | translate }}</option>
+										<option value="race_accepted">{{ 'GLOBAL.LABEL.RUNACCEPTED' | translate }}</option>
+										<option value="race_in_progress">{{ 'GLOBAL.LABEL.ONTHERUN' | translate }}</option>
+									</select>
+								</div>
+							</div>
+						</div>
+						<!--SERVIÇOS-->
+						<div class="row">
+							<div class="col-9 ">
+								<h6>{{ 'GLOBAL.LABEL.SERVICELIST' | translate }}</h6>
+							</div>
+							<div class="col-3 text-right">
+								<button type="button" class="btn btn-sm btn-info ml-auto" (click)="addNewService()">
+									<span aria-hidden="true">{{ 'GLOBAL.LABEL.NEWSERVICE' | translate }}</span>
+								</button>
+							</div>
+						</div>
+						<div class="row" *ngFor="let newservice of secondFormData.get('services').controls; index as i">
+							<ng-container [formGroup]="newservice">
+								<div class="form-group col-6">
+									<label for="service">{{ 'GLOBAL.LABEL.SERVICE' | translate }}</label>
+									<div class="input-group">
+										<input type="text" class="form-control" [matAutocomplete]="autoService" matInput
+											placeholder="{{ 'GLOBAL.LABEL.CHOOSEASERVICE' | translate }}" formControlName="service"
+											[ngClass]="{ 'is-invalid' : formSubmitDriversTwo && newservice.get('service').invalid }">
+										<mat-autocomplete #autoService="matAutocomplete" [displayWith]="displayFn">
+											<mat-option *ngFor="let serve of services" [value]="serve">
+												{{ serve.name }}
+												<b *ngIf="serve?.franchise?.name"> - {{ serve?.franchise?.name }}</b>
+											</mat-option>
+										</mat-autocomplete>
+									</div>
+								</div>
+							</ng-container>
+							<div class="form-group text-center col-2">
+								<label class="col-12" for="fee">{{ 'GLOBAL.LABEL.ACTION' | translate }}</label>
+								<button (click)="removeServices(i)" mat-mini-fab color="warn"
+									class="col-12 mat-mini-fab mat-button-base mat-accent">
+									<span class="mat-button-wrapper">
+										<mat-icon class="mat-icon notranslate material-icons mat-icon-no-color" role="img"
+											aria-hidden="true">
+											delete
+										</mat-icon>
+									</span>
+									<div class="mat-button-ripple mat-ripple mat-button-ripple-round" matripple>
+									</div>
+									<div class="mat-button-focus-overlay">
+									</div>
+								</button>
+							</div>
+						</div>
+					</form>
+				</mat-card>
+				<div class="form-group row btn-steps">
+					<button (click)="formSubmitDriversOne=false" class="btn btn-warning mr-3" mat-button matStepperPrevious>{{
+						'GLOBAL.LABEL.PREVIOUS' | translate }}</button>
+					<button (click)="formSubmitDriversthird=true" class="btn btn-info" mat-button matStepperNext>{{
+						'GLOBAL.LABEL.NEXT' | translate }}</button>
+				</div>
+			</mat-step>
+
+			<!--TERCEIRO FORMULÁRIO-->
+			<mat-step [stepControl]="thirdFormData" label="{{ 'GLOBAL.LABEL.FINANCIAL' | translate }}">
+				<mat-card class="formGroup col-12">
+					<form id="form3" [formGroup]="thirdFormData" (ngSubmit)="formSubmitDriversthird=true; thirdFormData.valid">
+						<div class="row">
+							<div class="form-group col-6">
+								<label for="name">{{ 'GLOBAL.LABEL.NAMEHOLDER' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="name">
+								</div>
+							</div>
+							<div class="form-group col-6">
+								<label for="cpfCnpj">CPF</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="cpfCnpj" mask="000.000.000-00">
+								</div>
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="form-group col-6">
+								<label for="city">{{ 'GLOBAL.LABEL.CITY' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="city">
+								</div>
+							</div>
+							<div class="form-group col-6">
+								<label for="bank">{{ 'GLOBAL.LABEL.BANKNAME' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="bank">
+								</div>
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="form-group col-4">
+								<label for="agency">{{ 'GLOBAL.LABEL.AGENCY' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="agency">
+								</div>
+							</div>
+							<div class="form-group col-4">
+								<label for="account">{{ 'GLOBAL.LABEL.ACCOUNT' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="account">
+								</div>
+							</div>
+
+							<div class="form-group col-4">
+								<label for="type">{{ 'GLOBAL.LABEL.TYPE' | translate }}</label>
+								<select class="form-control" formControlName="type">
+									<option value="Poupança">{{ 'GLOBAL.LABEL.SAVINGSACCOUNT' | translate }}</option>
+									<option value="Corrente">{{ 'GLOBAL.LABEL.CHECKINGACCOUNT' | translate }}</option>
+								</select>
+							</div>
+						</div>
+
+					</form>
+				</mat-card>
+				<mat-card>
+
+				</mat-card>
+				<div class="form-group row btn-steps">
+					<button (click)="formSubmitDriversTwo=false" class="btn btn-warning mr-3" mat-button matStepperPrevious>{{
+						'GLOBAL.LABEL.PREVIOUS' | translate }}</button>
+
+					<button class="btn btn-success ml-3"
+						(click)="formSubmitDriversthird=true; firstFormData.valid && secondFormData.valid && upsert()">{{
+						'GLOBAL.LABEL.SAVE' | translate }}</button>
+				</div>
+			</mat-step>
+		</mat-horizontal-stepper>
+	</div>
+	<div class="modal-footer">
+	</div>
+
+	<!-- Modal Delete   -->
+	<ng-template #confirmdeletemodal let-modal>
+		<div class="modal-header">
+			<h4 class="modal-title" id="modal-delete-driver" *ngIf="formData && formData.value && formData.value.name">
+				{{ 'GLOBAL.LABEL.CONFIRMDELETION' | translate }}
+			</h4>
+			<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+		<div class="modal-body" class="btn btn-warning">
+			{{ 'GLOBAL.LABEL.AREYOUSUREYOUWANTTODELETE' | translate }}
+		</div>
+		<div class="modal-footer">
+			<button type="button" (click)="driverIdToDelete=undefined; modal.dismiss('Cross click')" class="btn btn-secondary"
+				data-dismiss="modal">{{ 'GLOBAL.LABEL.CANCEL' | translate }}</button>
+			<button type="button" (click)="deleteDriver() && modal.dismiss('Cross click')" class="btn btn-primary">{{
+				'GLOBAL.LABEL.YES' | translate }}</button>
+		</div>
+	</ng-template>

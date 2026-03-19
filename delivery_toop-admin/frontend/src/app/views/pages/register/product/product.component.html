@@ -1,0 +1,483 @@
+<form [formGroup]="formFilter" formFilter.valid>
+	<div class="row">
+		<div class="form-group col-4">
+			<label for="name">{{
+				"GLOBAL.LABEL.PRODUCT_OR_BARCODE" | translate
+				}}</label>
+			<div class="input-group">
+				<input required class="form-control" placeholder="Pesquise um produto" formControlName="name" />
+			</div>
+		</div>
+		<!--fdsfsdsetgeryh-->
+		<div class="form-group col-4">
+			<label for="images">{{ "GLOBAL.LABEL.IMAGES" | translate }}</label>
+			<div class="input-group">
+				<select class="form-control" formControlName="images">
+					<option value="all">Todos</option>
+					<option value="withimages">Com Imagens</option>
+					<option value="withoutimages">Sem imagens</option>
+				</select>
+			</div>
+		</div>
+
+		<div class="form-group col-2">
+			<label for="startPrice">{{
+				"GLOBAL.LABEL.STARTPRICE" | translate
+				}}</label>
+			<div class="input-group">
+				<input required currencyMask class="form-control" formControlName="startPrice" />
+			</div>
+		</div>
+		<div class="form-group col-2">
+			<label for="endPrice">{{ "GLOBAL.LABEL.ENDPRICE" | translate }}</label>
+			<div class="input-group">
+				<input required currencyMask class="form-control" formControlName="endPrice" />
+			</div>
+		</div>
+	</div>
+</form>
+
+<div class="row justify-content-between">
+	<div class="col-auto align-self-center mb-2">
+		<p class="float-left">{{ "GLOBAL.LABEL.PRODUCT" | translate }}</p>
+	</div>
+	<div class="col-auto">
+		<a (click)="upsertProductModalShow(upsertproductmodal, undefined, 'create')" href="javascript:;"
+			class="float-right btn btn-label-primary btn-bold btn-sm btn-icon-h">
+			{{ "GLOBAL.LABEL.CREATE" | translate }}
+		</a>
+
+		<a *ngIf="userCompany && userCompany?._id" (click)="modalSortDepartment(sortDepartment)" href="javascript:;"
+			class="float-right btn btn-label-primary btn-bold btn-sm btn-icon-h mr-3">
+			Ordenar Departamentos
+		</a>
+	</div>
+</div>
+
+<div class="example-container mat-elevation-z8">
+	<form *ngIf="VOForm" [formGroup]="VOForm" autocomplete="off">
+		<mat-table #table [dataSource]="dataSource">
+			<!-- Checkbox Column -->
+			<ng-container matColumnDef="select">
+				<mat-header-cell *matHeaderCellDef>
+					<mat-checkbox [checked]="false" [indeterminate]="true"> </mat-checkbox>
+				</mat-header-cell>
+				<mat-cell *matCellDef="let row">
+					<mat-checkbox (click)="$event.stopPropagation()"> </mat-checkbox>
+				</mat-cell>
+			</ng-container>
+			<!-- Image Column -->
+			<ng-container matColumnDef="image">
+				<mat-header-cell *matHeaderCellDef>
+					{{ "GLOBAL.LABEL.IMAGES" | translate }}
+				</mat-header-cell>
+				<mat-cell *matCellDef="let element">
+					<a [href]="element.image" target="_blank">
+						<img width="50" class="img-thumbnail" class="img-thumbnail"
+							[src]="element.image || './assets/media/logos/image_default.png'" [alt]="element.name" />
+					</a>
+				</mat-cell>
+			</ng-container>
+			<!-- checkbox Column -->
+			<ng-container matColumnDef="checkbox">
+				<mat-header-cell *matHeaderCellDef>#</mat-header-cell>
+				<mat-cell *matCellDef="let element">
+					<!-- checked="element.checked === false" -->
+					<ng-container *ngIf="!element.checked; then content; else other_content">
+					</ng-container>
+					<ng-template #content>
+						<input type="checkbox" (change)="checkItemGraphicStudio($event, element)" class="form-check-input"
+							id="exampleCheck1" />
+					</ng-template>
+					<ng-template #other_content>
+						<input type="checkbox" checked="true" (change)="checkItemGraphicStudio($event, element)"
+							class="form-check-input" id="exampleCheck1" />
+					</ng-template>
+				</mat-cell>
+			</ng-container>
+			<!-- Name Column -->
+			<ng-container matColumnDef="name">
+				<mat-header-cell *matHeaderCellDef>
+					{{ "GLOBAL.LABEL.NAME" | translate }}
+				</mat-header-cell>
+				<mat-cell *matCellDef="let element"> {{ element.name }} </mat-cell>
+			</ng-container>
+			<!-- Price Column -->
+			<ng-container matColumnDef="price">
+				<mat-header-cell *matHeaderCellDef>
+					{{ "GLOBAL.LABEL.PRICE" | translate }}
+				</mat-header-cell>
+				<mat-cell *matCellDef="let element" style="cursor: pointer;">
+					<div (click)="editRow(element)" *ngIf="indexEdit !== element.position">
+						<h6 *ngIf="element.pricePromotion">
+							<span class="pricePromotionBlue">
+								{{
+								"R$: " +
+								(element.pricePromotion || 0).toFixed(2).replace(".", ",")
+								}}
+							</span>
+							<br />
+							<span class="pricePromotion">
+								{{ "R$: " + (element.price || 0).toFixed(2).replace(".", ",") }}
+							</span>
+						</h6>
+						<h6 *ngIf="element.pricePromotion" class="pricePromotion"></h6>
+						<h6 *ngIf="!element.pricePromotion">
+							{{ "R$: " + (element.price || 0).toFixed(2).replace(".", ",") }}
+						</h6>
+					</div>
+
+					<div *ngIf="indexEdit === element.position">
+						<div class="row">
+							<div class="form-group col-12">
+								<label for="name">Preço</label>
+								<div class="input-group">
+									<input formControlName="price" type="number" value="5" />
+								</div>
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="form-group col-12">
+								<label for="name">Preço Promoção</label>
+								<div class="input-group">
+									<input formControlName="pricePromotion" type="number" value="{{element.pricePromotion}}" />
+								</div>
+							</div>
+						</div>
+					</div>
+				</mat-cell>
+			</ng-container>
+			<!-- Date Finish Price Promotion -->
+			<ng-container matColumnDef="department">
+				<mat-header-cell *matHeaderCellDef>
+					{{ "GLOBAL.LABEL.DEPARTMENT" | translate }}
+				</mat-header-cell>
+				<mat-cell *matCellDef="let element"> {{ element.department }} </mat-cell>
+			</ng-container>
+			<!-- Delete Product -->
+			<ng-container matColumnDef="delete">
+				<mat-header-cell *matHeaderCellDef>{{ "GLOBAL.LABEL.ACTION" | translate }}
+				</mat-header-cell>
+				<mat-cell *matCellDef="let element">
+					<ng-container *ngIf="indexEdit !== element.position">
+						<i class="flaticon2-edit mr-2" (click)="upsertProductModalShow(upsertproductmodal, element, 'edit')"></i>
+						<i class="flaticon2-trash mr-2" (click)="confirmDeleteModalShow(confirmdeletemodal, element)"></i>
+						<i class="flaticon2-refresh mr-2" (click)="initSyncProduct(syncModal, element)"></i>
+					</ng-container>
+
+					<ng-container *ngIf="indexEdit === element.position">
+						<i class="flaticon2-checkmark mr-2" (click)="confirmEditRow(VOForm.value, element)"></i>
+					</ng-container>
+				</mat-cell>/
+			</ng-container>
+			<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+			<mat-row *matRowDef="let row; columns: displayedColumns"> </mat-row>
+		</mat-table>
+		<mat-paginator [length]="totalLength" [pageSize]="pageSize" [pageSizeOptions]="pageLimit"
+			(page)="changePage($event)">
+		</mat-paginator>
+	</form>
+</div>
+
+<!-- Modal Edit Product-->
+<ng-template #upsertproductmodal let-modal modal-lg>
+	<form [formGroup]="formData" (ngSubmit)="
+			formSubmitProduct = true; formData.valid && upsertProduct(formData.value)
+		">
+		<div class="modal-header">
+			<h4 class="modal-title" id="modal-edit-product">
+				{{ "GLOBAL.LABEL.TOEDIT" | translate }}
+			</h4>
+			<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+		<div class="modal-body">
+			<div style="margin-top: 10px">
+				<div style="margin-top: 10px">
+					<div class="custom-file">
+						<input type="file" class="custom-file-input" id="customFile" (change)="onChange($event)" multiple [ngClass]="{
+								'is-invalid': formSubmitProduct && formData.get('file').invalid
+							}" />
+						<label class="custom-file-label" for="customFile" id="customFileLabel">
+							{{ "GLOBAL.LABEL.SELECTIMAGE" | translate }}</label>
+					</div>
+				</div>
+			</div>
+			<input type="hidden" class="form-control" formControlName="_id" />
+			<div class="row">
+				<div class="form-group col-12">
+					<label for="name">{{ "GLOBAL.LABEL.NAME" | translate }}</label>
+					<div class="input-group">
+						<input class="form-control" formControlName="name" [ngClass]="{
+								'is-invalid': formSubmitProduct && formData.get('name').invalid
+							}" />
+					</div>
+				</div>
+				<div class="form-group col-12">
+					<label for="description">{{
+						"GLOBAL.LABEL.DESCRIPTION" | translate
+						}}</label>
+					<div class="input-group">
+						<input class="form-control" formControlName="description" />
+					</div>
+				</div>
+				<div class="form-group col-3">
+					<label for="unity">{{ "GLOBAL.LABEL.UNITY" | translate }}</label>
+					<div class="input-group">
+						<select class="form-control" formControlName="unity" [ngClass]="{
+								'is-invalid': formSubmitProduct && formData.get('unity').invalid
+							}">
+							<option value="unidade">Unidade</option>
+							<option value="peso">Peso</option>
+							<option value="duzia">Duzia</option>
+						</select>
+					</div>
+				</div>
+				<div class="form-group col-5">
+					<label>{{ "GLOBAL.LABEL.BARCODE" | translate }}</label>
+					<div class="input-group">
+						<input class="form-control" formControlName="barcode" [ngClass]="{
+								'is-invalid':
+									formSubmitProduct && formData.get('barcode').invalid
+							}" />
+					</div>
+				</div>
+				<div class="form-group col-4">
+					<label for="barcodeBox">{{
+						"GLOBAL.LABEL.BARCODEBOX" | translate
+						}}</label>
+					<div class="input-group">
+						<input class="form-control" formControlName="barcodeBox" />
+					</div>
+				</div>
+				<div class="form-group col-6">
+					<label for="price">{{ "GLOBAL.LABEL.PRICE" | translate }}</label>
+					<div class="input-group">
+						<input thousandSeparator="." currencyMask class="form-control" formControlName="price" [ngClass]="{
+								'is-invalid': formSubmitProduct && formData.get('price').invalid
+							}" />
+					</div>
+				</div>
+				<div class="form-group col-6">
+					<label for="pricePromotion">{{
+						"GLOBAL.LABEL.PRICEPROMOTION" | translate
+						}}</label>
+					<div class="input-group">
+						<input thousandSeparator="." currencyMask class="form-control" formControlName="pricePromotion" />
+					</div>
+				</div>
+				<div class="form-group col-4">
+					<label for="dateInitPricePromotion">{{
+						"GLOBAL.LABEL.DATEINITPRICEPROMOTION" | translate
+						}}</label>
+					<div class="input-group">
+						<input mask="d0/M0/0000" class="form-control" formControlName="dateInitPricePromotion" />
+					</div>
+				</div>
+				<div class="form-group col-4">
+					<label for="dateFinishPricePromotion">{{
+						"GLOBAL.LABEL.DATEFINISHPRICEPROMOTION" | translate
+						}}</label>
+					<div class="input-group">
+						<input mask="d0/M0/0000" class="form-control" formControlName="dateFinishPricePromotion" />
+					</div>
+				</div>
+				<div class="form-group col-4">
+					<label for="dateFinishPricePromotion">{{
+						"GLOBAL.LABEL.MAXBYORDER" | translate
+						}}</label>
+					<div class="input-group">
+						<input type="number" class="form-control" formControlName="maximumAmount" [ngClass]="{
+								'is-invalid':
+									formSubmitProduct && formData.get('maximumAmount').invalid
+							}" />
+					</div>
+					<label for="">"0" para ilimitado</label>
+				</div>
+
+				<div class="form-group col-12">
+					<label for="keywords">{{
+						"GLOBAL.LABEL.KEYWORDS" | translate
+						}}</label>
+					<div class="input-group">
+						<mat-chip-list #chipList aria-label="Palavras-chave">
+							<mat-chip *ngFor="let keyword of keywordsList" [selectable]="selectable" [removable]="removable"
+								(removed)="removeKeyword(keyword)">
+								{{ keyword }}
+								<mat-icon matChipRemove *ngIf="removable"> cancel </mat-icon>
+							</mat-chip>
+							<input placeholder="Nova Palavra-chave..." [matChipInputFor]="chipList"
+								[matChipInputAddOnBlur]="addOnBlur" (matChipInputTokenEnd)="addKeyword($event)" />
+						</mat-chip-list>
+					</div>
+				</div>
+
+				<div class="col-12">
+					<label for="departments">Departamentos</label>
+					<div class="input-group">
+						<mat-chip-list #departmentsList aria-label="departments" style="width: 100%">
+							<mat-chip *ngFor="let department of department" [selectable]="selectable" [removable]="removable"
+								(removed)="removeDepartment(department)">
+								{{ department }}
+								<mat-icon matChipRemove *ngIf="removable"> cancel </mat-icon>
+							</mat-chip>
+							<input [ngClass]="{
+									'is-invalid': formSubmit && formData.get('department').invalid
+								}" class="form-control" placeholder="Departamentos" #departInput formControlName="departmentSelected"
+								[matChipInputFor]="departmentsList" [matChipInputAddOnBlur]="addOnBlur" [matAutocomplete]="auto"
+								(matChipInputTokenEnd)="addDepartment($event)" [matChipInputSeparatorKeyCodes]="separatorKeysCodes" />
+						</mat-chip-list>
+						<mat-autocomplete autoActiveFirstOption #auto="matAutocomplete" (optionSelected)="selected($event)">
+							<mat-option *ngFor="let department of filteredDepartments | async" [value]="department">
+								{{ department }}
+							</mat-option>
+						</mat-autocomplete>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="modal-footer">
+			<input type="submit" value="Salvar" class="btn btn-outline-dark" />
+		</div>
+	</form>
+</ng-template>
+
+<!-- Modal Delete -->
+<ng-template #confirmdeletemodal let-modal>
+	<div class="modal-header">
+		<h4 class="modal-title" id="modal-delete-product">Confirmar exclusão</h4>
+		<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	<div class="modal-body" class="btn btn-warning">
+		{{ "GLOBAL.LABEL.AREYOUSUREYOUWANTTODELETE" | translate }}
+	</div>
+	<div class="modal-footer">
+		<button type="button" (click)="productIdToDelete = undefined; modal.dismiss('Cross click')"
+			class="btn btn-secondary" data-dismiss="modal">
+			{{ "GLOBAL.LABEL.CANCEL" | translate }}
+		</button>
+		<button type="button" (click)="deleteProduct() && modal.dismiss('Cross click')" class="btn btn-primary">
+			{{ "GLOBAL.LABEL.YES" | translate }}
+		</button>
+	</div>
+</ng-template>
+
+<!-- Modal Info -->
+<ng-template #modalInfo let-modal>
+	<div class="modal-header">
+		<h4 class="modal-title" id="modal-info-product">Sincronização</h4>
+		<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	<div class="modal-body">
+		Pedido de Sincronização enviada em breve a sincronização será concluída
+	</div>
+</ng-template>
+
+<!-- Vincular Produto - Banco Imagens -->
+<ng-template #syncModal let-modal>
+	<div class="modal-header">
+		<h4 class="modal-title" id="modal-delete-product">Header</h4>
+		<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	<div class="modal-body">
+		Produto:
+		<div class="row">
+			<div class="col-2 w-100">
+				<img width="100" class="img-thumbnail" class="img-thumbnail" [src]="
+						productSelected.image || './assets/media/logos/image_default.png'
+					" [alt]="productSelected.name" />
+			</div>
+			<div class="col">
+				nome: {{ productSelected.name }}
+				<br />
+				Departamento:
+				<span *ngFor="let department of productSelected.department" class="mr-2">{{ department }},</span>
+			</div>
+		</div>
+
+		<div *ngIf="!barcodeAlreadyExist" class="mt-5">
+			<form [formGroup]="formFilter">
+				<div class="form-group">
+					<label>Produtos semelhantes</label>
+					<div class="input-group">
+						<input type="text" class="form-control" matInput placeholder="Digite o nome do produto"
+							[matAutocomplete]="autoProducts" formControlName="productSelected" />
+						<mat-autocomplete #autoProducts="matAutocomplete" class="w-100">
+							<mat-option *ngFor="let product of productList" [value]="product" (click)="productChossed(product)">
+								<img *ngIf="product.images && product.images[0]" class="product-image" aria-hidden
+									[src]="product.images[0]" height="25" />
+								<span>{{ product.name }} {{ product.weight }}</span>
+							</mat-option>
+						</mat-autocomplete>
+					</div>
+				</div>
+			</form>
+		</div>
+
+		<div *ngIf="barcodeAlreadyExist" class="mt-5 mb-3">
+			<h4>Este Produdo já está vinculado ao produto abaixo!</h4>
+		</div>
+
+		<div class="row w-100" *ngIf="productChoosed">
+			<div class="col-2">
+				<img class="product-image" aria-hidden [src]="productChoosed.images[0]" height="100" />
+			</div>
+			<div class="col-7">
+				nome: {{ productChoosed.name }}
+				<br />
+				Departamento:
+				<span *ngFor="let department of productChoosed.department" class="mr-2">{{ department }}</span>
+				<br />
+				Peso: {{ productChoosed.weight }}
+				<br />
+				Palavras-Chaves:
+				<span class="mr-3" *ngFor="let keywords of productChoosed.keywords">{{
+					keywords
+					}}</span>
+			</div>
+		</div>
+	</div>
+	<div class="modal-footer">
+		<div *ngIf="!barcodeAlreadyExist" class="d-flex justify-content-center">
+			<button (click)="linkProduct()" class="btn btn-primary">Vincular</button>
+		</div>
+		<div *ngIf="barcodeAlreadyExist" class="d-flex justify-content-center">
+			<button (click)="modal.dismiss('Cross click')" class="btn btn-danger">
+				Ok
+			</button>
+		</div>
+	</div>
+</ng-template>
+
+<!-- Ordenar Departamentos -->
+<ng-template #sortDepartment let-modal>
+	<div class="modal-header">
+		<h4 class="modal-title" id="modal-sort-department">
+			Ordenar Departamentos
+		</h4>
+		<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	<div class="modal-body">
+		<div class="col-12" *ngIf="listSort">
+			<div cdkDropList class="example-list" [cdkDropListData]="listSort" (cdkDropListDropped)="drop($event, ci)">
+				<div class="example-box col-12" *ngFor="let item of listSort" cdkDrag>
+					{{ item?.department?.name }}
+				</div>
+			</div>
+		</div>
+
+		<div class="row col-12" *ngIf="!listSort || listSort.length <= 0">
+			<div>Nenum Produto Vinculado ao departamento</div>
+		</div>
+	</div>
+</ng-template>

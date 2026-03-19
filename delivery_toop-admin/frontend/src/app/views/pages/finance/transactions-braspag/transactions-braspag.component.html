@@ -1,0 +1,161 @@
+<div class="alert alert-warning" role="alert">
+  Para mostrar algum resultado, use o filtro abaixo!
+</div>
+<form [formGroup]="formFilter" (ngSubmit)="formSubmitFilter=true; formFilter.valid && filterDate(formFilter.value)">
+	<div class="row">
+		<div class="form-group col-4">
+			<label for="initialDate">{{ 'GLOBAL.LABEL.STARTDATE' | translate }}</label>
+			<div class="input-group">
+				<input required mask="d0/M0/0000" class="form-control" placeholder="Escolha uma data inicial" formControlName="initialDate" [ngClass]="{'is-invalid' : formSubmitFilter && formFilter.get('initialDate').invalid}">
+			</div>
+		</div>
+		<div class="form-group col-4">
+			<label for="endDate">{{ 'GLOBAL.LABEL.ENDDATE' | translate }}</label>
+			<div class="input-group">
+				<input required mask="d0/M0/0000" class="form-control" placeholder="Escolha uma data final" formControlName="endDate" [ngClass]="{'is-invalid' : formSubmitFilter && formFilter.get('endDate').invalid}">
+			</div>
+		</div>
+		<div class="form-group col-4">
+			<input type="submit" value="Filtrar" class="btn btn-outline-dark">
+		</div>
+	</div>
+</form>
+<div class="example-container mat-elevation-z8">
+	<mat-table class="table-braspag-transactions" #table [dataSource]="dataSource">
+		<!-- Checkbox Column -->
+		<ng-container matColumnDef="select">
+			<mat-header-cell *matHeaderCellDef>
+				<mat-checkbox [checked]="true" [indeterminate]="true">
+				</mat-checkbox>
+			</mat-header-cell>
+			<mat-cell *matCellDef="let row">
+				<mat-checkbox (click)="$event.stopPropagation()">
+				</mat-checkbox>
+			</mat-cell>
+		</ng-container>
+		<!-- Column Payment Id -->
+		<ng-container matColumnDef="PaymentId">
+			<mat-header-cell class="col-header-payment" *matHeaderCellDef> {{ 'GLOBAL.LABEL.TRANSACTIONIDENTIFIER' | translate }} </mat-header-cell>
+			<mat-cell class="col-payment" *matCellDef="let element">
+				<div class="my-2">
+					<img *ngIf="element.CardNumber" width="25" class="img-thumbnail cardBrand mr-2" [src]='element.CardNumber || "./assets/media/logo-default.png"' />
+					<span *ngIf="element.Status === '2'" class="badge badge-pill badge-success">Pago</span>
+					<span *ngIf="element.Status !== '2'" class="badge badge-pill badge-danger">Negado</span>
+					<span *ngIf="element.totalSplit.qty" class="badge badge-pill badge-danger" (click)="showSplitDetail(element.totalSplit)">{{element.totalSplit.qty}}</span>
+					<small class="paymentId d-block mt-2 text-dark">
+						{{ element.PaymentId }}
+					</small>
+				</div>
+			</mat-cell>
+		</ng-container>
+		<!-- Column Order Id -->
+		<ng-container matColumnDef="OrderId">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.ORDERID' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.OrderId }} </mat-cell>
+		</ng-container>
+		<!-- Column Order company -->
+		<ng-container matColumnDef="OrderCompany">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.ORDECOMPANY' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.OrderCompany }} </mat-cell>
+		</ng-container>
+		<!-- Column Order Number -->
+		<ng-container matColumnDef="OrderNumber">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.ORDERNUMBERR' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.OrderNumber }} </mat-cell>
+		</ng-container>
+		<!-- Column Authorization Date -->
+		<ng-container matColumnDef="AuthorizationDate">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.AUTORIZATIONDATE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.AuthorizationDate }} </mat-cell>
+		</ng-container>
+		<!-- Column Captured Date -->
+		<ng-container matColumnDef="CapturedDate">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.CAPTUREDDATE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.CapturedDate }} </mat-cell>
+		</ng-container>
+		<!-- Column Nsu -->
+		<ng-container matColumnDef="Nsu">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.NSU' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.Nsu }} </mat-cell>
+		</ng-container>
+		<!-- Column Authorization Code -->
+		<ng-container matColumnDef="AuthorizationCode">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.AUTHORIZATIONCODE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.AuthorizationCode }} </mat-cell>
+		</ng-container>
+		<!-- Column amount -->
+		<ng-container matColumnDef="amount">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.VALUE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ 'R$ ' + (element.amount || 0).toFixed(2).replace('.',',') }} </mat-cell>
+		</ng-container>
+
+		<!-- Detalhe -->
+		<ng-container matColumnDef="detail">
+			<mat-header-cell *matHeaderCellDef>{{ 'GLOBAL.LABEL.ACTION' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<div class="text-center my-2">
+					<button (click)="splitModalShow(element)" class="btn btn-primary d-flex align-items-center">
+						<i class="fas fa-hand-holding-usd" style="font-size: 15px;"></i>
+						Enviar Dinheiro
+					</button>
+					<small *ngIf="element.fee > 0" class="mt-2 d-block">Sugestão: <b>{{'R$ ' + (element.fee).toFixed(2).replace('.',',')}}</b></small>
+				</div>
+			</mat-cell>
+		</ng-container>
+
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns;">
+		</mat-row>
+	</mat-table>
+	<mat-paginator [length]="totalLength" [pageSize]="pageSize" [pageSizeOptions]="pageLimit" (page)="changePage($event)">
+	</mat-paginator>
+</div>
+
+<ng-template #splitModal let-modal modal-lg>
+	<div class="modal-header">
+		<h4 class="modal-title" id="modal-topic-notification">Split Pagamento
+		</h4>
+		<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	<div class="modal-body">
+		<kt-split-braspag [(transaction)]='transactionCurrent'></kt-split-braspag>
+	</div>
+</ng-template>
+
+<ng-template #splitDetail let-modal modal-lg>
+	<div class="modal-header">
+		<h4 class="modal-title" id="modal-topic-notification">Split Detail
+		</h4>
+		<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	<div class="modal-body">
+		<div class="table-responsive">
+			<table class="table table-striped">
+				<thead>
+					<tr>
+						<th scope="col">SubordinateMerchantId</th>
+						<th scope="col">Amount</th>
+						<th scope="col">MDR</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr *ngFor="let showDetail of showDetails;">
+						<th scope="row">
+							{{showDetail.SubordinateMerchantId}}
+						</th>
+						<td>
+							{{showDetail.Amount | currency:'BRL':true:'1.2-2'}}
+						</td>
+						<td>
+							{{showDetail.Fares.Mdr}}
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+</ng-template>

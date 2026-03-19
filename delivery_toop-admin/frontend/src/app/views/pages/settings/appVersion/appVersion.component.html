@@ -1,0 +1,102 @@
+<div class="row justify-content-between">
+	<div class="col-auto align-self-center mb-2">
+		<p class="float-left"> Versionamento do aplicativo </p>
+	</div>
+	<div class="col-auto">
+		<a (click)="createVersionModalShow(createversionmodal)" href="javascript:;"
+			class="float-right btn btn-label-warning btn-bold btn-sm btn-icon-h">
+			{{ 'GLOBAL.LABEL.CREATE' | translate }}
+		</a>
+	</div>
+</div>
+
+<!-- Alert -->
+<p>
+	<ngb-alert *ngIf="alert" [type]="alert.type" (close)="closeAlert()">
+		{{ alert.message }}
+	</ngb-alert>
+</p>
+
+<div class="example-container mat-elevation-z8">
+	<mat-table #table [dataSource]="dataSource">
+
+		<ng-container matColumnDef="select">
+			<mat-header-cell *matHeaderCellDef>
+				<mat-checkbox [checked]="true" [indeterminate]="true">
+				</mat-checkbox>
+			</mat-header-cell>
+			<mat-cell *matCellDef="let row">
+				<mat-checkbox (click)="$event.stopPropagation()">
+				</mat-checkbox>
+			</mat-cell>
+		</ng-container>
+		<!-- Name Column -->
+		<ng-container matColumnDef="name">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.NAME' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.name }} </mat-cell>
+		</ng-container>
+		<!-- version Column -->
+		<ng-container matColumnDef="version">
+			<mat-header-cell *matHeaderCellDef> Versão </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.version }}
+			</mat-cell>
+		</ng-container>
+		<!-- platform Column -->
+		<ng-container matColumnDef="platform">
+			<mat-header-cell *matHeaderCellDef> Plataforma </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.platform }}
+			</mat-cell>
+		</ng-container>
+
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns;">
+		</mat-row>
+	</mat-table>
+	<!-- Apartir de aqui é o modal -->
+	<!-- Modal Create -->
+	<ng-template #createversionmodal let-modal>
+		<form [formGroup]="formData" (ngSubmit)="formSubmitAttempt=true; formData.valid && createVersion(formData.value)
+		&& modal.dismiss('Cross click')">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-create-version">Nova Versão</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div style="margin-top: 10px">
+					<div class="form-group">
+						<label for="name">{{ 'GLOBAL.LABEL.NAME' | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="name"
+								[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('name').invalid}">
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="version">Código da Versão</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="version"
+								[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('version').invalid}">
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label for="platform">Plataforma</label>
+						<div class="input-group">
+							<select id="platform" class="form-control" formControlName="platform" [ngClass]="{
+								'is-invalid':
+								formSubmitAttempt && formData.get('platform').invalid
+							}">
+								<option value="android">[Google] - Android</option>
+								<option value="ios">[Apple] - iOS</option>
+							</select>
+						</div>
+					</div>
+
+				</div>
+			</div>
+			<div class="modal-footer">
+				<input type="submit" value="Criar" class="btn btn-outline-dark">
+			</div>
+		</form>
+	</ng-template>

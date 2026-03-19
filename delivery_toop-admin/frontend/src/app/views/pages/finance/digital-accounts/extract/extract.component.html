@@ -1,0 +1,409 @@
+<form [formGroup]="formFilter" formFilter.valid>
+	<div class="row">
+		<div class="form-group col-2">
+			<label for="dateInit">{{ 'GLOBAL.LABEL.DATEINIT' | translate }}</label>
+			<div class="input-group">
+				<input class="form-control" mask="d0/M0/0000" formControlName="dateInit" />
+			</div>
+		</div>
+
+		<div class="form-group col-2">
+			<label for="dateFinal">{{ 'GLOBAL.LABEL.DATEFINISH' | translate }}</label>
+			<div class="input-group">
+				<input class="form-control" mask="d0/M0/0000" formControlName="dateFinal" />
+			</div>
+		</div>
+
+		<div class="form-group col-4" style="display: none;">
+			<label for="category">Pessoa</label>
+			<div class="input-group">
+				<input type="text" class="form-control" matInput placeholder="Pesquisar por pessoa"
+					[matAutocomplete]="autoPerson" formControlName="person">
+				<mat-autocomplete [displayWith]="displayFn" #autoPerson="matAutocomplete">
+					<mat-option *ngFor="let pers of person" [value]="pers" (click)="onClickPersonFilter(pers)">
+						{{ pers.name }}
+					</mat-option>
+				</mat-autocomplete>
+			</div>
+		</div>
+
+		<div class="form-group col-4" style="display: none;">
+			<label for="category">Empresa</label>
+			<div class="input-group">
+				<input type="text" class="form-control" matInput placeholder="Selecione a Empresa"
+					[matAutocomplete]="autoCompany" formControlName="company"
+					[ngClass]="{'is-invalid' : formFilter && formFilter.get('company').invalid}">
+				<mat-autocomplete [displayWith]="displayFn" #autoCompany="matAutocomplete">
+					<mat-option *ngFor="let company of listCompany" [value]="company" (click)="onClickCompanyFilter(company)">
+						{{ company.name }}
+					</mat-option>
+				</mat-autocomplete>
+			</div>
+		</div>
+
+		<div class="form-group col-8">
+			<label for="images">Tipo Pagamento</label>
+			<div class="input-group">
+				<select class="form-control" formControlName="typePayment">
+					<option value="all" selected>Mostrar Todos</option>
+					<option value="APP">Pelo App</option>
+					<option value="MONEY">Dinheiro</option>
+					<option value="PIX">PIX</option>
+					<option value="CARD">Maquininha</option>
+				</select>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<!-- <div class="form-group col-4">
+			<label for="images">Tipo Pagamento</label>
+			<div class="input-group">
+				<select class="form-control" formControlName="typePayment">
+					<option value="all" selected>Mostrar Todos</option>
+					<option value="APP">Pelo App</option>
+					<option value="MONEY">Dinheiro</option>
+					<option value="PIX">PIX</option>
+					<option value="CARD">Maquininha</option>
+				</select>
+			</div>
+		</div> -->
+	</div>
+</form>
+
+
+
+<div class="row justify-content-between">
+	<div class="col-auto align-self-center mb-2">
+		<p class="float-left">{{ 'GLOBAL.LABEL.EXTRACT' | translate }}</p>
+	</div>
+	<div class="col-auto btn-add-balance">
+
+		<button *ngIf="balance >= 0" class="float-right btn btn-sm btn-success mb-2 ml-2" style="cursor: default;">
+			<i class="flaticon-price-tag mr-2"></i> {{ balance |
+			currency:"BRL":"symbol" }}
+		</button>
+		<button *ngIf="balance < 0" class="float-right btn btn-sm btn-danger mb-2 ml-2" style="cursor: default;">
+			<i class="flaticon-price-tag mr-2"></i> {{ balance |
+			currency:"BRL":"symbol" }}
+		</button>
+
+		<button class="float-right btn btn-lg btn-primary mb-2 ml-2" (click)="addBalanceShow(addbanlancemodal)">
+			<i class="flaticon-price-tag mr-2"></i> Adicionar Saldo
+		</button>
+	</div>
+
+</div>
+
+
+<div class="example-container mat-elevation-z8">
+	<mat-table #table [dataSource]="dataSource">
+		<!-- Checkbox Column -->
+		<ng-container matColumnDef="select">
+			<mat-header-cell *matHeaderCellDef>
+				<mat-checkbox [checked]="true" [indeterminate]="true">
+				</mat-checkbox>
+			</mat-header-cell>
+			<mat-cell *matCellDef="let row">
+				<mat-checkbox (click)="$event.stopPropagation()">
+				</mat-checkbox>
+			</mat-cell>
+		</ng-container>
+
+
+		<ng-container matColumnDef="transactionCode">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.TRANSACTIONCODE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element" [style]="backgrounColor(element)"> {{ element.transactionCode }} </mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="transactionDate">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.TRANSACTIONDATE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element" [style]="backgrounColor(element)">{{ element.transactionDate |
+				date:'dd/MM/yyyy HH:mm' }} </mat-cell>
+
+		</ng-container>
+
+		<!-- origin Column -->
+		<ng-container matColumnDef="originAccount">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.ORIGIN' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element" [style]="backgrounColor(element)"> <small title="Agência">{{
+					element?.originAgency?.code
+					}}</small> / {{ element?.originAccount?.code }}</mat-cell>
+		</ng-container>
+
+		<!-- destination Column -->
+		<ng-container matColumnDef="destinationAccount">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.DESTINATION' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element" [style]="backgrounColor(element)"> <small title="Agência">{{
+					element?.destinationAgency?.code }}</small> / {{ element?.destinationAccount?.code }}</mat-cell>
+		</ng-container>
+
+		<!-- bank Column -->
+		<ng-container matColumnDef="value">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.VALUE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element" [style]="backgrounColor(element)">
+				<strong *ngIf="isCredit(element.type)" style="color: green;">{{ element.value |
+					currency:"BRL":"symbol" }}</strong>
+				<strong *ngIf="!isCredit(element.type)" style="color: red;">- {{ element.value |
+					currency:"BRL":"symbol" }}</strong>
+			</mat-cell>
+		</ng-container>
+
+		<!-- bank Column -->
+		<ng-container matColumnDef="typePayment">
+			<mat-header-cell *matHeaderCellDef>Meio Pagamento</mat-header-cell>
+			<mat-cell *matCellDef="let element" [style]="backgrounColor(element)">
+				{{ element?.typePayment }}
+			</mat-cell>
+		</ng-container>
+
+		<!-- Delete -->
+		<ng-container matColumnDef="delete">
+			<mat-header-cell *matHeaderCellDef>{{ 'GLOBAL.LABEL.ACTION' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element" [style]="backgrounColor(element)">
+
+				<i style="color: red" *ngIf="element.type === 'debit'" title="Débito" class="flaticon2-arrow-down mr-2"></i>
+				<i style="color: green" *ngIf="element.type === 'credit'" title="Crédito" class="flaticon2-arrow-up mr-2"></i>
+				<i style="color: red" *ngIf="element.type === 'withdraw'" title="Saque" class="flaticon2-arrow-down mr-2"></i>
+				<i style="color: green" *ngIf="element.type === 'chargeback'" title="Estorno"
+					class="flaticon2-arrow-up mr-2"></i>
+				<i style="color: green" *ngIf="element.type === 'cashback'" title="Cashback"
+					class="flaticon2-arrow-up mr-2"></i>
+
+
+				<i style="color: orange" *ngIf="element.status === 'AWAITING'" class="flaticon2-hourglass-1 mr-2"
+					title="Aguardando/Processando"></i>
+				<i style="color: green" *ngIf="element.type === 'COMPLETED'" class="flaticon2-check-mark mr-2"
+					title="Processada/Concluida"></i>
+				<i style="color: orange" *ngIf="element.type === 'AUTHORIZEDBYUSER'" class="flaticon2-check-mark mr-2"
+					title="Autorizada pelo usuário"></i>
+				<i style="color: orange" *ngIf="element.type === 'BANKAUTHORIZED'" class="flaticon2-check-mark mr-2"
+					title="Autorizada pelo banco"></i>
+				<i style="color: blue" *ngIf="element.type === 'SCHEDULED'"
+					class="flaticon-calendar-with-a-clock-time-tools mr-2" title="Autorizada pelo banco"></i>
+
+
+				<i class="flaticon2-paper mr-2" (click)="modalShowInfo(modalshowinfo, element)"></i>
+			</mat-cell>
+		</ng-container>
+
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns;">
+		</mat-row>
+	</mat-table>
+	<mat-paginator [length]="totalLength" [pageSize]="pageSize" [pageSizeOptions]="pageLimit" (page)="changePage($event)">
+	</mat-paginator>
+
+
+</div>
+
+<!-- Modal Delete   -->
+<ng-template #modalshowinfo let-modal modal-md>
+
+	<div class="modal-header">
+		<h4 class="modal-title" id="modal-detail-transaction">{{ 'GLOBAL.LABEL.DETAILSTRANSACTION' | translate }}</h4>
+		<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+
+	<div class="modal-body info-form">
+
+		<div class="row">
+			<div class="col-12">
+				<label for="id">{{ 'GLOBAL.LABEL.TRANSACTIONCODE' | translate }}: </label> {{showItem.transactionCode}}
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-12">
+				<label for="protocol">{{ 'GLOBAL.LABEL.TYPE' | translate }}: </label> {{translateType()}}
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-12">
+				<label for="protocol">{{ 'GLOBAL.LABEL.DATE' | translate }}: </label> {{ showItem.transactionDate |
+				date:'dd/MM/yyyy HH:mm:ss' }}
+			</div>
+		</div>
+
+		<hr />
+
+		<div class="row">
+			<div class="col-12" *ngIf="showItem.originAgency">
+				<label for="name">{{ 'GLOBAL.LABEL.ORIGINAGENCY' | translate }}: </label> {{showItem.originAgency?.code}} -
+				({{showItem.originAgency?.franchise?.name}})
+			</div>
+			<div class="col-12" *ngIf="showItem.originAccount">
+				<label for="name">{{ 'GLOBAL.LABEL.ORIGINACCOUNT' | translate }}: </label> {{showItem.originAccount?.code}} -
+				({{showItem.originAccount?.holder?.name}})
+			</div>
+		</div>
+
+		<hr />
+
+		<div class="row">
+			<div class="col-12" *ngIf="showItem.destinationAgency">
+				<label for="name">{{ 'GLOBAL.LABEL.DESTINATIONAGENCY' | translate }}: </label>
+				{{showItem.destinationAgency?.code}} -
+				({{showItem.destinationAgency?.franchise?.name}})
+			</div>
+			<div class="col-12" *ngIf="showItem.destinationAccount">
+				<label for="name">{{ 'GLOBAL.LABEL.DESTINATIONACCOUNT' | translate }}: </label>
+				{{showItem.destinationAccount?.code}} -
+				({{showItem.destinationAccount?.holder?.name}})
+			</div>
+		</div>
+
+		<hr />
+
+
+		<div class="row">
+			<div class="col-12">
+				<label for="name">{{ 'GLOBAL.LABEL.VALUE' | translate }}: </label>
+				<strong *ngIf="isCredit(showItem.type)" style="color: green;"> {{ showItem.value |
+					currency:"BRL":"symbol" }}</strong>
+				<strong *ngIf="!isCredit(showItem.type)" style="color: red;"> - {{ showItem.value |
+					currency:"BRL":"symbol" }}</strong>
+
+			</div>
+			<div class="col-12">
+				<label for="name">{{ 'GLOBAL.LABEL.STATUS' | translate }}: </label>
+				{{translateStatus()}}
+			</div>
+			<div class="col-12">
+				<label for="methodPayment">Metodo Pagamento</label>
+				{{showItem?.typePayment}}
+			</div>
+			<div class="col-12">
+				<label for="methodPayment">Tipo Titular</label>
+				{{holderType(showItem?.originAccount?.onModel)}}
+			</div>
+			<div class="col-12">
+				<label for="methodPayment">Titular</label>
+				{{showItem?.originAccount?.onModel !== 'Person'
+				? showItem?.originAccount?.holder?.name
+				: showItem?.originAccount?.holder?.email
+				}}
+			</div>
+			<div class="col-12">
+				<label for="methodPayment">Tipo Destinatário</label>
+				{{holderType(showItem?.destinationAccount?.onModel)}}
+			</div>
+			<div class="col-12">
+				<label for="methodPayment">Destinatário</label>
+				{{showItem?.destinationAccount?.onModel !== 'Person'
+				? showItem?.destinationAccount?.holder?.name
+				: showItem?.destinationAccount?.holder?.email
+				}}
+			</div>
+		</div>
+
+
+	</div>
+
+	<div class="modal-footer">
+		<div class="row">
+			<div class="col-12">
+
+				<button type="button" (click)="modal.dismiss('Cross click')"
+					class="btn btn-outline-dark btn-default">FECHAR</button>
+			</div>
+		</div>
+	</div>
+</ng-template>
+
+
+<!-- Modal ADD BALANCE   -->
+<ng-template #addbanlancemodal let-modal>
+	<form [formGroup]="formDataBalance"
+		(ngSubmit)="formSubmitBanlance=true; formDataBalance.valid && addBalance(formDataBalance.value)">
+		<div class="modal-header">
+			<h4 class="modal-title" id="modal-add-balance">
+				{{ 'GLOBAL.LABEL.ADDBALANCE' | translate }}
+			</h4>
+			<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+		<div class="modal-body">
+			<div class="row">
+				<div class="form-group col-md-12 col-lg-12 col-sm-12 col-xs-12">
+					<label for="formDataBalance">{{ 'GLOBAL.LABEL.COSTCENTER' | translate }}</label>
+					<div class="input-group">
+						<input type="text" class="form-control" matInput placeholder="Escolha o Centro de Custo"
+							[matAutocomplete]="autoCostCenter" formControlName="costCenter"
+							[ngClass]="{'is-invalid' : formSubmitBanlance && formDataBalance.get('costCenter').invalid}">
+						<mat-autocomplete [displayWith]="displayFn" #autoCostCenter="matAutocomplete">
+							<mat-option *ngFor="let costCenter of costCenters" [value]="costCenter">
+								{{ costCenter.name }}
+							</mat-option>
+						</mat-autocomplete>
+					</div>
+				</div>
+				<!-- <div class="form-group col-md-6 col-lg-6 col-sm-12 col-xs-12">
+					<label for="bank">{{ 'GLOBAL.LABEL.BANK' | translate }}</label>
+					<div class="input-group">
+						<input type="text" class="form-control" matInput placeholder="Escolha um Banco" [matAutocomplete]="autoBank"
+							formControlName="bank"
+							[ngClass]="{'is-invalid' : formSubmitBanlance && formDataBalance.get('bank').invalid}">
+						<mat-autocomplete [displayWith]="displayFn" #autoBank="matAutocomplete">
+							<mat-option *ngFor="let bank of banks" [value]="bank">
+								{{ bank.name }}
+							</mat-option>
+						</mat-autocomplete>
+					</div>
+				</div> -->
+				<div class="form-group col-md-6 col-lg-6 col-sm-12 col-xs-12">
+					<label for="destinationAgency">{{ 'GLOBAL.LABEL.AGENCY' | translate }}</label>
+					<div class="input-group">
+						<input type="text" class="form-control" matInput placeholder="Escolha um Agência"
+							[matAutocomplete]="autoAgency" formControlName="destinationAgency"
+							[ngClass]="{'is-invalid' : formSubmitBanlance && formDataBalance.get('destinationAgency').invalid}">
+						<mat-autocomplete [displayWith]="displayFn" #autoAgency="matAutocomplete">
+							<mat-option *ngFor="let agency of agencies" [value]="agency" (click)="getAccounts(agency._id)">
+								[{{ agency.code }}] - {{ agency.name }}
+							</mat-option>
+						</mat-autocomplete>
+					</div>
+				</div>
+
+				<div class="form-group  col-md-6 col-lg-6 col-sm-12 col-xs-12">
+					<label for="destinationAccount">{{ 'GLOBAL.LABEL.HOLDER' | translate }}</label>
+					<div class="input-group">
+						<input type="text" class="form-control" matInput placeholder="Escolha um Titular"
+							[matAutocomplete]="autoHolder" formControlName="destinationAccount"
+							[ngClass]="{'is-invalid' : formSubmitBanlance && formDataBalance.get('destinationAccount').invalid}">
+						<mat-autocomplete [displayWith]="displayFnAccount" #autoHolder="matAutocomplete">
+							<mat-option *ngFor="let account of accounts" [value]="account">
+								[{{ account?.code }}] - {{ account?.holder?.name }}
+							</mat-option>
+						</mat-autocomplete>
+					</div>
+				</div>
+
+				<div class="form-group  col-md-6 col-lg-6 col-sm-12 col-xs-12">
+					<label class="" for="value">{{ 'GLOBAL.LABEL.VALUE' | translate }}</label>
+					<div class="input-group">
+						<input class="form-control" currencyMask formControlName="value"
+							[ngClass]="{'is-invalid' : formSubmitBanlance && formDataBalance.get('value').invalid}">
+					</div>
+				</div>
+
+				<div class="form-group  col-md-6 col-lg-6 col-sm-12 col-xs-12">
+					<label class="" for="description">{{ 'GLOBAL.LABEL.REFERENT' | translate }}</label>
+					<div class="input-group">
+						<input class="form-control" formControlName="description"
+							[ngClass]="{'is-invalid' : formSubmitBanlance && formDataBalance.get('description').invalid}">
+					</div>
+				</div>
+
+			</div>
+		</div>
+		<div class="modal-footer">
+			<button type="button" (click)="modal.dismiss('Cross click')" class="btn btn-secondary" data-dismiss="modal">{{
+				'GLOBAL.LABEL.CANCEL' | translate }}</button>
+			<button type="submit" class="btn btn-primary">{{ 'GLOBAL.LABEL.SAVE' | translate }}</button>
+		</div>
+	</form>
+</ng-template>

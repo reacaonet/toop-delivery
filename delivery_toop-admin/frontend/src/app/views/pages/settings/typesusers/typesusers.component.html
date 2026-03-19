@@ -1,0 +1,138 @@
+<div class="row justify-content-between">
+	<div class="col-auto align-self-center mb-2">
+		<p class="float-left">{{ 'GLOBAL.LABEL.TYPESUSERS' | translate }} </p>
+	</div>
+	<div class="col-auto">
+		<a (click)="createTypesUsersModalShow(createtypesusersmodal)" href="javascript:;" class="float-right btn btn-label-warning btn-bold btn-sm btn-icon-h">
+			{{ 'GLOBAL.LABEL.CREATE' | translate }}
+		</a>
+	</div>
+</div>
+
+<!-- Alert -->
+<p>
+	<ngb-alert *ngIf="alert" [type]="alert.type" (close)="closeAlert()">
+		{{ alert.message }}
+	</ngb-alert>
+</p>
+
+<div class="example-container mat-elevation-z8">
+	<mat-table #table [dataSource]="dataSource">
+		<ng-container matColumnDef="select">
+			<mat-header-cell *matHeaderCellDef>
+				<mat-checkbox [checked]="true" [indeterminate]="true">
+				</mat-checkbox>
+			</mat-header-cell>
+			<mat-cell *matCellDef="let row">
+				<mat-checkbox (click)="$event.stopPropagation()">
+				</mat-checkbox>
+			</mat-cell>
+		</ng-container>
+		<!-- Name Column -->
+		<ng-container matColumnDef="name">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.NAME' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{element.name}} </mat-cell>
+		</ng-container>
+		<!-- Status Column -->
+		<ng-container matColumnDef="status">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.STATUS' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i *ngIf="element.status === true" class="flaticon2-accept mr-2"></i>
+				<i *ngIf="element.status === false" class="flaticon2-cancel mr-2"></i>
+			</mat-cell>
+		</ng-container>
+		<!-- Delete Users Type -->
+		<ng-container matColumnDef="delete">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.ACTION' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i class="flaticon2-edit mr-2" (click)="editTypesUsersModalShow(edittypesusersmodal, element)"></i>
+				<i class="flaticon2-trash" (click)="confirmDeleteModalShow(confirmdeletemodal, element)"></i>
+			</mat-cell>
+		</ng-container>
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+	</mat-table>
+	<mat-paginator [length]="totalLength" [pageSize]="pageSize" [pageSizeOptions]="pageLimit" (page)="changePage($event)">
+	</mat-paginator>
+
+	<!-- A partir daqui é o modal -->
+	<!-- Modal Create types users -->
+	<ng-template #createtypesusersmodal let-modal>
+		<form [formGroup]="formData" (ngSubmit)="formSubmitAttempt=true; formData.valid && createTypesUsers(formData.value)
+		 && modal.dismiss('Cross click')">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-create-types-users">{{ 'GLOBAL.LABEL.CREATETYPESUSERS' | translate }}</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div style="margin-top: 10px">
+					<div class="form-group">
+						<label for="name">{{ 'GLOBAL.LABEL.NAME' | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="name" [ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('name').invalid}">
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="status">{{ 'GLOBAL.LABEL.STATUS' | translate }}</label>
+						<div class="input-group">
+							<mat-slide-toggle formControlName="status"></mat-slide-toggle>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<input type="submit" value="Criar" class="btn btn-outline-dark">
+			</div>
+		</form>
+	</ng-template>
+
+	<!-- Modal Edit types users -->
+	<ng-template #edittypesusersmodal let-modal>
+		<form [formGroup]="formData" (ngSubmit)="updateTypesUsers(formData.value) && modal.dismiss('Cross click')">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-edit-types-users">{{ 'GLOBAL.LABEL.TOEDIT' | translate }}
+					{{formData.value.name}}</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<input type="hidden" class="form-control" formControlName="_id">
+				<div class="form-group">
+					<label for="name">{{ 'GLOBAL.LABEL.NAME' | translate }}</label>
+					<div class="input-group">
+						<input class="form-control" formControlName="name" [ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('name').invalid}">
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="status">{{ 'GLOBAL.LABEL.STATUS' | translate }}</label>
+					<div class="input-group">
+						<mat-slide-toggle formControlName="status"></mat-slide-toggle>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<input type="submit" value="Salvar" class="btn btn-outline-dark">
+			</div>
+		</form>
+	</ng-template>
+</div>
+<!-- Modal Delete -->
+<ng-template #confirmdeletemodal let-modal>
+	<div class="modal-header">
+		<h4 class="modal-title" id="modal-delete-types-users">
+			Confirmar exclusão</h4>
+		<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	<div class="modal-body" class="btn btn-warning">
+		{{ 'GLOBAL.LABEL.AREYOUSUREYOUWANTTODELETE' | translate }}
+	</div>
+	<div class="modal-footer">
+		<button type="button" (click)="typesUsersIdToDelete=undefined; modal.dismiss('Cross click')" class="btn btn-secondary" data-dismiss="modal">{{ 'GLOBAL.LABEL.CANCEL' | translate }}</button>
+		<button type="button" (click)="deleteTypesUsers() && modal.dismiss('Cross click')" class="btn btn-primary">{{ 'GLOBAL.LABEL.YES' | translate }}</button>
+	</div>
+</ng-template>

@@ -1,0 +1,173 @@
+<!-- <ng-container *ngxPermissionsExcept="['accessToGlobal']"> -->
+<!-- <ng-container *ngxPermissionsOnly="['accessToGlobal']"> -->
+<!-- <ng-container> -->
+<ng-container *ngIf="isRoot">
+	<div *ngIf="messageQueue" class="col-12 alert alert-danger">
+		{{ messageQueue }}
+	</div>
+
+	<ng-container
+		*ngIf="
+			order?.status === 'WAIT_DELIVERYMAN' ||
+			order?.status === 'ACCEPT_DELIVERYMAN' ||
+			order?.status === 'RELEASE_SHOPPER' ||
+			order?.status === 'DISPATCH' ||
+			order?.status === 'DELIVERY_ROUTE'
+		"
+	>
+		<div class="col-12 text-right">
+			<button
+				type="button"
+				class="btn btn-primary ml-10"
+				(click)="changeQueueModal(confirmModal)"
+			>
+				Voltar para Fila
+			</button>
+		</div>
+	</ng-container>
+</ng-container>
+
+<ng-container *ngIf="!isRoot && messageQueue">
+	<div class="col-12 alert alert-danger">{{ messageQueue }}</div>
+
+	<ng-container
+		*ngIf="
+			order?.status === 'WAIT_DELIVERYMAN' ||
+			order?.status === 'ACCEPT_DELIVERYMAN' ||
+			order?.status === 'RELEASE_SHOPPER' ||
+			order?.status === 'DELIVERY_ROUTE'
+		"
+	>
+		<div class="col-12 text-right">
+			<button
+				type="button"
+				class="btn btn-primary ml-10"
+				(click)="changeQueueModal(confirmModal)"
+			>
+				Voltar para Fila
+			</button>
+		</div>
+	</ng-container>
+</ng-container>
+
+<!-- Modal Delete -->
+<ng-template #confirmModal let-modal>
+	<div class="modal-header">
+		<h4 class="modal-title" id="modal-delete-order">
+			Tem Certeza que deseja voltar pedido para a fila ?
+		</h4>
+		<button
+			type="button"
+			class="close"
+			aria-label="Close"
+			(click)="modal.dismiss('Cross click')"
+		>
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	<div class="modal-body">
+		<div class="alert alert-warning row" role="alert">
+			<p class="row text-center">
+				Quer enviar essa corrida para um entregador específico?
+			</p>
+			<div class="row">
+				<button
+					(click)="selectDeliveryMan()"
+					type="button"
+					class="btn btn-light col"
+				>
+					Sim, selecionar entregador
+				</button>
+				<button
+					*ngIf="!load"
+					(click)="changeQueue()"
+					type="button"
+					class="btn btn-primary col"
+				>
+					Enviar para o entregador mais próximo
+				</button>
+			</div>
+		</div>
+		<div *ngIf="formData">
+			<form
+				[formGroup]="formData"
+				(ngSubmit)="
+					formSubmitAttempt = true;
+					formData.valid && deliveryManSelected(formData.value)
+				"
+			>
+				<div class="row">
+					<div class="form-group col-12">
+						<label>Entregador</label>
+						<div class="input-group">
+							<input
+								type="text"
+								class="form-control"
+								matInput
+								placeholder="Escolha um entregador"
+								[matAutocomplete]="autoDeliveryman"
+								formControlName="deliveryman"
+							/>
+							<mat-autocomplete
+								[displayWith]="displayFn"
+								#autoDeliveryman="matAutocomplete"
+								class="col-12"
+							>
+								<mat-option
+									*ngFor="let delivery of deliverymanList"
+									[value]="delivery"
+									(click)="selectedDelivery(delivery)"
+								>
+									{{ delivery?.person?.name }}
+								</mat-option>
+							</mat-autocomplete>
+						</div>
+						<div class="row">
+							<button
+								type="button"
+								class="mt-2 col-12 btn btn-primary"
+								(click)="sendOrderToDelivery()"
+								*ngIf="!load"
+							>
+								Confirmar
+							</button>
+
+							<button
+								type="button"
+								class="mt-2 col-12 btn btn-primary"
+								*ngIf="load"
+							>
+								<span
+									class="spinner-grow spinner-grow-sm"
+									role="status"
+									aria-hidden="true"
+								></span>
+								Processando...
+							</button>
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+	<div class="modal-footer">
+		<button
+			type="button"
+			(click)="modal.dismiss('Cross click')"
+			class="btn btn-danger"
+			data-dismiss="modal"
+		>
+			{{ "GLOBAL.LABEL.CANCEL" | translate }}
+		</button>
+
+		<!-- <button type="button" (click)="changeQueue()" *ngIf="!load" class="btn btn-primary">
+			Enviar para fila
+		</button> -->
+
+		<!-- <button type="button" class="btn btn-primary" *ngIf="load">
+			<span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+			Processando...
+		</button> -->
+	</div>
+</ng-template>
+<!-- </ng-container> -->

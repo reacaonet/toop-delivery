@@ -1,0 +1,364 @@
+<form [formGroup]="formData" (ngSubmit)="formSubmit = true; formData.valid && save(formData.value)">
+	<h4 class="modal-title mb-5">
+		{{ "GLOBAL.LABEL.NEW" | translate }}
+		{{ "GLOBAL.LABEL.SERVICE" | translate }}
+	</h4>
+
+	<input type="hidden" class="form-control" formControlName="_id" />
+	<div class="card modal-body">
+		<h4 class="h6"><b>{{ "GLOBAL.LABEL.PRIMARYDATA" | translate }}</b></h4>
+		<hr />
+		<div class="card-body">
+			<div class="row">
+				<div class="form-group col-4">
+					<label for="franchise">{{ 'GLOBAL.LABEL.FRANCHISE' | translate }}</label>
+					<div class="input-group">
+						<input type="text" class="form-control" matInput
+							placeholder="{{ 'GLOBAL.LABEL.CHOOSEAFRANCHISE' | translate }}" [matAutocomplete]="autoFranchise"
+							formControlName="franchise" [ngClass]="{'is-invalid' : formSubmit && formData.get('franchise').invalid}">
+						<mat-autocomplete [displayWith]="displayFnFranchise" #autoFranchise="matAutocomplete">
+							<mat-option *ngFor="let franchise of franchises" [value]="franchise"
+								(click)="onClickFranchiseFilter(franchise)">
+								{{ franchise.name }}
+							</mat-option>
+						</mat-autocomplete>
+					</div>
+				</div>
+
+				<div class="form-group col-5">
+					<label for="name">{{ "GLOBAL.LABEL.NAME" | translate }}</label>
+					<div class="input-group">
+						<input class="form-control" formControlName="name" [ngClass]="{
+								'is-invalid': formSubmit && formData.get('name').invalid
+							}" />
+					</div>
+				</div>
+
+				<div class="form-group col-3">
+					<label for="capacity">{{
+						"GLOBAL.LABEL.CAPACITY" | translate
+						}}</label>
+					<div class="input-group">
+						<input class="form-control" formControlName="capacity" min="1" minlength="1" type="number" [ngClass]="{
+								'is-invalid': formSubmit && formData.get('capacity').invalid
+							}" />
+					</div>
+				</div>
+
+				<div class="form-group col-4">
+					<label for="status">{{ "GLOBAL.LABEL.STATUS" | translate }}</label>
+					<div class="input-group">
+						<mat-slide-toggle formControlName="status"></mat-slide-toggle>
+					</div>
+				</div>
+
+				<div class="form-group col-4">
+					<label for="onlyForWomen">{{ "GLOBAL.LABEL.ONLY_FOR_WOMEN" | translate }}</label>
+					<div class="input-group">
+						<mat-slide-toggle formControlName="onlyForWomen"></mat-slide-toggle>
+					</div>
+				</div>
+
+				<div class="form-group col-4">
+					<label for="showArrivalTime">{{ "GLOBAL.LABEL.SHOWARRIVALTIME" | translate }}</label>
+					<div class="input-group">
+						<mat-slide-toggle formControlName="showArrivalTime"></mat-slide-toggle>
+					</div>
+				</div>
+
+				<div class="row col-12">
+					<div class="form-group col-12">
+						<label for="useDynamicsRace">{{ "GLOBAL.LABEL.USE_DYNAMICS_RACE" | translate }} <small class="legend">{{
+								"GLOBAL.LABEL.USE_DYNAMICS_RACE_TEXT" | translate }}</small></label>
+						<div class="input-group">
+							<mat-slide-toggle formControlName="useDynamicsRace"></mat-slide-toggle>
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group col-3 sm-col-6">
+					<label for="state">{{ "GLOBAL.LABEL.TYPE" | translate }}</label>
+					<div class="input-group">
+						<select id="type" class="form-control autocomplete" formControlName="type">
+							<option selected value="">{{ "GLOBAL.LABEL.SELECT" | translate }}</option>
+							<option *ngFor="let type of serviceTypes" [value]="type.key">{{ type.value | translate }}</option>
+						</select>
+					</div>
+				</div>
+
+				<div class="form-group col-3 sm-col-6">
+					<label for="state">{{ "GLOBAL.LABEL.TIMEZONE" | translate }}</label>
+					<div class="input-group">
+						<select id="timeZone" class="form-control autocomplete" formControlName="timeZone"
+							(change)="selectTimeZone($event.target)">
+							<option selected value="">{{ "GLOBAL.LABEL.SELECT" | translate }}</option>
+							<option *ngFor="let time of listTimeZone" [value]="time.zone">{{time.offset}} | {{time.zone}}</option>
+						</select>
+					</div>
+				</div>
+
+				<div class="form-group col-3 sm-col-6">
+					<label for="valueByPercentage">{{ "GLOBAL.LABEL.VALUEBYPERCENTAGE" | translate }}</label>
+					<div class="input-group">
+						<input type="number" class="form-control" formControlName="valueByPercentage" [ngClass]="{
+								'is-invalid': formSubmit && formData.get('valueByPercentage').invalid
+							}" />
+					</div>
+				</div>
+				<div class="form-group col-3 sm-col-6">
+					<label for="fixedValue">{{ "GLOBAL.LABEL.FIXEDVALUE" | translate }}<small>(R$0,00)</small></label>
+					<div class="input-group">
+						<input class="form-control" formControlName="fixedValue" [ngClass]="{
+								'is-invalid': formSubmit && formData.get('fixedValue').invalid
+							}" currencyMask />
+					</div>
+				</div>
+
+				<div class="form-group col-4 sm-col-6">
+					<label for="radiusSendRace">{{ "GLOBAL.LABEL.SEARCHRADIUS" | translate }}</label>
+					<div class="input-group">
+						<input class="form-control" formControlName="radiusSendRace" min="1" minlength="2" type="number" [ngClass]="{
+							'is-invalid': formSubmit && formData.get('radiusSendRace').invalid
+						}" />
+					</div>
+					<label><small class="legend">{{ "GLOBAL.LABEL.SEARCHRADIUSTEXT" | translate }}</small></label>
+				</div>
+
+				<div class="form-group col-4 sm-col-6">
+					<label for="info">Informação Serviço no Aplicativo</label>
+					<div class="input-group">
+						<input class="form-control" formControlName="info" type="text" [ngClass]="{
+							'is-invalid': formSubmit && formData.get('info').invalid
+						}" />
+					</div>
+				</div>
+
+				<div class="form-group">
+					<br />
+					<p style="margin-right: 14%" class="legend">
+						{{ "GLOBAL.LABEL.LINKEDRATES" | translate }}
+					</p>
+				</div>
+			</div>
+		</div>
+
+		<h4 class="h6"><b>{{ "GLOBAL.LABEL.CALCULATIONS" | translate }}</b></h4>
+		<hr />
+		<div class="card-body">
+			<div class="row">
+				<div class="form-group col-4">
+					<label for="minimumRate">{{ "GLOBAL.LABEL.MINIMUMRATE" | translate }}
+						<small>(R$0,00)</small></label>
+					<div class="input-group">
+						<input class="form-control" formControlName="minimumRate" [ngClass]="{
+								'is-invalid': formSubmit && formData.get('minimumRate').invalid
+							}" currencyMask />
+					</div>
+					<label><small class="legend">TM {{ "GLOBAL.LABEL.SHORTTRIPS" | translate }}</small></label>
+				</div>
+
+				<!-- <div class="form-group col-4">
+					<label for="hourlyPrice">{{ "GLOBAL.LABEL.HOURLYPRICE" | translate }}
+						<small>(R$0,00)</small></label>
+					<div class="input-group">
+						<input class="form-control" formControlName="hourlyPrice" [ngClass]="{
+								'is-invalid': formSubmit && formData.get('hourlyPrice').invalid
+							}" currencyMask />
+					</div>
+					<label><small class="legend">PH {{ "GLOBAL.LABEL.PHTH" | translate }}</small></label>
+				</div> -->
+
+				<div class="form-group col-4">
+					<label for="basePrice">{{ "GLOBAL.LABEL.BASEPRICE" | translate }}
+						<small>(R$0,00)</small></label>
+					<div class="input-group">
+						<input class="form-control" formControlName="basePrice" [ngClass]="{
+								'is-invalid': formSubmit && formData.get('basePrice').invalid
+							}" currencyMask />
+					</div>
+					<label><small class="legend">PB ({{ "GLOBAL.LABEL.BASEPRICE" | translate }})</small></label>
+				</div>
+			</div>
+
+			<div class="row">
+				<div class="form-group col-4">
+					<label for="timePrice">{{ "GLOBAL.LABEL.TIMEPRICE" | translate }}
+						<small>(R$0,00)</small></label>
+					<div class="input-group">
+						<input class="form-control" formControlName="timePrice" currencyMask [ngClass]="{
+								'is-invalid': formSubmit && formData.get('timePrice').invalid
+							}" />
+					</div>
+					<label><small class="legend">{{ "GLOBAL.LABEL.PMTM" | translate }}</small></label>
+				</div>
+				<div class="form-group col-4">
+					<label for="currencyPrice">{{ "GLOBAL.LABEL.PKM" | translate }}</label>
+					<div class="input-group">
+						<input class="form-control" formControlName="currencyPrice" currencyMask [ngClass]="{
+								'is-invalid':
+									formSubmit && formData.get('currencyPrice').invalid
+							}" />
+					</div>
+					<!-- <label><small class="legend">PKms (Por Kms), TKms (Total Kms)</small></label> -->
+				</div>
+			</div>
+
+			<div class="row mb-3">
+				<div class="col-9">
+					<h6>Preço Por Quilômetro <small class="legend">Possui preço diferenciados por distancia ?</small></h6>
+				</div>
+				<div class="col-3">
+					<button type="button" class="btn btn-sm btn-info" (click)="addPriceForKM()">
+						<span aria-hidden="true">Novo Preço / KM</span>
+					</button>
+				</div>
+			</div>
+
+			<div class="row" *ngFor="let priceForKM of formData.get('distance').controls; index as i">
+				<ng-container [formGroup]="priceForKM">
+					<div class="form-group col-2">
+						<label for="min">{{ 'GLOBAL.LABEL.MIN' | translate }} /KM</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="min"
+								[ngClass]="{'is-invalid' : formSubmit && priceForKM.get('min').invalid}" mask="separator.2" />
+						</div>
+					</div>
+
+					<div class="form-group col-2">
+						<label for="max">{{ 'GLOBAL.LABEL.MAX' | translate }} /KM</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="max"
+								[ngClass]="{'is-invalid' : formSubmit && priceForKM.get('max').invalid}" mask="separator.2" />
+						</div>
+					</div>
+
+					<div class="form-group col-4">
+						<label for="price">{{ "GLOBAL.LABEL.TIMEPRICE" | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" currencyMask formControlName="priceMinute"
+								[ngClass]="{'is-invalid' : formSubmit && priceForKM.get('priceMinute').invalid}">
+						</div>
+					</div>
+
+					<div class="form-group col-3">
+						<label for="price">{{ "GLOBAL.LABEL.PKM" | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" currencyMask formControlName="priceKM"
+								[ngClass]="{'is-invalid' : formSubmit && priceForKM.get('priceKM').invalid}">
+						</div>
+					</div>
+
+					<div class="form-group col-1">
+						<label for="remove"></label>
+						<div class="input-group mt-3">
+							<i class="flaticon2-trash" (click)="removePriceForKM(priceForKM, i)"></i>
+						</div>
+					</div>
+				</ng-container>
+			</div>
+		</div>
+
+		<h4 class="h6"><b>{{ "GLOBAL.LABEL.TXE" | translate }}</b></h4>
+		<hr />
+		<div class="card-body">
+			<div class="row">
+				<div class="form-group col-6">
+					<label for="dispensingMinutes">{{ "GLOBAL.LABEL.DPMIN" | translate }}</label>
+					<div class="input-group">
+						<input type="number" step="1" min="0" class="form-control" formControlName="dispensingMinutes" [ngClass]="{
+								'is-invalid':
+									formSubmit && formData.get('dispensingMinutes').invalid
+							}" />
+					</div>
+				</div>
+
+				<!-- <div class="form-group col-6">
+					<label for="ratePerMinute">{{ "GLOBAL.LABEL.TARMIN" | translate }}</label>
+					<div class="input-group">
+						<input currencyMask class="form-control" formControlName="ratePerMinute" [ngClass]="{
+								'is-invalid':
+									formSubmit && formData.get('ratePerMinute').invalid
+							}" />
+					</div>
+				</div> -->
+			</div>
+		</div>
+
+		<h4 class="h6">{{ "GLOBAL.LABEL.IMAGES" | translate }}</h4>
+		<hr />
+		<div class="card-body">
+			<div class="row">
+				<div class="form-group col-6 row">
+					<div class="col-2 image">
+						<a [href]="formData.get('images').value" target="_blank">
+							<img width="50" class="img-thumbnail" [src]="
+									formData.get('images').value ||
+									'./assets/media/logos/Icon1.png'
+								" />
+						</a>
+					</div>
+					<div class="col">
+						<label for="customFile">{{
+							"GLOBAL.LABEL.IMAGE" | translate
+							}}</label>
+						<div class="custom-file">
+							<input type="file" class="custom-file-input" id="customFile" (change)="onChange($event)" multiple
+								[ngClass]="{
+									'is-invalid': formSubmit && formData.get('file').invalid
+								}" />
+							<label class="custom-file-label" for="customFile" id="customFileLabel">
+								{{ "GLOBAL.LABEL.SELECTIMAGE" | translate }}</label>
+						</div>
+					</div>
+				</div>
+
+				<div class="form-group col-6 row">
+					<div class="col-2 image">
+						<a [href]="formData.get('makers').value" target="_blank">
+							<img width="50" class="img-thumbnail" [src]="
+									formData.get('makers').value ||
+									'./assets/media/logos/Icon1.png'
+								" />
+						</a>
+					</div>
+					<div class="col">
+						<label for="customMaker">{{
+							"GLOBAL.LABEL.MAKER" | translate
+							}}</label>
+						<div class="custom-file">
+							<input type="file" class="custom-file-input" id="customMaker" (change)="onChangeMaker($event)" multiple
+								[ngClass]="{
+									'is-invalid': formSubmit && formData.get('maker').invalid
+								}" />
+							<label class="custom-file-label" for="customMaker" id="customMakerLabel">
+								{{ "GLOBAL.LABEL.SELECTIMAGE" | translate }}</label>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<h4 class="h6">
+			<b>{{ "GLOBAL.LABEL.PEAKHOUR" | translate }}</b>
+			<small class="legend" style="font-size: 12px; padding: 5px">{{ "GLOBAL.LABEL.PRICEVARIABLE" | translate }}</small>
+		</h4>
+		<hr />
+		<div class="card-body">
+			<div class="row">
+				<div class="form-group col-6" *ngFor="let peakHour of peakHours">
+					<label>Das {{ peakHour.start }} às {{ peakHour.end }} (0%)</label>
+					<div class="input-group">
+						<input (change)="addPeakHour(peakHour._id, $event.target.value)" type="number" required class="form-control"
+							[ngClass]="{
+								'is-invalid': formSubmit && formData.get('peakHours').invalid
+							}" [value]="getPeakHourValue(peakHour._id)" />
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal-footer">
+		<input type="submit" value="{{ 'GLOBAL.LABEL.SAVE' | translate }}" class="btn btn-success" />
+	</div>
+</form>

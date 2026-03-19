@@ -1,0 +1,350 @@
+<form [formGroup]="formFilter" *ngIf="formFilter" formFilter.valid class="col-12">
+	<div class="row col col-12 shadow pt-2 bg-light">
+		<div class="form-group col-6 col-md-2">
+			<label for="dateInit">{{ "GLOBAL.LABEL.DATEINIT" | translate }}</label>
+			<div class="input-group">
+				<input class="form-control" mask="d0/M0/0000" formControlName="dateInit" />
+			</div>
+		</div>
+
+		<div class="form-group col-6 col-md-2">
+			<label for="dateFinal">{{ "GLOBAL.LABEL.DATEFINISH" | translate }}</label>
+			<div class="input-group">
+				<input class="form-control" mask="d0/M0/0000" formControlName="dateFinal" />
+			</div>
+		</div>
+
+		<div class="form-group col-6 col-md-4">
+			<label for="category">Franquia</label>
+			<div class="input-group">
+				<input type="text" class="form-control inputBorder" matInput placeholder="Selecione a Franquia"
+					[matAutocomplete]="autoFranchise" formControlName="franchise" [ngClass]="{
+						'is-invalid': formFilter && formFilter.get('franchise').invalid
+					}" />
+				<mat-autocomplete [displayWith]="displayFn" #autoFranchise="matAutocomplete">
+					<mat-option *ngFor="let franchise of listFranchise" [value]="franchise"
+						(click)="onClickFranchiseFilter(franchise)">
+						{{ franchise.name }}
+					</mat-option>
+				</mat-autocomplete>
+			</div>
+		</div>
+
+		<!-- <div class="form-group col-6 col-md-4">
+			<label>{{ 'GLOBAL.LABEL.COMPANY' | translate }}</label>
+			<div class="input-group inputBorder">
+				<input type="text" class="form-control" matInput placeholder="Pesquisar por Empresa"
+					[matAutocomplete]="autoCompany" formControlName="company">
+				<mat-autocomplete [displayWith]="displayFn" #autoCompany="matAutocomplete">
+					<mat-option *ngFor="let company of companiesFilter" [value]="company" (click)="onClickCompanyFilter(company)">
+						{{ company.name }}
+					</mat-option>
+				</mat-autocomplete>
+			</div>
+		</div> -->
+	</div>
+</form>
+
+<div class="row justify-content-between" *ngIf="showPaginator">
+	<div class="form-group col-12">
+		<span class="alert alert-danger"><b>{{ 'GLOBAL.LABEL.CONFIRMPAGINATOR' | translate }}</b></span>
+	</div>
+</div>
+
+<div class="row justify-content-between mt-3">
+	<div class="col align-self-center mb-2">
+		<h5>
+			<p class="float-left">{{ "GLOBAL.LABEL.SCHEDULES" | translate }}</p>
+		</h5>
+	</div>
+
+	<div class="col-auto">
+		<a (click)="upsertModalShow(null, upserttemplatemodal)" href="javascript:;"
+			class="float-right btn btn-primary btn-bold btn-sm btn-icon-h">
+			{{ 'GLOBAL.LABEL.CREATESLIDE' | translate }}
+		</a>
+	</div>
+</div>
+
+<div class="mat-elevation-z8 mt-3" *ngIf="pageLimit">
+	<mat-table #table [dataSource]="dataSource" class="responsive-table table-responsive">
+		<ng-container matColumnDef="date">
+			<mat-header-cell *matHeaderCellDef>{{ "GLOBAL.LABEL.DATE" | translate }}</mat-header-cell>
+			<mat-cell *matCellDef="let element">{{ element?.date }}</mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="startAt">
+			<mat-header-cell *matHeaderCellDef>{{ "GLOBAL.LABEL.START" | translate }}</mat-header-cell>
+			<mat-cell *matCellDef="let element">{{ element?.startAt }}</mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="origin">
+			<mat-header-cell *matHeaderCellDef>{{ "GLOBAL.LABEL.DEPARTURELOCATION" | translate }}</mat-header-cell>
+			<mat-cell *matCellDef="let element">{{ element?.origin }}</mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="destiny">
+			<mat-header-cell *matHeaderCellDef>{{ "GLOBAL.LABEL.PLACEARRIVAL" | translate }}</mat-header-cell>
+			<mat-cell *matCellDef="let element">{{ element?.destiny }}</mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="passenger">
+			<mat-header-cell *matHeaderCellDef>{{ "GLOBAL.LABEL.PASSENGER" | translate }}</mat-header-cell>
+			<mat-cell *matCellDef="let element">{{ element?.passengerName }}</mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="driver">
+			<mat-header-cell *matHeaderCellDef>{{ "GLOBAL.LABEL.DRIVER" | translate }}</mat-header-cell>
+			<mat-cell *matCellDef="let element">{{ element?.driverName }}</mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="phone">
+			<mat-header-cell *matHeaderCellDef>{{ "GLOBAL.LABEL.PHONE" | translate }}</mat-header-cell>
+			<mat-cell *matCellDef="let element">{{ element?.driverPhone }}</mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="vehicle">
+			<mat-header-cell *matHeaderCellDef>{{ "GLOBAL.LABEL.VEHICLEMODEL" | translate }}</mat-header-cell>
+			<mat-cell *matCellDef="let element">{{ element?.driverVehicleModel }}</mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="total">
+			<mat-header-cell *matHeaderCellDef>Total</mat-header-cell>
+			<mat-cell *matCellDef="let element">{{ currencySymbol }} {{ element?.total}}</mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="methodPayment">
+			<mat-header-cell *matHeaderCellDef>{{ "GLOBAL.LABEL.MTPAYMENT" | translate }}</mat-header-cell>
+			<mat-cell *matCellDef="let element">{{ element?.methodPayment }}</mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="externalConsultant">
+			<mat-header-cell *matHeaderCellDef>{{ "GLOBAL.LABEL.EXTERNALCONSULTANT" | translate }}</mat-header-cell>
+			<mat-cell *matCellDef="let element">{{ element?.externalConsultant }}</mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="internalConsultant">
+			<mat-header-cell *matHeaderCellDef>{{ "GLOBAL.LABEL.INTERNALCONSULTANT" | translate }}</mat-header-cell>
+			<mat-cell *matCellDef="let element">{{ element?.internalConsultant }}</mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="company">
+			<mat-header-cell *matHeaderCellDef>{{ "GLOBAL.LABEL.SUPPLIER" | translate }}</mat-header-cell>
+			<mat-cell *matCellDef="let element">{{ element?.company?.name }}</mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="client">
+			<mat-header-cell *matHeaderCellDef>{{ "GLOBAL.LABEL.CLIENT" | translate }}</mat-header-cell>
+			<mat-cell *matCellDef="let element">{{ element?.clientName }}</mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="status">
+			<mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
+			<mat-cell *matCellDef="let element">{{ element?.status }}</mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="action">
+			<mat-header-cell *matHeaderCellDef>{{ "GLOBAL.LABEL.ACTION" | translate }}</mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<div *ngIf="!load" class="sm-col-3 form-check">
+					<i class="flaticon2-edit mr-2" (click)="upsertModalShow(element, upserttemplatemodal)"></i>
+					<i class="flaticon-cancel ml-2 mt-1" style="cursor: pointer;" (click)="cancelRace(element)"></i>
+				</div>
+
+				<div *ngIf="load" class="spinner-border text-primary" role="status">
+					<span class="visually-hidden"></span>
+				</div>
+			</mat-cell>
+		</ng-container>
+
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns"> </mat-row>
+	</mat-table>
+	<mat-paginator [length]="totalLength" [pageSize]="pageSize" [pageSizeOptions]="pageLimit"
+		(page)="changePage($event, confirmpaginacaomodal)">
+	</mat-paginator>
+</div>
+
+
+<!-- Apartir de aqui é o modal -->
+<!-- Modal upsert data -->
+<ng-template #upserttemplatemodal let-modal>
+	<form [formGroup]="formData" (ngSubmit)="formSubmit=true; upsert(formData.value)">
+		<div class="modal-header">
+			<h4 class="modal-title" id="modal-create-data">{{ 'GLOBAL.LABEL.CREATESCHEDULES' | translate }}</h4>
+			<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+
+		<div class="modal-body">
+			<div *ngFor="let item of formData.controls; let i = index" class="col" [formGroupName]="i">
+				<div class="row">
+					<span class="col-12 text-center h2">{{ 'GLOBAL.LABEL.SCHEDULE' | translate }} {{i+1}}</span>
+
+					<!-- <div class="form-group col-6">
+						<label for="client">{{ 'GLOBAL.LABEL.CLIENT' | translate }}</label>
+						<div class="input-group">
+							<input type="text" class="form-control" matInput placeholder="Escolha um Cliente"
+								[matAutocomplete]="autoClient" formControlName="client"
+								[ngClass]="{'is-invalid' : formSubmitAttempt && formData.controls[i].get('client').invalid}">
+							<mat-autocomplete [displayWith]="extractKeyClientName" #autoClient="matAutocomplete">
+								<mat-option *ngFor="let client of clients" [value]="client">
+									{{ client.tradeName }}
+								</mat-option>
+							</mat-autocomplete>
+						</div>
+					</div> -->
+
+					<!-- <div class="form-group col-6">
+						<label for="company">{{ 'GLOBAL.LABEL.SUPPLIER' | translate }}</label>
+						<div class="input-group">
+							<input type="text" class="form-control" matInput placeholder="Escolha um Fornecedor"
+								[matAutocomplete]="autoCompany" formControlName="company"
+								[ngClass]="{'is-invalid' : formSubmitAttempt && formData.controls[i].get('company').invalid}">
+							<mat-autocomplete [displayWith]="extractKeyName" #autoCompany="matAutocomplete">
+								<mat-option *ngFor="let comp of companies" [value]="comp">
+									{{ comp.name }}
+								</mat-option>
+							</mat-autocomplete>
+						</div>
+					</div> -->
+
+					<div class="form-group col-6">
+						<label for="service">{{ 'GLOBAL.LABEL.SERVICE' | translate }}</label>
+						<div class="input-group">
+							<input type="text" class="form-control" matInput placeholder="Escolha um serviço"
+								[matAutocomplete]="autoService" formControlName="service"
+								[ngClass]="{'is-invalid' : formSubmitAttempt && formData.controls[i].get('service').invalid}">
+							<mat-autocomplete [displayWith]="extractKeyName" #autoService="matAutocomplete">
+								<mat-option *ngFor="let service of services" [value]="service">
+									{{ service.name }}
+									<b *ngIf="service?.franchise?.name"> - {{ service?.franchise?.name }}</b>
+								</mat-option>
+							</mat-autocomplete>
+						</div>
+					</div>
+
+					<div class="form-group col-12">
+						<label for="driverId">{{ 'GLOBAL.LABEL.DRIVER' | translate }}</label>
+						<div class="input-group">
+							<input type="text" class="form-control" matInput placeholder="Escolha um motorista"
+								[matAutocomplete]="autoDriver" formControlName="driverId"
+								[ngClass]="{'is-invalid' : formSubmitAttempt && formData.controls[i].get('driverId').invalid}">
+							<mat-autocomplete [displayWith]="extractKeyName" #autoDriver="matAutocomplete">
+								<mat-option *ngFor="let driver of drivers" [value]="driver">
+									{{ driver.name }}
+									<b *ngIf="driver?.franchise?.name"> - {{ driver?.franchise?.name }}</b>
+								</mat-option>
+							</mat-autocomplete>
+						</div>
+					</div>
+
+					<div *ngIf="!formData.controls[i].get('createPassenger').value" class="form-group col-6">
+						<label for="passenger">{{ 'GLOBAL.LABEL.PASSENGER' | translate }}</label>
+						<div class="input-group">
+							<input type="text" class="form-control" matInput placeholder="Passageiro"
+								[matAutocomplete]="autoPassenger" formControlName="passenger"
+								[ngClass]="{'is-invalid' : formSubmitAttempt && formData.controls[i].get('passenger').invalid}">
+							<mat-autocomplete [displayWith]="extractKeyName" #autoPassenger="matAutocomplete">
+								<mat-option *ngFor="let passenger of passengers" [value]="passenger">
+									{{ passenger.name }}
+									<b *ngIf="passenger?.franchise?.name"> - {{ passenger?.franchise?.name }}</b>
+								</mat-option>
+							</mat-autocomplete>
+						</div>
+					</div>
+
+					<div *ngIf="formData.controls[i].get('createPassenger').value" class="form-group col-6">
+						<label for="passenger">{{ 'GLOBAL.LABEL.PASSENGER' | translate }}</label>
+
+						<input type="text" class="form-control" matInput placeholder="Passageiro" formControlName="passenger"
+							[ngClass]="{'is-invalid' : formSubmitAttempt && formData.controls[i].get('passenger').invalid}">
+					</div>
+
+					<div class="form-group col-4">
+						<label for="createPassenger">{{ 'GLOBAL.LABEL.NEW' | translate }} {{ 'GLOBAL.LABEL.PASSENGER' |
+							translate }}</label>
+						<div class="input-group">
+							<mat-slide-toggle formControlName="createPassenger"></mat-slide-toggle>
+						</div>
+					</div>
+
+					<div class="form-group col-6">
+						<label for="origin">{{ 'GLOBAL.LABEL.ORIGIN' | translate }}</label>
+						<div class="input-group">
+							<input type="text" class="form-control" matInput placeholder="Origem" [matAutocomplete]="autoOrigin"
+								formControlName="origin"
+								[ngClass]="{'is-invalid' : formSubmitAttempt && formData.controls[i].get('origin').invalid}">
+							<mat-autocomplete [displayWith]="extractAutoComplete" #autoOrigin="matAutocomplete">
+								<mat-option *ngFor="let origin of origins" [value]="origin">
+									{{ origin.description }}
+								</mat-option>
+							</mat-autocomplete>
+						</div>
+					</div>
+
+					<div class="form-group col-6">
+						<label for="destiny">{{ 'GLOBAL.LABEL.DESTINY' | translate }}</label>
+						<div class="input-group">
+							<input type="text" class="form-control" matInput placeholder="Destino" [matAutocomplete]="autoDestiny"
+								formControlName="destiny"
+								[ngClass]="{'is-invalid' : formSubmitAttempt && formData.controls[i].get('destiny').invalid}">
+							<mat-autocomplete [displayWith]="extractAutoComplete" #autoDestiny="matAutocomplete">
+								<mat-option *ngFor="let destiny of destinys" [value]="destiny">
+									{{ destiny.description }}
+								</mat-option>
+							</mat-autocomplete>
+						</div>
+					</div>
+
+					<div class="form-group col-4">
+						<label for="externalConsultant">{{ 'GLOBAL.LABEL.EXTERNALCONSULTANT' | translate }}</label>
+						<input type="text" class="form-control" matInput placeholder="Ex. John Doe"
+							formControlName="externalConsultant"
+							[ngClass]="{'is-invalid' : formSubmitAttempt && formData.controls[i].get('externalConsultant').invalid}">
+					</div>
+
+					<div class="form-group col-4">
+						<label for="internalConsultant">{{ 'GLOBAL.LABEL.INTERNALCONSULTANT' | translate }}</label>
+						<input type="text" class="form-control" matInput placeholder="Ex. John Doe"
+							formControlName="internalConsultant"
+							[ngClass]="{'is-invalid' : formSubmitAttempt && formData.controls[i].get('internalConsultant').invalid}">
+					</div>
+
+					<div class="form-group col-2">
+						<label for="price">{{ 'GLOBAL.LABEL.PRICE' | translate }}</label>
+						<input type="number" class="form-control" matInput placeholder="Escolha um preço" formControlName="price"
+							[ngClass]="{'is-invalid' : formSubmitAttempt && formData.controls[i].get('price').invalid}">
+					</div>
+
+					<div class="form-group col-4">
+						<label for="startRaceAt">Hora de começo</label>
+						<input type="datetime-local" class="form-control" matInput formControlName="startRaceAt"
+							[ngClass]="{'is-invalid' : formSubmitAttempt && formData.controls[i].get('startRaceAt').invalid}">
+					</div>
+
+					<div *ngIf="formData.controls[i].get('action').value == 'create'"
+						class="form-group col-4 d-flex align-items-center flex-row-reverse">
+						<button class="btn btn-outline-dark" type="button" (click)="removeFormArrayItem(i)"
+							[disabled]="formSubmit">Remover</button>
+
+						<button class="btn btn-outline-dark mr-1" type="button" (click)="duplicateFormArrayItem(i)"
+							[disabled]="formSubmit">Duplicar</button>
+					</div>
+
+					<hr class="hr" />
+				</div>
+			</div>
+		</div>
+
+		<div class="modal-footer">
+			<input *ngIf="!formSubmit" type="submit" value='{{ "GLOBAL.LABEL.CREATESLIDE" | translate }}'
+				class="btn btn-outline-dark">
+
+			<button *ngIf="formSubmit" class="btn btn-outline-dark" type="button" disabled>
+				<span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+			</button>
+		</div>
+	</form>
+</ng-template>

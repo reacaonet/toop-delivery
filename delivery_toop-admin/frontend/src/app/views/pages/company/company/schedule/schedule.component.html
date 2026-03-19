@@ -1,0 +1,303 @@
+<div class="row justify-content-between">
+	<div class="col-auto align-self-center mb-2">
+		<p class="float-left">{{ "GLOBAL.LABEL.SCHEDULE" | translate }}</p>
+	</div>
+	<div class="col-auto">
+		<a
+			(click)="
+				upSertScheduleModalShow(upsertschedulemodal, undefined, 'create')
+			"
+			href="javascript:;"
+			class="float-right btn btn-label-warning btn-bold btn-sm btn-icon-h"
+		>
+			{{ "GLOBAL.LABEL.CREATE" | translate }}
+		</a>
+	</div>
+</div>
+
+<div class="example-container mat-elevation-z8">
+	<mat-table #table [dataSource]="dataSource">
+		<!-- Checkbox Column -->
+		<ng-container matColumnDef="select">
+			<mat-header-cell *matHeaderCellDef>
+				<mat-checkbox [checked]="true" [indeterminate]="true"> </mat-checkbox>
+			</mat-header-cell>
+			<mat-cell *matCellDef="let row">
+				<mat-checkbox (click)="$event.stopPropagation()"> </mat-checkbox>
+			</mat-cell>
+		</ng-container>
+		<!-- Name Column -->
+		<ng-container matColumnDef="dayWeek">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.NAME" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				{{ element.dayWeek | translate }}
+			</mat-cell>
+		</ng-container>
+		<!-- Description Column -->
+		<ng-container matColumnDef="startHour">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.DESCRIPTION" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.startHour }} </mat-cell>
+		</ng-container>
+		<ng-container matColumnDef="endHour">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.DESCRIPTION" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.endHour }} </mat-cell>
+		</ng-container>
+		<ng-container matColumnDef="type">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.TYPE" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				{{ "GLOBAL.LABEL." + element.type | translate }}
+			</mat-cell>
+		</ng-container>
+		<!-- Delete Company -->
+		<ng-container matColumnDef="delete">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.ACTION" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i
+					class="flaticon2-trash"
+					(click)="confirmDeleteModalShow(confirmdeletemodal, element)"
+				></i>
+			</mat-cell>
+		</ng-container>
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns"> </mat-row>
+	</mat-table>
+</div>
+
+<div class="example-container mat-elevation-z8">
+	<!-- Modal Up Sert created/updated -->
+	<ng-template #upsertschedulemodal let-modal modal-lg>
+		<form
+			[formGroup]="formData"
+			(ngSubmit)="
+				formSubmitFaq = true;
+				formData.valid &&
+					upSertSchedule(formData.value) &&
+					modal.dismiss('Cross click')
+			"
+		>
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-create-schedule">
+					{{
+						typeAction === "create"
+							? ("GLOBAL.LABEL.CREATESCHEDULE" | translate)
+							: ("GLOBAL.LABEL.EDITSCHEDULE" | translate)
+					}}
+				</h4>
+				<button
+					type="button"
+					class="close"
+					aria-label="Close"
+					(click)="modal.dismiss('Cross click')"
+				>
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<input type="hidden" class="form-control" formControlName="_id" />
+				<H6>Dias da semana</H6>
+				<div class="row">
+					<div
+						class="form-check form-check-inline"
+						*ngFor="let data of daysOfWeek; let i = index"
+					>
+						<input
+							class="form-check-input"
+							type="checkbox"
+							[value]="data.value"
+							(change)="onCheckboxChange($event)"
+						/>
+						<label class="form-check-label" for="inlineCheckbox1">{{
+							data.name | translate
+						}}</label>
+					</div>
+				</div>
+				<div class="row">
+					<label for="typeScheduleSelect">Horário mostrado para:</label>
+					<select
+						id="typeScheduleSelect"
+						class="form-control"
+						formControlName="type"
+						[ngClass]="{
+							'is-invalid': formSubmitSlider && formData.get('type').invalid
+						}"
+					>
+						<option
+							*ngIf="company?.companyCategory !== 'service'"
+							selected
+							value="BOTH"
+						>
+							Delivery & RETIRADA
+						</option>
+						<option
+							*ngIf="company?.companyCategory !== 'service'"
+							value="DELIVERY"
+						>
+							SOMENTE DELIVERY
+						</option>
+						<option
+							*ngIf="company?.companyCategory !== 'service'"
+							value="WITHDRAWAL"
+						>
+							SOMENTE RETIRADA
+						</option>
+
+						<option
+							*ngIf="company?.companyCategory === 'service'"
+							selected
+							value="BOTH"
+						>
+							Marcar no Local & Visita do Prestador
+						</option>
+						<option
+							*ngIf="company?.companyCategory === 'service'"
+							value="DELIVERY"
+						>
+							Visita do Prestador
+						</option>
+						<option
+							*ngIf="company?.companyCategory === 'service'"
+							value="WITHDRAWAL"
+						>
+							Marcar no Local
+						</option>
+					</select>
+				</div>
+				<br />
+				<div class="row">
+					<div class="col-6">
+						<button
+							class="btn btn-primary"
+							(click)="addNewHour()"
+							type="button"
+						>
+							Adicionar Novo Horário
+						</button>
+					</div>
+				</div>
+				<div *ngFor="let hour of formData.get('hours').controls; index as i">
+					<div class="card box-day-hour form-inline">
+						<ng-container [formGroup]="hour">
+							<div class="card-body box-day-hour2">
+								<div class="row">
+									<div class="form-group col-3">
+										<label class="" for="startHour">{{
+											"GLOBAL.LABEL.STARTHOUR" | translate
+										}}</label>
+										<div class="input-group">
+											<input
+												class="form-control"
+												mask="Hh:m0"
+												formControlName="startHour"
+												[ngClass]="{
+													'is-invalid':
+														formSubmitFaq && hour.get('startHour').invalid
+												}"
+											/>
+										</div>
+									</div>
+									<div class="form-group col-3">
+										<label class="" for="endHour">{{
+											"GLOBAL.LABEL.ENDHOUR" | translate
+										}}</label>
+										<div class="input-group">
+											<input
+												class="form-control"
+												mask="Hh:m0"
+												formControlName="endHour"
+												[ngClass]="{
+													'is-invalid':
+														formSubmitFaq && hour.get('endHour').invalid
+												}"
+											/>
+										</div>
+									</div>
+									<div class="form-group col-1">
+										<label class="col-12">{{
+											"GLOBAL.LABEL.ACTION" | translate
+										}}</label>
+										<button
+											(click)="removeHour(i)"
+											mat-mini-fab
+											color="warn"
+											class="col-12 mat-mini-fab mat-button-base mat-accent"
+										>
+											<span class="mat-button-wrapper">
+												<mat-icon
+													class="
+														mat-icon
+														notranslate
+														material-icons
+														mat-icon-no-color
+													"
+													role="img"
+													aria-hidden="true"
+												>
+													delete
+												</mat-icon>
+											</span>
+											<div
+												class="
+													mat-button-ripple mat-ripple mat-button-ripple-round
+												"
+												matripple
+											></div>
+											<div class="mat-button-focus-overlay"></div>
+										</button>
+									</div>
+								</div>
+							</div>
+						</ng-container>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<input type="submit" value="Criar" class="btn btn-outline-dark" />
+			</div>
+		</form>
+	</ng-template>
+
+	<!-- Modal Delete -->
+	<ng-template #confirmdeletemodal let-modal>
+		<div class="modal-header">
+			<h4 class="modal-title" id="modal-delete-faq">Confirmar exclusão</h4>
+			<button
+				type="button"
+				class="close"
+				aria-label="Close"
+				(click)="modal.dismiss('Cross click')"
+			>
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+		<div class="modal-body" class="btn btn-warning">
+			{{ "GLOBAL.LABEL.AREYOUSUREYOUWANTTODELETE" | translate }}
+		</div>
+		<div class="modal-footer">
+			<button
+				type="button"
+				(click)="faqIdToDelete = undefined; modal.dismiss('Cross click')"
+				class="btn btn-secondary"
+				data-dismiss="modal"
+			>
+				{{ "GLOBAL.LABEL.CANCEL" | translate }}
+			</button>
+			<button
+				type="button"
+				(click)="deleteSchedule() && modal.dismiss('Cross click')"
+				class="btn btn-primary"
+			>
+				{{ "GLOBAL.LABEL.YES" | translate }}
+			</button>
+		</div>
+	</ng-template>
+</div>

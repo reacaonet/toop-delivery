@@ -1,0 +1,197 @@
+<div class="row justify-content-between">
+	<div class="col-auto align-self-center mb-2">
+		<p class="float-left">{{ "GLOBAL.LABEL.FRANCHISE" | translate }}</p>
+	</div>
+	<div class="col-auto">
+		<a (click)="upsertModalShow(upsertsegmentmodal, undefined, 'create')" href="javascript:;"
+			class="float-right btn btn-label-warning btn-bold btn-sm btn-icon-h">
+			{{ "GLOBAL.LABEL.CREATE" | translate }}
+		</a>
+	</div>
+</div>
+
+<div class="example-container mat-elevation-z8">
+	<mat-table #table [dataSource]="dataSource">
+		<!-- Images Column -->
+		<ng-container matColumnDef="image">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.IMAGES" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<a [href]="element.image" target="_blank">
+					<img width="50" class="img-thumbnail" [src]="element.image || './assets/media/logo-default.png'"
+						[alt]="element.name" />
+				</a>
+			</mat-cell>
+		</ng-container>
+		<!-- Name Column -->
+		<ng-container matColumnDef="name">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.NAME" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.name }} </mat-cell>
+		</ng-container>
+		<!-- franchise Column -->
+		<ng-container matColumnDef="franchise">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.FRANCHISE" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				{{
+				element.franchise && element.franchise.name
+				? element.franchise.name
+				: "-"
+				}}
+			</mat-cell>
+		</ng-container>
+		<!-- Category Column -->
+		<ng-container matColumnDef="category">
+			<mat-header-cell *matHeaderCellDef>Categoria</mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				{{ element.category === "delivery" ? "Delivery" : "Serviço" }}
+			</mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="order">
+			<mat-header-cell *matHeaderCellDef> Ordem </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				{{ element.order }}
+			</mat-cell>
+		</ng-container>
+
+		<!-- Status Column -->
+		<ng-container matColumnDef="status">
+			<mat-header-cell *matHeaderCellDef class="text-center">
+				{{ "GLOBAL.LABEL.STATUS" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element" class="text-center">
+				<i *ngIf="element.status === true" class="flaticon2-accept mr-2"></i>
+				<i *ngIf="element.status === false" class="flaticon2-cancel mr-2"></i>
+			</mat-cell>
+		</ng-container>
+		<!-- Delete Slide -->
+		<ng-container matColumnDef="delete">
+			<mat-header-cell *matHeaderCellDef class="text-center">
+				{{ "GLOBAL.LABEL.ACTION" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element" class="text-center">
+				<i class="flaticon2-edit mr-2" (click)="upsertModalShow(upsertsegmentmodal, element, 'edit')"></i>
+				<i class="flaticon2-trash" (click)="confirmDeleteModalShow(confirmdeletemodal, element)"></i>
+			</mat-cell>
+		</ng-container>
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns"> </mat-row>
+	</mat-table>
+	<mat-paginator [length]="totalLength" [pageSize]="pageSize" [pageSizeOptions]="pageLimit" (page)="changePage($event)">
+	</mat-paginator>
+</div>
+
+<!-- Modal Up Sert created/updated -->
+<ng-template #upsertsegmentmodal let-modal>
+	<form [formGroup]="formData" (ngSubmit)="
+			formSubmitSegment = true; formData.valid && upsert(formData.value)
+		">
+		<div class="modal-header">
+			<h4 class="modal-title" id="modal-create-segment">
+				{{
+				typeAction === "create"
+				? ("GLOBAL.LABEL.CREATE" | translate)
+				: ("GLOBAL.LABEL.EDIT" | translate)
+				}}
+			</h4>
+			<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+		<div class="modal-body">
+			<input type="hidden" class="form-control" formControlName="_id" />
+			<div class="row">
+				<div class="form-group col-12">
+					<label>{{ "GLOBAL.LABEL.FRANCHISE" | translate }}</label>
+					<div class="input-group">
+						<input type="text" class="form-control" matInput placeholder="Escolha uma franquia"
+							[matAutocomplete]="autoFranchise" formControlName="franchise" />
+						<mat-autocomplete [displayWith]="displayFnFranchise" #autoFranchise="matAutocomplete">
+							<mat-option *ngFor="let franchise of franchises" [value]="franchise">
+								{{ franchise.name }}
+							</mat-option>
+						</mat-autocomplete>
+					</div>
+				</div>
+				<div class="form-group col-12" style="margin-top: 10px">
+					<div style="margin-top: 10px">
+						<div class="custom-file">
+							<input type="file" class="custom-file-input" id="customFile" (change)="onChange($event)" [ngClass]="{
+									'is-invalid':
+										formSubmitSegment && formData.get('file').invalid
+								}" multiple />
+							<label class="custom-file-label" for="customFile" id="customFileLabel">
+								{{ "GLOBAL.LABEL.SELECTIMAGE" | translate }}</label>
+						</div>
+					</div>
+				</div>
+				<div class="form-group col-12">
+					<label for="name">{{ "GLOBAL.LABEL.NAME" | translate }}</label>
+					<div class="input-group">
+						<input class="form-control" formControlName="name" [ngClass]="{
+								'is-invalid': formSubmitSegment && formData.get('name').invalid
+							}" />
+					</div>
+				</div>
+
+				<div class="col-12">
+					<div class="form-group">
+						<label for="category">Categoria</label>
+						<select id="category" class="form-control" formControlName="category"
+							[ngClass]="{ 'is-invalid': formData.get('category').invalid }">
+							<option value="">Selecione categoria</option>
+							<option *ngFor="let categoryItem of listCategory" value="{{ categoryItem.key }}">
+								{{ categoryItem.name }}
+							</option>
+						</select>
+					</div>
+				</div>
+
+				<div class="form-group col-6">
+					<label for="segment">Ordem</label>
+					<input class="form-control" formControlName="order" type="number" />
+					<small id="passwordHelpBlock" class="form-text text-muted">
+						Posições mais baixas tem prioridade na exibição
+					</small>
+				</div>
+
+				<div class="form-group col-2">
+					<label for="status">{{ "GLOBAL.LABEL.STATUS" | translate }}</label>
+					<div class="input-group">
+						<mat-slide-toggle formControlName="status"></mat-slide-toggle>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="modal-footer">
+			<input type="submit" value="Salvar" class="btn btn-outline-dark" />
+		</div>
+	</form>
+</ng-template>
+
+<!-- Modal Delete -->
+<ng-template #confirmdeletemodal let-modal>
+	<div class="modal-header">
+		<h4 class="modal-title" id="modal-delete-slider">Confirmar exclusão</h4>
+		<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	<div class="modal-body" class="btn btn-warning">
+		{{ "GLOBAL.LABEL.AREYOUSUREYOUWANTTODELETE" | translate }}
+	</div>
+	<div class="modal-footer">
+		<button type="button" (click)="segmentIdToDelete = undefined; modal.dismiss('Cross click')"
+			class="btn btn-secondary" data-dismiss="modal">
+			{{ "GLOBAL.LABEL.CANCEL" | translate }}
+		</button>
+		<button type="button" (click)="delete() && modal.dismiss('Cross click')" class="btn btn-primary">
+			{{ "GLOBAL.LABEL.YES" | translate }}
+		</button>
+	</div>
+</ng-template>

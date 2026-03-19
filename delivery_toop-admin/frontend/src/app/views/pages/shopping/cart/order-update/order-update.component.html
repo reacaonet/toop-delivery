@@ -1,0 +1,186 @@
+<ng-container *ngIf="isShopper">
+	<div class="col-12 text-right" *ngIf="!blockView">
+		<!-- <div class='col-12 badge badge-danger mb-15' *ngIf="order?.status==='ACCEPT_DELIVERYMAN'" >
+			Libere o pedido somente quando o entregador já estiver no seu estabelecimento!
+		</div> -->
+
+		<button type="button" class="btn btn-info ml-10" (click)="modalLiberationConfirm(confirmLiberation)"
+			*ngIf="order?.status === 'ACCEPT_DELIVERYMAN'">
+			Liberar Para Entrega
+		</button>
+
+		<button type="button" class="btn btn-dark" *ngIf="
+				isUpdateStatus === false &&
+				order?.status !== 'FINISHED' &&
+				order?.status !== 'CANCELED' &&
+				order?.status !== 'ACCEPT_DELIVERYMAN'
+			" data-toggle="tooltip" data-placement="top" title="{{ tooltipScheduleMessage }}">
+			{{ titleBtn }}
+		</button>
+
+		<button type="button" class="btn btn-success" *ngIf="order?.status === 'FINISHED'">
+			{{ titleBtn }}
+		</button>
+
+		<button type="button" class="btn btn-danger" *ngIf="order?.status === 'CANCELED'">
+			{{ titleBtn }}
+		</button>
+
+		<button type="button" class="btn btn-danger ml-10" (click)="confirmDeleteModalShow(confirmdeletemodal)"
+			*ngIf="order?.status === 'WAIT_COMPANY'">
+			Recusar Pedido
+		</button>
+
+		<!-- Status que o Shopper pode prosseguir -->
+		<ng-container *ngIf="isUpdateStatus === true">
+			<button type="button" class="btn btn-info ml-10" (click)="clickChangeStatus()"
+				*ngIf="!load && order?.status !== 'IN_PREPARATION' ">
+				{{ titleBtn }}
+			</button>
+
+
+			<!-- Se tiver Frete abrir Modal com valor a ser pago pelo estabelecimento -->
+			<button type="button" class="btn btn-info ml-10" (click)="modalPriceDelivery()"
+				*ngIf="!load && onlineDelivery === true && order?.status === 'IN_PREPARATION' && order?.typeSchedule === 'Delivery'">
+				{{ titleBtn }}
+			</button>
+
+			<button type="button" class="btn btn-primary ml-15" *ngIf="load">
+				<span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+				Processando...
+			</button>
+		</ng-container>
+
+		<!-- Entregador Próprio -->
+		<button type="button" class="btn btn-primary ml-15" (click)="modalPriceDispatch()"
+			*ngIf="ownDelivery === true && order?.status === 'IN_PREPARATION' && order?.typeSchedule === 'Delivery'">
+			Despachar
+		</button>
+
+		<button type="button" class="btn btn-primary ml-15" (click)="confirmOrderDelivery()"
+			*ngIf="!load && order?.status === 'DISPATCH'">
+			Pedido já Entregue ?
+		</button>
+
+		<button type="button" class="btn btn-warning ml-15" (click)="confirmOrderDelivery()"
+			*ngIf="!load && order?.status === 'IN_PREPARATION' && order?.typeSchedule !== 'Delivery'">
+			Cliente fez a retirada do pedido?
+		</button>
+
+		<button type="button" class="btn btn-primary ml-15" *ngIf="load && order?.status === 'DISPATCH'">
+			<span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+			Processando...
+		</button>
+	</div>
+
+	<!-- Modal Confirm  liberation-->
+	<ng-template #confirmLiberation let-modal>
+		<div class="modal-header">
+			<h4 class="modal-title text-danger" id="modal-liberation-order">
+				Libere o pedido somente quando o entregador já estiver no seu
+				estabelecimento!
+			</h4>
+			<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+		<div class="modal-footer">
+			<button type="button" (click)="modal.dismiss('Cross click')" class="btn btn-secondary" data-dismiss="modal">
+				{{ "GLOBAL.LABEL.CANCEL" | translate }}
+			</button>
+
+			<button type="button" (click)="clickChangeStatus()" class="btn btn-primary" *ngIf="load == false">
+				{{ "GLOBAL.LABEL.YES" | translate }}
+			</button>
+
+			<button type="button" class="btn btn-primary" *ngIf="load">
+				<span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+				Processando...
+			</button>
+		</div>
+	</ng-template>
+
+	<!-- Modal Delete -->
+	<ng-template #confirmdeletemodal let-modal>
+		<div class="modal-header">
+			<h4 class="modal-title" id="modal-delete-order">
+				{{ "GLOBAL.LABEL.AREYOUSUREYOUWANTTOREJECT" | translate }}
+			</h4>
+			<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+		<div class="modal-footer">
+			<button type="button" (click)="modal.dismiss('Cross click')" class="btn btn-secondary" data-dismiss="modal">
+				{{ "GLOBAL.LABEL.CANCEL" | translate }}
+			</button>
+			<button type="button" (click)="cancelOrder(); modal.dismiss('Cross click')" class="btn btn-primary">
+				{{ "GLOBAL.LABEL.YES" | translate }}
+			</button>
+		</div>
+	</ng-template>
+
+	<!-- Modal price dispat -->
+	<ng-template #infoPriceDispt let-modal>
+		<div class="modal-header">
+			<h4 class="modal-title text-info" *ngIf="order?.totalDiff > 0">
+				Você ira cobrar
+				{{ " R$ " + (order.totalDiff || 0).toFixed(2).replace(".", ",") }}
+				do seu cliente tem certeza que deseja continuar ?
+			</h4>
+
+			<h4 class="modal-title text-danger" *ngIf="order?.totalDiff < 0">
+				Você ira estornar
+				{{ " R$ " + (order.totalDiff || 0).toFixed(2).replace(".", ",") }}
+				reais do seu cliente tem certeza que deseja continuar ?
+			</h4>
+
+			<h4 class="modal-title text-danger">Deseja Prosseguir?</h4>
+			<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+
+		<div class="modal-footer">
+			<button type="button" (click)="modal.dismiss('Cross click')" class="btn btn-secondary" data-dismiss="modal">
+				{{ "GLOBAL.LABEL.CANCEL" | translate }}
+			</button>
+
+			<button type="button" (click)="modal.dismiss('Cross click'); modalDispachShow()" class="btn btn-primary">
+				{{ "GLOBAL.LABEL.YES" | translate }}
+			</button>
+		</div>
+	</ng-template>
+
+	<!-- Modal price delivery -->
+	<ng-template #infoPriceDelivery let-modal>
+		<div class="modal-header">
+			<h4 class="modal-title text-info" *ngIf="order?.totalDiff > 0">
+				Você ira cobrar
+				{{ " R$ " + (order.totalDiff || 0).toFixed(2).replace(".", ",") }}
+				do seu cliente tem certeza que deseja continuar ?
+			</h4>
+
+			<h4 class="modal-title text-danger" *ngIf="order?.totalDiff < 0">
+				Você ira estornar
+				{{ " R$ " + (order.totalDiff || 0).toFixed(2).replace(".", ",") }}
+				reais do seu cliente tem certeza que deseja continuar ?
+			</h4>
+
+			<h4 class="modal-title text-danger">Deseja continuar ?</h4>
+			<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+
+		<div class="modal-footer">
+			<button type="button" (click)="modal.dismiss('Cross click')" class="btn btn-secondary" data-dismiss="modal">
+				{{ "GLOBAL.LABEL.CANCEL" | translate }}
+			</button>
+
+			<button type="button" (click)="clickDelivery()" class="btn btn-primary">
+				{{ "GLOBAL.LABEL.YES" | translate }}
+			</button>
+		</div>
+	</ng-template>
+</ng-container>

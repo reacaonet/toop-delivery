@@ -1,0 +1,549 @@
+<form [formGroup]="formFilter" formFilter.valid>
+	<div class="row">
+		<div class="form-group col-4">
+			<label>{{ 'GLOBAL.LABEL.PERSON' | translate }}</label>
+			<div class="input-group">
+				<input type="text" class="form-control" matInput placeholder="Pesquisar por pessoa"
+					[matAutocomplete]="autoPerson" formControlName="person">
+				<mat-autocomplete [displayWith]="displayFnFilterTwo" #autoPerson="matAutocomplete">
+					<mat-option *ngFor="let pers of person" [value]="pers" (click)="onClickPersonFilter(pers)">
+						{{ pers.name }}
+					</mat-option>
+				</mat-autocomplete>
+			</div>
+		</div>
+		<div class="form-group col-4">
+			<label>{{ 'GLOBAL.LABEL.COMPANY' | translate }}</label>
+			<div class="input-group">
+				<input type="text" class="form-control" matInput placeholder="Pesquisar por Empresa"
+					[matAutocomplete]="autoCompany" formControlName="company">
+				<mat-autocomplete [displayWith]="displayFnFilter" #autoCompany="matAutocomplete">
+					<mat-option *ngFor="let company of companiesFilter" [value]="company" (click)="onClickCompanyFilter(company)">
+						{{ company.name }}
+					</mat-option>
+				</mat-autocomplete>
+			</div>
+		</div>
+		<div class="form-group col-4">
+			<label for="isOnline">{{ 'GLOBAL.LABEL.ISONLINE' | translate }}</label>
+			<div class="input-group">
+				<select class="form-control" formControlName="isOnline">
+					<option value="ALL">Todos</option>
+					<option value="true">Online</option>
+					<option value="false">Offline</option>
+				</select>
+			</div>
+		</div>
+	</div>
+</form>
+
+<div class="row justify-content-between">
+	<div class="col-auto align-self-center mb-2">
+		<p class="float-left">{{ 'GLOBAL.LABEL.DELIVERY' | translate }}</p>
+	</div>
+	<div class="col-auto">
+		<a (click)="upSertDeliveryManModalShow(upsertdeliverymanmodal, undefined)" href="javascript:;"
+			class="float-right btn btn-label-warning btn-bold btn-sm btn-icon-h">
+			{{ 'GLOBAL.LABEL.CREATE' | translate }}
+		</a>
+	</div>
+</div>
+
+
+<div class="example-container mat-elevation-z8">
+	<mat-table #table [dataSource]="dataSource">
+		<!-- Checkbox Column -->
+		<ng-container matColumnDef="select">
+			<mat-header-cell *matHeaderCellDef>
+				<mat-checkbox [checked]="true" [indeterminate]="true">
+				</mat-checkbox>
+			</mat-header-cell>
+			<mat-cell *matCellDef="let row">
+				<mat-checkbox (click)="$event.stopPropagation()">
+				</mat-checkbox>
+			</mat-cell>
+		</ng-container>
+		<!-- Is Online Column -->
+		<ng-container matColumnDef="isOnline">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.ISONLINE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i *ngIf="element.isOnline === true" class="flaticon2-user-outline-symbol online mr-2"></i>
+				<i *ngIf="element.isOnline === false" class="flaticon2-user-outline-symbol offline mr-2"></i>
+			</mat-cell>
+		</ng-container>
+		<!-- Person Column -->
+		<ng-container matColumnDef="person">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.PERSON' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ (element.person && element.person.name) ? element.person.name : '-' }}
+			</mat-cell>
+		</ng-container>
+		<!-- company Column -->
+		<ng-container matColumnDef="company">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.COMPANY' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ (element.company && element.company.name) ? element.company.name : '-' }}
+			</mat-cell>
+		</ng-container>
+		<!-- Phone Column -->
+		<ng-container matColumnDef="phone">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.PHONE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.phone }} </mat-cell>
+		</ng-container>
+		<!-- Type of vehicle Column -->
+		<ng-container matColumnDef="typeOfVehicle">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.TYPEOFVEHICLE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.typeOfVehicle }} </mat-cell>
+		</ng-container>
+		<!-- Board Column -->
+		<ng-container matColumnDef="board">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.BOARD' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.board }} </mat-cell>
+		</ng-container>
+		<!-- Model Column -->
+		<ng-container matColumnDef="model">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.MODEL' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.model }} </mat-cell>
+		</ng-container>
+		<!-- Manufacturer vehicle Column -->
+		<ng-container matColumnDef="manufacturer">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.MANUFACTURER' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.manufacturer }} </mat-cell>
+		</ng-container>
+		<!-- Color Column -->
+		<ng-container matColumnDef="color">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.COLOR' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.color }} </mat-cell>
+		</ng-container>
+		<!-- Year Column -->
+		<ng-container matColumnDef="year">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.YEAR' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.year }} </mat-cell>
+		</ng-container>
+		<!-- Merchant Id Column -->
+		<ng-container matColumnDef="merchantId">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.MERCHANTID' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.merchantId }} </mat-cell>
+		</ng-container>
+		<!-- Percentage Column -->
+		<ng-container matColumnDef="percentage">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.PERCENTAGE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.percentage }} </mat-cell>
+		</ng-container>
+		<!-- Status Column -->
+		<ng-container matColumnDef="status">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.STATUS' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i *ngIf="element.status === true" class="flaticon2-accept mr-2"></i>
+				<i *ngIf="element.status === false" class="flaticon2-cancel mr-2"></i>
+			</mat-cell>
+		</ng-container>
+		<!-- show Freight Value Column -->
+		<ng-container matColumnDef="showFreightValue">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.SHOWFREIGHVALUE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i *ngIf="element.showFreightValue === true" class="flaticon2-accept mr-2"></i>
+				<i *ngIf="element.showFreightValue === false" class="flaticon2-cancel mr-2"></i>
+			</mat-cell>
+		</ng-container>
+		<!-- app Version Column -->
+		<ng-container matColumnDef="appVersion">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.APPVERSION' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.appVersion }} </mat-cell>
+		</ng-container>
+		<!-- Delete Delivery Man -->
+		<ng-container matColumnDef="delete">
+			<mat-header-cell *matHeaderCellDef>{{ 'GLOBAL.LABEL.ACTION' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i class="flaticon2-edit mr-2"
+					(click)="upSertDeliveryManModalShow(upsertdeliverymanmodal, element, 'edit')"></i>
+				<i class="flaticon2-trash" (click)="confirmDeleteModalShow(confirmdeletemodal, element)"></i>
+			</mat-cell>/
+		</ng-container>
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns;">
+		</mat-row>
+	</mat-table>
+	<mat-paginator [length]="totalLength" [pageSize]="pageSize" [pageSizeOptions]="pageLimit" (page)="changePage($event)">
+	</mat-paginator>
+
+	<!-- Modal up sert Delivery Man -->
+	<ng-template #upsertdeliverymanmodal let-modal modal-lg>
+		<form [formGroup]="formData" (ngSubmit)="formSubmitDeliveryMan=true; formData.valid && upSertDeliveryMan(formData.value)
+         && modal.dismiss('Cross click')">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-create-deliveryRecord">
+					{{ (typeAction === 'create') ? ('GLOBAL.LABEL.CREATEDELIVERYRECORD' | translate) :
+					('GLOBAL.LABEL.EDITDELIVERYMAN' | translate) }}
+				</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<input type="hidden" class="form-control" formControlName="_id">
+				<mat-tab-group>
+					<mat-tab label="Dados">
+						<div class="form-group col-12">
+							<label for="franchise">{{ "GLOBAL.LABEL.FRANCHISE" | translate }}</label>
+							<div class="input-group">
+								<input type="text" class="form-control" matInput placeholder="Escolha uma franquia"
+									[matAutocomplete]="autoFranchise" formControlName="franchise" />
+								<mat-autocomplete [displayWith]="displayFnFranchise" #autoFranchise="matAutocomplete">
+									<mat-option *ngFor="let franchise of franchises" [value]="franchise">
+										{{ franchise.name }}
+									</mat-option>
+								</mat-autocomplete>
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="form-group col-2">
+								<label for="isOnline">{{ 'GLOBAL.LABEL.ISONLINE' | translate }}</label>
+								<div class="input-group">
+									<mat-slide-toggle formControlName="isOnline"></mat-slide-toggle>
+								</div>
+							</div>
+							<div class="form-group col-10">
+								<label>{{ 'GLOBAL.LABEL.PERSON' | translate }}</label>
+								<div class="input-group">
+									<input type="text" class="form-control" matInput placeholder="Escolha uma Pessoa"
+										[matAutocomplete]="autoPerson" formControlName="person"
+										[ngClass]="{'is-invalid' : formSubmitDeliveryMan && formData.get('person').invalid}">
+									<mat-autocomplete [displayWith]="displayFnPerson" #autoPerson="matAutocomplete">
+										<mat-option *ngFor="let pers of person" [value]="pers">
+											{{ pers.name }}
+										</mat-option>
+									</mat-autocomplete>
+								</div>
+							</div>
+						</div>
+
+						<!-- <div class="row">
+							<div class="form-group col-6">
+								<label for="company">{{ 'GLOBAL.LABEL.COMPANY' | translate }}</label>
+								<div class="input-group">
+									<input type="text" class="form-control" matInput placeholder="Escolha uma Empresa"
+										[matAutocomplete]="autoCompany" formControlName="company"
+										[ngClass]="{'is-invalid' : formSubmitDeliveryMan && formData.get('company').invalid}">
+									<mat-autocomplete [displayWith]="displayFn" #autoCompany="matAutocomplete">
+										<mat-option *ngFor="let comp of companies[0]" [value]="comp">
+											{{ comp.name }}
+										</mat-option>
+									</mat-autocomplete>
+								</div>
+							</div>
+							<div class="form-group col-6">
+								<label for="phone">{{ 'GLOBAL.LABEL.PHONE' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" mask="(00) 00009-0000" formControlName="phone">
+								</div>
+							</div>
+						</div> -->
+
+						<div class="row">
+							<div class="form-group col-4">
+								<label for="typeOfVehicle">{{ 'GLOBAL.LABEL.TYPEOFVEHICLE' | translate }}</label>
+								<div class="input-group">
+									<select class="form-control" formControlName="typeOfVehicle"
+										[ngClass]="{'is-invalid' : formSubmitDeliveryMan && formData.get('typeOfVehicle').invalid}">
+										<option value="MOTO">MOTO</option>
+										<option value="CARRO">CARRO</option>
+										<option value="BICICLETA">BICICLETA</option>
+									</select>
+								</div>
+							</div>
+							<div class="form-group col-4">
+								<label for="board">{{ 'GLOBAL.LABEL.BOARD' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="board">
+								</div>
+							</div>
+							<div class="form-group col-4">
+								<label for="model">{{ 'GLOBAL.LABEL.MODEL' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="model">
+								</div>
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="form-group col-4">
+								<label for="manufacturer">{{ 'GLOBAL.LABEL.MANUFACTURER' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="manufacturer">
+								</div>
+							</div>
+							<div class="form-group col-4">
+								<label for="color">{{ 'GLOBAL.LABEL.COLOR' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="color">
+								</div>
+							</div>
+							<div class="form-group col-4">
+								<label for="year">{{ 'GLOBAL.LABEL.YEAR' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="year"
+										[ngClass]="{'is-invalid' : formSubmitDeliveryMan && formData.get('year').invalid}">
+								</div>
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="form-group col-md-6">
+								<label for="status">{{ 'GLOBAL.LABEL.STATUS' | translate }}</label>
+								<div class="input-group">
+									<mat-slide-toggle formControlName="status"></mat-slide-toggle>
+								</div>
+							</div>
+						</div>
+
+						<div class="row">
+							<div class="col-12">
+								<div class="form-group">
+									<label for="companies">Empresas Exclusivas de entrega</label>
+									<div class="input-group">
+										<input type="text" class="form-control" matInput placeholder="Escolha uma Empresa"
+											[matAutocomplete]="autoCompanies" formControlName="deliveryCompany"
+											[ngClass]="{ 'is-invalid': formSubmitDeliveryMan && formData.get('deliveryCompany').invalid }" />
+										<mat-autocomplete [displayWith]="displayFnAll" #autoCompanies="matAutocomplete"
+											(optionSelected)="addCompanyInList($event)">
+											<mat-option *ngFor="let cp of deliveryCompanyFilter" [value]="cp"> {{ cp.name }}
+											</mat-option>
+										</mat-autocomplete>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div *ngIf="listDeliveryCompany && listDeliveryCompany.length > 0" class="col-12">
+							<table class="table">
+								<thead>
+									<tr>
+										<th scope="col">Empresa</th>
+										<th scope="col">Ação</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr *ngFor="let item of listDeliveryCompany">
+										<td>{{ item.name }}</td>
+										<td>
+											<a href="#">
+												<i class="flaticon2-cross mr-2" (click)="removeCompanyList(item)"></i>
+											</a>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+
+					</mat-tab>
+					<mat-tab label="Financeiro">
+						<div>
+							<div class="row">
+								<div class="col-12">
+									<h6>:: DADOS BANCÁRIOS (PARA REPASSES FINANCEIROS)</h6>
+								</div>
+							</div>
+							<div class="row" formGroupName="bankData">
+								<div class="form-group col-6">
+									<label class="" for="favoredName">{{ 'GLOBAL.LABEL.FAVOREDNAME' | translate }}</label>
+									<div class="input-group">
+										<input required class="form-control" formControlName="favoredName"
+											[ngClass]="{'is-invalid' : formSubmitDeliveryMan && formData.get('bankData').get('favoredName').invalid}">
+									</div>
+								</div>
+								<div class="form-group col-6">
+									<label class="" for="bankName">{{ 'GLOBAL.LABEL.BANK' | translate }}</label>
+									<div class="input-group">
+										<input required class="form-control" formControlName="bankName"
+											[ngClass]="{'is-invalid' : formSubmitDeliveryMan && formData.get('bankData').get('bankName').invalid}">
+									</div>
+								</div>
+								<div class="form-group col-4">
+									<label for="typeAccount">{{ 'GLOBAL.LABEL.TYPE' | translate }}</label>
+									<div class="input-group">
+										<select class="form-control" formControlName="typeAccount"
+											[ngClass]="{'is-invalid' : formSubmitDeliveryMan && formData.get('bankData').get('typeAccount').invalid}">
+											<option selected value="CURRENT">Conta Corrente</option>
+											<option value="SAVINGS">Conta Poupança</option>
+										</select>
+									</div>
+								</div>
+								<div class="form-group col-4">
+									<label class="" for="agency">{{ 'GLOBAL.LABEL.AGENCY' | translate }}</label>
+									<div class="input-group">
+										<input class="form-control" formControlName="agency"
+											[ngClass]="{'is-invalid' : formSubmitDeliveryMan && formData.get('bankData').get('agency').invalid}">
+									</div>
+								</div>
+								<div class="form-group col-4">
+									<label class="" for="account">{{ 'GLOBAL.LABEL.ACCOUNT' | translate }}</label>
+									<div class="input-group">
+										<input class="form-control" formControlName="account"
+											[ngClass]="{'is-invalid' : formSubmitDeliveryMan && formData.get('bankData').get('account').invalid}">
+									</div>
+								</div>
+								<div class="form-group col-4">
+									<label for="pixType">{{ 'GLOBAL.LABEL.PIXTYPE' | translate }}</label>
+									<div class="input-group">
+										<select class="form-control" formControlName="pixType"
+											[ngClass]="{'is-invalid' : formSubmitDeliveryMan && formData.get('bankData').get('pixType').invalid}">
+											<option value="">Selecione...</option>
+											<option value="CNPJ">CNPJ</option>
+											<option value="CPF">CPF</option>
+											<option value="CELLPHONE">CELULAR</option>
+											<option value="EMAIL">E-MAIL</option>
+											<option value="RANDOMKEY">Chave aleatória</option>
+										</select>
+									</div>
+								</div>
+								<div class="form-group col-8">
+									<label class="" for="pixKey">{{ 'GLOBAL.LABEL.PIXKEY' | translate }}</label>
+									<div class="input-group">
+										<input class="form-control" formControlName="pixKey"
+											[ngClass]="{'is-invalid' : formSubmitDeliveryMan && formData.get('bankData').get('pixKey').invalid}">
+									</div>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-12">
+									<h6>:: DIVISÃO DOS GANHOS</h6>
+								</div>
+							</div>
+							<div class="row">
+								<div class="form-group col-2" formGroupName="deliveryFee">
+									<label class="" for="percentage">{{ 'GLOBAL.LABEL.PERCENTAGE' | translate }}</label>
+									<div class="input-group col">
+										<input required class="form-control" formControlName="percentage"
+											[ngClass]="{'is-invalid' : formSubmitDeliveryMan && formData.get('deliveryFee').get('percentage').invalid}">
+									</div>
+								</div>
+								<div class="form-group col-4">
+									<label class="" for="merchantId">{{ 'GLOBAL.LABEL.MERCHANTID' | translate }}</label>
+									<div class="input-group">
+										<input class="form-control" formControlName="merchantId"
+											[ngClass]="{'is-invalid' : formSubmitDeliveryMan && formData.get('merchantId').invalid}">
+									</div>
+								</div>
+								<div class="form-group col-5">
+									<label for="showFreightValue">{{ 'GLOBAL.LABEL.SHOWFREIGHTVALUE' | translate }}</label>
+									<div class="input-group">
+										<mat-slide-toggle formControlName="showFreightValue"></mat-slide-toggle>
+									</div>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-9">
+									<h6>Porcentagem entre outras empresas</h6>
+								</div>
+								<div class="col-3">
+									<button type="button" class="btn btn-sm btn-info" (click)="addNewPercentage()">
+										<span aria-hidden="true">Nova porcentagem</span>
+									</button>
+								</div>
+							</div>
+							<div class="row" *ngFor="let percen of formData.get('deliveryFee').get('division').controls; index as i">
+								<ng-container [formGroup]="percen">
+									<div class="form-group col-6">
+										<label for="company">{{ 'GLOBAL.LABEL.COMPANY' | translate }}</label>
+										<div class="input-group">
+											<input type="text" class="form-control" matInput placeholder="Escolha uma Empresa"
+												[matAutocomplete]="autoCompany" formControlName="company"
+												[ngClass]="{'is-invalid' : formSubmitDeliveryMan && percen.get('company').invalid}">
+											<mat-autocomplete [displayWith]="displayFn" #autoCompany="matAutocomplete">
+												<mat-option *ngFor="let comp of companies[i]" [value]="comp">
+													{{ comp.name }}
+												</mat-option>
+											</mat-autocomplete>
+										</div>
+									</div>
+									<div class="form-group col-2">
+										<label class="" for="percentage">{{ 'GLOBAL.LABEL.PERCENTAGE' | translate }}</label>
+										<div class="input-group col">
+											<input required class="form-control" formControlName="percentage"
+												[ngClass]="{'is-invalid' : formSubmitDeliveryMan && percen.get('percentage').invalid}">
+										</div>
+									</div>
+									<div class="form-group text-center col-2">
+										<label class="col-12" for="fee">{{ 'GLOBAL.LABEL.ACTION' | translate }}</label>
+										<button (click)="removeFeePercentage(i)" mat-mini-fab color="warn"
+											class="col-12 mat-mini-fab mat-button-base mat-accent">
+											<span class="mat-button-wrapper">
+												<mat-icon class="mat-icon notranslate material-icons mat-icon-no-color" role="img"
+													aria-hidden="true">
+													delete
+												</mat-icon>
+											</span>
+											<div class="mat-button-ripple mat-ripple mat-button-ripple-round" matripple>
+											</div>
+											<div class="mat-button-focus-overlay">
+											</div>
+										</button>
+									</div>
+								</ng-container>
+							</div>
+						</div>
+					</mat-tab>
+					<mat-tab *ngIf="typeAction === 'edit'" label="Desempenho">
+						<div class="row">
+							<div class="col-12 text-center"
+								*ngIf="resultsDelivery && resultsDelivery[0] && resultsDelivery[0].mediaTime">
+								<h3 [ngClass]="(resultsDelivery[0].totalTime < 240) ? 'offline' : 'online'" class="media-time">
+									{{resultsDelivery[0].mediaTime}}</h3>
+								<h6 class="offline" *ngIf="resultsDelivery[0].totalTime < 240">Entregador abaixo da média</h6>
+								<h6 class="online" *ngIf="resultsDelivery[0].totalTime >= 240">Entregador acima da média</h6>
+								<h6>Média Online nos últimos 7 dias</h6>
+							</div>
+						</div>
+						<div>
+							<table class="table table-striped">
+								<thead>
+									<tr>
+										<th scope="col">#</th>
+										<th scope="col">Online</th>
+										<th scope="col">Offline</th>
+										<th scope="col">Total</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr *ngFor="let item of deliveryOnline[0]; index as i">
+										<th scope="row">{{ i + 1 }}</th>
+										<td>{{item.online | date:'dd/MM/yyyy HH:mm' }}</td>
+										<td>{{item.offline | date:'dd/MM/yyyy HH:mm' }}</td>
+										<td>{{item.total}}</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						<mat-paginator [length]="totalLengthDelivery" [pageSize]="pageSize" (page)="changePageDeliveryMan($event)">
+						</mat-paginator>
+					</mat-tab>
+				</mat-tab-group>
+			</div>
+			<div class="modal-footer">
+				<input *ngIf="typeAction === 'create'" type="submit" value="Criar" class="btn btn-outline-dark">
+				<input *ngIf="typeAction === 'edit'" type="submit" value="Editar" class="btn btn-outline-dark">
+			</div>
+		</form>
+	</ng-template>
+</div>
+
+<!-- Modal Delete   -->
+<ng-template #confirmdeletemodal let-modal>
+	<div class="modal-header">
+		<h4 class="modal-title" id="modal-delete-deliveryMan" *ngIf="formData && formData.value && formData.value.name">
+			Confirmar exclusão
+		</h4>
+		<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	<div class="modal-body" class="btn btn-warning">
+		{{ 'GLOBAL.LABEL.AREYOUSUREYOUWANTTODELETE' | translate }}
+	</div>
+	<div class="modal-footer">
+		<button type="button" (click)="deliveryManIdToDelete=undefined; modal.dismiss('Cross click')"
+			class="btn btn-secondary" data-dismiss="modal">{{ 'GLOBAL.LABEL.CANCEL' | translate }}</button>
+		<button type="button" (click)="deleteDeliveryMan() && modal.dismiss('Cross click')" class="btn btn-primary">{{
+			'GLOBAL.LABEL.YES' | translate }}</button>
+	</div>
+</ng-template>

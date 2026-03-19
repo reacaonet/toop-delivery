@@ -1,0 +1,210 @@
+<!-- Alert -->
+<p>
+	<ngb-alert *ngIf="alert" [type]="alert.type" (close)="closeAlert()">
+		{{ alert.message }}
+	</ngb-alert>
+</p>
+
+<div class="row justify-content-between">
+	<div class="col-auto align-self-center mb-2">
+		<p class="float-left">{{ 'GLOBAL.LABEL.PERMISSIONS' | translate }}</p>
+	</div>
+	<div class="col-auto">
+		<a (click)="createPermissionsModalShow(createpermissionsmodal)" href="javascript:;" class="float-right btn btn-label-warning btn-bold btn-sm btn-icon-h">
+			{{ 'GLOBAL.LABEL.CREATE' | translate }}
+		</a>
+	</div>
+</div>
+
+<div class="example-container mat-elevation-z8">
+	<mat-table #table [dataSource]="dataSource">
+		<!-- Checkbox Column -->
+		<ng-container matColumnDef="select">
+			<mat-header-cell *matHeaderCellDef>
+				<mat-checkbox [checked]="true" [indeterminate]="true">
+				</mat-checkbox>
+			</mat-header-cell>
+			<mat-cell *matCellDef="let row">
+				<mat-checkbox (click)="$event.stopPropagation()">
+				</mat-checkbox>
+			</mat-cell>
+		</ng-container>
+		<!-- Name Column -->
+		<ng-container matColumnDef="name">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.NAME' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.name }} </mat-cell>
+		</ng-container>
+		<!-- Roles Column -->
+		<ng-container matColumnDef="roles">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.ROLES' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ (element.roles && element.roles.name) ? element.roles.name : '-' }} </mat-cell>
+		</ng-container>
+		<!-- Route Column -->
+		<ng-container matColumnDef="route">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.ROUTE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.route }} </mat-cell>
+		</ng-container>
+		<!-- Level Column -->
+		<ng-container matColumnDef="level">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.LEVEL' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.level }} </mat-cell>
+		</ng-container>
+		<!-- Title Column -->
+		<ng-container matColumnDef="title">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.TITLE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.title }} </mat-cell>
+		</ng-container>
+		<!-- Delete Permissions -->
+		<ng-container matColumnDef="delete">
+			<mat-header-cell *matHeaderCellDef>{{ 'GLOBAL.LABEL.ACTION' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i class="flaticon2-edit mr-2" (click)="editPermissionsModalShow(editpermissionsmodal, element)"></i>
+				<i class="flaticon2-trash" (click)="confirmDeleteModalShow(confirmdeletemodal, element)"></i>
+			</mat-cell>/
+		</ng-container>
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns;">
+		</mat-row>
+	</mat-table>
+	<mat-paginator 
+		[length]="totalLength"
+		[pageSize]="pageSize"
+		[pageSizeOptions]="pageLimit" 
+		(page)="changePage($event)">
+	</mat-paginator>
+
+	<!-- Modal Create Permissions -->
+	<ng-template #createpermissionsmodal let-modal>
+		<form [formGroup]="formData" (ngSubmit)="formSubmitPermissions=true;
+     formData.valid && createPermissions(formData.value)">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-create-permissions">{{ 'GLOBAL.LABEL.CREATEROLES' | translate }}</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div class="form-group">
+					<label for="name">{{ 'GLOBAL.LABEL.NAME' | translate }}</label>
+					<div class="input-group">
+            <input class="form-control" formControlName="name"
+             [ngClass]="{'is-invalid' : formSubmitPermissions && formData.get('name').invalid}">
+					</div>
+        </div>
+        <div class="form-group">
+					<label for="roles">{{ 'GLOBAL.LABEL.ROLE' | translate }}</label>
+					<div class="input-group">
+            <input type="text" class="form-control"
+             matInput placeholder="Escolha um papel"
+             [matAutocomplete]="autoRoles" formControlName="roles"
+              [ngClass]="{'is-invalid' : formSubmitPermissions && formData.get('roles').invalid}">
+						<mat-autocomplete [displayWith]="displayFn" #autoRoles="matAutocomplete">
+							<mat-option *ngFor="let rol of roles" [value]="rol">
+								{{ rol.name }}
+							</mat-option>
+						</mat-autocomplete>
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="route">{{ 'GLOBAL.LABEL.ROUTE' | translate }}</label>
+					<div class="input-group">
+						<input class="form-control" formControlName="route" [ngClass]="{'is-invalid' : formSubmitPermissions && formData.get('route').invalid}">
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="level">{{ 'GLOBAL.LABEL.LEVEL' | translate }}</label>
+					<div class="input-group">
+						<input class="form-control" formControlName="level" [ngClass]="{'is-invalid' : formSubmitPermissions && formData.get('level').invalid}">
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="title">{{ 'GLOBAL.LABEL.TITLE' | translate }}</label>
+					<div class="input-group">
+						<input class="form-control" formControlName="title" [ngClass]="{'is-invalid' : formSubmitPermissions && formData.get('title').invalid}">
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<input type="submit" value="Criar" class="btn btn-outline-dark">
+			</div>
+		</form>
+	</ng-template>
+
+	<!-- Modal Edit Permissions-->
+	<ng-template #editpermissionsmodal let-modal>
+		<form [formGroup]="formData" (ngSubmit)="formSubmitPermissions=true;
+     formData.valid && updatePermissions(formData.value)">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-edit-permissions">{{ 'GLOBAL.LABEL.TOEDIT' | translate }}
+					{{formData.value.name}}</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<input type="hidden" class="form-control" formControlName="_id">
+				<div class="form-group">
+					<label for="name">{{ 'GLOBAL.LABEL.NAME' | translate }}</label>
+					<div class="input-group">
+						<input class="form-control" formControlName="name" [ngClass]="{'is-invalid' : formSubmitPermissions && formData.get('name').invalid}">
+					</div>
+        </div>
+        <div class="form-group">
+					<label for="roles">{{ 'GLOBAL.LABEL.ROLE' | translate }}</label>
+					<div class="input-group">
+            <input type="text" class="form-control"
+             matInput placeholder="Escolha um papel"
+             [matAutocomplete]="autoRoles" formControlName="roles"
+              [ngClass]="{'is-invalid' : formSubmitPermissions && formData.get('roles').invalid}">
+						<mat-autocomplete [displayWith]="displayFn" #autoRoles="matAutocomplete">
+							<mat-option *ngFor="let rol of roles" [value]="rol">
+								{{ rol.name }}
+							</mat-option>
+						</mat-autocomplete>
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="route">{{ 'GLOBAL.LABEL.ROUTE' | translate }}</label>
+					<div class="input-group">
+						<input class="form-control" formControlName="route" [ngClass]="{'is-invalid' : formSubmitPermissions && formData.get('route').invalid}">
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="level">{{ 'GLOBAL.LABEL.LEVEL' | translate }}</label>
+					<div class="input-group">
+						<input class="form-control" formControlName="level" [ngClass]="{'is-invalid' : formSubmitPermissions && formData.get('level').invalid}">
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="title">{{ 'GLOBAL.LABEL.TITLE' | translate }}</label>
+					<div class="input-group">
+						<input class="form-control" formControlName="title" [ngClass]="{'is-invalid' : formSubmitPermissions && formData.get('title').invalid}">
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<input type="submit" value="Salvar" class="btn btn-outline-dark">
+			</div>
+		</form>
+	</ng-template>
+</div>
+
+<!-- Modal Delete -->
+<ng-template #confirmdeletemodal let-modal>
+	<div class="modal-header">
+		<h4 class="modal-title" id="modal-delete-permissions">
+			Confirmar exclusão</h4>
+		<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	<div class="modal-body" class="btn btn-warning">
+		{{ 'GLOBAL.LABEL.AREYOUSUREYOUWANTTODELETE' | translate }}
+	</div>
+	<div class="modal-footer">
+		<button type="button" (click)="deleteIdToDelete=undefined; 
+    modal.dismiss('Cross click')" class="btn btn-secondary" data-dismiss="modal">{{ 'GLOBAL.LABEL.CANCEL' | translate }}</button>
+		<button type="button" (click)="deletePermissions()
+     && modal.dismiss('Cross click')" class="btn btn-primary">{{ 'GLOBAL.LABEL.YES' | translate }}</button>
+	</div>
+</ng-template>

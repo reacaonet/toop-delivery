@@ -1,0 +1,372 @@
+<div class="row justify-content-between">
+	<div class="col-auto align-self-center mb-2">
+		<p class="float-left">{{ 'GLOBAL.LABEL.POPUP' | translate }} </p>
+	</div>
+	<div class="col-auto">
+		<a (click)="createPopupModalShow(createpopupmodal)" href="javascript:;" class="float-right btn btn-label-warning btn-bold btn-sm btn-icon-h">
+			{{ 'GLOBAL.LABEL.CREATE' | translate }}
+		</a>
+	</div>
+</div>
+
+<!-- Alert -->
+<p>
+	<ngb-alert *ngIf="alert" [type]="alert.type" (close)="closeAlert()">
+		{{ alert.message }}
+	</ngb-alert>
+</p>
+
+<div class="example-container mat-elevation-z8">
+	<mat-table #table [dataSource]="dataSource">
+		<!-- Checkbox Column -->
+		<ng-container matColumnDef="select">
+			<mat-header-cell *matHeaderCellDef>
+				<mat-checkbox [checked]="true" [indeterminate]="true">
+				</mat-checkbox>
+			</mat-header-cell>
+			<mat-cell *matCellDef="let row">
+				<mat-checkbox (click)="$event.stopPropagation()">
+				</mat-checkbox>
+			</mat-cell>
+		</ng-container>
+		<!-- Image Column -->
+		<ng-container matColumnDef="image">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.IMAGES' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<a [href]='element.image' target="_blank">
+					<img width="50" class="img-thumbnail" [src]='element.image || "./assets/media/logo-default.png"' [alt]="element.name" />
+				</a>
+			</mat-cell>
+		</ng-container>
+		<!-- Name Column -->
+		<ng-container matColumnDef="name">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.NAME' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.name }} </mat-cell>
+		</ng-container>
+		<!-- Name Column -->
+		<ng-container matColumnDef="company">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.COMPANY' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ (element.company && element.company.name) ? element.company.name : '-' }} </mat-cell>
+		</ng-container>
+		<!--startDate -->
+		<ng-container matColumnDef="startDate">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.STARTDATE' | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.startDate }} </mat-cell>
+		</ng-container>
+		<!-- End Date -->
+		<ng-container matColumnDef="endDate">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.ENDDATE' | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.endDate }} </mat-cell>
+		</ng-container>
+		<!--start Hour -->
+		<ng-container matColumnDef="startHour">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.STARTHOUR' | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.startHour }} </mat-cell>
+		</ng-container>
+		<!-- End Date -->
+		<ng-container matColumnDef="endHour">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.ENDHOUR' | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.endHour }} </mat-cell>
+		</ng-container>
+		<!-- Message Column -->
+		<ng-container matColumnDef="message">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.HTML' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.message }} </mat-cell>
+		</ng-container>
+		<!-- Redirect To Column -->
+		<ng-container matColumnDef="redirectTo">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.REDIRECTTO' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.redirectTo }} </mat-cell>
+		</ng-container>
+		<!-- URL Column -->
+		<ng-container matColumnDef="url">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.URL' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.url }} </mat-cell>
+		</ng-container>
+		<!-- Status Column -->
+		<ng-container matColumnDef="status">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.STATUS' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i *ngIf="element.status === true" class="flaticon2-accept mr-2"></i>
+				<i *ngIf="element.status === false" class="flaticon2-cancel mr-2"></i>
+			</mat-cell>
+		</ng-container>
+		<!-- Vizualizations Column -->
+		<ng-container matColumnDef="vizualizations">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.VIZUALIZATIONS' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.vizualizations }} </mat-cell>
+		</ng-container>
+		<!-- Priorities Column -->
+		<ng-container matColumnDef="priorities">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.PRIORITIES' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.priorities }} </mat-cell>
+		</ng-container>
+		<!-- Delete Popup -->
+		<ng-container matColumnDef="delete">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.ACTION' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i class="flaticon2-edit mr-2" (click)="editPopupModalShow(editpopupmodal, element)"></i>
+				<i class="flaticon2-trash" (click)="confirmDeleteModalShow(confirmdeletemodal, element)"></i>
+			</mat-cell>
+		</ng-container>
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns;">
+		</mat-row>
+	</mat-table>
+	<mat-paginator [length]="totalLength" [pageSize]="pageSize" [pageSizeOptions]="pageLimit" (page)="changePage($event)"></mat-paginator>
+	<!-- Apartir de aqui é o modal -->
+	
+	<!-- Modal Create Popup -->
+	<ng-template #createpopupmodal let-modal>
+		<form [formGroup]="formData" (ngSubmit)="formSubmitAttempt=true; formData.valid && createPopup(formData.value)">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-create-popup">{{ 'GLOBAL.LABEL.CREATEPOPUP' | translate }}</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div style="margin-top: 10px">
+					<div style="margin-top: 10px">
+						<div class="custom-file">
+							<input type="file" class="custom-file-input" id="customFile" (change)="onChange($event)" [ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('file').invalid}" multiple>
+							<label class="custom-file-label" for="customFile" id="customFileLabel">
+								{{ 'GLOBAL.LABEL.SELECTIMAGE' | translate }}</label>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="form-group col-6">
+						<label for="name">{{ 'GLOBAL.LABEL.NAME' | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="name" required [ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('name').invalid}">
+						</div>
+					</div>
+					<div class="form-group col-6">
+						<label for="company">{{ 'GLOBAL.LABEL.COMPANY' | translate }}</label>
+						<div class="input-group">
+							<input type="text" class="form-control" matInput placeholder="Escolha uma Empresa" [matAutocomplete]="autoCompany" formControlName="company" [ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('company').invalid}">
+							<mat-autocomplete [displayWith]="displayFn" #autoCompany="matAutocomplete">
+								<mat-option *ngFor="let comp of companies" [value]="comp">
+									{{ comp.name }}
+								</mat-option>
+							</mat-autocomplete>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="form-group col-3">
+						<label for="startDate">{{ 'GLOBAL.LABEL.STARTDATE' | translate }}</label>
+						<div class="input-group">
+							<input mask="d0/M0/0000" class="form-control" formControlName="startDate" [ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('startDate').invalid}">
+						</div>
+					</div>
+					<div class="form-group col-3">
+						<label for="endDate">{{ 'GLOBAL.LABEL.ENDDATE' | translate }}</label>
+						<div class="input-group">
+							<input mask="d0/M0/0000" class="form-control" formControlName="endDate" [ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('endDate').invalid}">
+						</div>
+					</div>
+					<div class="form-group col-3">
+						<label for="startHour">{{ 'GLOBAL.LABEL.STARTHOUR' | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" mask="Hh:m0" formControlName="startHour" [ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('startHour').invalid}">
+						</div>
+					</div>
+					<div class="form-group col-3">
+						<label for="endHour">{{ 'GLOBAL.LABEL.ENDHOUR' | translate }}</label>
+						<div class="input-group">
+							<input mask="" class="form-control" mask="Hh:m0" formControlName="endHour" [ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('endHour').invalid}">
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="form-group col-4">
+						<label for="message">{{ 'GLOBAL.LABEL.HTML' | translate }}</label>
+						<div class="input-group">
+							<textarea ng-reflect-maxlength="45" class="form-control" formControlName="message" [ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('message').invalid}"></textarea>
+						</div>
+					</div>
+					<div class="form-group col-3">
+						<label for="priorities">{{ 'GLOBAL.LABEL.PRIORITIES' | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" type="number" formControlName="priorities" required [ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('priorities').invalid}">
+						</div>
+					</div>
+					<div class="form-group col-3">
+						<label for="vizualizations">{{ 'GLOBAL.LABEL.VIZUALIZATIONS' | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" type="number" formControlName="vizualizations" required [ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('vizualizations').invalid}">
+						</div>
+					</div>
+					<div class="form-group col-2">
+						<label for="status">{{ 'GLOBAL.LABEL.STATUS' | translate }}</label>
+						<div class="input-group">
+							<mat-slide-toggle formControlName="status"></mat-slide-toggle>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="form-group col-6">
+						<label for="redirectTo">{{ 'GLOBAL.LABEL.REDIRECTTO' | translate }}</label>
+						<div class="input-group">
+							<select class="form-control" (change)="onChangeUrl($event.target.value)" formControlName="redirectTo">
+								<option value="HOME">Home</option>
+								<option value="URL">URL</option>
+								<option value="ROUTE">Route</option>
+							</select>
+						</div>
+					</div>
+					<div class="form-group col-6">
+						<label for="url">{{ 'GLOBAL.LABEL.URL' | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="url">
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<input type="submit" value="Criar" class="btn btn-outline-dark">
+			</div>
+		</form>
+	</ng-template>
+
+	<!-- Modal Edit Popup -->
+	<ng-template #editpopupmodal let-modal>
+		<form [formGroup]="formData" (ngSubmit)="formSubmitAttempt=true; formData.valid &&  updatePopup(formData.value)">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-edit-popup">{{ 'GLOBAL.LABEL.TOEDIT' | translate }}
+					{{formData.value.name}}</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div style="margin-top: 10px">
+					<div style="margin-top: 10px">
+						<div class="custom-file">
+							<input type="file" class="custom-file-input" id="customFile" (change)="onChange($event)" multiple [ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('file').invalid}">
+							<label class="custom-file-label" for="customFile" id="customFileLabel">
+								{{ 'GLOBAL.LABEL.SELECTIMAGE' | translate }}</label>
+						</div>
+					</div>
+				</div>
+				<input type="hidden" class="form-control" formControlName="_id">
+				<div class="row">
+					<div class="form-group col-6">
+						<label for="name">{{ 'GLOBAL.LABEL.NAME' | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="name" [ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('name').invalid}">
+						</div>
+					</div>
+					<div class="form-group col-6">
+						<label for="company">{{ 'GLOBAL.LABEL.COMPANY' | translate }}</label>
+						<div class="input-group">
+							<input type="text" class="form-control" matInput placeholder="Escolha uma Empresa" [matAutocomplete]="autoCompany" formControlName="company" [ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('company').invalid}">
+							<mat-autocomplete [displayWith]="displayFn" #autoCompany="matAutocomplete">
+								<mat-option *ngFor="let comp of companies" [value]="comp">
+									{{ comp.name }}
+								</mat-option>
+							</mat-autocomplete>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="form-group col-3">
+						<label for="startDate">{{ 'GLOBAL.LABEL.STARTDATE' | translate }}</label>
+						<div class="input-group">
+							<input mask="d0/M0/0000" class="form-control" formControlName="startDate" [ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('startDate').invalid}">
+						</div>
+					</div>
+					<div class="form-group col-3">
+						<label for="endDate">{{ 'GLOBAL.LABEL.ENDDATE' | translate }}</label>
+						<div class="input-group">
+							<input mask="d0/M0/0000" class="form-control" formControlName="endDate" required [ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('endDate').invalid}">
+						</div>
+					</div>
+					<div class="form-group col-3">
+						<label for="startHour">{{ 'GLOBAL.LABEL.STARTHOUR' | translate }}</label>
+						<div class="input-group">
+							<input mask="" class="form-control" mask="Hh:m0" formControlName="startHour" [ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('startHour').invalid}">
+						</div>
+					</div>
+					<div class="form-group col-3">
+						<label for="endHour">{{ 'GLOBAL.LABEL.ENDHOUR' | translate }}</label>
+						<div class="input-group">
+							<input mask="" class="form-control" mask="Hh:m0" formControlName="endHour" required [ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('endHour').invalid}">
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="form-group col-4">
+						<label for="message">{{ 'GLOBAL.LABEL.HTML' | translate }}</label>
+						<div class="input-group">
+							<textarea class="form-control" formControlName="message" ng-reflect-maxlength="45" maxlength="45" [ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('message').invalid}"></textarea>
+						</div>
+					</div>
+					<div class="form-group col-3">
+						<label for="priorities">{{ 'GLOBAL.LABEL.PRIORITIES' | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" type="number" formControlName="priorities" required [ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('priorities').invalid}">
+						</div>
+					</div>
+					<div class="form-group col-3">
+						<label for="vizualizations">{{ 'GLOBAL.LABEL.VIZUALIZATIONS' | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" type="number" formControlName="vizualizations" required [ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('vizualizations').invalid}">
+						</div>
+					</div>
+					<div class="form-group col-2">
+						<label for="status">{{ 'GLOBAL.LABEL.STATUS' | translate }}</label>
+						<div class="input-group">
+							<mat-slide-toggle formControlName="status"></mat-slide-toggle>
+						</div>
+					</div>
+					<div class="row">
+						<div class="form-group col-6">
+							<label for="redirectTo">{{ 'GLOBAL.LABEL.REDIRECTTO' | translate }}</label>
+							<div class="input-group">
+								<select class="form-control" (change)="onChangeUrl($event.target.value)" formControlName="redirectTo">
+									<option value="HOME">Home</option>
+									<option value="URL">URL</option>
+									<option value="ROUTE">Route</option>
+								</select>
+							</div>
+						</div>
+						<div class="form-group col-6">
+							<label for="url">{{ 'GLOBAL.LABEL.URL' | translate }}</label>
+							<div class="input-group">
+								<input class="form-control" formControlName="url">
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<input type="submit" value="Salvar" class="btn btn-outline-dark">
+			</div>
+		</form>
+	</ng-template>
+</div>
+
+<!-- Modal Delete -->
+<ng-template #confirmdeletemodal let-modal>
+	<div class="modal-header">
+		<h4 class="modal-title" id="modal-delete-popup">
+			Confirmar exclusão</h4>
+		<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	<div class="modal-body" class="btn btn-warning">
+		{{ 'GLOBAL.LABEL.AREYOUSUREYOUWANTTODELETE' | translate }}
+	</div>
+	<div class="modal-footer">
+		<button type="button" (click)="popupIdToDelete=undefined; modal.dismiss('Cross click')" class="btn btn-secondary" data-dismiss="modal">{{ 'GLOBAL.LABEL.CANCEL' | translate }}</button>
+		<button type="button" (click)="deletePopup() && modal.dismiss('Cross click')" class="btn btn-primary">{{ 'GLOBAL.LABEL.YES' | translate }}</button>
+	</div>
+</ng-template>

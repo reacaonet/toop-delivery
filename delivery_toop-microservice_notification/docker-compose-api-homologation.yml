@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  notification-api:
+    container_name: 'notification-api'
+    image: node:14
+    volumes:
+      - .:/home/node/app
+    working_dir: /home/node/app
+    environment:
+      HOST: notification-api
+      PORT: 8300
+      APP_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9eyJzdWIiOiIxMjM0NTY3ODkw
+      PRODUCTION: 'true'
+    expose:
+      - '8300'
+    ports:
+      - 8300:8300
+    command: bash -c 'yarn install && yarn build && node ./dist/server.js'

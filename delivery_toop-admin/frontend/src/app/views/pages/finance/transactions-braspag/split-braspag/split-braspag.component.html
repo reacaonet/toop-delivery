@@ -1,0 +1,75 @@
+<form style="margin-top: 10px" [formGroup]="splitForm" (ngSubmit)="splitForm.valid && sendSplit()" autocomplete="off" >
+	<div class="row">
+		<div class="col-12">
+			<div class="form-group">
+				<label for="title">Informe Total Compra</label>
+				<input type="text" class="form-control" id="total" formControlName="total" required placeholder="Total da compra"
+					[ngClass]="{'is-invalid' : splitForm.get('total').invalid}">
+			</div>
+		</div>
+
+		<div class="col-12">
+			<div class="form-group">
+				<label for="title">Informe sua Senha</label>
+				<input type="password" class="form-control" id="password" formControlName="password" required placeholder="Senha" autoComplete="new-password"
+					[ngClass]="{'is-invalid' : splitForm.get('password').invalid}">
+			</div>
+		</div>
+
+		<div class="col-12" formGroupName="company">
+			<h4>
+				<b>Split Empresa</b>
+			</h4>
+			<div class="form-group">
+				<label for="title">MerchantID</label>
+				<input type="text" class="form-control" id="companySubordinate" formControlName="subordinateId" placeholder="SubordinateId">
+				<small>Sugestão: {{transaction.cieloMerchantId}}</small>
+			</div>
+			<div class="form-group">
+				<label for="title">Total a enviar</label>
+				<input type="text" class="form-control" id="companyAmount" formControlName="amount" placeholder="Total">
+				<small>Exemplo: Quero enviar R$20,00. Então tenho que enviar R$20,46(+ 2.3%)</small>
+			</div>
+			<div class="form-group">
+				<label for="title">Mdr</label>
+				<input type="text" class="form-control" id="companyMdr" formControlName="mdr" placeholder="Em Porcentagem" disabled>
+			</div>
+			<div class="form-group">
+				<label for="title">Fee</label>
+				<input type="text" class="form-control" id="companyFee" formControlName="fee" placeholder="em Real">
+			</div>
+		</div>
+
+		<div class="col-12" formGroupName="deliveryMan">
+			<h4>
+				<b>Split Entregador</b>
+			</h4>
+			<div class="form-group">
+				<label for="title">MerchantID</label>
+				<input type="text" class="form-control" id="deliverySubordinate" formControlName="subordinateId" placeholder="SubordinateId">
+			</div>
+			<div class="form-group">
+				<label for="title">Total a enviar</label>
+				<input type="text" class="form-control" id="deliveryAmount" formControlName="amount" placeholder="Total">
+			</div>
+			<div class="form-group">
+				<label for="title">Mdr</label>
+				<input type="text" class="form-control" id="deliveryMdr" formControlName="mdr" placeholder="Em Porcentagem">
+			</div>
+			<div class="form-group">
+				<label for="title">Fee</label>
+				<input type="text" class="form-control" id="deliveryFee" formControlName="fee" placeholder="em Real">
+			</div>
+		</div>
+
+		<div class="col-12">
+			<input type="submit" value="Enviar" class="btn btn-primary" *ngIf="!load" >
+
+			<button type="button" class="btn btn-primary" *ngIf="load">
+				<span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+				Enviando...
+			</button>
+		</div>
+
+	</div>
+</form>

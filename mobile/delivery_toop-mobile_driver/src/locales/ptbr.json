@@ -1,0 +1,141 @@
+{
+  "monetary": "R$",
+  "phone": "celular",
+  "nif": "CPF",
+  "races": "corridas",
+  "race": "corrida",
+  "raceFees": "Tarifas da corrida",
+  "youRated": "Você Avaliou",
+  "insertNewCar": "Cadastrar veículo",
+  "myVehicles": "Meus Veículos",
+  "raceDetails": "Detalhes da corrida",
+  "termsOfUse": "Termos de uso",
+  "login": {
+    "register": "CADASTRE-SE",
+    "enter": "ENTRAR",
+    "informYourPhone": "Digite seu número de celular",
+    "infoDDI": "Você selecionou o DDI {ddi} referente {country}, caso você esteja em outra localidade, clique no ícone e selecione seu pais"
+  },
+  "DynamicRegister": {
+    "title": "• Documento Selecionado",
+    "generateDoc": "Gerar documentos",
+    "takePicture": "Tirar foto",
+    "cameraPermission": {
+      "title": "Uso da câmera e arquivos",
+      "description": "Para um correto funcionamento do app e para conseguir prosseguir para os próximos passos é necessário selecionar a opção \"Permitir sempre\" ou \"Durante o uso do app\" nas permissões de câmera e de arquivos."
+    },
+    "goBack": "Voltar",
+    "confirm": "Confirmar",
+    "couldNotSave": "Não foi possível salvar",
+    "unableSendFile": "Não foi possível enviar o arquivo",
+    "codeSend": "Digite o código enviado para",
+    "dontReceive": "Não recebeu o código de segurança?",
+    "resendCode": "Reenviar código",
+    "sendCodeSMS": "Enviar código por SMS",
+    "selectRegion": "Selecione a região de cobertura",
+    "continue": "CONTINUAR"
+  },
+  "permissions": {
+    "alertWindow": {
+      "title": "Veja as corridas recebidas mais facilmente",
+      "subTitle": "Esta permissão é utilizada para que possamos direcionar uma corrida e abrir o aplicativo para você. Facilitando para que você possa aceitar uma corrida mais facilmente"
+    }
+  },
+  "mapFooter": {
+    "online": "Você está ONLINE",
+    "offline": "Você está OFFLINE",
+    "noCredit": "Você não possui créditos para receber solicitações de viagem, por favor entre em contato com o suporte",
+    "toDestination": "min até o destino",
+    "inProgress": "em andamento",
+    "enterCodeConfirmation": "Digite o código de confirmação",
+    "update": "Atualizar",
+    "start": "Iniciar"
+  },
+  "raceFare": {
+    "estimatedTool": "Pedágio estimados"
+  },
+  "screens": {
+    "genre": {
+      "title": "Qual é o seu Gênero ?",
+      "message": "Selecione um gênero",
+      "male": "MASCULINO",
+      "female": "FEMININO"
+    }
+  },
+  "register": {
+    "cpfNif": {
+      "title": "Digite seu",
+      "titleBold": "CPF"
+    },
+    "rg": {
+      "title": "Digite seu",
+      "titleBold": "RG"
+    }
+  },
+  "navigationDriver": {
+    "openNavigation": "Abrir navegação com ?",
+    "board": "Embarque",
+    "arrived": "Você chegou ao local",
+    "waitingPassenger": "Aguardando passageiro",
+    "youArrived": "Você chegou ao destino",
+    "services": "SERVIÇOS",
+    "arrivedPlace": "CHEGUEI NO LOCAL",
+    "initRace": "INICIAR CORRIDA",
+    "endRace": "FINALIZAR CORRIDA",
+    "arriveAdditionalStop": "CHEGUEI PARADA ADICIONAL",
+    "credits": "créditos",
+    "notRegister": "Nenhum destino cadastrado",
+    "confirmPrevention": "Confirme prevenção",
+    "confirmPreventionText": "É de grande importância seguir as\n medidas de prevenção neste momento de\n pandemia. Cuide de você e do passageiro",
+    "recomendation": "Não dirigir com sintomas relacionados\n ou diagnosticado com Covid-19",
+    "prevention": "Ter álcool em gel disponível no carro",
+    "dontDriverMask": "Não dirigir sem máscara",
+    "desinfectTheCar": "Desinfetar o carro a cada viagem",
+    "continue": "Continuar",
+    "follow": "Acompanhar viagem",
+    "callPolice": "Ligar para a polícia",
+    "selectDestiny": "Escolher destino",
+    "chosenDestiny": "Aqui você aponta a direção\n para destinos de até 3 corridas \n",
+    "selectOneDestiny": "Selecione um destino",
+    "receive": "Receba corridas com destinos\n direcionado à sua necessidade",
+    "typesReceive": "Escolha os tipos de serviços que irá receber",
+    "finished": "FINALIZADA",
+    "useCredit": "Créditos Utilizados",
+    "remainingCredit": "Créditos Restantes",
+    "payment": "Pagamento",
+    "status": "Status",
+    "valueRace": "Valor Viagem",
+    "discount": "Desconto",
+    "balanceWallet": "Saldo Carteira",
+    "totalPay": "Total a Pagar",
+    "evaluate": "Avalie",
+    "after": "Depois",
+    "conclude": "Concluir",
+    "help": "Ajuda",
+    "youRated": "Você avaliou",
+    "security": "Segurança",
+    "recordRace": "Gravar Corrida",
+    "receiveRaces": "Receba corridas ativando a Localização",
+    "sendComment": "Enviar Comentário",
+    "pay": "Pago",
+    "receivePassenger": "Receber Passageiro"
+  },
+  "confirmRideScreen": {
+    "arrivalDestination": "Chegada ao destino"
+  },
+  "background": {
+    "youOnline": "Você está online",
+    "backgroundService": "Serviço em segundo plano",
+    "location": "Localização",
+    "onTrip": "Você está em viagem"
+  },
+  "axios": {
+    "error": {
+      "network": "Verifique sua conexão com a internet",
+      "message": "Não foi possível processar informação"
+    },
+    "request": {
+      "networkerror": "Não conseguimos uma conexão"
+    }
+  }
+}

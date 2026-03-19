@@ -1,0 +1,12 @@
+export const debug = true;
+export const port = 8100;
+export const apiUrl = `https://homologation.toopdelivery.com.br:${port}`;
+export const timeout = 30000;
+export const chatUrl = 'https://homologation.toopdelivery.com.br:7000';
+export const tokenAuth = 'USER_AUTH';
+export const urlNotification = 'https://homologation.toopdelivery.com.br:8300/v1';
+export const FIREBASE_PATH = 'homolog/';
+export const appName = 'Toop Comerciante';
+export const appSubiTitle = '';
+export const apiGeoLocation = 'AIzaSyBKnJQI86pHukHoh7wtGzyRMxJfemZpRGQ';
+export const urlAppOffer = 'https://homologation.toopdelivery.com.br:3000';

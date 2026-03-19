@@ -1,0 +1,665 @@
+<form [formGroup]="formFilter" formFilter.valid>
+	<div class="row">
+		<div class="form-group col-3">
+			<label for="subject">{{ 'GLOBAL.LABEL.NAME' | translate }}</label>
+			<div class="input-group">
+				<input class="form-control" placeholder="{{ 'GLOBAL.LABEL.TYPETOSEARCH' | translate }}"
+					formControlName="name">
+			</div>
+		</div>
+
+		<div class="form-group col-3">
+			<label for="subject">{{ 'GLOBAL.LABEL.EMAIL' | translate }}</label>
+			<div class="input-group">
+				<input class="form-control" placeholder="{{ 'GLOBAL.LABEL.TYPETOSEARCH' | translate }}"
+					formControlName="email">
+			</div>
+		</div>
+
+		<div class="form-group col-3">
+			<label for="subject">CPF</label>
+			<div class="input-group">
+				<input class="form-control" placeholder="{{ 'GLOBAL.LABEL.TYPETOSEARCH' | translate }}"
+					formControlName="cpf" [dropSpecialCharacters]="false" mask="000.000.000-00">
+			</div>
+		</div>
+
+		<div class="form-group col-3">
+			<label for="subject">Status</label>
+			<div class="input-group">
+				<!-- <input class="form-control" placeholder="{{ 'GLOBAL.LABEL.TYPETOSEARCH' | translate }}" formControlName="cpf"> -->
+
+				<select class="form-control" formControlName="status">
+					<option value="ALL">{{ 'GLOBAL.LABEL.ALL' | translate }}</option>
+					<option value="PENDING">{{ 'GLOBAL.LABEL.PENDING' | translate }}</option>
+					<option value="ANALYZE">{{ 'GLOBAL.LABEL.ANALYZE' | translate }}</option>
+					<option value="APPROVED">{{ 'GLOBAL.LABEL.APPROVED' | translate }}</option>
+				</select>
+			</div>
+		</div>
+	</div>
+</form>
+
+<div class="example-container mat-elevation-z8">
+	<mat-table class="table-braspag-transactions" #table [dataSource]="dataSource">
+		<!-- Checkbox Column -->
+		<ng-container matColumnDef="select">
+			<mat-header-cell *matHeaderCellDef>
+				<mat-checkbox [checked]="true" [indeterminate]="true">
+				</mat-checkbox>
+			</mat-header-cell>
+			<mat-cell *matCellDef="let row">
+				<mat-checkbox (click)="$event.stopPropagation()">
+				</mat-checkbox>
+			</mat-cell>
+		</ng-container>
+		<!-- Column name -->
+		<ng-container matColumnDef="name">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.NAME' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.name }} </mat-cell>
+		</ng-container>
+		<!-- Column cpf -->
+		<ng-container matColumnDef="cpf">
+			<mat-header-cell *matHeaderCellDef> CPF / NIF </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.cpf ? element.cpf : element.nif ? element.nif : '' }}
+			</mat-cell>
+		</ng-container>
+		<!-- Column phone -->
+		<ng-container matColumnDef="phone">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.PHONE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.phone }} </mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="createdAt">
+			<mat-header-cell *matHeaderCellDef>{{ 'GLOBAL.LABEL.DATEREGISTER' | translate }}</mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.createdAt }} </mat-cell>
+		</ng-container>
+
+		<!-- Column status -->
+		<ng-container matColumnDef="status">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.STATUS' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.status }} </mat-cell>
+		</ng-container>
+		<!-- To see Partners -->
+		<ng-container matColumnDef="view">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.VIEW' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i class="flaticon-eye mr-2" (click)="viewPartnersModalShow(viewpartnermodal, element)"></i>
+				<i class="flaticon2-trash" (click)="confirmDeleteModalShow(confirmdeletemodal, element)"></i>
+			</mat-cell>
+		</ng-container>
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns;">
+		</mat-row>
+	</mat-table>
+	<mat-paginator [length]="totalLength" [pageSize]="pageSize" [pageSizeOptions]="pageLimit"
+		(page)="changePage($event)">
+	</mat-paginator>
+
+
+	<!-- Modal view -->
+	<ng-template #viewpartnermodal let-modal>
+		<form [formGroup]="formData" (ngSubmit)="formData.valid && viewPartners(formData.value)
+       && modal.dismiss('Cross click')">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-view-partners">{{ 'GLOBAL.LABEL.VIEWPARTNERS' | translate }}</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div class="row">
+					<div class="form-group col-6">
+						<label for="name">{{ 'GLOBAL.LABEL.NAME' | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="name">
+						</div>
+					</div>
+					<div class="form-group col-3">
+						<label for="rg">RG</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="rg">
+						</div>
+					</div>
+					<div class="form-group col-3">
+						<label for="cpf">{{ 'GLOBAL.LABEL.CPF' | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="cpf">
+						</div>
+					</div>
+
+					<div class="form-group col-3">
+						<label for="nif">NIF</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="nif">
+						</div>
+					</div>
+
+					<div class="form-group col-3">
+						<label for="birthDate">{{ 'GLOBAL.LABEL.BIRTHDATE' | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="birthDate">
+						</div>
+					</div>
+
+					<div class="form-group col-3">
+						<label for="phone">{{ 'GLOBAL.LABEL.PHONE' | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="phone">
+						</div>
+					</div>
+
+					<div class="form-group col-2">
+						<label for="phone">{{ 'GLOBAL.LABEL.GENRE' | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="genre">
+						</div>
+					</div>
+
+					<div class="form-group col-4">
+						<label for="status">{{ 'GLOBAL.LABEL.STATUS' | translate }}</label>
+						<div class="input-group">
+							<input [readonly]="!childmessage" class="form-control" formControlName="status">
+						</div>
+					</div>
+					<div class="form-group col-8">
+						<label for="email">{{ 'GLOBAL.LABEL.EMAIL' | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="email">
+						</div>
+					</div>
+					<div class="form-group col-4">
+						<label for="franchiseName">{{ 'GLOBAL.LABEL.FRANCHISE' | translate }}</label>
+						<div class="input-group">
+							<input [readonly]="!childmessage" class="form-control" formControlName="franchiseName">
+						</div>
+					</div>
+
+					<div class="form-group col-4">
+						<label for="vehicleManufacturer">{{ 'GLOBAL.LABEL.BRAND' | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="vehicleManufacturer">
+						</div>
+					</div>
+
+					<div class="form-group col-4">
+						<label for="vehicleModel">{{ 'GLOBAL.LABEL.MODEL' | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="vehicleModel">
+						</div>
+					</div>
+
+					<div class="form-group col-4">
+						<label for="vehicleNameplate">{{ 'GLOBAL.LABEL.BOARD' | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="vehicleNameplate">
+						</div>
+					</div>
+
+					<div class="form-group col-4">
+						<label for="vehicleYear">{{ 'GLOBAL.LABEL.YEAR' | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="vehicleYear">
+						</div>
+					</div>
+
+					<div class="form-group col-4">
+						<label for="vehicleColor">{{ 'GLOBAL.LABEL.COLOR' | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="vehicleColor">
+						</div>
+					</div>
+
+					<div class="form-group col-4">
+						<label for="terms">{{ 'GLOBAL.LABEL.TERMS' | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="terms">
+						</div>
+					</div>
+
+					<!-- <div class="form-group col-8">
+						<label for="terms">Serviço</label>
+						<div class="input-group">
+							<select required class="form-control" formControlName="services" [readonly]="!childmessage">
+								<option value="">Selecione</option>
+								<option *ngFor="let service of listServices" value="{{ service._id }}">{{service.name}}</option>
+							</select>
+						</div>
+					</div> -->
+
+					<div class="form-group col-4">
+						<label for="createdAt">{{ 'GLOBAL.LABEL.DATECREATION' | translate }}</label>
+						<div class="input-group">
+							<input [readonly]="!childmessage" class="form-control" formControlName="createdAt">
+						</div>
+					</div>
+				</div>
+
+				<div class="row mb-3">
+					<div class="col-9 ">
+						<h6>{{ 'GLOBAL.LABEL.SERVICELIST' | translate }}</h6>
+					</div>
+					<div class="col-3 text-right">
+						<button type="button" class="btn btn-sm btn-info ml-auto" (click)="addNewService()">
+							<span aria-hidden="true">{{ 'GLOBAL.LABEL.NEWSERVICE' | translate }}</span>
+						</button>
+					</div>
+				</div>
+
+				<div class="row mb-3" *ngFor="let newservice of formData.get('services').controls; index as i">
+					<ng-container [formGroup]="newservice">
+						<div class="form-group col-6">
+							<label for="service">{{ 'GLOBAL.LABEL.SERVICE' | translate }}</label>
+							<div class="input-group">
+								<input type="text" class="form-control" [matAutocomplete]="autoService" matInput
+									placeholder="{{ 'GLOBAL.LABEL.CHOOSEASERVICE' | translate }}"
+									formControlName="service"
+									[ngClass]="{ 'is-invalid' : newservice.get('service').invalid }">
+								<mat-autocomplete #autoService="matAutocomplete" [displayWith]="displayFn">
+									<mat-option *ngFor="let serve of services" [value]="serve">
+										{{ serve.name }}
+										<b *ngIf="serve?.franchise?.name"> - {{ serve?.franchise?.name }}</b>
+									</mat-option>
+								</mat-autocomplete>
+							</div>
+						</div>
+					</ng-container>
+					<div class="form-group text-center col-2">
+						<label class="col-12" for="fee">{{ 'GLOBAL.LABEL.ACTION' | translate }}</label>
+						<button (click)="removeServices(i)" mat-mini-fab color="warn"
+							class="col-12 mat-mini-fab mat-button-base mat-accent">
+							<span class="mat-button-wrapper">
+								<mat-icon class="mat-icon notranslate material-icons mat-icon-no-color" role="img"
+									aria-hidden="true">
+									delete
+								</mat-icon>
+							</span>
+							<div class="mat-button-ripple mat-ripple mat-button-ripple-round" matripple>
+							</div>
+							<div class="mat-button-focus-overlay">
+							</div>
+						</button>
+					</div>
+				</div>
+
+				<div class="row d-flex justify-content-around">
+					<!-- Image Column -->
+					<div *ngFor="let selfie of selfiePhoto; index as i" class="card col-3" style="width: 8rem;">
+						<ng-container *ngIf="selfie.slice(-3) !== 'pdf'">
+							<img class="card-img-top" [src]='selfie || "./assets/media/logo-default.png"'
+								alt="Card image cap">
+							<div class="card-body">
+								<h6 class="card-title">{{
+									'GLOBAL.LABEL.SELFIEPHOTONUMBER' | translate }} {{i + 1}}</h6>
+								<a target="_blank" [href]='selfie || "./assets/media/logo-default.png"'
+									class="btn btn-primary">{{
+									'GLOBAL.LABEL.VIEWIMAGE' | translate
+									}}</a>
+							</div>
+						</ng-container>
+
+						<ng-container *ngIf="selfie.slice(-3) ==='pdf'">
+							<img class="card-img-top" [src]='"./assets/media/pdf.png"' alt="Card image cap">
+							<div class="card-body">
+								<h6 class="card-title">{{
+									'GLOBAL.LABEL.SELFIEPHOTONUMBER' | translate }} {{i + 1}}</h6>
+								<a target="_blank" [href]='selfie' class="btn btn-primary">{{
+									'GLOBAL.LABEL.SEEDOCUMENT' | translate }}</a>
+							</div>
+						</ng-container>
+					</div>
+
+					<div *ngFor="let Cnh of CNHDocumentPhoto; index as i" class="card col-3" style="width: 8rem;">
+						<ng-container *ngIf="Cnh.slice(-3) !== 'pdf'">
+							<img class="card-img-top" [src]='Cnh || "./assets/media/logo-default.png"'
+								alt="Card image cap">
+							<div class="card-body">
+								<h6 class="card-title">{{
+									'GLOBAL.LABEL.PHOTOCNHN' | translate
+									}} {{i + 1}}</h6>
+								<a target="_blank" [href]='Cnh || "./assets/media/logo-default.png"'
+									class="btn btn-primary">{{
+									'GLOBAL.LABEL.VIEWIMAGE' | translate
+									}}</a>
+							</div>
+						</ng-container>
+
+						<ng-container *ngIf="Cnh.slice(-3) ==='pdf'">
+							<img class="card-img-top" [src]='"./assets/media/pdf.png"' alt="Card image cap">
+							<div class="card-body">
+								<h6 class="card-title">{{
+									'GLOBAL.LABEL.PDFCNHN' | translate }} {{i + 1}}</h6>
+								<a target="_blank" [href]='Cnh || "./assets/media/logo-default.png"'
+									class="btn btn-primary">{{
+									'GLOBAL.LABEL.SEEDOCUMENT' | translate }}</a>
+							</div>
+
+						</ng-container>
+					</div>
+
+					<div *ngFor="let docs of CRLVDocumentPhoto; index as i" class="card col-3" style="width: 8rem;">
+						<ng-container *ngIf="docs.slice(-3) !== 'pdf'">
+							<img class="card-img-top" [src]='docs || "./assets/media/logo-default.png"'
+								alt="Card image cap">
+							<div class="card-body">
+								<h6 class="card-title">{{ 'GLOBAL.LABEL.PHOTOCRLV' | translate
+									}} {{i + 1}}</h6>
+								<a target="_blank" [href]='docs || "./assets/media/logo-default.png"'
+									class="btn btn-primary">{{
+									'GLOBAL.LABEL.VIEWIMAGE' | translate
+									}}</a>
+							</div>
+						</ng-container>
+
+						<ng-container *ngIf="docs.slice(-3) ==='pdf'">
+							<img class="card-img-top" [src]='"./assets/media/pdf.png"' alt="Card image cap">
+							<div class="card-body">
+								<h6 class="card-title">{{ 'GLOBAL.LABEL.PDFCRLV' | translate
+									}} {{i + 1}}</h6>
+								<a target="_blank" [href]='docs' class="btn btn-primary">{{ 'GLOBAL.LABEL.SEEDOCUMENT' |
+									translate
+									}}</a>
+							</div>
+						</ng-container>
+					</div>
+
+					<div *ngFor="let docs of CriminalRecord; index as i" class="card col-3" style="width: 8rem;">
+						<ng-container *ngIf="docs.slice(-3) !== 'pdf'">
+							<img class="card-img-top" [src]='docs || "./assets/media/logo-default.png"'
+								alt="Card image cap">
+							<div class="card-body">
+								<h6 class="card-title">{{
+									'GLOBAL.LABEL.PHOTOBACKGROUND' | translate }} {{i + 1}}</h6>
+								<a target="_blank" [href]='docs || "./assets/media/logo-default.png"'
+									class="btn btn-primary">{{
+									'GLOBAL.LABEL.VIEWIMAGE' | translate }}</a>
+							</div>
+						</ng-container>
+
+						<ng-container *ngIf="docs.slice(-3) ==='pdf'">
+							<img class="card-img-top" [src]='"./assets/media/pdf.png"' alt="Card image cap">
+							<div class="card-body">
+								<h6 class="card-title"> {{ 'GLOBAL.LABEL.CRIMINALBACKGROUND' | translate }} {{i + 1}}
+								</h6>
+								<a target="_blank" [href]='docs' class="btn btn-primary">{{ 'GLOBAL.LABEL.SEEDOCUMENT' |
+									translate
+									}}</a>
+							</div>
+						</ng-container>
+					</div>
+
+					<div *ngFor="let docs of CCfront; index as i" class="card col-3" style="width: 8rem;">
+						<ng-container *ngIf="docs.slice(-3) !== 'pdf'">
+							<img class="card-img-top" [src]='docs || "./assets/media/logo-default.png"'
+								alt="Card image cap">
+							<div class="card-body">
+								<h6 class="card-title">{{
+									'GLOBAL.LABEL.PHOTO_CC_FRONT' | translate }} {{i + 1}}</h6>
+								<a target="_blank" [href]='docs || "./assets/media/logo-default.png"'
+									class="btn btn-primary">{{
+									'GLOBAL.LABEL.VIEWIMAGE' | translate }}</a>
+							</div>
+						</ng-container>
+
+						<ng-container *ngIf="docs.slice(-3) ==='pdf'">
+							<img class="card-img-top" [src]='"./assets/media/pdf.png"' alt="Card image cap">
+							<div class="card-body">
+								<h6 class="card-title"> {{ 'GLOBAL.LABEL.CRIMINALBACKGROUND' | translate }} {{i + 1}}
+								</h6>
+								<a target="_blank" [href]='docs' class="btn btn-primary">{{ 'GLOBAL.LABEL.SEEDOCUMENT' |
+									translate
+									}}</a>
+							</div>
+						</ng-container>
+					</div>
+
+					<div *ngFor="let docs of CCVerse; index as i" class="card col-3" style="width: 8rem;">
+						<ng-container *ngIf="docs.slice(-3) !== 'pdf'">
+							<img class="card-img-top" [src]='docs || "./assets/media/logo-default.png"'
+								alt="Card image cap">
+							<div class="card-body">
+								<h6 class="card-title">{{
+									'GLOBAL.LABEL.PHOTO_CC_VERSE' | translate }} {{i + 1}}</h6>
+								<a target="_blank" [href]='docs || "./assets/media/logo-default.png"'
+									class="btn btn-primary">{{
+									'GLOBAL.LABEL.VIEWIMAGE' | translate }}</a>
+							</div>
+						</ng-container>
+
+						<ng-container *ngIf="docs.slice(-3) ==='pdf'">
+							<img class="card-img-top" [src]='"./assets/media/pdf.png"' alt="Card image cap">
+							<div class="card-body">
+								<h6 class="card-title"> {{ 'GLOBAL.LABEL.CRIMINALBACKGROUND' | translate }} {{i + 1}}
+								</h6>
+								<a target="_blank" [href]='docs' class="btn btn-primary">{{ 'GLOBAL.LABEL.SEEDOCUMENT' |
+									translate
+									}}</a>
+							</div>
+						</ng-container>
+					</div>
+
+					<div *ngFor="let docs of ImageCardFront; index as i" class="card col-3" style="width: 8rem;">
+						<ng-container *ngIf="docs.slice(-3) !== 'pdf'">
+							<img class="card-img-top" [src]='docs || "./assets/media/logo-default.png"'
+								alt="Card image cap">
+							<div class="card-body">
+								<h6 class="card-title">{{
+									'GLOBAL.LABEL.PHOTO_IMAGE_CARD' | translate }} {{i + 1}}</h6>
+								<a target="_blank" [href]='docs || "./assets/media/logo-default.png"'
+									class="btn btn-primary">{{
+									'GLOBAL.LABEL.VIEWIMAGE' | translate }}</a>
+							</div>
+						</ng-container>
+
+						<ng-container *ngIf="docs.slice(-3) ==='pdf'">
+							<img class="card-img-top" [src]='"./assets/media/pdf.png"' alt="Card image cap">
+							<div class="card-body">
+								<h6 class="card-title"> {{ 'GLOBAL.LABEL.CRIMINALBACKGROUND' | translate }} {{i + 1}}
+								</h6>
+								<a target="_blank" [href]='docs' class="btn btn-primary">{{ 'GLOBAL.LABEL.SEEDOCUMENT' |
+									translate
+									}}</a>
+							</div>
+						</ng-container>
+					</div>
+
+					<div *ngFor="let docs of ImageCardVerse; index as i" class="card col-3" style="width: 8rem;">
+						<ng-container *ngIf="docs.slice(-3) !== 'pdf'">
+							<img class="card-img-top" [src]='docs || "./assets/media/logo-default.png"'
+								alt="Card image cap">
+							<div class="card-body">
+								<h6 class="card-title">{{
+									'GLOBAL.LABEL.PHOTO_IMAGE_CARD_VERSE' | translate }} {{i + 1}}</h6>
+								<a target="_blank" [href]='docs || "./assets/media/logo-default.png"'
+									class="btn btn-primary">{{
+									'GLOBAL.LABEL.VIEWIMAGE' | translate }}</a>
+							</div>
+						</ng-container>
+
+						<ng-container *ngIf="docs.slice(-3) ==='pdf'">
+							<img class="card-img-top" [src]='"./assets/media/pdf.png"' alt="Card image cap">
+							<div class="card-body">
+								<h6 class="card-title"> {{ 'GLOBAL.LABEL.CRIMINALBACKGROUND' | translate }} {{i + 1}}
+								</h6>
+								<a target="_blank" [href]='docs' class="btn btn-primary">{{ 'GLOBAL.LABEL.SEEDOCUMENT' |
+									translate
+									}}</a>
+							</div>
+						</ng-container>
+					</div>
+
+					<div *ngFor="let docs of UniqueDocument; index as i" class="card col-3" style="width: 8rem;">
+						<ng-container *ngIf="docs.slice(-3) !== 'pdf'">
+							<img class="card-img-top" [src]='docs || "./assets/media/logo-default.png"'
+								alt="Card image cap">
+							<div class="card-body">
+								<h6 class="card-title">{{
+									'GLOBAL.LABEL.PHOTO_UNIQUEDOC' | translate }} {{i + 1}}</h6>
+								<a target="_blank" [href]='docs || "./assets/media/logo-default.png"'
+									class="btn btn-primary">{{
+									'GLOBAL.LABEL.VIEWIMAGE' | translate }}</a>
+							</div>
+						</ng-container>
+
+						<ng-container *ngIf="docs.slice(-3) ==='pdf'">
+							<img class="card-img-top" [src]='"./assets/media/pdf.png"' alt="Card image cap">
+							<div class="card-body">
+								<h6 class="card-title"> {{ 'GLOBAL.LABEL.CRIMINALBACKGROUND' | translate }} {{i + 1}}
+								</h6>
+								<a target="_blank" [href]='docs' class="btn btn-primary">{{ 'GLOBAL.LABEL.SEEDOCUMENT' |
+									translate
+									}}</a>
+							</div>
+						</ng-container>
+					</div>
+
+					<div *ngFor="let docs of UniqueDocumentVerse; index as i" class="card col-3" style="width: 8rem;">
+						<ng-container *ngIf="docs.slice(-3) !== 'pdf'">
+							<img class="card-img-top" [src]='docs || "./assets/media/logo-default.png"'
+								alt="Card image cap">
+							<div class="card-body">
+								<h6 class="card-title">{{
+									'GLOBAL.LABEL.PHOTO_UNIQUEDOC_VERSE' | translate }} {{i + 1}}</h6>
+								<a target="_blank" [href]='docs || "./assets/media/logo-default.png"'
+									class="btn btn-primary">{{
+									'GLOBAL.LABEL.VIEWIMAGE' | translate }}</a>
+							</div>
+						</ng-container>
+
+						<ng-container *ngIf="docs.slice(-3) ==='pdf'">
+							<img class="card-img-top" [src]='"./assets/media/pdf.png"' alt="Card image cap">
+							<div class="card-body">
+								<h6 class="card-title"> {{ 'GLOBAL.LABEL.CRIMINALBACKGROUND' | translate }} {{i + 1}}
+								</h6>
+								<a target="_blank" [href]='docs' class="btn btn-primary">{{ 'GLOBAL.LABEL.SEEDOCUMENT' |
+									translate
+									}}</a>
+							</div>
+						</ng-container>
+					</div>
+				</div>
+				<div class="row col-12 mt-3">
+					<div class="form-group col-6">
+						<label for="terms">{{ 'GLOBAL.LABEL.FILETYPE' | translate }}</label>
+						<div class="input-group">
+							<select class="form-control" name="typesFile" (change)="selectOption($event.target.value)">
+								<option value="selfiePhoto">Selfie</option>
+								<option value="CNHDocumentPhoto">CNH</option>
+								<option value="CRLVDocumentPhoto">CRLV</option>
+								<option value="CCfront">CCfront</option>
+								<option value="CCVerse">CCVerse</option>
+								<option value="ImageCardFront">ImageCardFront</option>
+								<option value="ImageCardVerse">ImageCardVerse</option>
+								<option value="UniqueDocument">UniqueDocument</option>
+								<option value="UniqueDocumentVerse">UniqueDocumentVerse</option>
+								<option value="CriminalRecord">{{ 'GLOBAL.LABEL.CRIMINALBACKGROU' | translate }}
+								</option>
+							</select>
+						</div>
+					</div>
+
+					<div class="form-group col-6">
+						<ng-container>
+							<label for="terms">{{ 'GLOBAL.LABEL.FILE' | translate }}</label>
+							<div class="input-group custom-file">
+								<input type="file" class="custom-file-input" id="customFile"
+									(change)="chageDocument($event, formData.value)" />
+								<label class="custom-file-label" for="customFile" id="selfiePhoto">{{
+									'GLOBAL.LABEL.TOEXCHANGE' |
+									translate }}</label>
+							</div>
+						</ng-container>
+					</div>
+				</div>
+
+				<div class="row mt-1" *ngIf="formData.value.status === 'AGUARDANDO'">
+					<div class="form-group col-12">
+						<label for="createdAt">{{ 'GLOBAL.LABEL.LASTMESSAGE' | translate }}</label>
+						<div class="input-group">
+							<textarea [readonly]="!childmessage" class="form-control" formControlName="message">
+									</textarea>
+						</div>
+					</div>
+
+				</div>
+			</div>
+			<div class="modal-footer d-flex justify-content-between" *ngIf="formData.value.status !== 'RECUSADO'">
+				<button type="button" class="btn btn-danger" (click)="cancelDeliveryman(formData.value)">
+					<span *ngIf="formData.value.status !== 'APROVADO'">{{ 'GLOBAL.LABEL.REFUSEREGISTRATION' | translate
+						}}</span>
+					<span *ngIf="formData.value.status === 'APROVADO'">{{ 'GLOBAL.LABEL.CANCELREGISTRATION' | translate
+						}}</span>
+				</button>
+				<!-- <button
+					type="button"
+					class="btn btn-secondary"
+					*ngIf="formData.value.status !== 'APROVADO'"
+					(click)="createMessage(messagemodal, formData.value)"
+				>
+					Solicitar alterações
+				</button> -->
+				<button type="button" class="btn btn-dark" (click)="updatePreRegister(formData.value)"
+					[disabled]="loadUpdate" *ngIf="formData.value.status !== 'APPROVED'">
+					<div *ngIf="!loadUpdate">{{ 'GLOBAL.LABEL.SAVEEDITIONS' | translate }}</div>
+					<div *ngIf="loadUpdate" class="spinner-border spinner-border-sm" role="status">
+						<span class="sr-only">Loading...</span>
+					</div>
+				</button>
+
+				<button type="button" class="btn btn-primary" (click)="acceptDeliveryman(formData.value)">
+					{{ 'GLOBAL.LABEL.ACCEPTREGISTRATION' | translate }}
+				</button>
+			</div>
+		</form>
+	</ng-template>
+
+	<ng-template #messagemodal let-modal>
+		<form [formGroup]="formData">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-message-deliveryman">{{ 'GLOBAL.LABEL.MESSAGETOTHEDELIVERY' |
+					translate }}
+				</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+
+			<div class="modal-body">
+
+				<div class="form-group">
+					<label for="description"></label>
+					<div class="input-group">
+						<textarea placeholder="{{ 'GLOBAL.LABEL.MESSAGEHERE' | translate }}" class="form-control"
+							formControlName="message"></textarea>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-danger" (click)="sendMessage(formData.value)">
+					{{ 'GLOBAL.LABEL.SUBMIT' | translate }}
+				</button>
+			</div>
+		</form>
+	</ng-template>
+</div>
+
+<!-- Modal Delete   -->
+<ng-template #confirmdeletemodal let-modal>
+	<div class="modal-header">
+		<h4 class="modal-title" id="modal-delete-pre" *ngIf="formData && formData.value && formData.value.name">
+			{{ 'GLOBAL.LABEL.CONFIRMDELETION' | translate }}
+		</h4>
+		<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	<div class="modal-body" class="btn btn-warning">
+		{{ 'GLOBAL.LABEL.AREYOUSUREYOUWANTTODELETE' | translate }}
+	</div>
+	<div class="modal-footer">
+		<button type="button" (click)="idToDelete=undefined; modal.dismiss('Cross click')" class="btn btn-secondary"
+			data-dismiss="modal">{{ 'GLOBAL.LABEL.CANCEL' | translate }}</button>
+		<button type="button" (click)="delete() && modal.dismiss('Cross click')" class="btn btn-primary">{{
+			'GLOBAL.LABEL.YES' | translate }}</button>
+	</div>
+</ng-template>

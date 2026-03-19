@@ -1,0 +1,106 @@
+.example-form {
+	min-width: 150px;
+	max-width: 500px;
+	width: 100%;
+}
+.example-full-width {
+	width: 100%;
+}
+
+::ng-deep .cdk-overlay-container {
+	z-index: 9999;
+}
+
+.mat-column-delete {
+	max-width: 100px;
+	text-align: center;
+	justify-content: center;
+	display: flex;
+	align-items: center;
+	padding: 0;
+}
+.mat-column-type {
+	max-width: 70px;
+}
+
+.mat-column-destinationAccount,
+.mat-column-originAccount,
+.mat-column-value {
+	max-width: 130px;
+	text-align: center;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.mat-column-value {
+	max-width: 130px;
+	text-align: right;
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	padding-right: 21px;
+}
+
+.mat-column-transactionCode {
+	flex: 1;
+}
+
+.mat-column-transactionDate {
+	max-width: 170px;
+	text-align: center;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.info-form label {
+	font-weight: bold;
+}
+
+.cdk-column-franchise {
+	font-size: 12px;
+}
+.cdk-cell {
+	font-size: 12px;
+}
+
+.cdk-column-date {
+	font-size: 10px;
+	max-width: 130px;
+}
+
+.cdk-column-order_number {
+	font-size: 10px;
+	font-weight: bold;
+	max-width: 65px;
+}
+
+.cdk-column-status {
+	font-size: 10px;
+	font-weight: bold;
+	max-width: 85px;
+}
+
+.cdk-column-methodPayment {
+	font-size: 10px;
+	font-weight: bold;
+	max-width: 120px;
+}
+
+.mat-table .mat-row:nth-child(even) {
+	background-color: #f2f2f2;
+}
+
+.cdk-column-total,
+.cdk-column-franchiseValue,
+.cdk-column-admValue,
+.cdk-column-delivery,
+.cdk-column-totalTransferAdm,
+.cdk-column-totalReceiveCompany {
+	max-width: 135px;
+}
+
+.cdk-column-action {
+	max-width: 60px;
+}

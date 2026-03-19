@@ -1,0 +1,395 @@
+<div class="row justify-content-between">
+	<div class="col-auto align-self-center mb-2">
+		<p class="float-left">{{ "GLOBAL.LABEL.DEPARTMENT" | translate }}</p>
+	</div>
+	<div class="col-auto">
+		<a
+			(click)="createDepartmentModalShow(createdepartmentmodal)"
+			href="javascript:;"
+			class="float-right btn btn-label-warning btn-bold btn-sm btn-icon-h"
+		>
+			{{ "GLOBAL.LABEL.CREATE" | translate }}
+		</a>
+	</div>
+</div>
+
+<!-- Alert -->
+<p>
+	<ngb-alert *ngIf="alert" [type]="alert.type" (close)="closeAlert()">
+		{{ alert.message }}
+	</ngb-alert>
+</p>
+
+<div class="example-container mat-elevation-z8">
+	<mat-table #table [dataSource]="dataSource">
+		<!-- Checkbox Column -->
+		<ng-container matColumnDef="select">
+			<mat-header-cell *matHeaderCellDef>
+				<mat-checkbox [checked]="true" [indeterminate]="true"> </mat-checkbox>
+			</mat-header-cell>
+			<mat-cell *matCellDef="let row">
+				<mat-checkbox (click)="$event.stopPropagation()"> </mat-checkbox>
+			</mat-cell>
+		</ng-container>
+		<!-- Name Column -->
+		<ng-container matColumnDef="name">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.NAME" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.name }} </mat-cell>
+		</ng-container>
+		<!-- Suggesteds Column -->
+		<ng-container matColumnDef="suggesteds">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.SUGGESTEDS" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.suggesteds }} </mat-cell>
+		</ng-container>
+		<!-- Show In App Column -->
+		<ng-container matColumnDef="showInApp">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.SHOWINAPP" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i *ngIf="element.showInApp === true" class="flaticon2-accept mr-2"></i>
+				<i
+					*ngIf="element.showInApp === false"
+					class="flaticon2-cancel mr-2"
+				></i>
+			</mat-cell>
+		</ng-container>
+		<!-- Status Column -->
+		<ng-container matColumnDef="status">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.STATUS" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i *ngIf="element.status === true" class="flaticon2-accept mr-2"></i>
+				<i *ngIf="element.status === false" class="flaticon2-cancel mr-2"></i>
+			</mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="origin">
+			<mat-header-cell *matHeaderCellDef> Cadastrado </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				{{ element.origin }}
+			</mat-cell>
+		</ng-container>
+
+		<!-- Delete Departments -->
+		<ng-container matColumnDef="delete">
+			<mat-header-cell *matHeaderCellDef
+				>{{ "GLOBAL.LABEL.ACTION" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i
+					*ngIf="showEdit(element)"
+					class="flaticon2-edit mr-2"
+					(click)="editDepartmentModalShow(editdepartmentmodal, element)"
+				></i>
+				<i
+					*ngIf="showEdit(element)"
+					class="flaticon2-trash"
+					(click)="confirmDeleteModalShow(confirmdeletemodal, element)"
+				></i> </mat-cell
+			>/
+		</ng-container>
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns"> </mat-row>
+	</mat-table>
+	<mat-paginator
+		[length]="totalLength"
+		[pageSize]="pageSize"
+		[pageSizeOptions]="pageLimit"
+		(page)="changePage($event)"
+	>
+	</mat-paginator>
+
+	<!-- Modal Create Department -->
+	<ng-template #createdepartmentmodal let-modal>
+		<form
+			[formGroup]="formData"
+			(ngSubmit)="
+				formSubmitDepartment = true;
+				formData.valid && createDepartment(formData.value)
+			"
+		>
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-create-department">
+					{{ "GLOBAL.LABEL.CREATEDEPARTMENT" | translate }}
+				</h4>
+				<button
+					type="button"
+					class="close"
+					aria-label="Close"
+					(click)="modal.dismiss('Cross click')"
+				>
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div class="form-group">
+					<label for="name">{{ "GLOBAL.LABEL.NAME" | translate }}</label>
+					<div class="input-group">
+						<input
+							class="form-control"
+							formControlName="name"
+							[ngClass]="{
+								'is-invalid':
+									formSubmitDepartment && formData.get('name').invalid
+							}"
+						/>
+					</div>
+				</div>
+				<div class="row">
+					<div class="form-group col-2">
+						<label for="showInApp">{{
+							"GLOBAL.LABEL.SHOWINAPP" | translate
+						}}</label>
+						<div class="input-group">
+							<mat-slide-toggle formControlName="showInApp"></mat-slide-toggle>
+						</div>
+					</div>
+					<div class="form-group col-4">
+						<label for="status">{{ "GLOBAL.LABEL.STATUS" | translate }}</label>
+						<div class="input-group">
+							<mat-slide-toggle formControlName="status"></mat-slide-toggle>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-9">
+						<h6>Palavras Chaves</h6>
+					</div>
+					<div class="col-3">
+						<button
+							type="button"
+							class="btn btn-sm btn-info"
+							(click)="addNewKeyword()"
+						>
+							<span aria-hidden="true">Nova Palavra Chave</span>
+						</button>
+					</div>
+				</div>
+				<div
+					class="row"
+					*ngFor="
+						let keywordList of formData.get('keyword').controls;
+						index as i
+					"
+				>
+					<ng-container [formGroup]="keywordList">
+						<div class="form-group col-5">
+							<label for="suggesteds">{{
+								"GLOBAL.LABEL.SUGGESTEDS" | translate
+							}}</label>
+							<div class="input-group">
+								<input
+									class="form-control"
+									formControlName="suggesteds"
+									[ngClass]="{
+										'is-invalid':
+											formSubmitDepartment &&
+											keywordList.get('suggesteds').invalid
+									}"
+								/>
+							</div>
+						</div>
+						<div class="form-group text-center col-2">
+							<label class="col-12" for="fee">{{
+								"GLOBAL.LABEL.ACTION" | translate
+							}}</label>
+							<button
+								(click)="removeFeeItem(i)"
+								mat-mini-fab
+								color="warn"
+								class="col-12 mat-mini-fab mat-button-base mat-accent"
+							>
+								<span class="mat-button-wrapper">
+									<mat-icon
+										class="
+											mat-icon
+											notranslate
+											material-icons
+											mat-icon-no-color
+										"
+										role="img"
+										aria-hidden="true"
+									>
+										delete
+									</mat-icon>
+								</span>
+								<div
+									class="mat-button-ripple mat-ripple mat-button-ripple-round"
+									matripple
+								></div>
+								<div class="mat-button-focus-overlay"></div>
+							</button>
+						</div>
+					</ng-container>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<input type="submit" value="Criar" class="btn btn-outline-dark" />
+			</div>
+		</form>
+	</ng-template>
+
+	<!-- Modal Edit Department-->
+	<ng-template #editdepartmentmodal let-modal>
+		<form
+			[formGroup]="formData"
+			(ngSubmit)="
+				formSubmitDepartment = true;
+				formData.valid && updateDepartment(formData.value)
+			"
+		>
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-edit-department">
+					{{ "GLOBAL.LABEL.TOEDIT" | translate }} {{ formData.value.name }}
+				</h4>
+				<button
+					type="button"
+					class="close"
+					aria-label="Close"
+					(click)="modal.dismiss('Cross click')"
+				>
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<input type="hidden" class="form-control" formControlName="_id" />
+				<div class="form-group">
+					<label for="name">{{ "GLOBAL.LABEL.NAME" | translate }}</label>
+					<div class="input-group">
+						<input
+							class="form-control"
+							formControlName="name"
+							[ngClass]="{
+								'is-invalid':
+									formSubmitDepartment && formData.get('name').invalid
+							}"
+						/>
+					</div>
+				</div>
+				<div class="row">
+					<div class="form-group col-2">
+						<label for="showInApp">{{
+							"GLOBAL.LABEL.SHOWINAPP" | translate
+						}}</label>
+						<div class="input-group">
+							<mat-slide-toggle formControlName="showInApp"></mat-slide-toggle>
+						</div>
+					</div>
+					<div class="form-group col-4">
+						<label for="status">{{ "GLOBAL.LABEL.STATUS" | translate }}</label>
+						<div class="input-group">
+							<mat-slide-toggle formControlName="status"></mat-slide-toggle>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row col-12">
+				<div class="col-9">
+					<h6>Palavras Chaves</h6>
+				</div>
+				<div class="col-3">
+					<button
+						type="button"
+						class="btn btn-sm btn-info"
+						(click)="addNewKeyword()"
+					>
+						<span aria-hidden="true">Nova Palavra Chave</span>
+					</button>
+				</div>
+			</div>
+			<div
+				class="row col-12"
+				*ngFor="let keywordList of formData.get('keyword').controls; index as i"
+			>
+				<ng-container [formGroup]="keywordList">
+					<div class="form-group col-5">
+						<label for="suggesteds">{{
+							"GLOBAL.LABEL.SUGGESTEDS" | translate
+						}}</label>
+						<div class="input-group">
+							<input
+								class="form-control"
+								formControlName="suggesteds"
+								[ngClass]="{
+									'is-invalid':
+										formSubmitDepartment &&
+										keywordList.get('suggesteds').invalid
+								}"
+							/>
+						</div>
+					</div>
+					<div class="form-group text-center col-2">
+						<label class="col-12" for="fee">{{
+							"GLOBAL.LABEL.ACTION" | translate
+						}}</label>
+						<button
+							(click)="removeFeeItem(i)"
+							mat-mini-fab
+							color="warn"
+							class="col-12 mat-mini-fab mat-button-base mat-accent"
+						>
+							<span class="mat-button-wrapper">
+								<mat-icon
+									class="mat-icon notranslate material-icons mat-icon-no-color"
+									role="img"
+									aria-hidden="true"
+								>
+									delete
+								</mat-icon>
+							</span>
+							<div
+								class="mat-button-ripple mat-ripple mat-button-ripple-round"
+								matripple
+							></div>
+							<div class="mat-button-focus-overlay"></div>
+						</button>
+					</div>
+				</ng-container>
+			</div>
+			<div class="modal-footer">
+				<input type="submit" value="Salvar" class="btn btn-outline-dark" />
+			</div>
+		</form>
+	</ng-template>
+</div>
+
+<!-- Modal Delete -->
+<ng-template #confirmdeletemodal let-modal>
+	<div class="modal-header">
+		<h4 class="modal-title" id="modal-delete-department">Confirmar exclusão</h4>
+		<button
+			type="button"
+			class="close"
+			aria-label="Close"
+			(click)="modal.dismiss('Cross click')"
+		>
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	<div class="modal-body" class="btn btn-warning">
+		{{ "GLOBAL.LABEL.AREYOUSUREYOUWANTTODELETE" | translate }}
+	</div>
+	<div class="modal-footer">
+		<button
+			type="button"
+			(click)="deleteIdToDelete = undefined; modal.dismiss('Cross click')"
+			class="btn btn-secondary"
+			data-dismiss="modal"
+		>
+			{{ "GLOBAL.LABEL.CANCEL" | translate }}
+		</button>
+		<button
+			type="button"
+			(click)="deleteDepartment() && modal.dismiss('Cross click')"
+			class="btn btn-primary"
+		>
+			{{ "GLOBAL.LABEL.YES" | translate }}
+		</button>
+	</div>
+</ng-template>

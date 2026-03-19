@@ -1,0 +1,531 @@
+<div>
+	<div>
+	</div>
+	<button (click)="upSertCategoryModalShow(upsertcategorymodal, undefined, 'create')" type="button"
+		class="btn btn-primary btn-add-category">Adicionar Categoria</button>
+
+	<div *ngIf="!categories || categories.length <= 0" class="alert alert-warning" role="alert">
+		Nenhuma categoria cadastrada!
+	</div>
+	<div *ngIf="categories && categories.length > 0">
+		<!--   <div *ngFor="let category of categories" class="card bg-primary" style="width: 100%;">  -->
+		<div *ngFor="let category of categories; index as ci" class="card" style="width: 100%;">
+			<div class="card-header">
+				<div class="row">
+					<div class="categoryName col-7">
+						{{category.name}}
+					</div>
+					<div class="categryPosition col-1">
+						{{category.position}}
+					</div>
+					<div class="toggleHeader col-3" style="text-align: right;">
+						<mat-slide-toggle [checked]="category.isPaused" name="isPaused"
+							(change)="onChangetoggleHeader($event, category)" labelPosition="after">Pausar</mat-slide-toggle>
+					</div>
+					<div class="col-1 actions-category">
+						<i class="flaticon2-up icon-menu-food" [id]="'icon_'+category._id"
+							(click)="clickOpenAndClosed(category._id)"></i>
+						<div class="col-1 actions-products">
+							<div class="card-toolbar col">
+								<div ngbDropdown [placement]="'bottom-right'" class="dropdown dropdown-inline" title="Ações rápidas">
+									<a ngbDropdownToggle class="btn btn-clean btn-hover-light-primary btn-sm btn-icon"
+										data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+										<i class="flaticon-more icon-menu-food"></i>
+									</a>
+									<div ngbDropdownMenu class="dropdown-menu dropdown-menu-md dropdown-menu-right">
+										<ul class="navi navi-hover action-menu-product">
+											<!-- <li class="navi-footer pt-1 pb-4">
+												<i class="flaticon2-edit icon-sm mr-2"></i>
+												Duplicar
+											</li> -->
+											<li (click)="upSertCategoryModalShow(upsertcategorymodal, category, 'edit')"
+												class="navi-footer pt-1 pb-4">
+												<i class="flaticon2-edit icon-sm mr-2"></i>
+												Editar
+											</li>
+											<li (click)="confirmDeleteCategoryModalShow(confirmdeletemodal, category._id)"
+												class="navi-footer pt-1 pb-4">
+												<i class="flaticon2-trash icon-sm mr-2">
+													Excluir
+												</i>
+											</li>
+										</ul>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="card-body" [id]="'category_'+category._id" cdkDropListGroup>
+				<ul class="list-group list-group-flush menu-food-list" cdkDropList [cdkDropListData]="category.products"
+					(cdkDropListDropped)="drop($event, ci)">
+					<li *ngIf="!category.products || category.products.length <= 0" class="list-group-item">Nenhum item
+						cadastrado</li>
+					<li *ngFor="let product of category.products" class="list-group-item" cdkDrag>
+						<div class="row">
+							<div class="col-2">
+								<a [href]='product.images[0]' target="_blank">
+									<img width="50" class="img-thumbnail" [src]='product.images[0] || "./assets/media/logo-default.png"'
+										[alt]='product.name || ""' />
+								</a>
+							</div>
+							<div class="col-5">
+								{{product.name}}
+							</div>
+							<div class="col-2">
+								<h6 *ngIf="product.pricePromotion">
+									<span class="pricePromotionBlue">
+										{{ 'R$: ' + (product.pricePromotion || 0).toFixed(2).replace('.',',') }}
+									</span>
+									<br>
+									<span class="pricePromotion">
+										{{ 'R$: ' + (product.price || 0).toFixed(2).replace('.',',') }}
+									</span>
+								</h6>
+								<h6 *ngIf="product.pricePromotion" class="pricePromotion">
+								</h6>
+								<h6 *ngIf="!product.pricePromotion">{{ 'R$: ' + (product.price || 0).toFixed(2).replace('.',',') }}</h6>
+							</div>
+							<div class="toggleForm col-2">
+								<mat-slide-toggle [checked]="product.isPaused" name="isPaused"
+									(change)="onChangetoggleForm($event, product)" labelPosition="after">Pausar</mat-slide-toggle>
+							</div>
+							<div class="col-1 actions-products">
+								<div class="card-toolbar col">
+									<div ngbDropdown [placement]="'bottom-right'" class="dropdown dropdown-inline" title="Quick actions">
+										<a ngbDropdownToggle class="btn btn-clean btn-hover-light-primary btn-sm btn-icon"
+											data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+											<i class="flaticon-more icon-menu-food"></i>
+										</a>
+										<div ngbDropdownMenu class="dropdown-menu dropdown-menu-md dropdown-menu-right">
+											<ul class="navi navi-hover action-menu-product">
+												<li
+													(click)="duplicateModal(upsertfoodproductmodal, category._id, category.name, product, 'create')"
+													class="navi-footer pt-1 pb-4">
+													<i class="flaticon-add icon-sm mr-2"></i>
+													Duplicar
+												</li>
+												<li
+													(click)="upsertProductModal(upsertfoodproductmodal, category._id, category.name, product, 'edit')"
+													class="navi-footer pt-1 pb-4">
+													<i class="flaticon2-edit icon-sm mr-2"></i>
+													Editar
+												</li>
+												<li (click)="confirmDeleteItemModalShow(confirmdeleitemtemodal, product._id)"
+													class="navi-footer pt-1 pb-4">
+													<i class="flaticon2-trash icon-sm mr-2"></i>
+													Excluir
+												</li>
+											</ul>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</li>
+				</ul>
+			</div>
+			<div class="card-footer">
+				<button class="btn btn-primary btn-remove-category"
+					(click)="upsertProductModal(upsertfoodproductmodal, category._id, category.name, undefined, 'create')"
+					type="button">Adicionar Item</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<ng-template #confirmdeletemodal let-modal>
+	<div class="modal-header">
+		<h4 class="modal-title" id="modal-delete-menu">Confirmar exclusão</h4>
+		<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	<div class="modal-body" class="btn btn-warning">
+		{{ 'GLOBAL.LABEL.AREYOUSUREYOUWANTTODELETE' | translate }}
+	</div>
+	<div class="modal-footer">
+		<button type="button" (click)="menuIdToDelete=undefined;
+		 modal.dismiss('Cross click')" class="btn btn-secondary"
+			data-dismiss="modal">{{ 'GLOBAL.LABEL.CANCEL' | translate }}</button>
+		<button type="button" (click)="deleteFoodCategory()" class="btn btn-primary">
+			{{ 'GLOBAL.LABEL.YES' | translate }}</button>
+	</div>
+</ng-template>
+
+<ng-template #confirmdeleitemtemodal let-modal>
+	<div class="modal-header">
+		<h4 class="modal-title" id="modal-delete-menu" *ngIf="formData && formData.value && formData.value.name">
+			{{formData.value?.name}}
+		</h4>
+		<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	<div class="modal-body" class="btn btn-warning">
+		{{ 'GLOBAL.LABEL.AREYOUSUREYOUWANTTODELETE' | translate }}
+	</div>
+	<div class="modal-footer">
+		<button type="button" (click)="menuIdToDelete=undefined;
+		 modal.dismiss('Cross click')" class="btn btn-secondary"
+			data-dismiss="modal">{{ 'GLOBAL.LABEL.CANCEL' | translate }}</button>
+		<button type="button" (click)="deleteItem()" class="btn btn-primary">
+			{{ 'GLOBAL.LABEL.YES' | translate }}</button>
+	</div>
+</ng-template>
+
+<div class="example-container mat-elevation-z8">
+	<!-- Modal Up Sert created/updated -->
+	<ng-template #upsertcategorymodal let-modal>
+		<form [formGroup]="formData" (ngSubmit)="formSubmitAttempt=true; formData.valid && upsertCategory(formData.value)
+         && modal.dismiss('Cross click')">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-create-category">
+					{{ (typeAction === 'create') ? ('GLOBAL.LABEL.CREATECATEGORY' | translate) : ('GLOBAL.LABEL.EDITCATEGORY' | translate) }}
+				</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<input type="hidden" class="form-control" formControlName="_id">
+				<div class="row">
+					<div class="form-group">
+						<label for="name">{{ 'GLOBAL.LABEL.NAME' | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="name"
+								[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('name').invalid}">
+						</div>
+					</div>
+					<div class="form-group col-3">
+						<label for="position">{{ 'GLOBAL.LABEL.POSITION' | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" type="number" formControlName="position"
+								[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('position').invalid}">
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<input type="submit" value="Criar" class="btn btn-outline-dark">
+			</div>
+		</form>
+	</ng-template>
+</div>
+
+<div class="example-container mat-elevation-z8">
+	<!-- Apartir de aqui é o modal -->
+	<!-- Modal Create Produto adicional -->
+	<ng-template #upsertfoodproductmodal let-modal modal-lg>
+		<form [formGroup]="formDataProduct" (ngSubmit)="formSubmitProduct=true;
+			validPricePromotion(formDataProduct.value) &&
+			 formDataProduct.valid
+			  && upsertProduct(formDataProduct.value)">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-create-foodProduct">
+					{{ 'GLOBAL.LABEL.CREATEPRODUCT' | translate }}
+				</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<mat-tab-group>
+					<mat-tab label="Produto">
+						<div style="margin-top: 10px">
+							<div class="custom-file">
+								<input type="file" class="custom-file-input" id="customFile" (change)="onChange($event)" multiple
+									[ngClass]="{'is-invalid' : formSubmitProduct && formDataProduct.get('file').invalid}">
+								<label class="custom-file-label" for="customFile" id="customFileLabel">
+									{{ 'GLOBAL.LABEL.SELECTIMAGE' | translate }}</label>
+							</div>
+						</div>
+						<br>
+						<div class="row">
+							<input type="hidden" class="form-control" formControlName="_id">
+							<div class="form-group form-check col-6">
+								<label class="" for="name">{{ 'GLOBAL.LABEL.NAME' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="name"
+										[ngClass]="{'is-invalid' : formSubmitProduct && formDataProduct.get('name').invalid}">
+								</div>
+							</div>
+							<div class="form-group col-6">
+								<label for="category">{{ 'GLOBAL.LABEL.FOODCATEGORY' | translate }}</label>
+								<div class="input-group">
+									<input type="text" class="form-control" matInput placeholder="Escolha uma Empresa"
+										[matAutocomplete]="autoCategory" formControlName="category"
+										[ngClass]="{'is-invalid' : formSubmitProduct && formDataProduct.get('category').invalid}">
+									<mat-autocomplete [displayWith]="displayFn" #autoCategory="matAutocomplete">
+										<mat-option *ngFor="let cat of categories" [value]="cat">
+											{{ cat.name }}
+										</mat-option>
+									</mat-autocomplete>
+								</div>
+							</div>
+							<div class="form-group form-check col-6">
+								<label class="" for="shortDescription">{{ 'GLOBAL.LABEL.SHORTDESCRIPTION' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="shortDescription">
+								</div>
+							</div>
+							<div class="form-group form-check col-3">
+								<label class="" for="codPdv">{{ 'GLOBAL.LABEL.CODPDV' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="codPdv" style="width: 94px;">
+								</div>
+							</div>
+							<div class="form-group col-3">
+								<label for="isPaused">{{ 'GLOBAL.LABEL.ISPAUSED' | translate }}</label>
+								<div class="input-group">
+									<mat-slide-toggle formControlName="isPaused"></mat-slide-toggle>
+								</div>
+							</div>
+							<div class="form-group form-check col-12">
+								<label class="" for="description">{{ 'GLOBAL.LABEL.DESCRIPTION' | translate }}</label>
+								<ckeditor [editor]="Editor"
+									[config]="{ toolbar: [ 'heading', '|', 'bold', 'italic', '|',  'undo', 'redo', '|' ] } "
+									formControlName="description"></ckeditor>
+							</div>
+							<div class="container">
+								<div class="row">
+									<div class="form-group col-12">
+										<h3 class="text col-12">Pra qual tamanho de fome é esse item</h3>
+										<br>
+										<h6 class="text col-12">Dê mais detalhes para qual o cliente possa planejar uma refeição</h6>
+										<!-- <label class="col-12" for="amountPeople">Quantas pessoas?</label> -->
+										<div class="form-check form-check-inline col-2">
+											<input class="form-check-input" type="radio" formControlName="amountPeople" name="amountPeople"
+												id="ONE" value="ONE" [ngClass]="{'is-invalid' : formDataProduct.get('amountPeople').invalid}">
+											<label class="form-check-label flaticon-users-1" for="inlineRadio1"> uma</label>
+										</div>
+										<div class="form-check form-check-inline col-2">
+											<input class="form-check-input" type="radio" formControlName="amountPeople" name="amountPeople"
+												id="TWO" value="TWO" [ngClass]="{'is-invalid' : formDataProduct.get('amountPeople').invalid}">
+											<label class="form-check-label flaticon-users-1" for="inlineRadio2"> duas</label>
+										</div>
+										<div class="form-check form-check-inline col-2">
+											<input class="form-check-input" type="radio" formControlName="amountPeople" name="amountPeople"
+												id="THREE" value="THREE"
+												[ngClass]="{'is-invalid' : formDataProduct.get('amountPeople').invalid}">
+											<label class="form-check-label flaticon-users-1" for="inlineRadio3"> três</label>
+										</div>
+										<div class="form-check form-check-inline col-2">
+											<input class="form-check-input" type="radio" formControlName="amountPeople" name="amountPeople"
+												id="FOUR" value="FOUR" [ngClass]="{'is-invalid' : formDataProduct.get('amountPeople').invalid}">
+											<label class="form-check-label flaticon-users-1" for="inlineRadio4"> quatro</label>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="row col-12">
+								<div class="card col-12">
+									<div class="card-header">
+										{{ !applyDiscount ? 'Preço' : 'Desconto direto no produto' }}
+									</div>
+									<div class="card-body row">
+										<h5 *ngIf="applyDiscount" class="card-text card-text-info col-12">Se o desconto for acima de 20%, o
+											item aparecerá em destaque no aplicativo, inclusive na Home. Quanto maior o desconto, maior será o
+											destaque!</h5>
+										<!-- <a href="#" class="btn btn-primary">Go somewhere</a> -->
+										<div class="form-group form-check col-3">
+											<label class="" for="price">{{ 'GLOBAL.LABEL.PRICE' | translate }}</label>
+											<div class="input-group">
+												<input class="form-control" currencyMask formControlName="price"
+													[ngClass]="{'is-invalid' : formSubmitProduct && formDataProduct.get('price').invalid}">
+											</div>
+										</div>
+										<div *ngIf="applyDiscount" class="form-group form-check col-3">
+											<label class="" for="pricePromotion">{{ 'GLOBAL.LABEL.PRICEPROMOTION' | translate }}</label>
+											<div class="input-group">
+												<input class="form-control" currencyMask formControlName="pricePromotion">
+											</div>
+										</div>
+										<div *ngIf="applyDiscount" class="form-group form-check col-3">
+											<label class=""
+												for="percentualDiscount">{{ 'GLOBAL.LABEL.PERCENTUALDISCOUNT' | translate }}</label>
+											<div class="input-group">
+												<input class="form-control" (change)="onChangePriceDiscountPercent(formDataProduct.value)"
+													type="number" min="0.00" max="100.00" step="0.01" formControlName="percentualDiscount">
+											</div>
+										</div>
+										<div *ngIf="!applyDiscount" class="form-group form-check col-3">
+											<label class=""></label>
+											<div class="input-group">
+												<button type="button" class="btn btn-sm btn-outline-primary"
+													(click)="enabledPricePromotion(formDataProduct.value)">
+													<label class="" for="includeDiscount">Aplicar desconto</label>
+												</button>
+											</div>
+										</div>
+										<div class="row col-3">
+											<div *ngIf="applyDiscount" class="form-group form-check">
+												<label class=""></label>
+												<div class="input-group">
+													<button type="button" class="btn btn-sm btn-outline-danger	"
+														(click)="disabledPricePromotion(formDataProduct.value)">
+														<label class="" for="removeDiscount">Cancelar desconto</label>
+													</button>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</mat-tab>
+					<mat-tab label="Complemento">
+						<div>
+							<div class="col-6">
+								<button class="btn btn-primary" (click)="addComplementForm()" type="button">
+									Adicionar Categoria
+								</button>
+							</div>
+							<br>
+							<div *ngFor="let complement of formDataProduct.get('complements').controls; index as i">
+								<div id="box-card-complement-${countBox}" class="card box-product-complement form-inline"
+									style="box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19) !important; margin-bottom: 15px !important;">
+									<ng-container [formGroup]="complement">
+										<div class="card-body row box-product-complement2">
+											<!-- row justify-content-between Alinha pra direita-->
+											<div class="form-inline justify-content-between">
+												<div class="form-group col-4">
+													<label class="" for="name">{{ 'GLOBAL.LABEL.NAME' | translate }}</label>
+													<div class="input-group col">
+														<input required class="form-control" formControlName="name"
+															[ngClass]="{'is-invalid' : formSubmitProduct && complement.get('name').invalid}">
+													</div>
+												</div>
+												<div class="form-group col-2">
+													<label class="" for="amountMin">{{ 'GLOBAL.LABEL.AMOUNTMIN' | translate }}</label>
+													<div class="input-group">
+														<input class="form-control" formControlName="amountMin"
+															[ngClass]="{'is-invalid' : formSubmitProduct && complement.get('amountMin').invalid}">
+													</div>
+												</div>
+												<div class="form-group col-2">
+													<label class="" for="amountMax">{{ 'GLOBAL.LABEL.AMOUNTMAX' | translate }}</label>
+													<div class="input-group">
+														<input class="form-control" formControlName="amountMax"
+															[ngClass]="{'is-invalid' : formSubmitProduct && complement.get('amountMax').invalid}">
+													</div>
+												</div>
+												<div class="form-check col-1">
+													<label class="form-check-label"
+														for="isRequired">{{ 'GLOBAL.LABEL.ISREQUIRED' | translate }}</label>
+													<input type="checkbox" class="form-check-input" formControlName="isRequired">
+												</div>
+												<div class="form-group col-2">
+													<label for="isPaused">{{ 'GLOBAL.LABEL.ISPAUSED' | translate }}</label>
+													<div class="input-group">
+														<mat-slide-toggle formControlName="isPaused"></mat-slide-toggle>
+													</div>
+												</div>
+												<div class="form-group col-3">
+													<label for="position">{{ 'GLOBAL.LABEL.POSITION' | translate }}</label>
+													<div class="input-group">
+														<input class="form-control" type="number" formControlName="position"
+															[ngClass]="{'is-invalid' : formSubmitProduct && complement.get('position').invalid}">
+													</div>
+												</div>
+											</div>
+										</div>
+										<br>
+										<hr>
+										<ul>
+											<li *ngFor="let item of complement.get('items').controls; index as j" class="row"
+												[formGroup]="item">
+												<!-- {{j}} -->
+												<div class="form-inline col-3">
+													<label class="" for="name">{{ 'GLOBAL.LABEL.NAME' | translate }}</label>
+													<div class="input-group">
+														<input class="form-control form-control-sm" formControlName="name"
+															[ngClass]="{'is-invalid' : formSubmitProduct && item.get('name').invalid}">
+													</div>
+												</div>
+												<div class="form-inline col-1">
+													<label class="" for="codPdv">{{ 'GLOBAL.LABEL.CODPDV' | translate }}</label>
+													<div class="input-group">
+														<input class="form-control form-control-sm" style="width: 94px;" formControlName="codPdv">
+													</div>
+												</div>
+												<div class="form-inline col-2">
+													<label class="" for="description">{{ 'GLOBAL.LABEL.DESCRIPTION' | translate }}</label>
+													<div class="input-group">
+														<input class="form-control form-control-sm" formControlName="description">
+													</div>
+												</div>
+												<div class="form-inline col-2">
+													<label class="" for="price">{{ 'GLOBAL.LABEL.PRICE' | translate }}</label>
+													<div class="input-group">
+														<input class="form-control form-control-sm" style="width: 94px;" currencyMask
+															formControlName="price"
+															[ngClass]="{'is-invalid' : formSubmitProduct && item.get('price').invalid}">
+													</div>
+												</div>
+												<div class="form-group col-2">
+													<label for="isPaused">{{ 'GLOBAL.LABEL.ISPAUSED' | translate }}</label>
+													<div class="input-group">
+														<mat-slide-toggle formControlName="isPaused"></mat-slide-toggle>
+													</div>
+												</div>
+												<div class="form-group text-center col-1">
+													<label class="col-12">{{ 'GLOBAL.LABEL.ACTION' | translate }}</label>
+													<button type="button" (click)="removeFeeItem(i, j)" mat-mini-fab color="warn"
+														class="col-12 mat-mini-fab mat-button-base mat-accent">
+														<span class="mat-button-wrapper">
+															<mat-icon class="mat-icon notranslate material-icons mat-icon-no-color" role="img"
+																aria-hidden="true">
+																delete
+															</mat-icon>
+														</span>
+														<div class="mat-button-ripple mat-ripple mat-button-ripple-round" matripple>
+														</div>
+														<div class="mat-button-focus-overlay">
+														</div>
+													</button>
+												</div>
+											</li>
+										</ul>
+										<div class="card-footer text-left">
+											<button class="btn btn-danger btn-delete" (click)="deleteComplement(i)" type="button">
+												Excluir categoria
+											</button>
+											<button class="btn btn-primary"
+												(click)="addComplement(i, formDataProduct.get('complements').controls[i])" type="button">
+												Adicionar complemento
+											</button>
+										</div>
+									</ng-container>
+									<!-- {{i}} -->
+								</div>
+							</div>
+							<br>
+							<div class="row">
+							</div>
+							<div id="list-product-complement"></div>
+						</div>
+					</mat-tab>
+				</mat-tab-group>
+			</div>
+			<div class="modal-footer">
+				<input type="submit" value="Salvar Item" class="btn btn-outline-dark">
+			</div>
+		</form>
+	</ng-template>
+</div>
+<div class="example-container mat-elevation-z8">
+	<!-- Apartir de aqui é o modal -->
+	<!-- Modal Para confirmar ação -->
+	<ng-template #confirmaction let-modal>
+		<div class="modal fade bd-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel"
+			aria-hidden="true">
+			<div class="modal-dialog modal-sm">
+				<div class="modal-content">
+					...
+				</div>
+			</div>
+		</div>
+	</ng-template>
+</div>

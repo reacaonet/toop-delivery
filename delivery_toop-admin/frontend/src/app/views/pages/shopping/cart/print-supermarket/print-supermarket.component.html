@@ -1,0 +1,213 @@
+<div class="box">
+	<div class="contentPrint">
+		<!-- <img class="imgLogo" src="../../../../../../assets/images/logo/print/logo.png" />
+
+		<p></p>
+		<span class="txtInfo">Impresso em {{currentDate | date:'dd/MM/yyyy HH:mm'}}</span>
+		<span class="txtInfo">SIMPLES CONFERENCIA DA CONTA</span>
+		<span class="txtInfo">*** NÃO É DOCUMENTO FISCAL ***</span> -->
+
+		<!-- <hr class="divider"> -->
+
+		<table class="table">
+			<tbody>
+				<tr>
+					<td class="text-center" style="width: '50%'">
+						<img class="imgLogo" src="../../../../../../assets/images/logo/print/logo.png" />
+					</td>
+					<td style="width: '50%'">
+						<h6>
+							Nº do pedido: <b>{{order?.numberOrder}}</b>
+						</h6>
+						<h6>
+							Data/Hora: <b>{{order?.dateOrder}}</b>
+						</h6>
+						<h6>
+							Nº Interno:
+						</h6>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+
+		<table class="table">
+			<thead>
+				<tr>
+					<th>
+						<b>Dados do Cliente</b>
+					</th>
+					<th>
+						<b>Informações</b>
+					</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td style="width: '50%'">
+						<h6 *ngIf="order?.customer">
+							<b>{{order?.customer}}</b>
+						</h6>
+						<h6 *ngIf="order?.phoneCustomer">
+							Contato: <b>{{order?.phoneCustomer}}</b>
+						</h6>
+						<h6 *ngIf="order?.address">
+							<b>{{order?.address}}</b>
+						</h6>
+						<h6 *ngIf="order?.number">
+							Número: <b>{{order?.number}}</b>
+						</h6>
+						<h6 *ngIf="order?.complement">
+							Complemento: <b>{{order?.complement}}</b>
+						</h6>
+						<h6 *ngIf="order?.referencePoint">
+							Referência: <b>{{order?.referencePoint}}</b>
+						</h6>
+						<h6 *ngIf="order?.note">
+							Observações: <b>{{order?.note}}</b>
+						</h6>
+					</td>
+					<td style="width: '50%'">
+						<h6>
+							Pagamento:
+							<b *ngIf="order.typePayment ==='PAGARME'">Aplicativo</b>
+							<b *ngIf="order.typePayment ==='CARD'">Cartão</b>
+							<b *ngIf="order.typePayment ==='MONEY'">Dinheiro</b>
+						</h6>
+						<h6>Status:
+							<b *ngIf="order.typePayment ==='PAGARME'">Pago</b>
+							<b *ngIf="order.typePayment !=='PAGARME'">Aguardando Pagamento na entrega</b>
+						</h6>
+						<h6 *ngIf="order.typePayment ==='CARD'">
+							<img src="{{order?.fncTypePayment?.image[0]}}" alt="CARD" width="50px" style="max-height: 80px;" />
+						</h6>
+						<h6 *ngIf="order.typePayment ==='MONEY' && order?.cashChange">Troco para:
+							<b>{{order?.cashChange | currency:'BRL':true:'1.2-2'}}</b>
+						</h6>
+						<h6 *ngIf="order?.typeSchedule">Tipo agendamento:
+							<b>{{order?.typeSchedule}}</b>
+						</h6>
+						<h6 *ngIf="order?.schedule">Agendamento:
+							<b>{{order?.schedule}}</b>
+						</h6>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+
+		<table class="table tableItem" *ngIf="order && order.products">
+			<thead class="noBorder">
+				<tr class="noBorder">
+					<th>Foto</th>
+					<th>Descrição</th>
+					<th>Qtd</th>
+					<th>Valor Uni</th>
+					<th>Total</th>
+					<th>Encontrado</th>
+					<th>Não Encontrado</th>
+				</tr>
+			</thead>
+			<tbody *ngFor="let item of order.products; index as i;" class="noBorder">
+				<tr class="noBorder">
+					<td>
+						<img [src]='item.image || "./assets/media/logos/image_default.png"' width="60px" height="60px" />
+					</td>
+					<td>
+						{{item.product}}
+						<p *ngIf="item.barcode">
+							Cod {{item.barcode}}
+						</p>
+					</td>
+					<td>{{item.amount}}</td>
+					<td>{{item.price}}</td>
+					<td>{{item.subtotal}}</td>
+					<td class="square">
+						<div class="squareContent"></div>
+					</td>
+					<td class="square">
+						<div class="squareContent"></div>
+					</td>
+				</tr>
+
+				<tr class="noBorder" *ngIf="item.comment">
+					<td colspan="7">Obs.: {{item.comment}}</td>
+				</tr>
+
+				<tr class="noBorder">
+					<td colspan="7">
+						<hr class="divider">
+					</td>
+				</tr>
+			</tbody>
+		</table>
+
+		<table class="table">
+			<tbody class="noBorder">
+				<tr>
+					<td style="width: '50%'"></td>
+					<td class="text-right" style="width: '50%'">
+						<h6>
+							Taxa Entrega: {{ ' R$ ' + (order?.priceDelivery || 0).toFixed(2).replace('.',',') }}
+						</h6>
+						<h6>
+							Cupom: {{ '- R$ ' + (order?.couponPrice || 0).toFixed(2).replace('.',',') }}
+						</h6>
+						<h6>
+							Descontos: {{ '- R$ ' + (order?.totalDiscount || 0).toFixed(2).replace('.',',') }}
+						</h6>
+						<h6>
+							SubTotal: {{ ' R$ ' + (order.subTotal || 0).toFixed(2).replace('.',',') }}
+						</h6>
+						<h6>
+							Total: {{ 'R$ ' + (order?.totalCompany || 0).toFixed(2).replace('.',',') }}
+						</h6>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+
+		<table class="table table-bordered">
+			<thead class="thead-light">
+				<tr>
+					<th class="text-center" scope="col">Valor Estimado (Produtos)</th>
+					<th class="text-center" scope="col">Valor Final (Após separação) </th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td class="text-center" style="width: '50%'">
+						{{ ' R$ ' + (order.subTotal || 0).toFixed(2).replace('.',',') }}
+					</td>
+					<td class="text-center" style="width: '50%'">
+
+					</td>
+				</tr>
+			</tbody>
+		</table>
+
+		<hr class="divider" style="margin-top: 30px; margin-bottom: 15px;">
+
+		<table class="table tableItem">
+			<tbody class="noBorder">
+				<tr>
+					<td style="width: '50%'">
+						<h6 class="spaceBottom">
+							Nome do separador:
+						</h6>
+						<h6 class="spaceBottom">
+							Nº do cupom fiscal:
+						</h6>
+						<h6 class="spaceBottom">
+							Valor no cupom fiscal:
+						</h6>
+						<h6 class="spaceBottom">
+							Data e hora da separação:
+						</h6>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+
+		<span class="centered">* Obrigado pela preferência! *</span>
+		<span class="centered">Volte sempre!</span>
+	</div>
+</div>

@@ -1,0 +1,362 @@
+<form [formGroup]="formFilter" formFilter.valid>
+	<div class="row">
+		<div class="form-group row col-6">
+			<label for="name">{{ 'GLOBAL.LABEL.PERSON' | translate }}</label>
+			<div class="input-group">
+				<input required class="form-control" placeholder="Pesquisar por nome" formControlName="name">
+			</div>
+		</div>
+		<div class="form-group col-6">
+			<label for="cpf">{{ 'GLOBAL.LABEL.CPF' | translate }}</label>
+			<div class="input-group">
+				<input mask="000.000.000-00" required class="form-control" placeholder="Pesquisar por CPF"
+					formControlName="cpf">
+			</div>
+		</div>
+	</div>
+</form>
+
+<div class="row justify-content-between">
+	<div class="col-auto align-self-center mb-2">
+		<p class="float-left">{{ 'GLOBAL.LABEL.PERSON' | translate }} </p>
+	</div>
+	<div class="col-auto">
+		<a (click)="createPersonModalShow(createpersonmodal)" href="javascript:;"
+			class="float-right btn btn-label-warning btn-bold btn-sm btn-icon-h">
+			{{ 'GLOBAL.LABEL.CREATE' | translate }}
+		</a>
+	</div>
+</div>
+
+<div class="example-container mat-elevation-z8">
+	<mat-table #table [dataSource]="dataSource">
+		<!-- Checkbox Column -->
+		<ng-container matColumnDef="select">
+			<mat-header-cell *matHeaderCellDef>
+				<mat-checkbox [checked]="true" [indeterminate]="true">
+				</mat-checkbox>
+			</mat-header-cell>
+			<mat-cell *matCellDef="let row">
+				<mat-checkbox (click)="$event.stopPropagation()">
+				</mat-checkbox>
+			</mat-cell>
+		</ng-container>
+		<!-- franchise Column -->
+		<ng-container matColumnDef="franchise">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.FRANCHISE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element?.franchise?.name }} </mat-cell>
+		</ng-container>
+		<!-- company Column -->
+		<ng-container matColumnDef="company">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.COMPANY' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element?.company?.name }} </mat-cell>
+		</ng-container>
+		<!-- Name Column -->
+		<ng-container matColumnDef="name">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.NAME' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.name }} </mat-cell>
+		</ng-container>
+		<!-- CPF Column -->
+		<ng-container matColumnDef="cpf">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.CPF' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.cpf }} </mat-cell>
+		</ng-container>
+		<!-- City Column -->
+		<ng-container matColumnDef="city">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.CITY' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.city?.name || '-' }} </mat-cell>
+		</ng-container>
+		<!-- Phone Column -->
+		<ng-container matColumnDef="phone">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.PHONE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.phone }} </mat-cell>
+		</ng-container>
+		<!-- Cellphone Column -->
+		<ng-container matColumnDef="cellphone">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.CELLPHONE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.cellphone }} </mat-cell>
+		</ng-container>
+		<!-- Birthdate Column -->
+		<ng-container matColumnDef="birthdate">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.BIRTHDATE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.birthdate }} </mat-cell>
+		</ng-container>
+		<!-- Status Column -->
+		<ng-container matColumnDef="status">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.STATUS' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i *ngIf="element.status === true" class="flaticon2-accept mr-2"></i>
+				<i *ngIf="element.status === false" class="flaticon2-cancel mr-2"></i>
+			</mat-cell>
+		</ng-container>
+		<!-- Edit Person -->
+		<ng-container matColumnDef="editAction">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.ACTION' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i class="flaticon2-edit mr-2" (click)="editPersonModalShow(editpersonmodal, element)"></i>
+				<i class="flaticon2-trash" (click)="confirmDeleteModalShow(confirmdeletemodal, element)"></i>
+			</mat-cell>
+		</ng-container>
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns;">
+		</mat-row>
+	</mat-table>
+	<mat-paginator [length]="totalLength" [pageSize]="pageSize" [pageSizeOptions]="pageLimit" (page)="changePage($event)">
+	</mat-paginator>
+
+	<!-- Apartir de aqui é o modal -->
+	<!-- Modal Create Person -->
+	<ng-template #createpersonmodal let-modal>
+		<form [formGroup]="formData"
+			(ngSubmit)="formSubmitPerson=true; formData.valid && createPerson(formData.value, confirmcreateaccounmodal, true)">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-create-person">{{ 'GLOBAL.LABEL.CREATEPERSON' | translate }}</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div class="form-group" *ngIf="!isRoot">
+					<label for="company">{{ 'GLOBAL.LABEL.COMPANY' | translate }}</label>
+					<div class="input-group">
+						<input type="text" class="form-control" matInput placeholder="Escolha uma Empresa"
+							[matAutocomplete]="autoCompany" formControlName="company"
+							[ngClass]="{'is-invalid' : formSubmitPerson && formData.get('company').invalid}">
+						<mat-autocomplete [displayWith]="displayFn" #autoCompany="matAutocomplete">
+							<mat-option *ngFor="let comp of companies" [value]="comp">
+								{{ comp.name }}
+							</mat-option>
+						</mat-autocomplete>
+					</div>
+				</div>
+				<div class="form-group" *ngIf="isRoot">
+					<label for="franchise">{{ 'GLOBAL.LABEL.FRANCHISE' | translate }}</label>
+					<div class="input-group">
+						<input type="text" class="form-control" matInput placeholder="Escolha uma Fanquia"
+							[matAutocomplete]="autoFranchise" formControlName="franchise"
+							[ngClass]="{'is-invalid' : formSubmitPerson && formData.get('franchise').invalid}">
+						<mat-autocomplete [displayWith]="displayFn" #autoFranchise="matAutocomplete">
+							<mat-option *ngFor="let franchise of franchises" [value]="franchise">
+								{{ franchise.name }}
+							</mat-option>
+						</mat-autocomplete>
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="name">{{ 'GLOBAL.LABEL.NAME' | translate }}</label>
+					<div class="input-group">
+						<input class="form-control" formControlName="name"
+							[ngClass]="{'is-invalid' : formSubmitPerson && formData.get('name').invalid}">
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="cpf">{{ 'GLOBAL.LABEL.CPF' | translate }}</label>
+					<div class="input-group">
+						<input mask="000.000.000-00" class="form-control" formControlName="cpf">
+					</div>
+				</div>
+				<div class="form-group">
+					<label>{{ 'GLOBAL.LABEL.CITY' | translate }}</label>
+					<div class="input-group">
+						<input type="text" class="form-control" matInput placeholder="Escolha uma cidade"
+							[matAutocomplete]="autoImagesEdit" formControlName="city"
+							[ngClass]="{'is-invalid' : formSubmitPerson && formData.get('city').invalid}">
+						<mat-autocomplete [displayWith]="displayFn" #autoImagesEdit="matAutocomplete">
+							<mat-option *ngFor="let city of listCity" [value]="city">
+								{{ city.name }}
+							</mat-option>
+						</mat-autocomplete>
+					</div>
+				</div>
+				<div class="row">
+					<div class="form-group col col-4">
+						<label for="ddi">DDI</label>
+						<div class="input-group">
+							<select class="form-control" formControlName="ddi" (change)="setMaskPhone($event)">
+								<option value="+55">Brasil</option>
+								<option value="+244">Angola</option>
+							</select>
+						</div>
+					</div>
+					<div class="form-group col col-8">
+						<label for="phone">{{ 'GLOBAL.LABEL.PHONE' | translate }}</label>
+						<div class="input-group">
+							<input mask="{{ maskPhone }}" class="form-control" formControlName="phone">
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="cellphone">{{ 'GLOBAL.LABEL.CELLPHONE' | translate }}</label>
+					<div class="input-group">
+						<input mask="(00) 00009-0000" class="form-control" formControlName="cellphone">
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="birthdate">{{ 'GLOBAL.LABEL.BIRTHDATE' | translate }}</label>
+					<div class="input-group">
+						<input mask="00/M0/0000" class="form-control" formControlName="birthdate"
+							[ngClass]="{'is-invalid' : formSubmitPerson && formData.get('birthdate').invalid}">
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="status">{{ 'GLOBAL.LABEL.STATUS' | translate }}</label>
+					<div class="input-group">
+						<mat-slide-toggle formControlName="status"></mat-slide-toggle>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<input type="submit" value="Criar" class="btn btn-outline-dark">
+			</div>
+		</form>
+	</ng-template>
+
+	<!-- Modal Edit Person -->
+	<ng-template #editpersonmodal let-modal>
+		<form [formGroup]="formData" (ngSubmit)="formSubmitPerson=true; formData.valid && updatePerson(formData.value)">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-edit-person">{{ 'GLOBAL.LABEL.TOEDIT' | translate }}
+					{{formData.value.name}}</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<input type="hidden" class="form-control" formControlName="_id">
+				<div class="form-group" *ngIf="!isRoot">
+					<label for="company">{{ 'GLOBAL.LABEL.COMPANY' | translate }}</label>
+					<div class="input-group">
+						<input type="text" class="form-control" matInput placeholder="Escolha uma Empresa"
+							[matAutocomplete]="autoCompany" formControlName="company"
+							[ngClass]="{'is-invalid' : formSubmitPerson && formData.get('company').invalid}">
+						<mat-autocomplete [displayWith]="displayFn" #autoCompany="matAutocomplete">
+							<mat-option *ngFor="let comp of companies" [value]="comp">
+								{{ comp.name }}
+							</mat-option>
+						</mat-autocomplete>
+					</div>
+				</div>
+				<div class="form-group" *ngIf="isRoot">
+					<label for="franchise">{{ 'GLOBAL.LABEL.FRANCHISE' | translate }}</label>
+					<div class="input-group">
+						<input type="text" class="form-control" matInput placeholder="Escolha uma Fanquia"
+							[matAutocomplete]="autoFranchise" formControlName="franchise"
+							[ngClass]="{'is-invalid' : formSubmitPerson && formData.get('franchise').invalid}">
+						<mat-autocomplete [displayWith]="displayFn" #autoFranchise="matAutocomplete">
+							<mat-option *ngFor="let franchise of franchises" [value]="franchise">
+								{{ franchise.name }}
+							</mat-option>
+						</mat-autocomplete>
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="name">{{ 'GLOBAL.LABEL.NAME' | translate }}</label>
+					<div class="input-group">
+						<input class="form-control" formControlName="name"
+							[ngClass]="{'is-invalid' : formSubmitPerson && formData.get('name').invalid}">
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="cpf">{{ 'GLOBAL.LABEL.CPF' | translate }}</label>
+					<div class="input-group">
+						<input mask="000.000.000-00" class="form-control" formControlName="cpf">
+					</div>
+				</div>
+				<div class="form-group">
+					<label>{{ 'GLOBAL.LABEL.CITY' | translate }}</label>
+					<div class="input-group">
+						<input type="text" class="form-control" matInput placeholder="Escolha uma cidade"
+							[matAutocomplete]="autoImagesEdit" formControlName="city">
+						<mat-autocomplete [displayWith]="displayFn" #autoImagesEdit="matAutocomplete">
+							<mat-option *ngFor="let city of listCity" [value]="city">
+								{{ city.name }}
+							</mat-option>
+						</mat-autocomplete>
+					</div>
+				</div>
+				<div class="row">
+					<div class="form-group col col-4">
+						<label for="ddi">DDI</label>
+						<div class="input-group">
+							<select class="form-control" formControlName="ddi" (change)="setMaskPhone($event)">
+								<option value="+55">Brasil</option>
+								<option value="+244">Angola</option>
+							</select>
+						</div>
+					</div>
+					<div class="form-group col col-8">
+						<label for="phone">{{ 'GLOBAL.LABEL.PHONE' | translate }}</label>
+						<div class="input-group">
+							<input mask="{{ maskPhone }}" class="form-control" formControlName="phone">
+						</div>
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="cellphone">{{ 'GLOBAL.LABEL.CELLPHONE' | translate }}</label>
+					<div class="input-group">
+						<input mask="(00) 00009-0000" class="form-control" formControlName="cellphone">
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="birthdate">{{ 'GLOBAL.LABEL.BIRTHDATE' | translate }}</label>
+					<div class="input-group">
+						<input type="text" mask="d0/M0/0000" class="form-control" formControlName="birthdate">
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="status">{{ 'GLOBAL.LABEL.STATUS' | translate }}</label>
+					<div class="input-group">
+						<mat-slide-toggle formControlName="status"></mat-slide-toggle>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<input type="submit" value="Salvar" class="btn btn-outline-dark">
+			</div>
+		</form>
+	</ng-template>
+
+
+	<!-- <ng-template #confirmcreateaccounmodal let-modal>
+		<div class="modal-header">
+			<h4 class="modal-title" id="modal-create-digital-accounts">Deseja criar a CONTA DIGITAL agora?</h4>
+			<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+		<div class="modal-body" class="btn btn-success">
+			{{ 'GLOBAL.LABEL.WANTTOCREATEADIGITALACCOUNTNOW' | translate }}
+		</div>
+		<div class="modal-footer">
+			<button type="button"
+				(click)="createDigitalAccount=false; createPerson(formData.value, confirmcreateaccounmodal, true)"
+				class="btn btn-secondary" data-dismiss="modal">{{
+				'GLOBAL.LABEL.NO' | translate }}</button>
+			<button type="button"
+				(click)="createDigitalAccount=true; createPerson(formData.value, confirmcreateaccounmodal, true)"
+				class="btn btn-primary">{{
+				'GLOBAL.LABEL.YES' | translate }}</button>
+		</div>
+	</ng-template> -->
+
+	<!-- Modal Delete -->
+	<ng-template #confirmdeletemodal let-modal>
+		<div class="modal-header">
+			<h4 class="modal-title" id="modal-delete-person">
+				Confirmar exclusão</h4>
+			<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+		<div class="modal-body" class="btn btn-warning">
+			{{ 'GLOBAL.LABEL.AREYOUSUREYOUWANTTODELETE' | translate }}
+		</div>
+		<div class="modal-footer">
+			<button type="button" (click)="personIdDelete=undefined; modal.dismiss('Cross click')" class="btn btn-sm btn-info"
+				data-dismiss="modal">{{ 'GLOBAL.LABEL.CANCEL' | translate }}</button>
+			<button type="button" (click)="deletePerson() && modal.dismiss('Cross click')" class="btn btn-sm btn-primary">{{
+				'GLOBAL.LABEL.YES' | translate }}</button>
+		</div>
+	</ng-template>
+
+</div>

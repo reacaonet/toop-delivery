@@ -1,0 +1,289 @@
+<div class="row justify-content-between">
+	<div class="col-auto align-self-center mb-2">
+		<p class="float-left">{{ 'GLOBAL.LABEL.COUPONS' | translate }} </p>
+	</div>
+	<div class="col-auto">
+		<a (click)="upsertCouponModalShow(upsertcouponmodal, undefined, 'create')" href="javascript:;"
+			class="float-right btn btn-label-warning btn-bold btn-sm btn-icon-h">
+			{{ 'GLOBAL.LABEL.CREATE' | translate }}
+		</a>
+	</div>
+</div>
+
+<!-- Alert -->
+<p>
+	<ngb-alert *ngIf="alert" [type]="alert.type" (close)="closeAlert()">
+		{{ alert.message }}
+	</ngb-alert>
+</p>
+
+<div class="example-container mat-elevation-z8">
+	<mat-table #table [dataSource]="dataSource">
+		<!-- Checkbox Column -->
+		<ng-container matColumnDef="select">
+			<mat-header-cell *matHeaderCellDef>
+				<mat-checkbox [checked]="true" [indeterminate]="true">
+				</mat-checkbox>
+			</mat-header-cell>
+			<mat-cell *matCellDef="let row">
+				<mat-checkbox (click)="$event.stopPropagation()">
+				</mat-checkbox>
+			</mat-cell>
+		</ng-container>
+		<!-- Name Column -->
+		<ng-container matColumnDef="name">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.NAME' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.name }} </mat-cell>
+		</ng-container>
+		<!-- Description Column -->
+		<ng-container matColumnDef="description">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.DESCRIPTION' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.description }} </mat-cell>
+		</ng-container>
+		<!-- Rules Column -->
+		<ng-container matColumnDef="rules">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.RULES' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.rules }} </mat-cell>
+		</ng-container>
+		<!-- Price Column -->
+		<ng-container matColumnDef="pricedescmax">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.PRICEDESCMAX' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.price | currency:'BRL':true:'1.2-2' }} </mat-cell>
+		</ng-container>
+		<!-- Date Init Column -->
+		<ng-container matColumnDef="dateInit">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.DATEINIT' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.dateInit }} </mat-cell>
+		</ng-container>
+		<!-- Date Finish Column -->
+		<ng-container matColumnDef="dateFinish">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.DATEFINISH' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.dateFinish }} </mat-cell>
+		</ng-container>
+		<!-- limit  Column -->
+		<ng-container matColumnDef="limit">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.LIMIT' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.limit }} </mat-cell>
+		</ng-container>
+		<!-- Status Column -->
+		<ng-container matColumnDef="status">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.STATUS' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i *ngIf="element.status === true" class="flaticon2-accept mr-2"></i>
+				<i *ngIf="element.status === false" class="flaticon2-cancel mr-2"></i>
+			</mat-cell>
+		</ng-container>
+		<!-- only First Purchase Column -->
+		<ng-container matColumnDef="onlyFirstPurchase">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.ONLYFIRSTPURCHASE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i *ngIf="element.onlyFirstPurchase === true" class="flaticon2-accept mr-2"></i>
+				<i *ngIf="element.onlyFirstPurchase === false" class="flaticon2-cancel mr-2"></i>
+			</mat-cell>
+		</ng-container>
+		<!-- minPriceDelivery Column -->
+		<ng-container matColumnDef="minPriceDelivery">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.MINPRICEDELIVERY' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.minPriceDelivery }} </mat-cell>
+		</ng-container>
+		<!-- Delete Coupon -->
+		<ng-container matColumnDef="delete">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.ACTION' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<a target="_blank" [href]="'/company/coupon/' + element._id">
+					<i class="flaticon-eye mr-2"></i>
+				</a>
+				<i class="flaticon2-edit mr-2" (click)="upsertCouponModalShow(upsertcouponmodal, element, 'edit')"></i>
+				<i class="flaticon2-trash" (click)="confirmDeleteModalShow(confirmdeletemodal, element)"></i>
+			</mat-cell>
+		</ng-container>
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns;">
+		</mat-row>
+	</mat-table>
+	<mat-paginator [length]="totalLength" [pageSize]="pageSize" [pageSizeOptions]="pageLimit" (page)="changePage($event)">
+	</mat-paginator>
+
+	<!-- Apartir de aqui é o modal -->
+	<!-- Modal Upsert Coupon -->
+	<ng-template #upsertcouponmodal let-modal>
+		<form [formGroup]="formData" (ngSubmit)="formSubmitCoupon=true; formData.valid && upsertCoupon(formData.value)">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-create-coupon">
+					{{ (typeAction === 'create') ? ('GLOBAL.LABEL.CREATECOUPON' | translate) : ('GLOBAL.LABEL.EDITCOUPON' |
+					translate) }}
+				</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<input type="hidden" class="form-control" formControlName="_id">
+				<div class="form-group">
+					<label for="franchise">{{ 'GLOBAL.LABEL.FRANCHISE' | translate }}</label>
+					<div class="input-group">
+						<input type="text" class="form-control" matInput placeholder="Escolha uma Fanquia"
+							[matAutocomplete]="autoFranchise" formControlName="franchise"
+							[ngClass]="{'is-invalid' : formSubmitCoupon && formData.get('franchise').invalid}">
+						<mat-autocomplete [displayWith]="displayFranchise" #autoFranchise="matAutocomplete">
+							<mat-option *ngFor="let franchise of franchises" [value]="franchise">
+								{{ franchise.name }}
+							</mat-option>
+						</mat-autocomplete>
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="name">{{ 'GLOBAL.LABEL.NAME' | translate }}</label>
+					<div class="input-group">
+						<input class="form-control" formControlName="name"
+							[ngClass]="{'is-invalid' : formSubmitCoupon && formData.get('name').invalid}">
+					</div>
+				</div>
+				<div class="row">
+					<div class="form-group col-6">
+						<label for="description">{{ 'GLOBAL.LABEL.DESCRIPTION' | translate }}</label>
+						<div class="input-group">
+							<textarea class="form-control" formControlName="description" rows="3"
+								[ngClass]="{'is-invalid' : formSubmitCoupon && formData.get('description').invalid}"></textarea>
+						</div>
+					</div>
+					<div class="form-group col-6">
+						<label for="rules">{{ 'GLOBAL.LABEL.RULES' | translate }}</label>
+						<div class="input-group">
+							<textarea class="form-control" formControlName="rules" rows="3"
+								[ngClass]="{'is-invalid' : formSubmitCoupon && formData.get('rules').invalid}"> </textarea>
+						</div>
+					</div>
+				</div>
+				<!--row-->
+				<div class="row">
+					<div class="form-group col-3">
+						<label for="price">{{ 'GLOBAL.LABEL.PRICEDESCMAX' | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" currencyMask formControlName="price"
+								[ngClass]="{'is-invalid' : formSubmitCoupon && formData.get('price').invalid}">
+						</div>
+					</div>
+					<div class="form-group col-2">
+						<label for="discountPercentage">{{ 'GLOBAL.LABEL.DISCOUNTPERCENTAGE' | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" type="number" formControlName="discountPercentage"
+								[ngClass]="{'is-invalid' : formSubmitCoupon && formData.get('discountPercentage').invalid}">
+						</div>
+					</div>
+					<div class="form-group col-3">
+						<label for="dateInit">{{ 'GLOBAL.LABEL.DATEINIT' | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" mask="d0/M0/0000" formControlName="dateInit"
+								[ngClass]="{'is-invalid' : formSubmitCoupon && formData.get('dateInit').invalid}">
+						</div>
+					</div>
+					<div class="form-group col-3">
+						<label for="dateFinish">{{ 'GLOBAL.LABEL.DATEFINISH' | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" mask="d0/M0/0000" formControlName="dateFinish"
+								[ngClass]="{'is-invalid' : formSubmitCoupon && formData.get('dateFinish').invalid}">
+						</div>
+					</div>
+					<div class="form-group col-3">
+						<label for="minPriceDelivery">{{ 'GLOBAL.LABEL.MINPRICEDELIVERY' | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" currencyMask formControlName="minPriceDelivery"
+								[ngClass]="{'is-invalid' : formSubmitCoupon && formData.get('minPriceDelivery').invalid}">
+						</div>
+					</div>
+					<div class="form-group col-2">
+						<label for="limit">{{ 'GLOBAL.LABEL.LIMIT' | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" type="number" formControlName="limit"
+								[ngClass]="{'is-invalid' : formSubmitCoupon && formData.get('limit').invalid}">
+						</div>
+					</div>
+					<div class="form-group col-3">
+						<label for="status">{{ 'GLOBAL.LABEL.STATUS' | translate }}</label>
+						<div class="input-group">
+							<mat-slide-toggle formControlName="status"></mat-slide-toggle>
+						</div>
+					</div>
+					<div class="form-group col-3">
+						<label for="allCompanies">{{ 'GLOBAL.LABEL.ALLCOMPANIES' | translate }}</label>
+						<div class="input-group">
+							<mat-slide-toggle formControlName="allCompanies"></mat-slide-toggle>
+						</div>
+					</div>
+					<div class="form-group col-4">
+						<label for="onlyFirstPurchase">{{ 'GLOBAL.LABEL.ONLYFIRSTPURCHASE' | translate }}</label>
+						<div class="input-group">
+							<mat-slide-toggle formControlName="onlyFirstPurchase"></mat-slide-toggle>
+						</div>
+					</div>
+
+				</div>
+				<div class="row">
+					<div class="col-9">
+						<h6>Vincular empresas</h6>
+					</div>
+					<div class="col-3">
+						<button type="button" class="btn btn-sm btn-info" (click)="addNewCompany()">
+							<span aria-hidden="true">Empresa</span>
+						</button>
+					</div>
+				</div>
+				<div class="row" *ngFor="let companieList of formData.get('companies').controls; index as i">
+					<ng-container [formGroup]="companieList">
+						<div class="form-group col-6">
+							<label for="companies">{{ 'GLOBAL.LABEL.COMPANY' | translate }}</label>
+							<div class="input-group">
+								<input type="text" class="form-control" matInput placeholder="Escolha uma Empresa"
+									[matAutocomplete]="autoCompany" formControlName="companies"
+									[ngClass]="{'is-invalid' : formSubmitCoupon && companieList.get('companies').invalid}">
+								<mat-autocomplete [displayWith]="displayFn" #autoCompany="matAutocomplete">
+									<mat-option *ngFor="let comp of companies[i]" [value]="comp">
+										{{ comp.name }}
+									</mat-option>
+								</mat-autocomplete>
+							</div>
+						</div>
+						<div class="form-group text-center col-2">
+							<label class="col-12">{{ 'GLOBAL.LABEL.ACTION' | translate }}</label>
+							<button (click)="removeCompany(i)" mat-mini-fab color="warn"
+								class="col-12 mat-mini-fab mat-button-base mat-accent">
+								<span class="mat-button-wrapper">
+									<mat-icon class="mat-icon notranslate material-icons mat-icon-no-color" role="img" aria-hidden="true">
+										delete
+									</mat-icon>
+								</span>
+								<div class="mat-button-ripple mat-ripple mat-button-ripple-round" matripple>
+								</div>
+								<div class="mat-button-focus-overlay">
+								</div>
+							</button>
+						</div>
+					</ng-container>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<input type="submit" [value]="typeAction === 'create' ? 'CRIAR' : 'EDITAR'" class="btn btn-outline-dark">
+			</div>
+		</form>
+	</ng-template>
+</div>
+<!-- Modal Delete teste -->
+<ng-template #confirmdeletemodal let-modal>
+	<div class="modal-header">
+		<h4 class="modal-title" id="modal-delete-coupon">
+			Confirmar exclusão</h4>
+		<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	<div class="modal-body" class="btn btn-warning">
+		{{ 'GLOBAL.LABEL.AREYOUSUREYOUWANTTODELETE' | translate }}
+	</div>
+	<div class="modal-footer">
+		<button type="button" (click)="couponIdToDelete=undefined; modal.dismiss('Cross click')" class="btn btn-secondary"
+			data-dismiss="modal">{{ 'GLOBAL.LABEL.CANCEL' | translate }}</button>
+		<button type="button" (click)="deleteCoupon() && modal.dismiss('Cross click')" class="btn btn-primary">{{
+			'GLOBAL.LABEL.YES' | translate }}</button>
+	</div>
+</ng-template>

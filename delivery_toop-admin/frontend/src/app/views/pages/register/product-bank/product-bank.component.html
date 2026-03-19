@@ -1,0 +1,179 @@
+<form [formGroup]="formFilter" formFilter.valid>
+	<div class="form-group col-4">
+		<label for="name">Produto ou Código Barra</label>
+		<div class="input-group">
+			<input required class="form-control" placeholder="Pesquise um produto" formControlName="name">
+		</div>
+	</div>
+</form>
+
+<div class="row justify-content-between">
+	<div class="col-auto align-self-center mb-2">
+		<p class="float-left">{{ 'GLOBAL.LABEL.USER' | translate }} </p>
+	</div>
+	<div class="col-auto">
+		<a (click)="createProductModalShow(createImageBank)" href="javascript:;"
+			class="float-right btn btn-label-warning btn-bold btn-sm btn-icon-h">
+			{{ 'GLOBAL.LABEL.CREATE' | translate }}
+		</a>
+	</div>
+</div>
+
+
+<div class="example-container mat-elevation-z8">
+	<mat-table #table [dataSource]="dataSource">
+		<ng-container matColumnDef="select">
+			<mat-header-cell *matHeaderCellDef>
+				<mat-checkbox [checked]="true" [indeterminate]="true">
+				</mat-checkbox>
+			</mat-header-cell>
+			<mat-cell *matCellDef="let row">
+				<mat-checkbox (click)="$event.stopPropagation()">
+				</mat-checkbox>
+			</mat-cell>
+		</ng-container>
+		<!-- Images Column -->
+		<ng-container matColumnDef="images">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.IMAGES' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<a [href]='element.images' target="_blank">
+					<img width="50" class="img-thumbnail" [src]='element.images || "./assets/media/logo-default.png"'
+						[alt]="element.name" />
+				</a>
+			</mat-cell>
+		</ng-container>
+		<!-- Name Column -->
+		<ng-container matColumnDef="name">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.NAME' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{element.name}} </mat-cell>
+		</ng-container>
+		<!-- Barcode Column -->
+		<ng-container matColumnDef="barcode">
+			<mat-header-cell *matHeaderCellDef>{{ 'GLOBAL.LABEL.BARCODE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.barcode }} </mat-cell>
+		</ng-container>
+		<!-- Copyright Column -->
+		<ng-container matColumnDef="copyright">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.COPYRIGHT' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i *ngIf="element.copyright === true" class="flaticon2-accept mr-2"></i>
+				<i *ngIf="element.copyright === false" class="flaticon2-cancel mr-2"></i>
+			</mat-cell>
+		</ng-container>
+
+		<!-- Departments Column -->
+		<ng-container matColumnDef="departments">
+			<mat-header-cell *matHeaderCellDef>{{ 'GLOBAL.LABEL.DEPARTMENTS' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.departments }} </mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="action">
+			<mat-header-cell *matHeaderCellDef>{{ 'GLOBAL.LABEL.ACTION' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i class="flaticon2-edit mr-2" (click)="copyId(element._id)"></i>
+			</mat-cell>/
+		</ng-container>
+
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns;">
+		</mat-row>
+	</mat-table>
+	<mat-paginator [length]="totalLength" [pageSize]="pageSize" [pageSizeOptions]="pageLimit" (page)="changePage($event)">
+	</mat-paginator>
+
+	<!-- Adicionar -->
+	<ng-template #createImageBank let-modal>
+		<form [formGroup]="formData" (ngSubmit)="formSubmit=true; formData.valid && createProduct(formData.value)
+			&& modal.dismiss('Cross click')">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-image-bank">Novo Produto</h4>
+
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+
+			<div class="modal-body">
+				<div class="row">
+					<div class="form-group col-12">
+						<label for="description">Nome</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="name" [ngClass]="{'is-invalid' : formSubmit && formData.get('name').invalid}">
+						</div>
+					</div>
+					<div class="form-group col-12">
+						<label for="description">Descrição</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="description" [ngClass]="{'is-invalid' : formSubmit && formData.get('description').invalid}">
+						</div>
+					</div>
+
+
+					<div class="form-group col-8">
+						<label for="description">Código Barra</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="barcode" [ngClass]="{'is-invalid' : formSubmit && formData.get('barcode').invalid}">
+						</div>
+					</div>
+
+					<div class="form-group col-4 mt-4">
+						<div class="input-group">
+							<button type="button" class="btn btn-success" (click)="generateCode()" >Gerr Código</button>
+						</div>
+					</div>
+
+					<div class="form-group col-12">
+						<label for="description">Url Imagem</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="image" [ngClass]="{'is-invalid' : formSubmit && formData.get('image').invalid}">
+						</div>
+					</div>
+					<div class="form-group col-12">
+						<label for="keywords">Palavras Chaves</label>
+						<div class="input-group">
+							<mat-chip-list #chipList aria-label="Fruit selection">
+								<mat-chip *ngFor="let keyword of keywordsList" [selectable]="selectable" [removable]="removable"
+									(removed)="removekeyword(keyword)">
+									{{keyword}}
+									<mat-icon matChipRemove *ngIf="removable">cancel</mat-icon>
+								</mat-chip>
+								<input placeholder="Nova palavra chave..." [matChipInputFor]="chipList" [matChipInputAddOnBlur]="addOnBlur"
+									(matChipInputTokenEnd)="addKeyword($event)">
+							</mat-chip-list>
+						</div>
+					</div>
+
+					<!-- <div class="form-group col-12">
+						<div class="form-group">
+							<label>Departamento</label>
+							<mat-select formControlName="department">
+								<mat-option *ngFor="let option of departments" [value]="option._id">{{option.name}}</mat-option>
+							</mat-select>
+						</div>
+					</div> -->
+
+					<div class="form-group col-12">
+						<div class="form-group">
+							<label>Departamento</label>
+							<select class="form-control" id="department" formControlName="department" >
+								<option *ngFor="let option of departments" [value]="option._id" >{{option.name}}</option>
+							</select>
+						</div>
+					</div>
+
+					<div class="form-group col-4">
+						<label for="status">{{ 'GLOBAL.LABEL.STATUS' | translate }}</label>
+						<div class="input-group">
+							<mat-slide-toggle formControlName="status"></mat-slide-toggle>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="modal-footer">
+				<input type="submit" value="Criar" class="btn btn-outline-dark">
+			</div>
+		</form>
+	</ng-template>
+
+</div>

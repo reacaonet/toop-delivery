@@ -1,0 +1,191 @@
+<form [formGroup]="formFilter" *ngIf="formFilter" formFilter.valid>
+	<div class="row col-12 shadow pt-2 bg-light">
+		<div class="form-group col-2">
+			<label for="dateInit">{{ "GLOBAL.LABEL.DATEINIT" | translate }}</label>
+			<div class="input-group">
+				<input class="form-control" mask="d0/M0/0000" formControlName="dateInit" />
+			</div>
+		</div>
+
+		<div class="form-group col-2">
+			<label for="dateFinal">{{ "GLOBAL.LABEL.DATEFINISH" | translate }}</label>
+			<div class="input-group">
+				<input class="form-control" mask="d0/M0/0000" formControlName="dateFinal" />
+			</div>
+		</div>
+
+		<div class="form-group col-4">
+			<label for="category">Passageiro</label>
+			<div class="input-group">
+				<input type="text" class="form-control" matInput placeholder="Selecione Passageiro"
+					[matAutocomplete]="autoPassenger" formControlName="passenger" [ngClass]="{
+						'is-invalid': formFilter && formFilter.get('passenger').invalid
+					}" />
+				<mat-autocomplete [displayWith]="displayFn" #autoPassenger="matAutocomplete">
+					<mat-option *ngFor="let passenger of listPassenger" [value]="passenger"
+						(click)="onClickPassengerFilter(passenger)">
+						{{ passenger.name }}
+					</mat-option>
+				</mat-autocomplete>
+			</div>
+		</div>
+
+		<div class="form-group col-4">
+			<label for="images">Status</label>
+			<div class="input-group">
+				<select class="form-control" formControlName="status">
+					<option value="all" selected>Mostrar Todos</option>
+					<option value="concluded">Finalizados</option>
+					<option value="canceled">Cancelados</option>
+					<option value="in_progress">Em Progresso</option>
+					<option value="accepted">Aceito</option>
+					<option value="waiting">Aguardando</option>
+				</select>
+			</div>
+		</div>
+	</div>
+</form>
+
+<div class="row mt-3">
+	<div class="col-3">
+		<div class="card shadow">
+			<div class="card-content">
+				<div class="card-body">
+					<div class="media d-flex">
+						<div class="align-self-center">
+							<i class="flaticon-line-graph text-success"></i>
+						</div>
+						<div class="media-body text-right">
+							<h3 class="text-success">{{ aproved }}</h3>
+							<span class="text-success">Finalizadas</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="col-3">
+		<div class="card shadow">
+			<div class="card-content">
+				<div class="card-body">
+					<div class="media d-flex">
+						<div class="align-self-center">
+							<i class="flaticon-line-graph text-danger"></i>
+						</div>
+						<div class="media-body text-right">
+							<h3 class="text-danger">{{ canceled }}</h3>
+							<span class="text-danger">Canceladas</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="col-3">
+		<div class="card shadow">
+			<div class="card-content">
+				<div class="card-body">
+					<div class="media d-flex">
+						<div class="align-self-center">
+							<i class="flaticon-line-graph text-primary"></i>
+						</div>
+						<div class="media-body text-right">
+							<h3 class="text-primary">{{ total | currency:"BRL":"symbol" }}</h3>
+							<span class="text-primary">Total Pago</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- GERAR EXCEL -->
+<div class="col-auto">
+	<button class="float-right btn btn-sm btn-warning mb-2 ml-2" (click)="generateExcel()"
+		style="display: flex; gap: 5px; align-items: center; justify-content: center;">
+		<i class="flaticon2-document mr-2"></i>
+		<span *ngIf="!exporting">Gerar Excel</span>
+		<span *ngIf="exporting">Gerando excel ...</span>
+		<div *ngIf="exporting" class="spinner-border text-primary" role="status" style=" width: 1em; height: 1em;">
+			<span class="visually-hidden"></span>
+		</div>
+	</button>
+</div>
+
+<div class="row justify-content-between">
+	<div class="col-auto align-self-center mb-2" style="margin-top: 20px;">
+		<h5>
+			<p class="float-left">Receitas Passageiro</p>
+		</h5>
+	</div>
+</div>
+
+	<div class="example-container mat-elevation-z8 mt-3">
+		<mat-table #table [dataSource]="dataSource" class="responsive-table">
+			<ng-container matColumnDef="select">
+				<mat-header-cell *matHeaderCellDef>
+					<mat-checkbox [checked]="true" [indeterminate]="true"> </mat-checkbox>
+				</mat-header-cell>
+				<mat-cell *matCellDef="let row">
+					<mat-checkbox (click)="$event.stopPropagation()"> </mat-checkbox>
+				</mat-cell>
+			</ng-container>
+
+			<ng-container matColumnDef="date">
+				<mat-header-cell *matHeaderCellDef>Data</mat-header-cell>
+				<mat-cell *matCellDef="let element">{{ element?.date }}</mat-cell>
+			</ng-container>
+
+			<ng-container matColumnDef="passenger">
+				<mat-header-cell *matHeaderCellDef>Passageiro</mat-header-cell>
+				<mat-cell *matCellDef="let element">{{ element?.passenger?.person?.name }}</mat-cell>
+			</ng-container>
+
+			<ng-container matColumnDef="origin">
+				<mat-header-cell *matHeaderCellDef>Local Partida</mat-header-cell>
+				<mat-cell *matCellDef="let element">{{ element?.origin }}</mat-cell>
+			</ng-container>
+
+			<ng-container matColumnDef="destiny">
+				<mat-header-cell *matHeaderCellDef>Local Chegada</mat-header-cell>
+				<mat-cell *matCellDef="let element">{{ element?.destiny }}</mat-cell>
+			</ng-container>
+
+			<ng-container matColumnDef="total">
+				<mat-header-cell *matHeaderCellDef>Total</mat-header-cell>
+				<mat-cell *matCellDef="let element">{{ element?.total | currency:"BRL":"symbol" }}</mat-cell>
+			</ng-container>
+
+			<ng-container matColumnDef="methodPayment">
+				<mat-header-cell *matHeaderCellDef>Mt. Pagamento</mat-header-cell>
+				<mat-cell *matCellDef="let element">{{ element?.methodPayment }}</mat-cell>
+			</ng-container>
+
+			<ng-container matColumnDef="status">
+				<mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
+				<mat-cell *matCellDef="let element">{{ element?.status }}</mat-cell>
+			</ng-container>
+
+			<ng-container matColumnDef="action">
+				<mat-header-cell *matHeaderCellDef>Ação</mat-header-cell>
+				<mat-cell *matCellDef="let element">
+					<!-- <div *ngIf="!load" class="sm-col-3 form-check">
+					<i class="flaticon2-add-1 ml-2 mt-1" style="cursor: pointer;" (click)="infoModalShow(infomodal, element)"></i>
+				</div>
+
+				<div *ngIf="load" class="spinner-border text-primary" role="status">
+					<span class="visually-hidden"></span>
+				</div> -->
+				</mat-cell>
+			</ng-container>
+
+			<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+			<mat-row *matRowDef="let row; columns: displayedColumns"> </mat-row>
+		</mat-table>
+		<mat-paginator [length]="totalLength" [pageSize]="pageSize" [pageSizeOptions]="pageLimit"
+			(page)="changePage($event)">
+		</mat-paginator>
+	</div>

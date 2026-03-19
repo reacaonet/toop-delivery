@@ -1,0 +1,196 @@
+<div class="row justify-content-between">
+	<div class="col-auto align-self-center mb-2">
+		<p class="float-left">{{ 'GLOBAL.LABEL.CAMPAIGN' | translate }} </p>
+	</div>
+	<div class="col-auto">
+		<a (click)="upSertCampaignModalShow(upsertcampaignmodal, undefined)" href="javascript:;" class="float-right btn btn-label-warning btn-bold btn-sm btn-icon-h">
+			{{ 'GLOBAL.LABEL.CREATE' | translate }}
+		</a>
+	</div>
+</div>
+
+<div class="example-container mat-elevation-z8">
+	<mat-table #table [dataSource]="dataSource">
+
+		<ng-container matColumnDef="select">
+			<mat-header-cell *matHeaderCellDef>
+				<mat-checkbox [checked]="true" [indeterminate]="true">
+				</mat-checkbox>
+			</mat-header-cell>
+			<mat-cell *matCellDef="let row">
+				<mat-checkbox (click)="$event.stopPropagation()">
+				</mat-checkbox>
+			</mat-cell>
+		</ng-container>
+		<!-- Image Column -->
+		<ng-container matColumnDef="image">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.IMAGES' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<a [href]='element.image' target="_blank">
+					<img width="50" class="img-thumbnail" [src]='element.image || "./assets/media/logo-default.png"' [alt]="element.name" />
+				</a>
+			</mat-cell>
+		</ng-container>
+		<!-- Name Column -->
+		<ng-container matColumnDef="name">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.NAME' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{element.name}} </mat-cell>
+		</ng-container>
+		<!-- Dissemination Vehicle Column -->
+		<ng-container matColumnDef="disseminationVehicle">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.DISSEMINATIONVEHICLE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{element.disseminationVehicle}} </mat-cell>
+		</ng-container>
+		<!-- Initial Date Column -->
+		<ng-container matColumnDef="initialDate">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.INITIALDATE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{element.initialDate}} </mat-cell>
+		</ng-container>
+		<!-- final Date Column -->
+		<ng-container matColumnDef="finalDate">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.FINALDATE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{element.finalDate}} </mat-cell>
+		</ng-container>
+		<!-- note Column -->
+		<ng-container matColumnDef="note">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.NOTE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{element.note}} </mat-cell>
+		</ng-container>
+		<!-- dowload Android Column -->
+		<ng-container matColumnDef="dowloadAndroid">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.DOWLOADANDROID' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{element.dowloadAndroid}} </mat-cell>
+		</ng-container>
+		<!-- dowloadIos Column -->
+		<ng-container matColumnDef="dowloadIos">
+			<mat-header-cell *matHeaderCellDef>{{ 'GLOBAL.LABEL.DOWLOADIOS' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.dowloadIos }} </mat-cell>
+		</ng-container>
+		<!-- Delete modal -->
+		<ng-container matColumnDef="delete">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.ACTION' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i class="flaticon2-edit mr-2" (click)="upSertCampaignModalShow(upsertcampaignmodal, element, 'edit')"></i>
+				<i class="flaticon2-trash" (click)="confirmDeleteModalShow(confirmdeletemodal, element)"></i>
+			</mat-cell>
+		</ng-container>
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns;">
+		</mat-row>
+	</mat-table>
+	<mat-paginator [length]="totalLength" [pageSize]="pageSize" [pageSizeOptions]="pageLimit" (page)="changePage($event)">
+	</mat-paginator>
+
+	<!-- Modal Up Sert created/updated -->
+	<ng-template #upsertcampaignmodal let-modal modal-lg>
+		<p>
+			<ngb-alert *ngIf="alertModal" [type]="alertModal.type" (close)="closeAlertModal()">
+				{{ alertModal.message }}
+			</ngb-alert>
+		</p>
+		<form [formGroup]="formData" (ngSubmit)="formSubmitCampaign=true; formData.valid && upSertCampaign(formData.value)
+         && modal.dismiss('Cross click')">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-create-campaign">{{ (typeAction === 'create') ? ('GLOBAL.LABEL.CREATECAMPAIGN' | translate) : ('GLOBAL.LABEL.EDITCAMPAIGN' | translate) }}</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<input type="hidden" class="form-control" formControlName="_id">
+				<div class="row">
+					<div class="form-group col-12">
+						<ngx-file-drop dropZoneLabel="Arraste as imagens aqui" (onFileDrop)="dropped($event)">
+							<ng-template ngx-file-drop-content-tmp let-openFileSelector="openFileSelector">
+								Arraste e solte aqui as imagens...
+								<button type="button" (click)="openFileSelector()">Selecionar Arquivos</button>
+							</ng-template>
+						</ngx-file-drop>
+					</div>
+					<div class="form-group col-12">
+						<div class="card" *ngIf="filesBase64.length">
+							<div class="card-header">
+								Lista imagens
+							</div>
+							<div class="card-body" [id]="list-image-campaign" cdkDropListGroup>
+								<div class="list-group" cdkDropList [cdkDropListData]="filesBase64" (cdkDropListDropped)="drop($event)">
+									<div *ngFor="let item of filesBase64" class="list-group-item" cdkDrag>
+										<div class="col-3">
+											<img width="50" [src]="item.base64" />
+										</div>
+										<div class="col-9">
+											<strong>{{ item.relativePath }}</strong>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="form-group col-8">
+						<label for="name">{{ 'GLOBAL.LABEL.NAME' | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="name" [ngClass]="{'is-invalid' : formSubmitCampaign && formData.get('name').invalid}">
+						</div>
+					</div>
+					<div class="form-group col-6">
+						<label for="disseminationVehicle">{{ 'GLOBAL.LABEL.DISSEMINATIONVEHICLE' | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="disseminationVehicle" [ngClass]="{'is-invalid' : formSubmitCampaign && formData.get('disseminationVehicle').invalid}">
+						</div>
+					</div>
+					<div class="form-group col-3">
+						<label for="initialDate">{{ 'GLOBAL.LABEL.INITIALDATE' | translate }}</label>
+						<div class="input-group">
+							<input mask="d0/M0/0000" class="form-control" formControlName="initialDate" [ngClass]="{'is-invalid' : formSubmitCampaign && formData.get('initialDate').invalid}">
+						</div>
+					</div>
+					<div class="form-group col-3">
+						<label for="finalDate">{{ 'GLOBAL.LABEL.FINALDATE' | translate }}</label>
+						<div class="input-group">
+							<input mask="d0/M0/0000" class="form-control" formControlName="finalDate" [ngClass]="{'is-invalid' : formSubmitCampaign && formData.get('finalDate').invalid}">
+						</div>
+					</div>
+					<div class="form-group col-12">
+						<label for="note">{{ 'GLOBAL.LABEL.NOTE' | translate }}</label>
+						<div class="input-group">
+							<textarea class="form-control" formControlName="note" [ngClass]="{'is-invalid' : formSubmitCampaign && formData.get('note').invalid}"></textarea>
+						</div>
+					</div>
+					<div class="form-group col-4">
+						<label for="dowloadAndroid">{{ 'GLOBAL.LABEL.DOWLOADANDROID' | translate }}</label>
+						<div class="input-group">
+							<input type="number" class="form-control" formControlName="dowloadAndroid" [ngClass]="{'is-invalid' : formSubmitCampaign && formData.get('dowloadAndroid').invalid}">
+						</div>
+					</div>
+					<div class="form-group col-4">
+						<label for="dowloadIos">{{ 'GLOBAL.LABEL.DOWLOADIOS' | translate }}</label>
+						<div class="input-group">
+							<input type="number" class="form-control" formControlName="dowloadIos" [ngClass]="{'is-invalid' : formSubmitCampaign && formData.get('dowloadIos').invalid}">
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<input type="submit" value="Criar" class="btn btn-outline-dark">
+			</div>
+		</form>
+	</ng-template>
+
+	<!-- Modal Delete -->
+	<ng-template #confirmdeletemodal let-modal>
+		<div class="modal-header">
+			<h4 class="modal-title" id="modal-delete-campaign">
+				Confirmar exclusão</h4>
+			<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+		<div class="modal-body" class="btn btn-warning">
+			{{ 'GLOBAL.LABEL.AREYOUSUREYOUWANTTODELETE' | translate }}
+		</div>
+		<div class="modal-footer">
+			<button type="button" (click)="campaignIdToDelete=undefined; modal.dismiss('Cross click')" class="btn btn-secondary" data-dismiss="modal">{{ 'GLOBAL.LABEL.CANCEL' | translate }}</button>
+			<button type="button" (click)="deleteCampaign() && modal.dismiss('Cross click')" class="btn btn-primary">{{ 'GLOBAL.LABEL.YES' | translate }}</button>
+		</div>
+	</ng-template>
+</div>

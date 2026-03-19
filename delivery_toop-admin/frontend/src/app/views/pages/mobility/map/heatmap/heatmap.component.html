@@ -1,0 +1,25 @@
+<div class="example-container mat-elevation-z8">
+	<form [formGroup]="formFilter" *ngIf="formFilter" formFilter.valid class="col-12">
+		<div class="row col-12 shadow pt-2 bg-light">
+			<div class="form-group col-3">
+				<label for="dateInit">Inicio</label>
+				<div class="input-group">
+					<input class="form-control" mask="d0/M0/0000" formControlName="dateInit" />
+				</div>
+			</div>
+
+			<div class="form-group col-3">
+				<label for="dateFinal">Fim</label>
+				<div class="input-group">
+					<input class="form-control" mask="d0/M0/0000" formControlName="dateFinal" />
+				</div>
+			</div>
+		</div>
+	</form>
+
+	<div fxFlex *ngIf="center?.lat !== 0 && center?.lng !== 0">
+		<agm-map [latitude]="center?.lat" [longitude]="center?.lng" [scrollwheel]="false" [zoom]="zoom"
+			(mapReady)="onMapLoad($event)" #agmMap>
+		</agm-map>
+	</div>
+</div>

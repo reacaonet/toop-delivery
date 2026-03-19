@@ -1,0 +1,266 @@
+<!-- Alert -->
+<p>
+	<ngb-alert *ngIf="alert" [type]="alert.type" (close)="closeAlert()">
+		{{ alert.message }}
+	</ngb-alert>
+</p>
+
+<div class="row justify-content-between">
+	<div class="col-auto align-self-center mb-2">
+		<p class="float-left">{{ "GLOBAL.LABEL.TYPEPAYMENTS" | translate }}</p>
+	</div>
+	<div class="col-auto">
+		<a
+			(click)="upSertTypePaymentsModalShow(upserttypepaymentsmodal, undefined)"
+			href="javascript:;"
+			class="float-right btn btn-label-warning btn-bold btn-sm btn-icon-h"
+		>
+			{{ "GLOBAL.LABEL.CREATE" | translate }}
+		</a>
+	</div>
+</div>
+
+<div class="example-container mat-elevation-z8">
+	<mat-table #table [dataSource]="dataSource">
+		<!-- Checkbox Column -->
+		<ng-container matColumnDef="select">
+			<mat-header-cell *matHeaderCellDef>
+				<mat-checkbox [checked]="true" [indeterminate]="true"> </mat-checkbox>
+			</mat-header-cell>
+			<mat-cell *matCellDef="let row">
+				<mat-checkbox (click)="$event.stopPropagation()"> </mat-checkbox>
+			</mat-cell>
+		</ng-container>
+		<!-- Image Column -->
+		<ng-container matColumnDef="image">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.IMAGES" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<a [href]="element.image" target="_blank">
+					<img
+						width="50"
+						class="img-thumbnail"
+						[src]="element.image || './assets/media/logo-default.png'"
+						[alt]="element.name"
+					/>
+				</a>
+			</mat-cell>
+		</ng-container>
+		<!-- Name Column -->
+		<ng-container matColumnDef="name">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.NAME" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.name }} </mat-cell>
+		</ng-container>
+		<!-- Type of vehicle Column -->
+		<ng-container matColumnDef="type">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.TYPE" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.type }} </mat-cell>
+		</ng-container>
+		<!-- Brand Column -->
+		<ng-container matColumnDef="brand">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.FLAG" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.brand }} </mat-cell>
+		</ng-container>
+		<!-- Status Column -->
+		<ng-container matColumnDef="status">
+			<mat-header-cell *matHeaderCellDef>
+				{{ "GLOBAL.LABEL.STATUS" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i *ngIf="element.status === true" class="flaticon2-accept mr-2"></i>
+				<i *ngIf="element.status === false" class="flaticon2-cancel mr-2"></i>
+			</mat-cell>
+		</ng-container>
+		<!-- Delete -->
+		<ng-container matColumnDef="delete">
+			<mat-header-cell *matHeaderCellDef
+				>{{ "GLOBAL.LABEL.ACTION" | translate }}
+			</mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i
+					class="flaticon2-edit mr-2"
+					(click)="
+						upSertTypePaymentsModalShow(
+							upserttypepaymentsmodal,
+							element,
+							'edit'
+						)
+					"
+				></i>
+				<i
+					class="flaticon2-trash"
+					(click)="confirmDeleteModalShow(confirmdeletemodal, element)"
+				></i> </mat-cell
+			>/
+		</ng-container>
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns"> </mat-row>
+	</mat-table>
+	<mat-paginator
+		[length]="totalLength"
+		[pageSize]="pageSize"
+		[pageSizeOptions]="pageLimit"
+		(page)="changePage($event)"
+	>
+	</mat-paginator>
+
+	<!-- Modal up sert Type Payments -->
+	<ng-template #upserttypepaymentsmodal let-modal modal-lg>
+		<form
+			[formGroup]="formData"
+			(ngSubmit)="
+				formSubmitTypePayments = true;
+				formData.valid &&
+					upSertTypePayments(formData.value) &&
+					modal.dismiss('Cross click')
+			"
+		>
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-create-typePayments">
+					{{
+						typeAction === "create"
+							? ("GLOBAL.LABEL.CREATETYPEPAYMENTS" | translate)
+							: ("GLOBAL.LABEL.EDITTYPEPAYMENTS" | translate)
+					}}
+				</h4>
+				<button
+					type="button"
+					class="close"
+					aria-label="Close"
+					(click)="modal.dismiss('Cross click')"
+				>
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div style="margin-top: 10px">
+					<div class="custom-file">
+						<input
+							type="file"
+							class="custom-file-input"
+							id="customFile"
+							(change)="onChange($event)"
+							multiple
+							[ngClass]="{
+								'is-invalid':
+									formSubmitTypePayments && formData.get('file').invalid
+							}"
+						/>
+						<label
+							class="custom-file-label"
+							for="customFile"
+							id="customFileLabel"
+						>
+							{{ "GLOBAL.LABEL.SELECTIMAGE" | translate }}</label
+						>
+					</div>
+				</div>
+				<input type="hidden" class="form-control" formControlName="_id" />
+				<div class="row">
+					<div class="form-group col-2">
+						<label for="type">{{ "GLOBAL.LABEL.TYPE" | translate }}</label>
+						<div class="input-group">
+							<select
+								class="form-control"
+								formControlName="type"
+								[ngClass]="{
+									'is-invalid':
+										formSubmitTypePayments && formData.get('type').invalid
+								}"
+							>
+								<option value="MONEY">DINHEIRO</option>
+								<option value="CARD">CARTÃO</option>
+								<option value="BRASPAG">BRASPAG</option>
+								<option value="PIX">PIX</option>
+								<option value="PIX_DIRECT">PIX Direto</option>
+							</select>
+						</div>
+					</div>
+					<div class="form-group col-8">
+						<label for="name">{{ "GLOBAL.LABEL.NAME" | translate }}</label>
+						<div class="input-group">
+							<input
+								class="form-control"
+								formControlName="name"
+								[ngClass]="{
+									'is-invalid':
+										formSubmitTypePayments && formData.get('name').invalid
+								}"
+							/>
+						</div>
+					</div>
+					<div class="form-group col-4">
+						<label for="brand">{{ "GLOBAL.LABEL.FLAG" | translate }}</label>
+						<div class="input-group">
+							<input
+								class="form-control"
+								formControlName="brand"
+								[ngClass]="{
+									'is-invalid':
+										formSubmitTypePayments && formData.get('brand').invalid
+								}"
+							/>
+						</div>
+					</div>
+					<div class="form-group col-4">
+						<label for="status">{{ "GLOBAL.LABEL.STATUS" | translate }}</label>
+						<div class="input-group">
+							<mat-slide-toggle formControlName="status"></mat-slide-toggle>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<input type="submit" value="Criar" class="btn btn-outline-dark" />
+				</div>
+			</div>
+		</form>
+	</ng-template>
+</div>
+
+<!-- Modal Delete   -->
+<ng-template #confirmdeletemodal let-modal>
+	<div class="modal-header">
+		<h4
+			class="modal-title"
+			id="modal-delete-typePayments"
+			*ngIf="formData && formData.value && formData.value.name"
+		>
+			Confirmar exclusão
+		</h4>
+		<button
+			type="button"
+			class="close"
+			aria-label="Close"
+			(click)="modal.dismiss('Cross click')"
+		>
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	<div class="modal-body" class="btn btn-warning">
+		{{ "GLOBAL.LABEL.AREYOUSUREYOUWANTTODELETE" | translate }}
+	</div>
+	<div class="modal-footer">
+		<button
+			type="button"
+			(click)="typePaymentsIdToDelete = undefined; modal.dismiss('Cross click')"
+			class="btn btn-secondary"
+			data-dismiss="modal"
+		>
+			{{ "GLOBAL.LABEL.CANCEL" | translate }}
+		</button>
+		<button
+			type="button"
+			(click)="deleteTypePayments() && modal.dismiss('Cross click')"
+			class="btn btn-primary"
+		>
+			{{ "GLOBAL.LABEL.YES" | translate }}
+		</button>
+	</div>
+</ng-template>

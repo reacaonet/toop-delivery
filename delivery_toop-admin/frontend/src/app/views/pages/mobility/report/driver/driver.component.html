@@ -1,0 +1,140 @@
+<form [formGroup]="formFilter" *ngIf="formFilter" formFilter.valid style="margin-left: 10px;">
+	<div class="row ">
+		<div class="form-group col-12">
+			<label for="category">{{ 'GLOBAL.LABEL.DRIVER' | translate }}</label>
+			<div class="input-group">
+				<input type="text" class="form-control" matInput placeholder="{{ 'GLOBAL.LABEL.SELECTDRIVER' | translate }}"
+					[matAutocomplete]="autoDriver" formControlName="driver" [ngClass]="{
+						'is-invalid': formFilter && formFilter.get('driver').invalid
+					}" style="background-color: #fff" />
+				<mat-autocomplete [displayWith]="displayFnDriverId" #autoDriver="matAutocomplete">
+					<mat-option *ngFor="let driver of listDriver" [value]="driver" (click)="onClickDriverFilter(driver)">
+						{{ driver.name }}
+					</mat-option>
+				</mat-autocomplete>
+			</div>
+		</div>
+		<div class="form-group col-4">
+			<label for="email">{{ 'GLOBAL.LABEL.EMAIL' | translate }}</label>
+			<div class="input-group">
+				<input class="form-control" placeholder="{{ 'GLOBAL.LABEL.TYPETOSEARCH' | translate }}" formControlName="email">
+			</div>
+		</div>
+		<div class="form-group col-2">
+			<label for="status">Status</label>
+			<div class="input-group">
+				<select class="form-control" formControlName="status">
+					<option value="all" selected>Todos</option>
+					<option value="true">Ativo</option>
+					<option value="false">Inativo</option>
+				</select>
+			</div>
+		</div>
+		<div class="form-group col-2">
+			<label for="online">Online?</label>
+			<div class="input-group">
+				<select class="form-control" formControlName="online">
+					<option value="all">{{ 'GLOBAL.LABEL.ALL' | translate }}</option>
+					<option value="true">Online</option>
+					<option value="false">Offline</option>
+				</select>
+			</div>
+		</div>
+		<div class="form-group col-2">
+			<label for="dateInit">{{ "GLOBAL.LABEL.DATEINIT" | translate }}</label>
+			<div class="input-group">
+				<input class="form-control" mask="d0/M0/0000" formControlName="dateInit" />
+			</div>
+		</div>
+
+		<div class="form-group col-2">
+			<label for="dateFinal">{{ "GLOBAL.LABEL.DATEFINISH" | translate }}</label>
+			<div class="input-group">
+				<input class="form-control" mask="d0/M0/0000" formControlName="dateFinal" />
+			</div>
+		</div>
+	</div>
+	</form>
+
+	<!-- GERAR EXCEL -->
+	<div class="col-auto">
+		<button class="float-right btn btn-sm btn-warning mb-2 ml-2" (click)="generateExcel()"
+			style="display: flex; gap: 5px; align-items: center; justify-content: center; ">
+			<i class="flaticon2-document mr-2"></i>
+			<span *ngIf="!exporting">Gerar Excel</span>
+			<span *ngIf="exporting">Gerando excel ...</span>
+			<div *ngIf="exporting" class="spinner-border text-primary" role="status" style=" width: 1em; height: 1em;">
+				<span class="visually-hidden"></span>
+			</div>
+		</button>
+	</div>
+
+	<div class="row justify-content-between">
+		<div class="col align-self-center mb-2">
+			<h5>
+				<p class="float-left">{{ "GLOBAL.LABEL.DRIVEREPORT" | translate }}</p>
+			</h5>
+		</div>
+	</div>
+
+<div class="example-container mat-elevation-z8">
+	<mat-table #table [dataSource]="dataSource" matSort #empTbSort="matSort" (matSortChange)="sortData($event)" matSortActive="rating">
+		<!-- name Column -->
+		<ng-container matColumnDef="name">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.NAME' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ (element.name && element.name) ? element.name : '-' }} </mat-cell>
+		</ng-container>
+		<!-- name Column -->
+		<ng-container matColumnDef="birthDate">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.BIRDDATE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ (element.birthDate && element.birthDate) ? element.birthDate : '-' }} </mat-cell>
+		</ng-container>
+		<!-- name Column -->
+		<ng-container matColumnDef="cpf">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.CPF' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ (element.birthDate && element.cpf) ? element.cpf : '-' }} </mat-cell>
+		</ng-container>
+		<!-- email Column -->
+		<ng-container matColumnDef="email">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.EMAIL' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.email }} </mat-cell>
+		</ng-container>
+		<!-- stars Column -->
+		<ng-container matColumnDef="stars">
+			<mat-header-cell *matHeaderCellDef mat-sort-header> {{ 'GLOBAL.LABEL.EVALUATION' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ (element.stars) ? element.stars : 0 }}</mat-cell>
+		</ng-container>
+		<!-- totalRating Column -->
+		<ng-container matColumnDef="totalRating">
+			<mat-header-cell *matHeaderCellDef mat-sort-header> {{ 'GLOBAL.LABEL.AMOUNT' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ (element.totalRating) ? element.totalRating : 0 }} </mat-cell>
+		</ng-container>
+		<!-- Status Column -->
+		<ng-container matColumnDef="status">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.STATUS' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i *ngIf="element.status === true" class="flaticon2-accept mr-2"></i>
+				<i *ngIf="element.status === false" class="flaticon2-cancel mr-2"></i>
+			</mat-cell>
+		</ng-container>
+		<!-- Is Online Column -->
+		<ng-container matColumnDef="isOnline">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.ISONLINE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i *ngIf="element.online === true" class="flaticon2-user-outline-symbol online mr-2"></i>
+				<i *ngIf="element.online === false" class="flaticon2-user-outline-symbol offline mr-2"></i>
+			</mat-cell>
+		</ng-container>
+		<ng-container matColumnDef="view">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.VIEW' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i class="flaticon-eye mr-2" (click)="viewdriverModalShow(viewdrivermodal, element)"></i>
+			</mat-cell>
+		</ng-container>
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns;">
+		</mat-row>
+	</mat-table>
+	<mat-paginator [length]="totalLength" [pageSize]="pageSize" [pageSizeOptions]="pageLimit" (page)="changePage($event)">
+	</mat-paginator>
+</div>

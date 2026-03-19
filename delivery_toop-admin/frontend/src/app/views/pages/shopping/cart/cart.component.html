@@ -1,0 +1,843 @@
+<!-- Alert -->
+<p>
+	<ngb-alert *ngIf="alert" [type]="alert.type" (close)="closeAlert()">
+		{{ alert.message }}
+	</ngb-alert>
+</p>
+
+<div class="row justify-content-between">
+	<div class="col-auto align-self-center mb-2">
+		<p class="float-left">
+			{{ "MENU.SUPERMARKETONLINE.REQUESTS" | translate }}
+		</p>
+	</div>
+</div>
+<div class="row">
+	<div class="col-3">
+		<div class="card boxOrders" infiniteScroll [infiniteScrollDistance]="1" [infiniteScrollThrottle]="50"
+			(scrolled)="onScroll()" [scrollWindow]="false">
+			<ul class="list-group list-group-flush">
+				<li *ngFor="let element of dataSourceList" class="list-group-item cursorMouse"
+					(click)="getListCartItem(element)">
+					<div class="card">
+						<div class="card-body">
+							<div>
+								<h5 class="mb-5">
+									<b>{{ element.customer }}: </b> #{{ element.numberOrder }}
+									<div *ngIf="showCompanyName">
+										<p style="font-size: 12px; color: blue" *ngIf="element.company">
+											{{ element.company }}
+										</p>
+									</div>
+									<div class="alertChatNew position-absolute" *ngFor="let alert of alertChat; index as i" [ngClass]="{
+											'd-block': element.numberOrder === alert.order_number
+										}">
+										<span class="badge badge-danger">Nova mensagem</span>
+									</div>
+								</h5>
+								<span *ngIf="element.missing" id="missing_{{ element.numberOrder }}" class="badge badge-warning mb-2">
+									{{ element.missing }}
+								</span>
+							</div>
+							<p class="m-0"><b>Data: </b> {{ element.dateOrder }}</p>
+							<!-- <p><b>Valor: </b> {{ element.price }}</p> -->
+						</div>
+						<div class="card-footer">
+							<span [class]="'badge badge-pill ' + element.colorStatus">
+								{{
+								element?.status === "WAIT_COMPANY" &&
+								element?.shoppingCart?.schedule?.deliveryDate
+								? "Agendado"
+								: (element?.status | translate)
+								}}
+							</span>
+						</div>
+					</div>
+				</li>
+			</ul>
+			<div *ngIf="loading" class="spinner-border text-primary" role="status"
+				style="width: 1em; height: 1em; padding: 10px; align-self: center; margin: 10px;">
+				<span class="visually-hidden"></span>
+			</div>
+		</div>
+	</div>
+	<div class="col-9">
+		<div class="d-flex flex-row-reverse mb-1">
+			<a href="/loose-delivery?type={{ companyType }}" type="button" class="btn btn-info">Criar entrega avulsa</a>
+		</div>
+
+		<div *ngIf="!cartItem; else cartItemDetail" class="text-center warning-select-order alert alert-warning"
+			role="alert">
+			Selecione um pedido ao lado...
+		</div>
+		<ng-template #cartItemDetail>
+			<div class="card">
+				<div class="card-header row">
+					<h4 class="card-title col-7" *ngIf="cartItem?.numberOrder" id="modal-create-slider">
+						{{ "PEDIDO: " + cartItem.numberOrder }}
+					</h4>
+					<div class="col-5" style="vertical-align: top; top: -15px">
+						<a [routerLink]="" (click)="openPrintOrder(cartItem)" style="
+								float: right;
+								color: #80dcc1;
+								justify-content: flex-end;
+								padding: 10px;
+							">
+							<img width="50" class="img-thumbnail" src="./assets/images/printer.png" alt="Imprimir" />
+						</a>
+						<a class="position-relative" *ngIf="cartItem.status != 'WAIT_COMPANY'" [routerLink]=""
+							(click)="openChat(cartItem.shoppingCart, cartItem.numberOrder)" style="
+								float: right;
+								color: #80dcc1;
+								justify-content: flex-end;
+								padding: 10px;
+							">
+							<div class="position-absolute" *ngFor="let alert of alertChat; index as i" style="top: 7px; right: 7px">
+								<span *ngIf="cartItem?.numberOrder === alert.order_number" class="bg-danger rounded-circle d-block"
+									style="width: 12px; height: 12px"></span>
+							</div>
+							<img width="50" class="img-thumbnail" src="./assets/images/chat.png" alt="Chat" />
+						</a>
+						<a class="position-relative" *ngIf="cartItem.status != 'WAIT_COMPANY'" [routerLink]=""
+							(click)="cancelOrder(cartItem)" style="
+								float: right;
+								color: #80dcc1;
+								justify-content: flex-end;
+								padding: 10px;
+							">
+							<div class="position-absolute" *ngFor="let alert of alertChat; index as i" style="top: 7px; right: 7px">
+								<span *ngIf="cartItem?.numberOrder === alert.order_number" class="bg-danger rounded-circle d-block"
+									style="width: 12px; height: 12px"></span>
+							</div>
+							<img width="50" class="img-thumbnail" src="./assets/images/cancel.png" alt="Cancel" />
+						</a>
+					</div>
+
+					<div class="col-12"></div>
+				</div>
+
+				<div class="card-footer col-12">
+					<kt-queue-delivery [(order)]="cartItem" (orderUpdateMessage)="orderUpdateMessageEvent($event)"
+						(changeStatus)="changeStatusEvent($event)">
+					</kt-queue-delivery>
+				</div>
+
+				<div class="card-body">
+					<div class="row mb-3">
+						<div class="col-12">
+							<div class="card">
+								<h5 class="card-header">
+									Método de Pagamento:
+									<b *ngIf="cartItem.typePayment === 'BRASPAG'">Aplicativo</b>
+									<b *ngIf="cartItem.typePayment === 'CARD'">Cartão</b>
+									<b *ngIf="cartItem.typePayment === 'MONEY'">Dinheiro</b>
+									<b *ngIf="cartItem.typePayment === 'PIX'">PIX</b>
+									<b *ngIf="cartItem.typePayment === 'PIX_DIRECT'">Transferência PIX</b>
+								</h5>
+								<div class="card-body">
+									<h6>
+										Status:
+										<b *ngIf="
+												cartItem.typePayment === 'PAGARME' ||
+												cartItem.typePayment === 'PIX'
+											">Pago</b>
+										<b *ngIf="
+												cartItem.typePayment !== 'PAGARME' &&
+												cartItem.typePayment !== 'PIX_DIRECT'&&
+												cartItem.typePayment !== 'PIX'
+											">Aguardando Pagamento na entrega</b>
+										<b *ngIf="
+												cartItem.typePayment === 'PIX_DIRECT'
+											">Aguardando Pagamento</b>
+									</h6>
+									<div class="col-12" *ngIf="cartItem.typePayment === 'CARD'">
+										<img src="{{ cartItem?.fncTypePayment?.image[0] }}" alt="CARD" width="50px"
+											style="max-height: 80px" />
+									</div>
+									<div class="col-12" *ngIf="
+											cartItem.typePayment === 'MONEY' && cartItem?.cashChange
+										">
+										<h6>
+											Troco para:
+											<b>{{
+												cartItem.cashChange | currency: "BRL":true:"1.2-2"
+												}}</b>
+										</h6>
+									</div>
+
+									<div class="col-12" *ngIf="cartItem?.typeSchedule" style="margin-left: 0px; padding-left: 0px">
+										<h6>
+											Tipo agendamento:
+											<b>{{ cartItem.typeSchedule }}</b>
+										</h6>
+									</div>
+
+									<div class="col-12" *ngIf="cartItem?.schedule" style="margin-left: 0px; padding-left: 0px">
+										<h6>
+											Agendamento:
+											<b>{{ cartItem.schedule }}</b>
+										</h6>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="col col-12">
+						<kt-order-update #orderChild [orderEvent]="eventCartItem.asObservable()" [(order)]="cartItem"
+							(orderUpdateMessage)="orderUpdateMessageEvent($event)" (changeStatus)="changeStatusEvent($event)"
+							(modalDispach)="modalDispachEvent($event)" (modalFreight)="modalFreightEvent($event)"
+							(btnLoad)="btnLoadEvent($event)">
+						</kt-order-update>
+					</div>
+
+					<table class="table table-striped table-sm" *ngIf="cartItem && cartItem.products">
+						<thead>
+							<tr>
+								<th scope="col">#</th>
+								<th scope="col">Imagem</th>
+								<th scope="col">Item</th>
+								<th scope="col">Quantidade</th>
+								<th scope="col">Valor unitário</th>
+								<th scope="col">Subtotal</th>
+							</tr>
+						</thead>
+						<tbody>
+							<ng-container *ngFor="let item of cartItem.products; index as i">
+								<tr class="table-success">
+									<th scope="row">{{ i + 1 }}</th>
+									<td>
+										<a [href]="item.image" target="_blank">
+											<img width="50" class="img-thumbnail" [src]="
+													item.image || './assets/media/logos/image_default.png'
+												" />
+										</a>
+									</td>
+									<td>
+										<b>{{ item.product }}</b>
+										<b *ngIf="item.comment"><br />{{ "Observação: " + item.comment }}</b>
+									</td>
+									<td>{{ item.amount }}</td>
+									<td>
+										<h6 *ngIf="item.havePricePromotion">
+											{{ item.pricePromotion }}
+										</h6>
+										<h6 *ngIf="item.havePricePromotion" class="pricePromotion">
+											{{ item.price }}
+										</h6>
+										<h6 *ngIf="!item.havePricePromotion">{{ item.price }}</h6>
+									</td>
+									<td>
+										<h6 *ngIf="item.havePricePromotion">
+											{{ item.subtotalPricePromotion }}
+										</h6>
+										<h6 *ngIf="item.havePricePromotion" class="pricePromotion">
+											{{ item.subtotal }}
+										</h6>
+										<h6 *ngIf="!item.havePricePromotion">
+											{{ item.subtotal }}
+										</h6>
+									</td>
+									<td *ngIf="isShopper">
+										<div ngbDropdown placement="bottom-right" class="dropdown dropdown-inline" title="Ações rápidas"
+											*ngIf="
+												companyType === 'supermarket' &&
+												(cartItem.status == 'ACCEPT_SHOPPER' ||
+													cartItem.status == 'IN_PREPARATION')
+											">
+											<a ngbDropdownToggle class="
+													btn btn-clean btn-hover-light-primary btn-sm btn-icon
+												" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+												<i class="flaticon-more icon-menu-food"></i>
+											</a>
+											<div ngbDropdownMenu class="
+													dropdown-menu dropdown-menu-md dropdown-menu-right
+												">
+												<ul class="navi navi-hover action-menu-cart">
+													<li (click)="
+															upSertCartItemModalShow(
+																upsertcartitemmodal,
+																item,
+																'edit'
+															)
+														" class="navi-footer pt-1 pb-4">
+														<i class="flaticon2-edit icon-sm mr-2"></i>
+														Editar
+													</li>
+													<li (click)="
+															confirmDeleteModalShow(confirmdeletemodal, item)
+														" class="navi-footer pt-1 pb-4">
+														<i class="flaticon2-trash icon-sm mr-2">
+															Excluir
+														</i>
+													</li>
+												</ul>
+											</div>
+										</div>
+									</td>
+								</tr>
+								<ng-container *ngIf="item.complements">
+									<tr class="table-warning" *ngFor="let compl of item.complements; index as c">
+										<td colspan="3">
+											<strong>{{ compl.title ? compl.title + ': ' : '' }}</strong>
+											<strong>{{ compl?.amountFormat ? compl?.amountFormat : "" }}</strong> {{ compl.name ? compl.name :
+											'' }}
+											<br />
+											{{ compl.description ? 'Descrição: ' + compl.description : '' }}
+										</td>
+										<td><strong>{{ compl?.amountFormat ? compl?.amountFormat : compl.amount }}</strong></td>
+										<td>{{ compl.price }}</td>
+										<td>{{ compl.subTotal }}</td>
+									</tr>
+								</ng-container>
+							</ng-container>
+						</tbody>
+					</table>
+					<div class="card-footer" *ngIf="isShopper">
+						<div class="row">
+							<button class="btn btn-primary btn-remove-category col-md-3 ml-md-auto" (click)="
+									upSertCartAddModalShow(
+										upsertcartaddmodal,
+										cartItem._id,
+										cartItem.name,
+										undefined,
+										'create'
+									)
+								" type="button" *ngIf="
+									companyType === 'supermarket' &&
+									(cartItem.status == 'ACCEPT_SHOPPER' ||
+										cartItem.status == 'IN_PREPARATION')
+								">
+								Adicionar Item
+							</button>
+						</div>
+					</div>
+					<div class="
+							totalCompany
+							d-flex
+							align-items-center
+							justify-content-end
+							mb-3
+						">
+						<h5 class="check-size check-title">Subtotal:</h5>
+						<p class="pl-2 check-size">
+							&nbsp;
+							{{
+							" R$" + (cartItem.subTotal || 0).toFixed(2).replace(".", ",")
+							}}
+						</p>
+					</div>
+					<div *ngIf="cartItem.totalDiscount > 0" class="
+							totalCompany
+							d-flex
+							align-items-center
+							justify-content-end
+							mb-3
+						">
+						<h5 class="check-size check-title">Descontos:</h5>
+						<p class="pl-2 check-size text-danger">
+							&nbsp;
+							{{
+							" R$ -" +
+							(cartItem.totalDiscount || 0).toFixed(2).replace(".", ",")
+							}}
+						</p>
+					</div>
+					<div *ngIf="cartItem.couponPrice > 0" class="
+							totalCompany
+							d-flex
+							align-items-center
+							justify-content-end
+							mb-3
+						">
+						<h5 class="check-size check-title">Cupom:</h5>
+						<p class="pl-2 check-size text-danger">
+							&nbsp;
+							{{
+							" R$ -" +
+							(cartItem.couponPrice || 0).toFixed(2).replace(".", ",")
+							}}
+						</p>
+					</div>
+					<div *ngIf="cartItem.totalComplements > 0" class="
+							totalCompany
+							d-flex
+							align-items-center
+							justify-content-end
+							mb-3
+						">
+						<h5 class="check-size check-title">Complementos:</h5>
+						<p class="pl-2 check-size text-success">
+							&nbsp;
+							{{
+							" R$ +" +
+							(cartItem.totalComplements || 0).toFixed(2).replace(".", ",")
+							}}
+						</p>
+					</div>
+					<div *ngIf="cartItem.priceDelivery > 0" class="
+							totalCompany
+							d-flex
+							align-items-center
+							justify-content-end
+							mb-3
+						">
+						<h5 class="check-size check-title">Entrega:</h5>
+						<p class="pl-2 check-size text-success">
+							&nbsp;
+							{{
+							" R$ +" +
+							(cartItem.priceDelivery || 0).toFixed(2).replace(".", ",")
+							}}
+						</p>
+					</div>
+					<div *ngIf="cartItem.freeShippingBonus > 0" class="
+						totalCompany
+						d-flex
+						align-items-center
+						justify-content-end
+						mb-3
+					">
+						<h5 class="check-size check-title">Bônus Entrega:</h5>
+						<p class="pl-2 check-size text-danger">
+							&nbsp;
+							{{
+							" R$ -" +
+							(cartItem.freeShippingBonus || 0).toFixed(2).replace(".", ",")
+							}}
+						</p>
+					</div>
+					<div *ngIf="cartItem.serviceCharge > 0" class="
+							totalCompany
+							d-flex
+							align-items-center
+							justify-content-end
+							mb-3
+						">
+						<h5 class="check-size check-title">Taxa Serviço:</h5>
+						<p class="pl-2 check-size text-success">
+							&nbsp;
+							{{
+							" R$ +" +
+							(cartItem.serviceCharge || 0).toFixed(2).replace(".", ",")
+							}}
+						</p>
+					</div>
+					<div *ngIf="cartItem.valueTip > 0" class="
+							totalCompany
+							d-flex
+							align-items-center
+							justify-content-end
+							mb-3
+						">
+						<h5 class="check-size check-title">Gorjeta:</h5>
+						<p class="pl-2 check-size text-success">
+							&nbsp;
+							{{
+							" R$ +" + (cartItem.valueTip || 0).toFixed(2).replace(".", ",")
+							}}
+						</p>
+					</div>
+
+					<div class="
+							totalCompany
+							d-flex
+							align-items-center
+							justify-content-end
+							mb-3
+						">
+						<h5 class="check-size check-title">Alterações:</h5>
+						<p class="pl-2 check-size text-success" [class.text-danger]="cartItem?.totalDiff < 0">
+							&nbsp;
+							{{
+							" R$ " + (cartItem.totalDiff || 0).toFixed(2).replace(".", ",")
+							}}
+						</p>
+					</div>
+
+					<div class="
+							totalCompany
+							d-flex
+							align-items-center
+							justify-content-end
+							mb-3
+						">
+						<h5 class="font-weight-bold m-0">Observação:</h5>
+						<p class="pl-2 check-size">
+							&nbsp;
+							{{
+							cartItem.note
+							}}
+						</p>
+					</div>
+
+					<div class="
+							totalCompany
+							d-flex
+							align-items-center
+							justify-content-end
+							mb-3
+						">
+						<h5 class="font-weight-bold m-0">Total:</h5>
+						<p class="pl-2 m-0 font-weight-bold text-success">
+							&nbsp;
+							{{
+							"R$" + (cartItem.totalCompany || 0).toFixed(2).replace(".", ",")
+							}}
+						</p>
+					</div>
+
+					<!-- Itens do carrinho alterado -->
+					<kt-changed-cart [(order)]="cartItem"></kt-changed-cart>
+					<!-- Itens do carrinho alterado -->
+
+					<div class="row">
+						<div [ngClass]="cartItem.deliveryMan ? 'col-6' : 'col-12'">
+							<div class="card">
+								<h5 class="card-header">Dados do cliente:</h5>
+								<div class="card-body">
+									<h6>Cliente: {{ cartItem.customer }}</h6>
+									<h6>Telefone: {{ cartItem.phoneCustomer }}</h6>
+									<h6>
+										Endereço: {{ cartItem.address }}
+										<button class="btn btn-info btn-sm" (click)="sendRouteInGoogleMap()">
+											<i class="fa fa-route"></i>
+											Ver Rota
+										</button>
+									</h6>
+									<h6>Número: {{ cartItem?.number }}</h6>
+									<h6>Complemento: {{ cartItem?.complement }}</h6>
+									<h6>Referência: {{ cartItem?.referencePoint }}</h6>
+								</div>
+							</div>
+						</div>
+
+						<div class="col-6" *ngIf="cartItem.deliveryMan">
+							<div class="card">
+								<h5 class="card-header">Dados do Entregador:</h5>
+								<div class="card-body">
+									<h6>Nome: {{ cartItem.deliveryMan.person.name }}</h6>
+									<h6>Veiculo: {{ cartItem.deliveryMan.typeOfVehicle }}</h6>
+									<h6>Cor: {{ cartItem.deliveryMan.color }}</h6>
+									<h6>Placa: {{ cartItem.deliveryMan.board | uppercase }}</h6>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="chat bg-light rounded" *ngIf="showChat">
+						<div class="
+								chat-header
+								d-flex
+								align-items-center
+								justify-content-between
+								p-2
+								bg-secondary
+								rounded-top
+							">
+							<h5 class="m-0">
+								{{ "Chat do pedido " + cartItem.numberOrder }}
+							</h5>
+
+							<button type="button" class="btn p-0 m-0 chat-close" (click)="openChat()">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<div class="chat-body d-flex flex-column justify-content-end">
+							<div class="chat-messages px-3 pt-3">
+								<div *ngFor="let conversation of chatConversation; index as i" [ngClass]="{
+										receive:
+											conversation.person == 'customer' ||
+											conversation.person == 'deliveryMan',
+										send: conversation.person == 'shopper'
+									}">
+									<p *ngIf="cartItem.numberOrder === conversation.order_number" [ngClass]="{
+											'bg-secondary':
+												conversation.person == 'customer' ||
+												conversation.person == 'deliveryMan',
+											'bg-primary text-white': conversation.person == 'shopper'
+										}" class="rounded p-2 d-inline-block text-justify">
+										{{ conversation.message }}
+									</p>
+								</div>
+								<div *ngIf="
+										cartItem.status == 'IN_PROGRESS_DELIVERYMAN' ||
+										cartItem.status == 'DELIVERY_ROUTE' ||
+										cartItem.status == 'FINISHED' ||
+										cartItem.status == 'CANCELED'
+									">
+									<p class="bg-secondary p-2 rounded text-center text-justify" style="max-width: 100%">
+										Finalizado chat com o cliente
+									</p>
+								</div>
+								<div *ngIf="loaderChat" class="loader">
+									<div class="lds-ring">
+										<div></div>
+										<div></div>
+										<div></div>
+										<div></div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="chat-footer p-2 bg-secondary">
+							<form [formGroup]="formChat" (ngSubmit)="
+									formSubmitChat = true;
+									formChat.valid && sendMessageChat(formChat.value)
+								">
+								<fieldset [disabled]="
+										sendLoaderMessage ||
+										!chatConversation ||
+										cartItem.status == 'IN_PROGRESS_DELIVERYMAN' ||
+										cartItem.status == 'DELIVERY_ROUTE' ||
+										cartItem.status == 'FINISHED' ||
+										cartItem.status == 'CANCELED'
+									">
+									<div class="form-group m-0 d-flex justify-content-between">
+										<input type="text" class="w-100 mr-3 rounded border px-3" placeholder="Escreva uma mensagem"
+											formControlName="message" />
+										<button class="btn btn-success" type="submit">
+											Enviar
+										</button>
+									</div>
+								</fieldset>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</ng-template>
+	</div>
+</div>
+
+<!-- Modal -->
+<ng-template #confirmDispatchModal let-modal>
+	<div class="modal-header">
+		<h4 class="modal-title text-danger" id="modal-liberation-order">
+			Você quer mesmo despachar ? lembrando que neste função você irá utilizar
+			entregador próprio
+		</h4>
+
+		<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	<div class="modal-footer">
+		<button type="button" (click)="modal.dismiss('Cross click')" class="btn btn-secondary" data-dismiss="modal">
+			{{ "GLOBAL.LABEL.CANCEL" | translate }}
+		</button>
+
+		<button type="button" (click)="confirmDispatch(modal)" class="btn btn-primary" *ngIf="btnLoad == false">
+			{{ "GLOBAL.LABEL.YES" | translate }}
+		</button>
+
+		<button type="button" class="btn btn-primary" *ngIf="btnLoad">
+			<span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+			Processando...
+		</button>
+	</div>
+</ng-template>
+
+<!-- Modal Frete -->
+<ng-template #freightModal let-modal>
+	<div class="modal-header">
+		<h5 class="modal-title text-info">
+			Gostaria de enviar o pedido pelo nosso sistema de entrega ?
+		</h5>
+		<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+
+	<div class="modal-body mx-auto">
+		<div clas="col col-12">
+			<h5 class="text-info">
+				Lembrando que o valor do frete é pago pelo estabelecimento
+			</h5>
+		</div>
+
+		<!-- <button type="button" class="btn btn-primary">
+			Frete <span class="badge badge-light">{{freight?.deliveryPrice | currency:'BRL':true:'1.2-2'}}</span>
+		</button> -->
+	</div>
+
+	<div class="modal-footer">
+		<button type="button" (click)="modal.dismiss('Cross click')" class="btn btn-secondary" data-dismiss="modal">
+			{{ "GLOBAL.LABEL.CANCEL" | translate }}
+		</button>
+
+		<button type="button" (click)="freightCompany()" class="btn btn-primary" *ngIf="btnLoad == false">
+			{{ "GLOBAL.LABEL.YES" | translate }}
+		</button>
+
+		<button type="button" class="btn btn-primary" *ngIf="btnLoad">
+			<span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+			Processando...
+		</button>
+	</div>
+</ng-template>
+
+<div class="example-container mat-elevation-z8">
+	<!-- Modal Up Sert created/updated  ngbDropdown -->
+	<ng-template #upsertcartitemmodal let-modal>
+		<form [formGroup]="formData" (ngSubmit)="
+				formSubmitCartItem = true;
+				formData.valid && upSertCartItem(formData.value)
+			">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-create-cartItem">
+					{{
+					typeAction === "create"
+					? ("GLOBAL.LABEL.CREATE" | translate)
+					: ("GLOBAL.LABEL.EDIT" | translate)
+					}}
+				</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<input type="hidden" class="form-control" formControlName="_id" />
+				<div class="row">
+					<div class="form-group col-3">
+						<label class="" for="price">{{
+							"GLOBAL.LABEL.PRICE" | translate
+							}}</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="price" [ngClass]="{
+									'is-invalid':
+										formSubmitCartItem && formData.get('price').invalid
+								}" />
+						</div>
+					</div>
+					<div class="form-group col-3">
+						<label class="" for="amount">{{
+							"GLOBAL.LABEL.AMOUNT" | translate
+							}}</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="amount" [ngClass]="{
+									'is-invalid':
+										formSubmitCartItem && formData.get('amount').invalid
+								}" />
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<input type="submit" value="Editar" class="btn btn-outline-dark" *ngIf="!load" />
+
+				<button type="button" class="btn btn-primary ml-15" *ngIf="load">
+					<span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+					Processando...
+				</button>
+			</div>
+		</form>
+	</ng-template>
+</div>
+
+<div class="example-container mat-elevation-z8">
+	<!-- Modal Up Sert created/updated ADD ITEM-->
+	<ng-template #upsertcartaddmodal let-modal>
+		<form [formGroup]="formDataCart" (ngSubmit)="
+				formSubmitCart = true;
+				formDataCart.valid && upSertCartAdd(formDataCart.value)
+			">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-create-cartItem">
+					{{
+					typeAction === "create"
+					? ("GLOBAL.LABEL.CREATE" | translate)
+					: ("GLOBAL.LABEL.EDIT" | translate)
+					}}
+				</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<input type="hidden" class="form-control" formControlName="_id" />
+				<div class="row">
+					<div class="form-group col-5">
+						<label class="" for="barCode">{{
+							"GLOBAL.LABEL.BARCODE" | translate
+							}}</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="barCode" [ngClass]="{
+									'is-invalid':
+										formSubmitCart && formDataCart.get('barCode').invalid
+								}" />
+						</div>
+					</div>
+					<div class="form-group col-4">
+						<label class="" for="name">{{
+							"GLOBAL.LABEL.NAME" | translate
+							}}</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="name" [ngClass]="{
+									'is-invalid':
+										formSubmitCart && formDataCart.get('name').invalid
+								}" />
+						</div>
+					</div>
+					<div class="form-group col-3">
+						<label class="" for="amount">{{
+							"GLOBAL.LABEL.AMOUNT" | translate
+							}}</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="amount" [ngClass]="{
+									'is-invalid':
+										formSubmitCart && formDataCart.get('amount').invalid
+								}" />
+						</div>
+					</div>
+					<div class="form-group col-3">
+						<label class="" for="price">{{
+							"GLOBAL.LABEL.PRICE" | translate
+							}}</label>
+						<div class="input-group">
+							<input class="form-control" currencyMask formControlName="price" [ngClass]="{
+									'is-invalid':
+										formSubmitCart && formDataCart.get('price').invalid
+								}" />
+						</div>
+					</div>
+					<div class="form-group col-6">
+						<label class="" for="note">{{
+							"GLOBAL.LABEL.NOTE" | translate
+							}}</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="note" [ngClass]="{
+									'is-invalid':
+										formSubmitCart && formDataCart.get('note').invalid
+								}" />
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<input type="submit" value="Criar" class="btn btn-outline-dark" />
+			</div>
+		</form>
+	</ng-template>
+</div>
+
+<!-- Modal Delete -->
+<ng-template #confirmdeletemodal let-modal>
+	<div class="modal-header">
+		<h4 class="modal-title" id="modal-delete-cartItem"></h4>
+		<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	<div class="modal-body" class="btn btn-warning">
+		{{ "GLOBAL.LABEL.AREYOUSUREYOUWANTTODELETE" | translate }}
+	</div>
+	<div class="modal-footer">
+		<button type="button" (click)="cartItemIdToDelete = undefined; modal.dismiss('Cross click')"
+			class="btn btn-secondary" data-dismiss="modal">
+			{{ "GLOBAL.LABEL.CANCEL" | translate }}
+		</button>
+		<button type="button" (click)="deleteCartItem()" class="btn btn-primary">
+			{{ "GLOBAL.LABEL.YES" | translate }}
+		</button>
+	</div>
+</ng-template>

@@ -1,0 +1,156 @@
+<div class="row justify-content-between">
+	<div class="col-auto align-self-center mb-2">
+		<p class="float-left">Notificações</p>
+	</div>
+
+	<div class="col-6 mb-2">
+		<button type="button" class="float-right btn btn-primary"
+			(click)="newNotificationShow(newNotificationModal)">Criar</button>
+	</div>
+</div>
+
+<div class="example-container mat-elevation-z8">
+	<mat-table #table [dataSource]="dataSource">
+		<ng-container matColumnDef="select">
+			<mat-header-cell *matHeaderCellDef>
+				<mat-checkbox [checked]="true" [indeterminate]="true"> </mat-checkbox>
+			</mat-header-cell>
+			<mat-cell *matCellDef="let row">
+				<mat-checkbox (click)="$event.stopPropagation()"> </mat-checkbox>
+			</mat-cell>
+		</ng-container>
+
+		<!-- Name Topic -->
+		<ng-container matColumnDef="title">
+			<mat-header-cell *matHeaderCellDef>Título</mat-header-cell>
+			<mat-cell *matCellDef="let element">{{ element.title }}</mat-cell>
+		</ng-container>
+
+		<!-- Type of topic Column -->
+		<ng-container matColumnDef="message">
+			<mat-header-cell *matHeaderCellDef>Mensagem</mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<div>{{ element.message }}</div>
+			</mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="total">
+			<mat-header-cell *matHeaderCellDef>Total Usuários</mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<div>{{ element?.total }}</div>
+			</mat-cell>
+		</ng-container>
+
+		<!-- Detalhe -->
+		<ng-container matColumnDef="detail">
+			<mat-header-cell *matHeaderCellDef>{{ 'GLOBAL.LABEL.ACTION' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<!-- <a href="#" onclick="return false;">
+					<i class="flaticon-multimedia-2 mr-2" (click)="detailModalShow(detailModal, element)"></i>
+				</a>
+				<a href="#" onclick="return false;">
+					<i class="flaticon-add-circular-button mr-2" (click)="detailModalShow(newCustomerTopicModal, element)"></i>
+				</a> -->
+			</mat-cell>
+		</ng-container>
+
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns"> </mat-row>
+	</mat-table>
+
+	<mat-paginator [length]="totalLength" [pageSize]="pageSize" [pageSizeOptions]="pageLimit" (page)="changePage($event)">
+	</mat-paginator>
+
+	<!-- Modal Send Message -->
+	<ng-template #newNotificationModal let-modal modal-lg>
+		<div class="modal-header">
+			<h4 class="modal-title" id="modal-topic-notification">
+				Notificação
+				<b>{{ topicCurrent?.topic }}</b>
+			</h4>
+			<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+
+		<div class="modal-body">
+			<form style="margin-top: 10px" [formGroup]="notificationForm"
+				(ngSubmit)="notificationForm.valid && sendNotification()">
+				<div class="row">
+					<div class="col-12">
+						<div class="form-group">
+							<label for="title">Título</label>
+							<input type="text" class="form-control" id="title" formControlName="title" required
+								placeholder="Informe um título" [ngClass]="{ 'is-invalid': notificationForm.get('title').invalid }" />
+						</div>
+					</div>
+
+					<div class="col-12">
+						<div class="form-group">
+							<label for="title">Mensagem</label>
+							<textarea class="form-control" id="mensagem" formControlName="message" required rows="3"
+								[ngClass]="{ 'is-invalid': notificationForm.get('message').invalid }"></textarea>
+						</div>
+					</div>
+
+					<div class="row col-12">
+						<div class="col-8">
+							<div *ngIf="!allUser" class="form-group">
+								<label for="company">Usuário</label>
+								<div class="input-group">
+									<input type="text" class="form-control" matInput placeholder="Escolha uma Usuário"
+										[matAutocomplete]="autoUser" formControlName="user"
+										[ngClass]="{ 'is-invalid': notificationForm.get('user').invalid }" />
+									<mat-autocomplete [displayWith]="displayFn" #autoUser="matAutocomplete"
+										(optionSelected)="addUserInList($event)">
+										<mat-option *ngFor="let us of users" [value]="us"> {{ us.name }} - {{ us.email }} - {{ us.phone }}
+										</mat-option>
+									</mat-autocomplete>
+								</div>
+							</div>
+						</div>
+
+						<div class="col-4">
+							<div class="form-group form-check">
+								<input type="checkbox" class="form-check-input" [checked]="allUser" id="allUser"
+									(change)="checkAllUser($event)" />
+								<label class="form-check-label" for="allUser">Todos Usuários</label>
+							</div>
+						</div>
+					</div>
+
+					<div *ngIf="!allUser && listUsers && listUsers.length > 0" class="col-12">
+						<table class="table">
+							<thead>
+								<tr>
+									<th scope="col">Name</th>
+									<th scope="col">Ação</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr *ngFor="let item of listUsers">
+									<td>{{ item.name }}</td>
+									<td>
+										<a href="#" onclick="return false;">
+											<i class="flaticon2-cross mr-2" (click)="removeUserList(item)"></i>
+										</a>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+
+					<div class="col-12">
+						<input type="submit" value="Enviar" class="btn btn-primary" *ngIf="!load" />
+
+						<button type="button" class="btn btn-primary" *ngIf="load">
+							<span class="spinner-grow spinner-grow-sm" role="status" aria-hidden="true"></span>
+							Enviando...
+						</button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</ng-template>
+	<!-- Modal Send Message -->
+</div>

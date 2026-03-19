@@ -1,0 +1,167 @@
+<div class="row justify-content-between">
+	<div class="col-auto align-self-center mb-2">
+		<p class="float-left">{{ 'GLOBAL.LABEL.NOTIFICATIONTOOLS' | translate }}</p>
+	</div>
+	<div class="col-auto">
+		<a (click)="createNotificationToolsModalShow(createnotificationToolsmodal)" href="javascript:;" class="float-right btn btn-label-warning btn-bold btn-sm btn-icon-h">
+			{{ 'GLOBAL.LABEL.CREATE' | translate }}
+		</a>
+	</div>
+</div>
+
+<!-- Alert -->
+<p>
+	<ngb-alert *ngIf="alert" [type]="alert.type" (close)="closeAlert()">
+		{{ alert.message }}
+	</ngb-alert>
+</p>
+
+<div class="example-container mat-elevation-z8">
+	<mat-table #table [dataSource]="dataSource">
+		<!-- Checkbox Column -->
+		<ng-container matColumnDef="select">
+			<mat-header-cell *matHeaderCellDef>
+				<mat-checkbox [checked]="true" [indeterminate]="true">
+				</mat-checkbox>
+			</mat-header-cell>
+			<mat-cell *matCellDef="let row">
+				<mat-checkbox (click)="$event.stopPropagation()">
+				</mat-checkbox>
+			</mat-cell>
+		</ng-container>
+		<!-- Title Column -->
+		<ng-container matColumnDef="title">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.TITLE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.title }} </mat-cell>
+		</ng-container>
+		<!-- Message Column -->
+		<ng-container matColumnDef="message">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.MESSAGE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.message }} </mat-cell>
+		</ng-container>
+		<!-- company Column -->
+		<ng-container matColumnDef="company">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.COMPANY' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.companyName }} </mat-cell>
+		</ng-container>
+		<!-- Delete NotificationTools -->
+		<ng-container matColumnDef="delete">
+			<mat-header-cell *matHeaderCellDef>{{ 'GLOBAL.LABEL.ACTION' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i class="flaticon2-edit mr-2" (click)="editNotificationToolsModalShow(editnotificationToolsmodal, element)"></i>
+				<i class="flaticon2-trash" (click)="confirmDeleteModalShow(confirmdeletemodal, element)"></i>
+			</mat-cell>/
+		</ng-container>
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns;">
+		</mat-row>
+	</mat-table>
+	<mat-paginator [length]="totalLength" [pageSize]="pageSize" [pageSizeOptions]="pageLimit" (page)="changePage($event)"></mat-paginator>
+	<!-- Apartir de aqui é o modal -->
+	<!-- Modal Create NotificationTools -->
+	<ng-template #createnotificationToolsmodal let-modal>
+		<form [formGroup]="formData" (ngSubmit)="formSubmitAttempt=true; formData.valid && createNotificationTools(formData.value)">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-create-notificationTools">{{ 'GLOBAL.LABEL.CREATENOTIFICATIONTOOLS' | translate }}</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div class="form-group">
+					<label for="title">{{ 'GLOBAL.LABEL.TITLE' | translate }}</label>
+					<div class="input-group">
+						<input class="form-control" formControlName="title" [ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('title').invalid}">
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="message">{{ 'GLOBAL.LABEL.MESSAGE' | translate }}</label>
+					<div class="input-group">
+						<textarea ng-reflect-maxlength="45" class="form-control"
+						 formControlName="message"
+						  [ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('message').invalid}"></textarea>
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="company">{{ 'GLOBAL.LABEL.COMPANY' | translate }}</label>
+					<div class="input-group">
+						<input type="text" class="form-control"
+						 matInput placeholder="Escolha uma Empresa"
+							[matAutocomplete]="autoCompany" formControlName="company"
+							 [ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('company').invalid}">
+						<mat-autocomplete [displayWith]="displayFn" #autoCompany="matAutocomplete">
+							<mat-option *ngFor="let comp of companies" [value]="comp">
+								{{ comp.name }}
+							</mat-option>
+						</mat-autocomplete>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<input type="submit" value="Criar" class="btn btn-outline-dark">
+			</div>
+		</form>
+	</ng-template>
+
+	<!-- Modal Edit NotificationTools-->
+	<ng-template #editnotificationToolsmodal let-modal>
+		<form [formGroup]="formData" (ngSubmit)="formSubmitAttempt=true; formData.valid && updateNotificationTools(formData.value)">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-edit-notificationTools">{{ 'GLOBAL.LABEL.TOEDIT' | translate }} {{formData.value.name}}</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<input type="hidden" class="form-control" formControlName="_id">
+				<div class="form-group">
+					<label for="title">{{ 'GLOBAL.LABEL.TITLE' | translate }}</label>
+					<div class="input-group">
+						<input class="form-control" formControlName="title" [ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('title').invalid}">
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="message">{{ 'GLOBAL.LABEL.MESSAGE' | translate }}</label>
+					<div class="input-group">
+						<textarea class="form-control" formControlName="message" ng-reflect-maxlength="45" maxlength="45" [ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('message').invalid}"></textarea>
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="company">{{ 'GLOBAL.LABEL.COMPANY' | translate }}</label>
+					<div class="input-group">
+						<input type="text" class="form-control" matInput placeholder="Escolha uma Empresa"
+						 [matAutocomplete]="autoCompany" formControlName="company"
+						  [ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('company').invalid}">
+						<mat-autocomplete [displayWith]="displayFn" #autoCompany="matAutocomplete">
+							<mat-option *ngFor="let comp of companies" [value]="comp">
+								{{ comp.name }}
+							</mat-option>
+						</mat-autocomplete>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<input type="submit" value="Salvar" class="btn btn-outline-dark">
+			</div>
+		</form>
+	</ng-template>
+</div>
+
+
+<!-- Modal Delete -->
+<ng-template #confirmdeletemodal let-modal>
+	<div class="modal-header">
+		<h4 class="modal-title" id="modal-delete-notificationTools">
+			Confirmar exclusão</h4>
+		<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	<div class="modal-body" class="btn btn-warning">
+		{{ 'GLOBAL.LABEL.AREYOUSUREYOUWANTTODELETE' | translate }}
+	</div>
+	<div class="modal-footer">
+		<button type="button" (click)="notificationToolsIdToDelete=undefined; modal.dismiss('Cross click')" class="btn btn-secondary" data-dismiss="modal">{{ 'GLOBAL.LABEL.CANCEL' | translate }}</button>
+		<button type="button" (click)="deleteNotificationTools() && modal.dismiss('Cross click')" class="btn btn-primary">{{ 'GLOBAL.LABEL.YES' | translate }}</button>
+	</div>
+</ng-template>

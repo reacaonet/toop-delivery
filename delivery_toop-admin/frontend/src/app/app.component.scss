@@ -1,0 +1,13 @@
+:host {
+	height: 100%;
+	margin: 0;
+}
+
+.text-center {
+	text-align: center !important;
+	display: grid;
+}
+
+/deep/ .cdk-overlay-container {
+	z-index: 9999;
+}

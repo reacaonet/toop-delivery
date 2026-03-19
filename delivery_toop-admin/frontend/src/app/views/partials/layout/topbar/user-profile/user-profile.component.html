@@ -1,0 +1,189 @@
+<div ngbDropdown placement="bottom-right" *ngIf="user$ | async as _user"
+	class="kt-header__topbar-item kt-header__topbar-item--user">
+	<div ngbDropdownToggle class="kt-header__topbar-wrapper">
+		<div class="kt-header__topbar-user" [ngClass]="{'kt-header__topbar-icon': icon}">
+			<span class="kt-header__topbar-welcome kt-hidden-mobile" *ngIf="greeting">Olá,</span>
+			<span class="kt-header__topbar-username kt-hidden-mobile" *ngIf="greeting">{{_user.fullname}}</span>
+			<div class="kt-header__topbar-username kt-hidden-mobile" *ngIf="companyMain$ | async as _companymain"> - {{
+				_companymain.name }}</div>
+			<i *ngIf="icon" class="flaticon2-user-outline-symbol"></i>
+			<img *ngIf="avatar" alt="Pic" [attr.src]="_user.pic">
+			<span *ngIf="badge"
+				class="kt-badge kt-badge--username kt-badge--unified-success kt-badge--lg kt-badge--rounded kt-badge--bold">{{_user.fullname|firstLetter}}</span>
+		</div>
+	</div>
+	<div ngbDropdownMenu
+		class="dropdown-menu dropdown-menu-fit dropdown-menu-right dropdown-menu-anim dropdown-menu-top-unround dropdown-menu-xl">
+		<!--begin: Head -->
+		<div class="row" style="background-image: url(./assets/media/misc/bg-1.jpg)" *ngIf="_user">
+			<div class="kt-user-card kt-user-card--skin-dark kt-notification-item-padding-x col-12"
+				style="background: transparent;">
+				<div class="kt-user-card__avatar">
+					<img alt="Pic" [attr.src]="_user.pic" />
+					<span [hidden]="true" class="kt-badge kt-badge--lg kt-badge--rounded kt-badge--bold kt-font-success"
+						*ngIf="_user && _user.fullname">
+						{{ _user.fullname | firstLetter}}
+					</span>
+				</div>
+				<div class="kt-user-card__name">
+					{{_user.fullname}}
+				</div>
+				<!-- <div class="kt-user-card__badge">
+					<span class="btn btn-success btn-sm btn-bold btn-font-md">231 messages</span>
+				</div> -->
+				<br />
+			</div>
+			<!-- <div *ngIf="_user.company && _user.company.name"
+				class="kt-user-card kt-user-card--skin-dark kt-notification-item-padding-x col-12"
+				style="background: transparent; padding-top: 0; padding-bottom: 7px;">
+				<div class="kt-user-card__name col">
+					Visualizando Empresa: {{ _user.company.name }}
+				</div>
+			</div> -->
+			<div *ngIf="franchises$.length && !isRoot$"
+				class="kt-user-card kt-user-card--skin-dark kt-notification-item-padding-x col-12"
+				style="background: transparent; padding-top: 0; ">
+				<div class="kt-user-card__name col">
+					Visualizando Franquia:
+					<select class="form-control" (change)="onChangeFranchise($event.target.value)">
+						<option *ngFor="let franchise of franchises$" value="{{ franchise._id }}"
+							selected="{{franchise$ === franchise._id?'selected':''}}">{{franchise.name}}</option>
+					</select>
+				</div>
+			</div>
+
+			<div *ngIf="companies$.length && !isRoot$"
+				class="kt-user-card kt-user-card--skin-dark kt-notification-item-padding-x col-12"
+				style="background: transparent; padding-top: 0; ">
+				<div class="kt-user-card__name col">
+					Visualizando Empresa:
+					<select class="form-control" (change)="onChangeCompany($event.target.value)">
+						<option *ngFor="let company of companies$" value="{{ company._id }}"
+							selected="{{company$ === company._id?'selected':''}}">{{company.name}}</option>
+					</select>
+				</div>
+			</div>
+		</div>
+		<!--end: Head -->
+
+		<!--begin: Navigation -->
+		<div class="kt-notification">
+			<!-- <a ngbDropdownItem routerLink="profile" href="javascript:;" class="kt-notification__item">
+				<div class="kt-notification__item-icon">
+					<i class="flaticon2-calendar-3 kt-font-success"></i>
+				</div>
+				<div class="kt-notification__item-details">
+					<div class="kt-notification__item-title kt-font-bold">
+						Meu Perfil
+					</div>
+					<div class="kt-notification__item-time">
+						Configurações da conta e mais...
+					</div>
+				</div>
+			</a> -->
+			<!-- <a ngbDropdownItem routerLink="profile" href="javascript:;" class="kt-notification__item">
+				<div class="kt-notification__item-icon">
+					<i class="flaticon2-mail kt-font-warning"></i>
+				</div>
+				<div class="kt-notification__item-details">
+					<div class="kt-notification__item-title kt-font-bold">
+						Minhas mensagens
+					</div>
+					<div class="kt-notification__item-time">
+						Mensagens e tarefas
+					</div>
+				</div>
+			</a> -->
+			<!-- <a ngbDropdownItem routerLink="profile" href="javascript:;" class="kt-notification__item">
+				<div class="kt-notification__item-icon">
+					<i class="flaticon2-rocket-1 kt-font-danger"></i>
+				</div>
+				<div class="kt-notification__item-details">
+					<div class="kt-notification__item-title kt-font-bold">
+						Minhas atividades
+					</div>
+					<div class="kt-notification__item-time">
+						Logs e notificações
+					</div>
+				</div>
+			</a> -->
+			<div class="kt-notification__custom">
+				<a href="javascript:;" (click)="logout()" class="btn btn-outline-brand btn-upper btn-sm btn-bold">Sair</a>
+				<a href="javascript:;" (click)="editUserModalShow(editusermodal, element)"
+					class="btn btn-outline-warning ml-auto btn-upper btn-sm btn-bold">Alterar senha</a>
+			</div>
+		</div>
+		<!--end: Navigation -->
+	</div>
+</div>
+
+<!-- Modal Edit Usuario-->
+<ng-template #editusermodal let-modal>
+	<form [formGroup]="formData" (ngSubmit)="formSubmit=true;
+	 formData.valid && updateUser(formData.value)">
+		<div class="modal-header">
+			<h4 class="modal-title" id="modal-edit-user">Alterar Meu Usuário</h4>
+			<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+		<div class="modal-body">
+			<input type="hidden" class="form-control" formControlName="_id">
+			<div class="row">
+				<div class="col-12">
+					<div class="form-group">
+						<label for="name">Nome</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="name" autocomplete="new-password"
+								[ngClass]="{'is-invalid' : formSubmit && formData.get('name').invalid}">
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-12">
+					<div class="form-group">
+						<label for="email">E-mail</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="email" autocomplete="new-password"
+								[ngClass]="{'is-invalid' : formSubmit && formData.get('email').invalid}">
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-6">
+					<div class="form-group">
+						<label for="newPassword">Nova Senha</label>
+						<div class="input-group">
+							<input class="form-control" type="password" formControlName="newPassword" autocomplete="new-password"
+								[ngClass]="{'is-invalid' : formSubmit && formData.get('newPassword').invalid}">
+						</div>
+					</div>
+				</div>
+				<div class="col-6">
+					<div class="form-group">
+						<label for="confirmPassword">Confirme a Nova Senha</label>
+						<div class="input-group">
+							<input class="form-control" type="password" formControlName="confirmPassword" autocomplete="new-password"
+								[ngClass]="{'is-invalid' : formSubmit && formData.get('confirmPassword').invalid}">
+						</div>
+					</div>
+				</div>
+			</div>
+
+		</div>
+		<div class="modal-footer">
+			<div class="form-group w-100">
+				<label for="currentPassword">Senha atual</label>
+				<div class="input-group">
+					<input class="form-control" type="password" formControlName="currentPassword"
+						[ngClass]="{'is-invalid' : formSubmit && formData.get('currentPassword').invalid}">
+				</div>
+			</div>
+		</div>
+		<div class="modal-footer">
+			<input type="submit" value="Salvar" class="btn btn-outline-dark">
+		</div>
+	</form>
+</ng-template>

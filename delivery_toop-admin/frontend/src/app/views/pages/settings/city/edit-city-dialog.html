@@ -1,0 +1,70 @@
+<div class="row">
+	<div class="col-6">
+		<h4 class="modal-title" id="modal-edit-city">Editar</h4>
+	</div>
+	<div class="col-6 text-left">
+		<button type="button" class="close" aria-label="Close" (click)="onNoClick()">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+</div>
+
+
+<div mat-dialog-content>
+	<form [formGroup]="data.formData">
+		<input type="hidden" class="form-control" formControlName="_id" />
+		<div class="form-group">
+			<label for="name">{{ "GLOBAL.LABEL.NAME" | translate }}</label>
+			<div class="input-group">
+				<input (change)="data.getCoordinates();" class="form-control" formControlName="name" [ngClass]="{
+					'is-invalid': data.formSubmitAttempt && data.formData.get('name').invalid
+				}" />
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label for="state">{{ "GLOBAL.LABEL.STATE" | translate }}</label>
+			<div class="input-group">
+				<input type="text" class="form-control" matInput placeholder="Escolha um Estado" [matAutocomplete]="autoState"
+					formControlName="state" [ngClass]="{
+						'is-invalid': data.formSubmitAttempt && data.formData.get('state').invalid
+					}" />
+				<mat-autocomplete [displayWith]="data.displayFn" #autoState="matAutocomplete" cdkScrollable>
+					<mat-option *ngFor="let comp of state" [value]="comp" (click)="data.getCoordinates();">
+						{{ comp.name }}
+					</mat-option>
+				</mat-autocomplete>
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="form-group col-6">
+				<label for="latitude">Latitude <a target="_blank"
+						[href]="'https://google.com/maps/place/'+data.formData.get('latitude').value+','+data.formData.get('longitude').value+''">Ver
+						localização</a></label>
+				<div class="input-group">
+					<input type="text" class="form-control" formControlName="latitude" [ngClass]="{
+						'is-invalid':
+						data.formSubmitAttempt && data.formData.get('latitude').invalid
+					}" />
+				</div>
+			</div>
+
+			<div class="form-group col-6">
+				<label for="longitude">Longitude <a target="_blank"
+						[href]="'https://google.com/maps/place/'+data.formData.get('latitude').value+','+data.formData.get('longitude').value+''">Ver
+						localização</a></label>
+				<div class="input-group">
+					<input type="text" class="form-control" formControlName="longitude" [ngClass]="{
+						'is-invalid':
+						data.formSubmitAttempt && data.formData.get('longitude').invalid
+					}" />
+				</div>
+			</div>
+		</div>
+	</form>
+</div>
+
+<div mat-dialog-actions>
+	<button mat-button class="btn btn-outline-dark" (click)="onSucess(data)">Salvar</button>
+</div>

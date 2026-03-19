@@ -1,0 +1,15 @@
+# COMANDOS PARA ENVIAR PARA GITHUB
+
+# 1. Substitua SEU-USER pelo seu username do GitHub
+git remote add origin https://github.com/SEU-USER/toop-delivery.git
+
+# 2. Enviar todas as branches
+git push -u origin master
+git push origin develop  
+git push origin homologation
+
+# 3. Verificar branches remotas
+git branch -r
+
+# 4. Configurar branch padrão (via interface GitHub)
+# Vá para Settings → Branches → Default branch → master

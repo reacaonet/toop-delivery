@@ -1,0 +1,75 @@
+<div class="example-container mat-elevation-z8">
+	<mat-table #table [dataSource]="dataSource">
+		<!-- Checkbox Column -->
+		<ng-container matColumnDef="select">
+			<mat-header-cell *matHeaderCellDef>
+				<mat-checkbox [checked]="true" [indeterminate]="true">
+				</mat-checkbox>
+			</mat-header-cell>
+			<mat-cell *matCellDef="let row">
+				<mat-checkbox (click)="$event.stopPropagation()">
+				</mat-checkbox>
+			</mat-cell>
+		</ng-container>
+		<!-- person Column -->
+		<ng-container matColumnDef="person">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.PERSON' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ (element.person && element.person.name) ? element.person.name : '-' }}
+			</mat-cell>
+		</ng-container>
+		<!-- totalCompany Column -->
+		<ng-container matColumnDef="totalCompany">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.TOTAL' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				{{ (element.payment && element.payment.totalCompany) ?(element.payment.totalCompany | currency:'BRL':true:'1.2-2') : '-' }}
+			</mat-cell>
+		</ng-container>
+		<!-- couponPrice Column -->
+		<ng-container matColumnDef="couponPrice">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.COUPON' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				{{ (element.payment && element.payment.couponPrice) ? (element.payment.couponPrice | currency:'BRL':true:'1.2-2') : '-' }}
+			</mat-cell>
+		</ng-container>
+		<!-- total Column -->
+		<ng-container matColumnDef="total">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.TOTALDISCOUNT' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				{{ (element.payment && element.payment.total) ? (element.payment.total | currency:'BRL':true:'1.2-2') : '-' }}
+			</mat-cell>
+		</ng-container>
+		<!-- priceDelivery Column -->
+		<ng-container matColumnDef="priceDelivery">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.PRICEDELIVERY' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				{{ (element.payment && element.payment.priceDelivery) ? (element.payment.priceDelivery | currency:'BRL':true:'1.2-2') : '-' }}
+			</mat-cell>
+		</ng-container>
+		<!-- company Column -->
+		<ng-container matColumnDef="company">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.COMPANY' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				{{ (element.company && element.company.name) ? element.company.name : '-' }}
+			</mat-cell>
+		</ng-container>
+		<!-- orderNumber Column -->
+		<ng-container matColumnDef="orderNumber">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.ORDERNUMBER' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				{{ (element.orderStatus && element.orderStatus.order_number) ? element.orderStatus.order_number : '-' }}
+			</mat-cell>
+		</ng-container>
+		<!-- orderDate Column -->
+		<ng-container matColumnDef="orderDate">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.ORDERDATE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				{{ ((element.orderStatus && element.orderStatus.createdAt) ? element.orderStatus.createdAt : '-') | date:'dd/MM/yyyy HH:mm' }}
+			</mat-cell>
+		</ng-container>
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns;">
+		</mat-row>
+	</mat-table>
+	<mat-paginator [length]="totalLength" [pageSize]="pageSize" [pageSizeOptions]="pageLimit" (page)="changePage($event)">
+	</mat-paginator>
+</div>

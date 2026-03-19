@@ -1,0 +1,61 @@
+.text-center {
+  text-align: center;
+}
+.ttu {
+  text-transform: uppercase;
+}
+.printer-ticket {
+  display: table !important;
+  margin-left: 3%;
+  width: 100%;
+  max-width: 180px;
+  font-weight: light;
+  line-height: 1.3em;
+}
+.printer-ticket,
+.printer-ticket * {
+  font-family: Tahoma, Geneva, sans-serif;
+}
+.printer-ticket th:nth-child(2),
+.printer-ticket td:nth-child(2) {
+  width: 50px;
+  text-align: center;
+}
+.printer-ticket th:nth-child(3),
+.printer-ticket td:nth-child(3) {
+  width: 50px;
+  text-align: right;
+}
+.printer-ticket th {
+  font-weight: inherit;
+	color: #333;
+  padding: 10px 0;
+  text-align: center;
+  border-bottom: 1px dashed #BCBCBC;
+}
+.printer-ticket tbody tr:last-child td {
+  padding-bottom: 10px;
+}
+.printer-ticket tfoot .sup td {
+  padding: 10px 0;
+  border-top: 1px dashed #BCBCBC;
+}
+.printer-ticket tfoot .sup.p--0 td {
+  padding-bottom: 0;
+}
+.printer-ticket .title {
+  font-size: 1.5em;
+  padding: 15px 0;
+}
+.printer-ticket td {
+	color: #333;
+}
+.printer-ticket .top td {
+  padding-top: 10px;
+}
+.printer-ticket .last td {
+  padding-bottom: 10px;
+}
+.complement-text {
+  padding-left: 10px;
+}

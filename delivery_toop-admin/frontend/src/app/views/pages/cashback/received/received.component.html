@@ -1,0 +1,62 @@
+<div class="row justify-content-between">
+	<div class="col-auto align-self-center mb-2">
+		<p class="float-left">cashBack</p>
+	</div>
+</div>
+
+
+<div class="example-container mat-elevation-z8">
+	<mat-table #table [dataSource]="dataSource">
+		<!-- Checkbox Column -->
+		<ng-container matColumnDef="select">
+			<mat-header-cell *matHeaderCellDef>
+				<mat-checkbox [checked]="true" [indeterminate]="true">
+				</mat-checkbox>
+			</mat-header-cell>
+			<mat-cell *matCellDef="let row">
+				<mat-checkbox (click)="$event.stopPropagation()">
+				</mat-checkbox>
+			</mat-cell>
+		</ng-container>
+
+		<!-- Name Column -->
+		<ng-container matColumnDef="data">
+			<mat-header-cell *matHeaderCellDef>Data</mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.data }} </mat-cell>
+		</ng-container>
+
+		<!-- Ammout Column -->
+		<ng-container matColumnDef="person">
+			<mat-header-cell *matHeaderCellDef>Cliente</mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.person?.name }} </mat-cell>
+		</ng-container>
+
+		<!-- Balance Column -->
+		<ng-container matColumnDef="order_number">
+			<mat-header-cell *matHeaderCellDef>N.º</mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.order_number }} </mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="percent">
+			<mat-header-cell *matHeaderCellDef>%</mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.percent }} </mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="cashback">
+			<mat-header-cell *matHeaderCellDef>Cashback</mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.cashback }} </mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="total">
+			<mat-header-cell *matHeaderCellDef>Total Compra</mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.total }} </mat-cell>
+		</ng-container>
+
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns;">
+		</mat-row>
+	</mat-table>
+	<mat-paginator [length]="totalLength" [pageSize]="pageSize" [pageSizeOptions]="pageLimit" (page)="changePage($event)">
+	</mat-paginator>
+</div>
+

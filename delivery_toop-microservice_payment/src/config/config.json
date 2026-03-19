@@ -1,0 +1,16 @@
+{
+  "homolog": {
+    "username": "${POSTGRES_USER}",
+    "password": "${POSTGRES_PASSWORD}",
+    "database": "${POSTGRES_DB}",
+    "host": "${POSTGRES_HOST}",
+    "dialect": "postgres"
+  },
+  "production": {
+    "username": "${POSTGRES_USER}",
+    "password": "${POSTGRES_PASSWORD}",
+    "database": "${POSTGRES_DB}",
+    "host": "${POSTGRES_HOST}",
+    "dialect": "postgres"
+  }
+}

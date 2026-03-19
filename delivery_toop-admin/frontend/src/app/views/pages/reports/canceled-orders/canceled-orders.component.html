@@ -1,0 +1,62 @@
+<div class="row justify-content-between">
+	<div class="col-12">
+
+		<button class="float-right btn btn-sm btn-warning mb-2 ml-2" (click)="generateExcel()"
+			style="display: flex; gap: 5px; align-items: center; justify-content: center; ">
+			<i class="flaticon2-document mr-2"></i>
+			<span *ngIf="!exporting">Gerar Excel</span>
+			<span *ngIf="exporting">Gerando excel ...</span>
+			<div *ngIf="exporting" class="spinner-border text-primary" role="status" style=" width: 1em; height: 1em;">
+				<span class="visually-hidden"></span>
+			</div>
+		</button>
+	</div>
+</div>
+
+<div class="example-container mat-elevation-z8">
+	<mat-table class="table-braspag-transactions" #table [dataSource]="dataSource">
+		<!-- Checkbox Column -->
+		<ng-container matColumnDef="select">
+			<mat-header-cell *matHeaderCellDef>
+				<mat-checkbox [checked]="true" [indeterminate]="true">
+				</mat-checkbox>
+			</mat-header-cell>
+			<mat-cell *matCellDef="let row">
+				<mat-checkbox (click)="$event.stopPropagation()">
+				</mat-checkbox>
+			</mat-cell>
+		</ng-container>
+		<!-- Column -->
+		<ng-container matColumnDef="createdAt">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.DATE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.createdAt }} </mat-cell>
+		</ng-container>
+		<!-- Column -->
+		<ng-container matColumnDef="customer">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.CUSTOMER' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element?.customer?.person[0]?.name }} </mat-cell>
+		</ng-container>
+		<ng-container matColumnDef="type">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.TYPE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.typePayment || translate }} </mat-cell>
+		</ng-container>
+		<ng-container matColumnDef="company">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.COMPANY' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element?.company?.name }} </mat-cell>
+		</ng-container>
+		<ng-container matColumnDef="value">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.VALUE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element?.payment?.total | currency:'R$ ':true:'1.2-2' }} </mat-cell>
+		</ng-container>
+
+
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns;">
+		</mat-row>
+	</mat-table>
+	<mat-paginator [length]="totalLength" [pageSize]="pageSize" [pageSizeOptions]="pageLimit" (page)="changePage($event)">
+	</mat-paginator>
+
+
+
+</div>

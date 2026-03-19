@@ -1,0 +1,174 @@
+<!-- Alert -->
+<p>
+	<ngb-alert *ngIf="alert" [type]="alert.type" (close)="closeAlert()">
+		{{ alert.message }}
+	</ngb-alert>
+</p>
+
+<div class="row justify-content-between">
+	<div class="col-auto align-self-center mb-2">
+		<p class="float-left">{{ 'GLOBAL.LABEL.AGENCIES' | translate }}</p>
+	</div>
+	<div class="col-auto">
+		<a (click)="upSertAgenciesModalShow(upsertagenciesmodal, undefined)" href="javascript:;"
+			class="float-right btn btn-label-warning btn-bold btn-sm btn-icon-h">
+			{{ 'GLOBAL.LABEL.CREATE' | translate }}
+		</a>
+	</div>
+</div>
+
+
+<div class="example-container mat-elevation-z8">
+	<mat-table #table [dataSource]="dataSource">
+		<!-- Checkbox Column -->
+		<ng-container matColumnDef="select">
+			<mat-header-cell *matHeaderCellDef>
+				<mat-checkbox [checked]="true" [indeterminate]="true">
+				</mat-checkbox>
+			</mat-header-cell>
+			<mat-cell *matCellDef="let row">
+				<mat-checkbox (click)="$event.stopPropagation()">
+				</mat-checkbox>
+			</mat-cell>
+		</ng-container>
+
+		<!-- bank Column -->
+		<ng-container matColumnDef="bank">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.BANK' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element?.bank?.name }} </mat-cell>
+		</ng-container>
+
+		<!-- bank Column -->
+		<ng-container matColumnDef="franchise">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.FRANCHISE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element?.franchise?.name }} </mat-cell>
+		</ng-container>
+
+		<!-- Name Column -->
+		<ng-container matColumnDef="name">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.NAME' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.name }} </mat-cell>
+		</ng-container>
+
+		<!-- code Column -->
+		<ng-container matColumnDef="code">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.CODE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.code }} </mat-cell>
+		</ng-container>
+
+		<!-- Status Column -->
+		<ng-container matColumnDef="status">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.STATUS' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i *ngIf="element.status === true" class="flaticon2-accept mr-2"></i>
+				<i *ngIf="element.status === false" class="flaticon2-cancel mr-2"></i>
+			</mat-cell>
+		</ng-container>
+		<!-- Delete -->
+		<ng-container matColumnDef="delete">
+			<mat-header-cell *matHeaderCellDef>{{ 'GLOBAL.LABEL.ACTION' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i class="flaticon2-edit mr-2" (click)="upSertAgenciesModalShow(upsertagenciesmodal, element, 'edit')"></i>
+				<i class="flaticon2-trash" (click)="confirmDeleteModalShow(confirmdeletemodal, element)"></i>
+			</mat-cell>/
+		</ng-container>
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns;">
+		</mat-row>
+	</mat-table>
+	<mat-paginator [length]="totalLength" [pageSize]="pageSize" [pageSizeOptions]="pageLimit" (page)="changePage($event)">
+	</mat-paginator>
+
+	<!-- Modal up sert -->
+	<ng-template #upsertagenciesmodal let-modal modal-lg>
+		<form [formGroup]="formData" (ngSubmit)="formSubmitAgencies=true; formData.valid && upSertAgencies(formData.value)
+         && modal.dismiss('Cross click')">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-create-gencies">{{ (typeAction === 'create') ?
+					('GLOBAL.LABEL.CREATEAGENCIES' | translate) : ('GLOBAL.LABEL.EDITAGENCIES' | translate) }}
+				</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<input type="hidden" class="form-control" formControlName="_id">
+				<div class="row">
+					<div class="form-group col-6">
+						<label for="bank">{{ 'GLOBAL.LABEL.BANK' | translate }}</label>
+						<div class="input-group">
+							<input type="text" class="form-control" matInput placeholder="Escolha um Banco"
+								[matAutocomplete]="autoBank" formControlName="bank"
+								[ngClass]="{'is-invalid' : formSubmitAgencies && formData.get('bank').invalid}">
+							<mat-autocomplete [displayWith]="displayFn" #autoBank="matAutocomplete">
+								<mat-option *ngFor="let bank of banks" [value]="bank">
+									{{ bank.name }}
+								</mat-option>
+							</mat-autocomplete>
+						</div>
+					</div>
+					<div class="form-group col-6">
+						<label for="franchise">{{ 'GLOBAL.LABEL.FRANCHISE' | translate }}</label>
+						<div class="input-group">
+							<input type="text" class="form-control" matInput placeholder="Escolha uma Franquia"
+								[matAutocomplete]="autoFranchise" formControlName="franchise"
+								[ngClass]="{'is-invalid' : formSubmitAgencies && formData.get('franchise').invalid}">
+							<mat-autocomplete [displayWith]="displayFn" #autoFranchise="matAutocomplete">
+								<mat-option *ngFor="let franchise of franchises" [value]="franchise">
+									{{ franchise.name }}
+								</mat-option>
+							</mat-autocomplete>
+						</div>
+					</div>
+
+					<div class="form-group col-12">
+						<label for="name">{{ 'GLOBAL.LABEL.NAME' | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="name"
+								[ngClass]="{'is-invalid' : formSubmitAgencies && formData.get('name').invalid}">
+						</div>
+					</div>
+
+					<div class="form-group col-12">
+						<label for="description">{{ 'GLOBAL.LABEL.DESCRIPTION' | translate }}</label>
+						<div class="input-group">
+							<input class="form-control" formControlName="description"
+								[ngClass]="{'is-invalid' : formSubmitAgencies && formData.get('description').invalid}">
+						</div>
+					</div>
+
+					<div class="form-group col-12">
+						<label for="status">{{ 'GLOBAL.LABEL.STATUS' | translate }}</label>
+						<div class="input-group">
+							<mat-slide-toggle formControlName="status"></mat-slide-toggle>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<input type="submit" value="Criar" class="btn btn-outline-dark">
+				</div>
+			</div>
+		</form>
+	</ng-template>
+</div>
+
+<!-- Modal Delete   -->
+<ng-template #confirmdeletemodal let-modal>
+	<div class="modal-header">
+		<h4 class="modal-title" id="modal-delete-agencies" *ngIf="formData && formData.value && formData.value.name">
+			Confirmar exclusão
+		</h4>
+		<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	<div class="modal-body" class="btn btn-warning">
+		{{ 'GLOBAL.LABEL.AREYOUSUREYOUWANTTODELETE' | translate }}
+	</div>
+	<div class="modal-footer">
+		<button type="button" (click)="agenciesIdToDelete=undefined; modal.dismiss('Cross click')" class="btn btn-secondary"
+			data-dismiss="modal">{{ 'GLOBAL.LABEL.CANCEL' | translate }}</button>
+		<button type="button" (click)="deleteAgencies() && modal.dismiss('Cross click')" class="btn btn-primary">{{
+			'GLOBAL.LABEL.YES' | translate }}</button>
+	</div>
+</ng-template>

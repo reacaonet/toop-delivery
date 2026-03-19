@@ -1,0 +1,57 @@
+version: "3"
+
+services:
+  admin-mongodb:
+    container_name: "admin-homologation-mongodb"
+    image: "mongo:5.0"
+    command: [--auth]
+    ports:
+      - "27117:27017"
+    restart: always
+    volumes:
+      - ./data/admin:/data/admin
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ADMIN_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ADMIN_PASSWORD}
+
+  admin-redis:
+    container_name: "admin-homologation-redis"
+    hostname: "admin-homologation-redis"
+    image: redis:alpine
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - ./data/redis:/data
+    ports:
+      - "6379:6379"
+
+  admin-redis-commander:
+    container_name: "admin-redis-commander"
+    hostname: "admin-redis-commander"
+    image: rediscommander/redis-commander:latest
+    restart: always
+    environment:
+      - REDIS_PORT=6379
+      - REDIS_HOST=admin-redis
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    ports:
+      - "8181:8081"
+
+  admin-api:
+    container_name: "admin-homologation-api"
+    image: node:18
+    restart: always
+    volumes:
+      - .:/home/node/app
+    working_dir: /home/node/app
+    links:
+      - admin-mongodb:mongodb
+    depends_on:
+      - admin-mongodb
+    environment:
+      PORT: ${PORT}
+      MONGO_DB_CONNECTION_STRING: mongodb://${MONGO_ADMIN_USER}:${MONGO_ADMIN_PASSWORD}@mongodb:27017/ecbr?retryWrites=true&authSource=admin
+    expose:
+      - "8100"
+    ports:
+      - 8100:8100
+    command: bash -c 'npm install && npm run prod --amb=homologation'

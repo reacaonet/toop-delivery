@@ -1,0 +1,21 @@
+image: node:10
+pipelines:
+  branches:
+    homologation:
+      -
+        step:
+          script:
+            - cd backend
+            - npm install
+    master:
+      -
+        step:
+          script:
+            - cd backend
+            - npm install
+  default:
+    - 
+      step:
+        script:
+          - cd backend
+          - npm install

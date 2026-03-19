@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>611821503010-pnttsjkhiv543b6satnnq9m4ajq1f4s4.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.611821503010-pnttsjkhiv543b6satnnq9m4ajq1f4s4</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>611821503010-16plor4j0e66uok29fbjfdf8pcj6lhel.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyBp4nI0FN5B8ZIBQ7CB_Azj5h4cf-dHs-I</string>
+	<key>GCM_SENDER_ID</key>
+	<string>611821503010</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>br.com.toopdelivery.motorista</string>
+	<key>PROJECT_ID</key>
+	<string>rich-access-318216</string>
+	<key>STORAGE_BUCKET</key>
+	<string>rich-access-318216.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:611821503010:ios:b880699fb4696073e3807b</string>
+	<key>DATABASE_URL</key>
+	<string>https://rich-access-318216-default-rtdb.firebaseio.com</string>
+</dict>
+</plist>

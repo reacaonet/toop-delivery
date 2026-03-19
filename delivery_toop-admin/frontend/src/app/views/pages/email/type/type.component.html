@@ -1,0 +1,194 @@
+<div class="row justify-content-between">
+	<div class="col-auto align-self-center mb-2">
+		<p class="float-left">{{ 'GLOBAL.LABEL.TYPE' | translate }} </p>
+	</div>
+	<div class="col-auto">
+		<a (click)="createModalShow(createmodal)" href="javascript:;"
+			class="float-right btn btn-label-warning btn-bold btn-sm btn-icon-h">
+			{{ 'GLOBAL.LABEL.CREATE' | translate }}
+		</a>
+	</div>
+</div>
+
+<!-- Alert -->
+<p>
+	<ngb-alert *ngIf="alert" [type]="alert.type" (close)="closeAlert()">
+		{{ alert.message }}
+	</ngb-alert>
+</p>
+
+<div class="example-container mat-elevation-z8">
+	<mat-table #table [dataSource]="dataSource">
+
+		<ng-container matColumnDef="select">
+			<mat-header-cell *matHeaderCellDef>
+				<mat-checkbox [checked]="true" [indeterminate]="true">
+				</mat-checkbox>
+			</mat-header-cell>
+			<mat-cell *matCellDef="let row">
+				<mat-checkbox (click)="$event.stopPropagation()">
+				</mat-checkbox>
+			</mat-cell>
+		</ng-container>
+		<!-- Name Column -->
+		<ng-container matColumnDef="name">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.NAME' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{element.name}} </mat-cell>
+		</ng-container>
+		<!-- State Column -->
+		<ng-container matColumnDef="status">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.STATUS' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{element.status?"Ativo":"Inativo" }}
+			</mat-cell>
+		</ng-container>
+
+		<!-- Delete  -->
+		<ng-container matColumnDef="delete">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.ACTION' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i class="flaticon2-edit mr-2" (click)="editModalShow(editmodal, element)"></i>
+				<i class="flaticon2-trash" (click)="confirmDeleteModalShow(confirmdeletemodal, element)"></i>
+			</mat-cell>
+		</ng-container>
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns;">
+		</mat-row>
+	</mat-table>
+
+	<!-- Apartir de aqui é o modal -->
+	<!-- Modal Create  -->
+	<ng-template #createmodal let-modal>
+		<form [formGroup]="formData" (ngSubmit)="formSubmitAttempt=true; formData.valid && create(formData.value)
+		&& modal.dismiss('Cross click')">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-create">{{ 'GLOBAL.LABEL.CREATE' | translate }}</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div style="margin-top: 10px">
+					<div class="row">
+						<div class="col-12">
+							<div class="form-group">
+								<label for="status">{{ 'GLOBAL.LABEL.STATUS' | translate }}</label>
+								<div class="input-group">
+									<select class="form-control" formControlName="status" (change)="changeStatus($event)"
+										[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('status').invalid}">
+										<option value="true">Ativo</option>
+										<option value="false">Inativo</option>
+									</select>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="col-4">
+							<div class="form-group">
+								<label for="key">{{ 'GLOBAL.LABEL.KEY' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="key"
+										[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('key').invalid}">
+								</div>
+							</div>
+						</div>
+						<div class="col-8">
+							<div class="form-group">
+								<label for="name">{{ 'GLOBAL.LABEL.NAME' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="name"
+										[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('name').invalid}">
+								</div>
+							</div>
+						</div>
+
+					</div>
+
+				</div>
+			</div>
+			<div class="modal-footer">
+				<input type="submit" value="Criar" class="btn btn-outline-dark">
+			</div>
+		</form>
+	</ng-template>
+
+	<!-- Modal Edit  -->
+	<ng-template #editmodal let-modal>
+		<form [formGroup]="formData" (ngSubmit)="update(formData.value) && modal.dismiss('Cross click')">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-edit">{{ 'GLOBAL.LABEL.TOEDIT' | translate }}
+					{{formData.value.name}}</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+
+			<div class="modal-body">
+				<div style="margin-top: 10px">
+					<input type="hidden" class="form-control" formControlName="_id">
+					<div class="row">
+						<div class="col-12">
+							<div class="form-group">
+								<label for="status">{{ 'GLOBAL.LABEL.STATUS' | translate }}</label>
+								<div class="input-group">
+									<select class="form-control" formControlName="status" (change)="changeStatus($event)"
+										[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('status').invalid}">
+										<option value="true" [selected]="formData.value.status == true">Ativo</option>
+										<option value="false" [selected]="formData.value.status == false">Inativo</option>
+									</select>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="col-4">
+							<div class="form-group">
+								<label for="key">{{ 'GLOBAL.LABEL.KEY' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="key" disabled="disabled"
+										[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('key').invalid}">
+								</div>
+							</div>
+						</div>
+						<div class="col-8">
+							<div class="form-group">
+								<label for="name">{{ 'GLOBAL.LABEL.NAME' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="name"
+										[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('name').invalid}">
+								</div>
+							</div>
+						</div>
+
+					</div>
+
+				</div>
+			</div>
+			<div class="modal-footer">
+				<input type="submit" value="Salvar" class="btn btn-outline-dark">
+			</div>
+		</form>
+	</ng-template>
+</div>
+
+<!-- Modal Delete -->
+<ng-template #confirmdeletemodal let-modal>
+	<div class="modal-header">
+		<h4 class="modal-title" id="modal-delete">
+			{{formData.value.name}}</h4>
+		<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	<div class="modal-body" class="btn btn-warning">
+		{{ 'GLOBAL.LABEL.AREYOUSUREYOUWANTTODELETE' | translate }}
+	</div>
+	<div class="modal-footer">
+		<button type="button" (click)="idToDelete=undefined; modal.dismiss('Cross click')" class="btn btn-secondary"
+			data-dismiss="modal">{{ 'GLOBAL.LABEL.CANCEL' | translate }}</button>
+		<button type="button" (click)="delete() && modal.dismiss('Cross click')" class="btn btn-primary">{{
+			'GLOBAL.LABEL.YES' | translate }}</button>
+	</div>
+</ng-template>

@@ -1,0 +1,553 @@
+<form [formGroup]="formFilter" formFilter.valid>
+	<div class="row">
+		<div class="form-group col-5">
+			<label>{{ 'GLOBAL.LABEL.COMPANY' | translate }}</label>
+			<div class="input-group">
+				<input type="text" class="form-control" matInput placeholder="Escolha uma Empresa"
+					[matAutocomplete]="autoCompany" formControlName="company">
+				<mat-autocomplete [displayWith]="displayFnFilter" #autoCompany="matAutocomplete">
+					<mat-option *ngFor="let comp of companies" [value]="comp" (click)="onClickCompanyFilter(comp)">
+						{{ comp.name }}
+					</mat-option>
+				</mat-autocomplete>
+			</div>
+		</div>
+	</div>
+</form>
+
+<div class="row justify-content-between">
+	<div class="col-auto align-self-center mb-2">
+		<p class="float-left">{{ 'GLOBAL.LABEL.COMPANYDELIVERY' | translate }} </p>
+	</div>
+	<div class="col-auto" *ngIf="(isFranchise === true || isRoot === true)">
+		<a (click)="createCompanyDeliveryModalShow(createcompanydeliverymodal)" href="javascript:;"
+			class="float-right btn btn-label-warning btn-bold btn-sm btn-icon-h">
+			{{ 'GLOBAL.LABEL.CREATE' | translate }}
+		</a>
+
+	</div>
+</div>
+
+<div class="example-container mat-elevation-z8">
+	<mat-table #table [dataSource]="dataSource">
+		<ng-container matColumnDef="select">
+			<mat-header-cell *matHeaderCellDef>
+				<mat-checkbox [checked]="true" [indeterminate]="true">
+				</mat-checkbox>
+			</mat-header-cell>
+			<mat-cell *matCellDef="let row">
+				<mat-checkbox (click)="$event.stopPropagation()">
+				</mat-checkbox>
+			</mat-cell>
+		</ng-container>
+		<!-- Name Column -->
+		<ng-container matColumnDef="company">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.COMPANY' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ (element.company && element.company.name) ? element.company.name : '-' }}
+			</mat-cell>
+		</ng-container>
+		<!-- Is Open Column -->
+		<ng-container matColumnDef="isOpen">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.ISOPEN' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i *ngIf="element.isOpen === true" class="flaticon2-accept mr-2"></i>
+				<i *ngIf="element.isOpen === false" class="flaticon2-cancel mr-2"></i>
+			</mat-cell>
+		</ng-container>
+		<!--  MDR Column -->
+		<ng-container matColumnDef="mdr">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.MDR' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.mdr }} </mat-cell>
+		</ng-container>
+		<!--  FEE Column -->
+		<ng-container matColumnDef="fee">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.FEE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.fee }} </mat-cell>
+		</ng-container>
+		<!--  min purchase Column -->
+		<ng-container matColumnDef="min_purchase">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.MINPURCHASE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.min_purchase }} </mat-cell>
+		</ng-container>
+		<!--  max amount items Column -->
+		<ng-container matColumnDef="max_amount_items">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.MAXAMOUNTITEMS' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.max_amount_items }} </mat-cell>
+		</ng-container>
+		<!--  time to call delivery Column -->
+		<ng-container matColumnDef="time_to_call_delivery">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.TIMETOCALLDELIVERY' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.time_to_call_delivery }} </mat-cell>
+		</ng-container>
+		<!-- Max Distance Column -->
+		<ng-container matColumnDef="max_distance">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.MAXDISTANCE' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element"> {{ element.max_distance }} </mat-cell>
+		</ng-container>
+		<!-- Own delivery Column -->
+		<ng-container matColumnDef="own_delivery">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.OWNDELIVERY' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i *ngIf="element.own_delivery === true" class="flaticon2-accept mr-2"></i>
+				<i *ngIf="element.own_delivery === false" class="flaticon2-cancel mr-2"></i>
+			</mat-cell>
+		</ng-container>
+		<!-- Oline delivery Column -->
+		<ng-container matColumnDef="online_delivery">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.ONLINEDELIVERY' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i *ngIf="element.online_delivery === true" class="flaticon2-accept mr-2"></i>
+				<i *ngIf="element.online_delivery === false" class="flaticon2-cancel mr-2"></i>
+			</mat-cell>
+		</ng-container>
+		<!-- Withdraw Market Column -->
+		<ng-container matColumnDef="withdrawMarket">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.WITHDRAWMARKET' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i *ngIf="element.withdrawMarket === true" class="flaticon2-accept mr-2"></i>
+				<i *ngIf="element.withdrawMarket === false" class="flaticon2-cancel mr-2"></i>
+			</mat-cell>
+		</ng-container>
+		<!-- Delete Company Delivery -->
+		<ng-container matColumnDef="delete">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.ACTION' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element">
+				<i class="flaticon2-edit mr-2" (click)="editCompanyDeliveryModalShow(editcompanydeliverymodal, element)"></i>
+				<i class="flaticon2-trash" *ngIf="(isFranchise === true || isRoot === true)"
+					(click)="confirmDeleteModalShow(confirmdeletemodal, element)"></i>
+			</mat-cell>
+		</ng-container>
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns;">
+		</mat-row>
+	</mat-table>
+	<mat-paginator [length]="totalLength" [pageSize]="pageSize" [pageSizeOptions]="pageLimit" (page)="changePage($event)">
+	</mat-paginator>
+
+	<!-- Apartir de aqui é o modal -->
+	<!-- Modal Create Company Delivery -->
+	<ng-template #createcompanydeliverymodal let-modal>
+		<form [formGroup]="formData"
+			(ngSubmit)="formSubmitAttempt=true; formData.valid && createCompanyDelivery(formData.value)">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-create-company-delivery">{{ 'GLOBAL.LABEL.CREATECOMPANYDELIVERY' | translate
+					}}</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div *ngIf="(isFranchise === true || isRoot === true)">
+					<div class="row">
+						<div class="form-group col-6">
+							<label for="company">{{ 'GLOBAL.LABEL.COMPANY' | translate }}</label>
+							<div class="input-group">
+								<input type="text" class="form-control" matInput placeholder="Escolha uma Empresa"
+									[matAutocomplete]="autoCompany" formControlName="company"
+									[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('company').invalid}">
+								<mat-autocomplete [displayWith]="displayFn" #autoCompany="matAutocomplete">
+									<mat-option *ngFor="let comp of companies" [value]="comp">
+										{{ comp.name }}
+									</mat-option>
+								</mat-autocomplete>
+							</div>
+						</div>
+						<div class="form-group col-4">
+							<label for="isOpen">{{ 'GLOBAL.LABEL.ISOPEN' | translate }}</label>
+							<div class="input-group">
+								<mat-slide-toggle (change)="onChangeHeader($event)" formControlName="isOpen"></mat-slide-toggle>
+							</div>
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="form-group col-6">
+							<label for="cieloMerchantId">{{ 'GLOBAL.LABEL.CIELOMERCHANTID' | translate }}</label>
+							<div class="input-group">
+								<input class="form-control" formControlName="cieloMerchantId" required
+									[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('cieloMerchantId').invalid}">
+							</div>
+						</div>
+						<div class="form-group col-6">
+							<label for="mdr">{{ 'GLOBAL.LABEL.MDR' | translate }}</label>
+							<div class="input-group">
+								<input class="form-control" formControlName="mdr"
+									[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('mdr').invalid}">
+							</div>
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="form-group col-6">
+							<label for="fee">{{ 'GLOBAL.LABEL.FEE' | translate }}</label>
+							<div class="input-group">
+								<input class="form-control" formControlName="fee"
+									[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('fee').invalid}">
+							</div>
+						</div>
+						<div class="form-group col-6">
+							<label for="max_distance">{{ 'GLOBAL.LABEL.MAXDISTANCE' | translate }}</label>
+							<div class="input-group">
+								<input class="form-control" formControlName="max_distance"
+									[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('max_distance').invalid}">
+							</div>
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="form-group col-4">
+							<label for="min_purchase">{{ 'GLOBAL.LABEL.MINPURCHASE' | translate }} </label>
+							<div class="input-group">
+								<input class="form-control" currencyMask formControlName="min_purchase"
+									[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('min_purchase').invalid}">
+							</div>
+						</div>
+						<div class="form-group col-4">
+							<label for="max_amount_items">{{ 'GLOBAL.LABEL.MAXAMOUNTITEMS' | translate }} </label>
+							<div class="input-group">
+								<input class="form-control" formControlName="max_amount_items"
+									[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('max_amount_items').invalid}">
+							</div>
+						</div>
+						<div class="form-group col-4">
+							<label for="time_to_call_delivery">{{ 'GLOBAL.LABEL.TIMETOCALLDELIVERY' | translate }} </label>
+							<div class="input-group">
+								<input class="form-control" formControlName="time_to_call_delivery"
+									[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('time_to_call_delivery').invalid}">
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="form-group col-4">
+						<label for="freeShipping">{{ 'GLOBAL.LABEL.FREESHIPPING' | translate }}</label>
+						<div class="input-group">
+							<mat-slide-toggle formControlName="freeShipping"></mat-slide-toggle>
+						</div>
+					</div>
+
+					<div class="form-group col-4" *ngIf="formData.get('freeShipping').value == true">
+						<label for="freeShippingAbove">{{ 'GLOBAL.LABEL.FREESHIPPINGABOVE' | translate }} </label>
+						<div class="input-group">
+							<input class="form-control" currencyMask formControlName="freeShippingAbove"
+								[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('freeShippingAbove').invalid}">
+						</div>
+					</div>
+				</div>
+				<div *ngIf="(isFranchise === true || isRoot === true)">
+
+					<div class="row">
+						<div class="form-group col-3">
+							<label for="own_delivery">{{ 'GLOBAL.LABEL.OWNDELIVERY' | translate }}</label>
+							<div class="input-group">
+								<mat-slide-toggle formControlName="own_delivery"></mat-slide-toggle>
+							</div>
+						</div>
+						<div class="form-group col-3">
+							<label for="online_delivery">{{ 'GLOBAL.LABEL.ONLINEDELIVERY' | translate }}</label>
+							<div class="input-group">
+								<mat-slide-toggle formControlName="online_delivery"></mat-slide-toggle>
+							</div>
+						</div>
+						<div class="form-group col-3">
+							<label for="withdrawMarket">{{ 'GLOBAL.LABEL.WITHDRAWMARKET' | translate }}</label>
+							<div class="input-group">
+								<mat-slide-toggle formControlName="withdrawMarket"></mat-slide-toggle>
+							</div>
+						</div>
+						<div class="form-group col-3">
+							<label for="has_split">{{ 'GLOBAL.LABEL.HASSPLIT' | translate }}</label>
+							<div class="input-group">
+								<mat-slide-toggle formControlName="has_split"></mat-slide-toggle>
+							</div>
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="col-9 ">
+							<h6>Lista de Frete x Valor</h6>
+						</div>
+						<div class="col-3 text-right">
+							<button type="button" class="btn btn-sm btn-info ml-auto" (click)="addNewDeliveryFee()">
+								<span aria-hidden="true">Novo Frete</span>
+							</button>
+						</div>
+					</div>
+					<div class="row" *ngFor="let deliveryfee of formData.get('distance').controls; index as i">
+						<ng-container [formGroup]="deliveryfee">
+							<div class="form-group col-2 ">
+								<label for="min">{{ 'GLOBAL.LABEL.MIN' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="min"
+										[ngClass]="{'is-invalid' : formSubmitAttempt && deliveryfee.get('min').invalid}">
+								</div>
+							</div>
+							<div class="form-group col-2">
+								<label for="max">{{ 'GLOBAL.LABEL.MAX' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="max"
+										[ngClass]="{'is-invalid' : formSubmitAttempt && deliveryfee.get('max').invalid}">
+								</div>
+							</div>
+							<div class="form-group col-3">
+								<label for="price">{{ 'GLOBAL.LABEL.PRICE' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" currencyMask formControlName="price"
+										[ngClass]="{'is-invalid' : formSubmitAttempt && deliveryfee.get('price').invalid}">
+								</div>
+							</div>
+							<div class="form-group col-3">
+								<label for="time">{{ 'GLOBAL.LABEL.TIME' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="delivery_time"
+										[ngClass]="{'is-invalid' : formSubmitAttempt && deliveryfee.get('delivery_time').invalid}">
+								</div>
+							</div>
+							<div class="form-group text-center col-2">
+								<label class="col-12" for="fee">{{ 'GLOBAL.LABEL.ACTION' | translate }}</label>
+								<button (click)="removeFeeItem(i)" mat-mini-fab color="warn"
+									class="col-12 mat-mini-fab mat-button-base mat-accent">
+									<span class="mat-button-wrapper">
+										<mat-icon class="mat-icon notranslate material-icons mat-icon-no-color" role="img"
+											aria-hidden="true">
+											delete
+										</mat-icon>
+									</span>
+									<div class="mat-button-ripple mat-ripple mat-button-ripple-round" matripple>
+									</div>
+									<div class="mat-button-focus-overlay">
+									</div>
+								</button>
+							</div>
+						</ng-container>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<input type="submit" value="Criar" class="btn btn-outline-dark">
+			</div>
+		</form>
+	</ng-template>
+
+	<!-- Modal Edit Company Delivery-->
+	<ng-template #editcompanydeliverymodal let-modal>
+		<form [formGroup]="formData"
+			(ngSubmit)="formSubmitAttempt=true; formData.valid && updateCompanyDelivery(formData.value)">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-edit-company-delivery">{{ 'GLOBAL.LABEL.TOEDIT' | translate }}
+					{{formData.value.name}}</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div *ngIf="(isFranchise === true || isRoot === true)">
+					<div class="row">
+						<div class="form-group col-6">
+							<label for="company">{{ 'GLOBAL.LABEL.COMPANY' | translate }}</label>
+							<div class="input-group">
+								<input type="text" class="form-control" matInput placeholder="Escolha uma Empresa"
+									[matAutocomplete]="autoCompany" formControlName="company"
+									[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('company').invalid}">
+								<mat-autocomplete [displayWith]="displayFn" #autoCompany="matAutocomplete">
+									<mat-option *ngFor="let comp of companies" [value]="comp">
+										{{ comp.name }}
+									</mat-option>
+								</mat-autocomplete>
+							</div>
+						</div>
+						<div class="form-group col-4">
+							<label for="isOpen">{{ 'GLOBAL.LABEL.ISOPEN' | translate }}</label>
+							<div class="input-group">
+								<mat-slide-toggle formControlName="isOpen"></mat-slide-toggle>
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="form-group col-6">
+							<label for="cieloMerchantId">{{ 'GLOBAL.LABEL.CIELOMERCHANTID' | translate }}</label>
+							<div class="input-group">
+								<input class="form-control" formControlName="cieloMerchantId"
+									[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('cieloMerchantId').invalid}">
+							</div>
+						</div>
+						<div class="form-group col-6">
+							<label for="mdr">{{ 'GLOBAL.LABEL.MDR' | translate }}</label>
+							<div class="input-group">
+								<input class="form-control" formControlName="mdr"
+									[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('mdr').invalid}">
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="form-group col-6">
+							<label for="fee">{{ 'GLOBAL.LABEL.FEE' | translate }}</label>
+							<div class="input-group">
+								<input class="form-control" formControlName="fee"
+									[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('fee').invalid}">
+							</div>
+						</div>
+						<div class="form-group col-6">
+							<label for="max_distance">{{ 'GLOBAL.LABEL.MAXDISTANCE' | translate }}</label>
+							<div class="input-group">
+								<input class="form-control" formControlName="max_distance"
+									[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('max_distance').invalid}">
+							</div>
+						</div>
+					</div>
+					<div class="row">
+						<div class="form-group col-4">
+							<label for="min_purchase">{{ 'GLOBAL.LABEL.MINPURCHASE' | translate }} </label>
+							<div class="input-group">
+								<input class="form-control" currencyMask formControlName="min_purchase"
+									[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('min_purchase').invalid}">
+							</div>
+						</div>
+						<div class="form-group col-4">
+							<label for="max_amount_items">{{ 'GLOBAL.LABEL.MAXAMOUNTITEMS' | translate }} </label>
+							<div class="input-group">
+								<input class="form-control" formControlName="max_amount_items"
+									[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('max_amount_items').invalid}">
+							</div>
+						</div>
+						<div class="form-group col-4">
+							<label for="time_to_call_delivery">{{ 'GLOBAL.LABEL.TIMETOCALLDELIVERY' | translate }} </label>
+							<div class="input-group">
+								<input class="form-control" formControlName="time_to_call_delivery"
+									[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('time_to_call_delivery').invalid}">
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="form-group col-4">
+						<label for="freeShipping">{{ 'GLOBAL.LABEL.FREESHIPPING' | translate }}</label>
+						<div class="input-group">
+							<mat-slide-toggle formControlName="freeShipping"></mat-slide-toggle>
+						</div>
+					</div>
+
+					<div class="form-group col-4" *ngIf="formData.get('freeShipping').value == true">
+						<label for="freeShippingAbove">{{ 'GLOBAL.LABEL.FREESHIPPINGABOVE' | translate }} </label>
+						<div class="input-group">
+							<input class="form-control" currencyMask formControlName="freeShippingAbove"
+								[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('freeShippingAbove').invalid}">
+						</div>
+					</div>
+				</div>
+				<div *ngIf="(isFranchise === true || isRoot === true)">
+					<div class="row">
+						<div class="form-group col-3">
+							<label for="own_delivery">{{ 'GLOBAL.LABEL.OWNDELIVERY' | translate }}</label>
+							<div class="input-group">
+								<mat-slide-toggle formControlName="own_delivery"></mat-slide-toggle>
+							</div>
+						</div>
+						<div class="form-group col-3">
+							<label for="online_delivery">{{ 'GLOBAL.LABEL.ONLINEDELIVERY' | translate }}</label>
+							<div class="input-group">
+								<mat-slide-toggle formControlName="online_delivery"></mat-slide-toggle>
+							</div>
+						</div>
+						<div class="form-group col-3">
+							<label for="withdrawMarket">{{ 'GLOBAL.LABEL.WITHDRAWMARKET' | translate }}</label>
+							<div class="input-group">
+								<mat-slide-toggle formControlName="withdrawMarket"></mat-slide-toggle>
+							</div>
+						</div>
+						<div class="form-group col-3">
+							<label for="has_split">{{ 'GLOBAL.LABEL.HASSPLIT' | translate }}</label>
+							<div class="input-group">
+								<mat-slide-toggle formControlName="has_split"></mat-slide-toggle>
+							</div>
+						</div>
+					</div>
+
+					<div class="row">
+						<div class="col-9">
+							<h6>Lista de Frete x Valor</h6>
+						</div>
+						<div class="col-3">
+							<button type="button" class="btn btn-sm btn-info" (click)="addNewDeliveryFee()">
+								<span aria-hidden="true">Novo frete</span>
+							</button>
+						</div>
+					</div>
+					<div class="row" *ngFor="let deliveryfee of formData.get('distance').controls; index as i">
+						<ng-container [formGroup]="deliveryfee">
+							<div class="form-group col-2">
+								<label for="fee">{{ 'GLOBAL.LABEL.MIN' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="min"
+										[ngClass]="{'is-invalid' : formSubmitAttempt && deliveryfee.get('min').invalid}">
+								</div>
+							</div>
+							<div class="form-group col-2">
+								<label for="fee">{{ 'GLOBAL.LABEL.MAX' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="max"
+										[ngClass]="{'is-invalid' : formSubmitAttempt && deliveryfee.get('max').invalid}">
+								</div>
+							</div>
+							<div class="form-group col-3">
+								<label for="fee">{{ 'GLOBAL.LABEL.PRICE' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" currencyMask formControlName="price"
+										[ngClass]="{'is-invalid' : formSubmitAttempt && deliveryfee.get('price').invalid}">
+								</div>
+							</div>
+							<div class="form-group col-3">
+								<label for="fee">{{ 'GLOBAL.LABEL.TIME' | translate }}</label>
+								<div class="input-group">
+									<input class="form-control" formControlName="delivery_time"
+										[ngClass]="{'is-invalid' : formSubmitAttempt && deliveryfee.get('delivery_time').invalid}">
+								</div>
+							</div>
+							<div class="form-group text-center col-2">
+								<label class="col-12" for="fee">{{ 'GLOBAL.LABEL.ACTION' | translate }}</label>
+								<button (click)="removeFeeItem(i)" mat-mini-fab color="warn"
+									class="col-12 mat-mini-fab mat-button-base mat-accent">
+									<span class="mat-button-wrapper">
+										<mat-icon class="mat-icon notranslate material-icons mat-icon-no-color" role="img"
+											aria-hidden="true">
+											delete
+										</mat-icon>
+									</span>
+									<div class="mat-button-ripple mat-ripple mat-button-ripple-round" matripple>
+									</div>
+									<div class="mat-button-focus-overlay">
+									</div>
+								</button>
+							</div>
+						</ng-container>
+					</div>
+				</div>
+			</div>
+			<!--Fim modal-body-->
+			<div class="modal-footer">
+				<input type="submit" value="Salvar" class="btn btn-outline-dark">
+			</div>
+		</form>
+	</ng-template>
+</div>
+<!--Fim class="example-container mat-elevation-z8"-->
+
+<!-- Modal Delete -->
+<ng-template #confirmdeletemodal let-modal>
+	<div class="modal-header">
+		<h4 class="modal-title" id="modal-delete-company-delivery">
+			Confirmar exclusão</h4>
+		<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+			<span aria-hidden="true">&times;</span>
+		</button>
+	</div>
+	<div class="modal-body" class="btn btn-warning">
+		{{ 'GLOBAL.LABEL.AREYOUSUREYOUWANTTODELETE' | translate }}
+	</div>
+	<div class="modal-footer">
+		<button type="button" (click)="companyDeliveryIdToDelete=undefined; modal.dismiss('Cross click')"
+			class="btn btn-sm btn-info" data-dismiss="modal">{{ 'GLOBAL.LABEL.CANCEL' | translate }}</button>
+		<button type="button" (click)="deleteCompanyDelivery() && modal.dismiss('Cross click')"
+			class="btn btn-sm btn-primary">{{ 'GLOBAL.LABEL.YES' | translate }}</button>
+	</div>
+</ng-template>

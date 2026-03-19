@@ -1,0 +1,235 @@
+{
+  "project_info": {
+    "project_number": "611821503010",
+    "firebase_url": "https://rich-access-318216-default-rtdb.firebaseio.com",
+    "project_id": "rich-access-318216",
+    "storage_bucket": "rich-access-318216.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:611821503010:android:fe89ead85079d31fe3807b",
+        "android_client_info": {
+          "package_name": "br.com.toopdelivery.cliente"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "611821503010-72ojs954n4amcogk1udqoctasqo88k14.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "br.com.toopdelivery.cliente",
+            "certificate_hash": "24a46496a341790a01f80489235951f897608407"
+          }
+        },
+        {
+          "client_id": "611821503010-9cr1iet4t0btmpkt2ds2ieek8qflc8lj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "br.com.toopdelivery.cliente",
+            "certificate_hash": "11b67ed4aaac64afe338930893e5ef8f13a5a7ea"
+          }
+        },
+        {
+          "client_id": "611821503010-ojthilobp4im57itu3ail0l8mirfml5f.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "br.com.toopdelivery.cliente",
+            "certificate_hash": "eb8b1bb6fab55b4272eb65dbdf351e64e8546398"
+          }
+        },
+        {
+          "client_id": "611821503010-tsm6fp8dcpmv3tie2hobnp234hnclgah.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD2EmpWzPeiZeWFYPhlJLuUq5hmRVXPMc0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "611821503010-tsm6fp8dcpmv3tie2hobnp234hnclgah.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "611821503010-fb9dho4cbvi7rrdnnq701nhnp5r8pif2.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "br.com.toopdelivery.cliente"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:611821503010:android:d99482e4809cce1ce3807b",
+        "android_client_info": {
+          "package_name": "br.com.toopdelivery.comercio"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "611821503010-gkr1unfjn4q80ol2io8jocarnfprs6ed.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "br.com.toopdelivery.comercio",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "611821503010-tsm6fp8dcpmv3tie2hobnp234hnclgah.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD2EmpWzPeiZeWFYPhlJLuUq5hmRVXPMc0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "611821503010-tsm6fp8dcpmv3tie2hobnp234hnclgah.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "611821503010-fb9dho4cbvi7rrdnnq701nhnp5r8pif2.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "br.com.toopdelivery.cliente"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:611821503010:android:792a9842d35c53f1e3807b",
+        "android_client_info": {
+          "package_name": "br.com.toopdelivery.entregador"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "611821503010-16plor4j0e66uok29fbjfdf8pcj6lhel.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "br.com.toopdelivery.entregador",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "611821503010-a5ehriv49cn429kasa9i5l4q311he0tb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "br.com.toopdelivery.entregador",
+            "certificate_hash": "c28ef70f84160e1b2efc8917e457f396fadef968"
+          }
+        },
+        {
+          "client_id": "611821503010-e3i1bauvmugmf6d1v4k5ajq925rtft8j.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "br.com.toopdelivery.entregador",
+            "certificate_hash": "11b67ed4aaac64afe338930893e5ef8f13a5a7ea"
+          }
+        },
+        {
+          "client_id": "611821503010-tsm6fp8dcpmv3tie2hobnp234hnclgah.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD2EmpWzPeiZeWFYPhlJLuUq5hmRVXPMc0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "611821503010-tsm6fp8dcpmv3tie2hobnp234hnclgah.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "611821503010-fb9dho4cbvi7rrdnnq701nhnp5r8pif2.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "br.com.toopdelivery.cliente"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:611821503010:android:837285147d365015e3807b",
+        "android_client_info": {
+          "package_name": "br.com.toopdelivery.motorista"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "611821503010-acqnhqssatqbgmgkq90edd3f8srv8ikq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "br.com.toopdelivery.motorista",
+            "certificate_hash": "b5b58ebb24247ab54ffa16963c250e7844727419"
+          }
+        },
+        {
+          "client_id": "611821503010-aqsq1vu9j5tv0bcgql41jl9kbdjrgi91.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "br.com.toopdelivery.motorista",
+            "certificate_hash": "11b67ed4aaac64afe338930893e5ef8f13a5a7ea"
+          }
+        },
+        {
+          "client_id": "611821503010-gg4u69u90c9ahhqh1etbdqi8gk9j1s8v.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "br.com.toopdelivery.motorista",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "611821503010-tsm6fp8dcpmv3tie2hobnp234hnclgah.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD2EmpWzPeiZeWFYPhlJLuUq5hmRVXPMc0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "611821503010-tsm6fp8dcpmv3tie2hobnp234hnclgah.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "611821503010-fb9dho4cbvi7rrdnnq701nhnp5r8pif2.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "br.com.toopdelivery.cliente"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

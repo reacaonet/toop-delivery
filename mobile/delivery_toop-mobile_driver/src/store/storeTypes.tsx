@@ -1,0 +1,22 @@
+/*USER*/
+export const GET_USER = 'GET_USER';
+export const SET_USER = 'SET_USER';
+export const CLEAR_SESSION = 'CLEAR_SESSION';
+
+export const GET_BOOKING = 'GET_BOOKING';
+export const SET_BOOKING = 'SET_BOOKING';
+export const UPDATE_BOOKING = 'UPDATE_BOOKING';
+export const CLEAN_BOOKING = 'CLEAN_BOOKING';
+
+export const GET_LOCATION = 'GET_LOCATION';
+export const SET_LOCATION = 'SET_LOCATION';
+export const CLEAN_LOCATION = 'CLEAN_LOCATION';
+
+export const GET_REGISTRATION = 'GET_REGISTRATION';
+export const SET_REGISTRATION = 'SET_REGISTRATION';
+
+export const GET_MESSAGE = 'GET_MESSAGE';
+export const SET_MESSAGE = 'SET_MESSAGE';
+
+export const GET_CONFIGURATIONS = 'GET_CONFIGURATIONS';
+export const SET_CONFIGURATIONS = 'SET_CONFIGURATIONS';

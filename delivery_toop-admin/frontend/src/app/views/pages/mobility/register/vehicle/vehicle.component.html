@@ -1,0 +1,231 @@
+<form [formGroup]="formFilter" formFilter.valid>
+	<div class="row">
+		<div class="form-group row col-12">
+			<label for="subject">{{ 'GLOBAL.LABEL.DRIVER' | translate }}</label>
+			<div class="input-group">
+				<input required class="form-control" placeholder="{{ 'GLOBAL.LABEL.TYPETOSEARCH' | translate }}"
+					formControlName="searchDriver">
+			</div>
+		</div>
+
+	</div>
+</form>
+
+<div class="row justify-content-between">
+	<div class="col-auto align-self-center mb-2">
+		<h5>
+			<p class="float-left">{{ 'GLOBAL.LABEL.VEHICLE' | translate }}</p>
+		</h5>
+	</div>
+
+	<!-- <div class="col-auto">
+		<a (click)="createModalShow(createdatamodal)" href="javascript:;"
+			class="float-right btn btn-label-warning btn-bold btn-sm btn-icon-h">
+			{{ 'GLOBAL.LABEL.CREATE' | translate }}
+		</a>
+	</div> -->
+</div>
+
+<div class="example-container mat-elevation-z8">
+	<mat-table #table [dataSource]="dataSource">
+		<!-- Checkbox Column -->
+		<ng-container matColumnDef="select">
+			<mat-header-cell *matHeaderCellDef>
+				<mat-checkbox [checked]="true" [indeterminate]="true">
+				</mat-checkbox>
+			</mat-header-cell>
+			<mat-cell *matCellDef="let row">
+				<mat-checkbox (click)="$event.stopPropagation()">
+				</mat-checkbox>
+			</mat-cell>
+		</ng-container>
+
+		<!-- subject Column -->
+		<ng-container matColumnDef="manufacturer">
+			<mat-header-cell *matHeaderCellDef>{{ 'GLOBAL.LABEL.BRAND' | translate }}</mat-header-cell>
+			<mat-cell *matCellDef="let element" [ngClass]="getPositionColor(element.position)"> {{element.manufacturer}}
+			</mat-cell>
+		</ng-container>
+
+		<!-- type Column -->
+		<ng-container matColumnDef="model">
+			<mat-header-cell *matHeaderCellDef>{{ 'GLOBAL.LABEL.MODEL' | translate }}</mat-header-cell>
+			<mat-cell *matCellDef="let element" [ngClass]="getPositionColor(element.position)">
+				{{element.model}}
+			</mat-cell>
+		</ng-container>
+
+		<!-- target Column -->
+		<ng-container matColumnDef="nameplate">
+			<mat-header-cell *matHeaderCellDef>{{ 'GLOBAL.LABEL.BOARD' | translate }}</mat-header-cell>
+			<mat-cell *matCellDef="let element" [ngClass]="getPositionColor(element.position)">
+				{{element.nameplate}}
+			</mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="nameDriver">
+			<mat-header-cell *matHeaderCellDef>{{ 'GLOBAL.LABEL.DRIVER' | translate }}</mat-header-cell>
+			<mat-cell *matCellDef="let element" [ngClass]="getPositionColor(element.position)">
+				{{element.nameDriver}}
+			</mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="phoneDriver">
+			<mat-header-cell *matHeaderCellDef>{{ 'GLOBAL.LABEL.PHONE' | translate }}</mat-header-cell>
+			<mat-cell *matCellDef="let element" [ngClass]="getPositionColor(element.position)">
+				{{element.phoneDriver}}
+			</mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="approved">
+			<mat-header-cell *matHeaderCellDef>{{ 'GLOBAL.LABEL.APPROVED' | translate }}</mat-header-cell>
+			<mat-cell *matCellDef="let element" [ngClass]="getPositionColor(element.position)">
+				{{element.approved ? 'Sim' : 'Não'}}
+			</mat-cell>
+		</ng-container>
+
+		<ng-container matColumnDef="status">
+			<mat-header-cell *matHeaderCellDef>{{ 'GLOBAL.LABEL.ACTIVE' | translate }}</mat-header-cell>
+			<mat-cell *matCellDef="let element" [ngClass]="getPositionColor(element.position)">
+				{{element.status ? 'Sim' : 'Não'}}
+			</mat-cell>
+		</ng-container>
+
+		<!-- Delete  -->
+		<ng-container matColumnDef="delete">
+			<mat-header-cell *matHeaderCellDef> {{ 'GLOBAL.LABEL.ACTION' | translate }} </mat-header-cell>
+			<mat-cell *matCellDef="let element" [ngClass]="getPositionColor(element.position)">
+				<!-- <i class="status mr-3" title="Situação" [ngClass]=" getStatusColor(element.status)"></i> -->
+				<i class="flaticon2-edit mr-3" (click)="editModalShow(editdatamodal, element)"></i>
+				<!-- <i class="flaticon2-trash" (click)="confirmDeleteModalShow(confirmdeletemodal, element)"></i> -->
+			</mat-cell>
+		</ng-container>
+		<mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+		<mat-row *matRowDef="let row; columns: displayedColumns;">
+		</mat-row>
+	</mat-table>
+	<mat-paginator [length]="totalLength" [pageSize]="pageSize" [pageSizeOptions]="pageLimit" (page)="changePage($event)">
+	</mat-paginator>
+
+	<!-- Modal EDIT  -->
+	<ng-template #editdatamodal let-modal modal-lg>
+		<form [formGroup]="formData" (ngSubmit)="formSubmitAttempt=true; formData.valid && edit(formData.value)">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-edit-data">
+					{{ 'GLOBAL.LABEL.EDIT' | translate }}
+				</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<input formControlName="_id" type="hidden">
+			</div>
+
+			<div class="modal-body">
+				<div class="row">
+					<div class="form-group col-4">
+						<label for="city">{{ 'GLOBAL.LABEL.BRAND' | translate }}</label>
+						<div class="input-group">
+							<input required class="form-control" formControlName="manufacturer"
+								[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('manufacturer').invalid}" disabled>
+						</div>
+					</div>
+
+					<div class="form-group col-4">
+						<label for="city">{{ 'GLOBAL.LABEL.MODEL' | translate }}</label>
+						<div class="input-group">
+							<input required class="form-control" formControlName="model"
+								[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('model').invalid}" disabled>
+						</div>
+					</div>
+
+					<div class="form-group col-4">
+						<label for="city">{{ 'GLOBAL.LABEL.BOARD' | translate }}</label>
+						<div class="input-group">
+							<input required class="form-control" formControlName="nameplate"
+								[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('nameplate').invalid}" disabled>
+						</div>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="form-group col-6">
+						<label for="city">{{ 'GLOBAL.LABEL.DRIVER' | translate }}</label>
+						<div class="input-group">
+							<input required class="form-control" formControlName="nameDriver"
+								[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('nameDriver').invalid}" disabled>
+						</div>
+					</div>
+
+					<div class="form-group col-6">
+						<label for="city">{{ 'GLOBAL.LABEL.PHONE' | translate }}</label>
+						<div class="input-group">
+							<input required class="form-control" formControlName="phoneDriver"
+								[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('phoneDriver').invalid}" disabled>
+						</div>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="form-group col-6">
+						<label for="state">{{ 'GLOBAL.LABEL.APPROVED' | translate }}</label>
+						<div class="input-group">
+							<select id="type" class="form-control autocomplete" formControlName="approved"
+								[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('approved').invalid}">
+								<option value="true">{{ 'GLOBAL.LABEL.YES' | translate }}</option>
+								<option value="false">{{ 'GLOBAL.LABEL.NO' | translate }}</option>
+							</select>
+						</div>
+					</div>
+
+					<div class="form-group col-6">
+						<label for="state">{{ 'GLOBAL.LABEL.MAINVEHICLE' | translate }} ?</label>
+						<div class="input-group">
+							<select id="type" class="form-control autocomplete" formControlName="status"
+								[ngClass]="{'is-invalid' : formSubmitAttempt && formData.get('status').invalid}">
+								<option value="true">{{ 'GLOBAL.LABEL.YES' | translate }}</option>
+								<option value="false">{{ 'GLOBAL.LABEL.NO' | translate }}</option>
+							</select>
+						</div>
+					</div>
+				</div>
+
+				<div class="row">
+					<div *ngFor="let image of images; index as i" class="card col-4" style="width: 8rem;">
+						<img class="card-img-top" [src]='image || "./assets/media/logo-default.png"' alt="Card image cap">
+						<div class="card-body">
+							<a target="_blank" [href]='image || "./assets/media/logo-default.png"' class="btn btn-primary">{{
+								'GLOBAL.LABEL.VIEWIMAGE' | translate
+								}}</a>
+						</div>
+					</div>
+				</div>
+
+			</div>
+			<div class="modal-footer">
+				<!-- <input type="submit" [disabled]="!formData.valid" value="Criar" class="btn btn-outline-dark"> -->
+				<input type="submit" value="{{ 'GLOBAL.LABEL.EDIT' | translate }}" class="btn btn-outline btn-success">
+			</div>
+		</form>
+	</ng-template>
+
+	<!-- Modal Delete -->
+	<ng-template #confirmdeletemodal let-modal>
+		<div class="modal-header">
+			<h4 class="modal-title" id="modal-delete-data">
+				{{ 'GLOBAL.LABEL.CONFIRMDELETION' | translate }}</h4>
+			<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+		<div class="modal-body" class="btn btn-warning">
+			{{ 'GLOBAL.LABEL.AREYOUSUREYOUWANTTODELETE' | translate }}
+		</div>
+		<div class="modal-footer">
+			<button type="button" (click)="idToDelete=undefined; modal.dismiss('Cross click')" class="btn btn-secondary"
+				data-dismiss="modal">{{ 'GLOBAL.LABEL.CANCEL' | translate }}</button>
+			<button type="button" (click)="delete() && modal.dismiss('Cross click')" class="btn btn-primary">{{
+				'GLOBAL.LABEL.YES' | translate }}</button>
+		</div>
+	</ng-template>
+
+</div>

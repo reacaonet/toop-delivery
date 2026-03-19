@@ -1,0 +1,265 @@
+<div class="row justify-content-between">
+	<div class="col-auto align-self-center mb-2">
+		<h4 class="modal-title" id="modal-create-tickets">Ticket {{ (element?.tickedId) ? element.tickedId : '-' }} -
+			Detalhes</h4>
+	</div>
+</div>
+
+<div class="rui-profile row vertical-gap mt-4">
+	<!-- col info-->
+	<div class="col-lg-6 col-xl-5">
+		<div class="card">
+			<div class="card-body">
+				<div class="row vertical-gap">
+					<div class="col">
+						<div class="rui-profile-info">
+							<h3 class="rui-profile-info-title h5">{{ element?.person?.name }}</h3>
+							<small class="text-grey-6 mt-2 mb-15 h6">{{ element?.createdAt | date:'dd/MM/yyyy
+								HH:mm' }}</small>
+
+							<a class="rui-profile-info-phone">
+								<small class="text-grey-6 mt-2 mb-15 h6">Assunto: </small> {{ element?.subject }}
+							</a>
+
+							<a class="rui-profile-info-phone">
+								<small class="text-grey-6 mt-2 mb-15 h6">Prioridade: </small> {{ element?.priority | translate}}
+							</a>
+
+							<a class="rui-profile-info-phone">
+								<small class="text-grey-6 mt-2 mb-15 h6">Protocolo: </small> {{ element?.tickedId }}
+							</a>
+
+							<a class="rui-profile-info-phone">
+								<small class="text-grey-6 mt-2 mb-15 h6">Empresa: </small> {{ element?.company?.name }}
+							</a>
+
+							<a class="rui-profile-info-phone">
+								<small class="text-grey-6 mt-2 mb-15 h6">Departamento: </small> {{ element?.department | translate
+								}}
+							</a>
+
+							<a class="rui-profile-info-phone">
+								<small class="text-grey-6 mt-2 mb-15 h6">Situação: </small> {{ element?.status | translate }}
+							</a>
+
+						</div>
+					</div>
+				</div>
+				<div class="rui-profile-numbers">
+					<div class="row justify-content-center">
+						<div class="col-6">
+							<div class="rui-profile-number text-center">
+								<button type="button" class="btn btn-primary mt-2 mb-15 h6"
+									(click)="upSertTicketsModalShow(upsertticketmodal, element, 'edit')">EDITAR TICKET</button>
+							</div>
+						</div>
+
+						<div class="col-6">
+							<div class="rui-profile-number text-center">
+								<button type="button" class="btn btn-info mt-2 mb-15 h6"
+									(click)="upSertTicketInteractionModalShow(upsertticketinteractionmodal, element._id, element.tickedId)">NOVA
+									INTERAÇÃO</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!--ULTIMAS INTEREÇOES-->
+	<div class="col-lg-6 col-xl-7">
+		<div class="card">
+			<div class="card-body">
+				<div class="d-flex align-items-center">
+					<h2 class="rui-profile-info-title h5">Última interação</h2>
+				</div>
+				<ul *ngIf="element?.lastIntetactions" class="list-group list-group-flush rui-profile-task-list">
+					<li class="list-group-item" *ngFor="let interact of element.lastIntetactions; let interaction = interact">
+						<div class="rui-task rui-task-closed">
+							<div class="rui-task-content">
+								<div class="rui-task-title" [innerHtml]="interact?.description"></div>
+								<small class="rui-task-subtitle text-grey-6 mt-2 mb-15 h6">
+									{{ interact?.createdAt | date:'dd/MM/yyyy HH:mm' }}
+								</small>
+							</div>
+						</div>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+
+	<!-- TIME LINE-->
+	<div class="col-12">
+		<div class="tab-content">
+			<div class="tab-pane active">
+				<div class=" mt-5 mb-5">
+					<div class="row">
+						<div class="col">
+							<h4>Todas as interações</h4>
+							<ul *ngIf="element?.intetactions" class="timeline">
+								<li *ngFor="let interact of element.intetactions">
+									<a target="_blank" class="text-grey-6 h6">{{ interact?.createdAt | date:'dd/MM/yyyy
+										HH:mm'}}</a>
+									<a class="float-right text-grey-6 h6"><small>Por: {{ interact.author?interact.author:'-'
+											}}</small></a>
+									<div class="rui-task-title" [innerHtml]="interact?.description"></div>
+								</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- MODAL EDIT -->
+	<ng-template #upsertticketmodal let-modal>
+		<form [formGroup]="formData" (ngSubmit)="formSubmitTickets=true; formData.valid && upSertTickets(formData.value)
+         && modal.dismiss('Cross click')">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-create-tickets">{{ 'GLOBAL.LABEL.EDITTICKETS' | translate }}</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<input type="hidden" class="form-control" formControlName="_id">
+				<div class="row">
+					<div class="form-group col-2">
+						<label for="tickedId">{{ 'GLOBAL.LABEL.TICKEDID' | translate }}</label>
+						<div class="input-group">
+							<input required class="form-control" readonly formControlName="tickedId"
+								[ngClass]="{'is-invalid' : formSubmitTickets && formData.get('tickedId').invalid}">
+						</div>
+					</div>
+					<div class="form-group col-10">
+						<label for="subject">{{ 'GLOBAL.LABEL.SUBJECT' | translate }}</label>
+						<div class="input-group">
+							<input required class="form-control" formControlName="subject"
+								[ngClass]="{'is-invalid' : formSubmitTickets && formData.get('subject').invalid}">
+						</div>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="form-group col-4">
+						<label for="priority">{{ 'GLOBAL.LABEL.PRIORITY' | translate }}</label>
+						<div class="input-group">
+							<select required class="form-control" formControlName="priority"
+								[ngClass]="{'is-invalid' : formSubmitTickets && formData.get('priority').invalid}">
+								<option value="LOW">Baixo</option>
+								<option value="MEDIUM">Médio</option>
+								<option value="HIGH">Alto</option>
+							</select>
+						</div>
+					</div>
+					<div class="form-group col-4">
+						<label for="department">{{ 'GLOBAL.LABEL.DEPARTMENT' | translate }}</label>
+						<div class="input-group">
+							<select required class="form-control" formControlName="department"
+								[ngClass]="{'is-invalid' : formSubmitTickets && formData.get('department').invalid}">
+								<option value="ADMINISTRATIVE">Adminsitrativo</option>
+								<option value="COMMERCIAL">Comercial</option>
+								<option value="MARKETING">Marketing</option>
+								<option value="FINANCIAL">Financeiro</option>
+								<option value="SUPPORT">Suporte</option>
+								<option value="TI">TI</option>
+							</select>
+						</div>
+					</div>
+					<div class="form-group col-4">
+						<label for="status">{{ 'GLOBAL.LABEL.STATUS' | translate }}</label>
+						<div class="input-group">
+							<select required class="form-control" formControlName="status"
+								[ngClass]="{'is-invalid' : formSubmitTickets && formData.get('status').invalid}">
+								<option value="NEW">Novo</option>
+								<option value="IN_PROGRESS">Em andamento</option>
+								<option value="ON_HOLD">Em espera</option>
+								<option value="SOLVED">Resolvido</option>
+							</select>
+						</div>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="form-group col-6">
+						<label for="person">{{ 'GLOBAL.LABEL.PERSON' | translate }}</label>
+						<div class="input-group">
+							<input type="text" class="form-control" matInput placeholder="Digite p/ Escolha uma pessoa"
+								[matAutocomplete]="autoPerson" formControlName="person"
+								[ngClass]="{'is-invalid' : formSubmitTickets && formData.get('person').invalid}">
+							<mat-autocomplete [displayWith]="displayFnPerson" #autoPerson="matAutocomplete">
+								<mat-option *ngFor="let persons of listPerson" [value]="persons">
+									{{ persons.name }}
+								</mat-option>
+							</mat-autocomplete>
+						</div>
+					</div>
+					<div class="form-group col-6">
+						<label>{{ 'GLOBAL.LABEL.COMPANY' | translate }}</label>
+						<div class="input-group">
+							<input type="text" class="form-control" matInput placeholder="Digite p/ Escolha uma empresa"
+								[matAutocomplete]="autoCompany" formControlName="company"
+								[ngClass]="{'is-invalid' : formSubmitTickets && formData.get('company').invalid}">
+							<mat-autocomplete [displayWith]="displayFnCompany" #autoCompany="matAutocomplete">
+								<mat-option *ngFor="let companies of appcompanies" [value]="companies">
+									{{ companies.name }}
+								</mat-option>
+							</mat-autocomplete>
+						</div>
+					</div>
+				</div>
+
+				<div class="row">
+					<div class="form-group col-12">
+						<label for="description">{{ 'GLOBAL.LABEL.DESCRIPTION' | translate }}</label>
+						<div class="input-group">
+							<textarea style="resize: none;" required class="form-control" formControlName="description"
+								[ngClass]="{'is-invalid' : formSubmitTickets && formData.get('description').invalid}"></textarea>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<input type="submit" value="Atualizar" class="btn btn-outline-dark">
+			</div>
+		</form>
+	</ng-template>
+
+	<!-- MODAL NOVA INTERACAO -->
+	<ng-template #upsertticketinteractionmodal let-modal>
+		<form [formGroup]="formDataInteract" (ngSubmit)="formSubmitTickets=true; formDataInteract.valid && upSertTicketInteraction(formDataInteract.value)
+         && modal.dismiss('Cross click')">
+			<div class="modal-header">
+				<h4 class="modal-title" id="modal-create-tickets">{{ 'GLOBAL.LABEL.NEWTICKETINTERACTION' | translate }}</h4>
+				<button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<input type="hidden" class="form-control" formControlName="ticket_id">
+				<div class="row">
+					<div class="form-group col-12">
+						<label for="tickedId">{{ 'GLOBAL.LABEL.TICKEDID' | translate }}</label>
+						<div class="input-group">
+							<input required class="form-control" readonly formControlName="tickedId"
+								[ngClass]="{'is-invalid' : formSubmitTickets && formDataInteract.get('tickedId').invalid}">
+						</div>
+					</div>
+					<div class="form-group col-12">
+						<label for="description">{{ 'GLOBAL.LABEL.DESCRIPTION' | translate }}</label>
+						<div class="input-group">
+							<ckeditor (change)="onChange($event)" style="width: 100%" [editor]="Editor" data="<p></p>"></ckeditor>
+						</div>
+					</div>
+				</div>
+
+			</div>
+			<div class="modal-footer">
+				<input type="submit" value="ENVIAR" class="btn btn-outline-dark">
+			</div>
+		</form>
+	</ng-template>
+</div>

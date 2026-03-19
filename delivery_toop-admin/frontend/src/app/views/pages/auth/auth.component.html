@@ -1,0 +1,32 @@
+<div class="kt-grid kt-grid--hor kt-grid--root kt-login kt-login--v1" id="kt_login">
+	<div class="kt-grid__item kt-grid__item--fluid kt-grid kt-grid--desktop kt-grid--ver-desktop kt-grid--hor-tablet-and-mobile">
+		<!--begin::Aside-->
+		<div class="kt-grid__item kt-grid__item--order-tablet-and-mobile-2 kt-grid kt-grid--hor kt-login__aside" style="background-image: url(./assets/media//bg/bg-4.jpg);">
+			<div class="kt-grid__item">
+				<a href="javascript:;" class="kt-login__logo">
+					<img src="./assets/images/logo/logo-ecbr.png" alt="">
+				</a>
+			</div>
+			<div class="kt-grid__item kt-grid__item--fluid kt-grid kt-grid--ver">
+				<div class="kt-grid__item kt-grid__item--middle">
+					<h3 class="kt-login__title">Bem vindo ao Toop Delivery!</h3>
+					<h4 class="kt-login__subtitle">O que quiser, aonde quiser. Receba e envie produtos com economia e praticidade</h4>
+				</div>
+			</div>
+			<footer>
+				<div class="kt-login__info">
+					<div class="kt-login__copyright">
+						© {{today|date:'yyyy'}} Toop - Versão {{appVersion}}
+					</div>
+				</div>
+			</footer>
+		</div>
+		<!--begin::Aside-->
+
+		<!--begin::Content-->
+		<div class="kt-grid__item kt-grid__item--fluid  kt-grid__item--order-tablet-and-mobile-1 kt-login__wrapper">
+			<router-outlet></router-outlet>
+		</div>
+		<!--end::Content-->
+	</div>
+</div>

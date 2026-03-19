@@ -1,0 +1,138 @@
+<div class="box">
+	<div class="contentPrint">
+		<img src="../../../../../../assets/images/logo/print/logo.png" />
+
+		<p></p>
+		<span class="txtInfo">Impresso em {{currentDate | date:'dd/MM/yyyy HH:mm'}}</span>
+		<span class="txtInfo">SIMPLES CONFERENCIA DA CONTA</span>
+		<span class="txtInfo">*** NÃO É DOCUMENTO FISCAL ***</span>
+
+		<hr class="divider">
+
+		<div class='containerCustomer'>
+			<div class="txtCustomer" *ngIf="order?.customer">{{order?.customer}}</div>
+			<div class="txtCustomer" *ngIf="order?.phoneCustomer">Contato: {{order?.phoneCustomer}}</div>
+			<div class="txtCustomer" *ngIf="order?.address">{{order?.address}}</div>
+			<div class="txtCustomer" *ngIf="order?.number">Número: {{order?.number}}</div>
+			<div class="txtCustomer" *ngIf="order?.complement">Complemento: {{order?.complement}}</div>
+			<div class="txtCustomer" *ngIf="order?.referencePoint">Referência: {{order?.referencePoint}}</div>
+			<div class="txtCustomer" *ngIf="order?.note">Observações: {{order?.note}}</div>
+		</div>
+		<br />
+		<hr class="divider" *ngIf="order?.cashChange > 0">
+		<h6>
+			Pagamento:
+			<b *ngIf="order.typePayment ==='PAGARME'">Aplicativo</b>
+			<b *ngIf="order.typePayment ==='CARD'">Cartão</b>
+			<b *ngIf="order.typePayment ==='MONEY'">Dinheiro</b>
+		</h6>
+		<p *ngIf="order?.cashChange > 0">
+			<span class="txtAddress">
+				Troco para {{order?.cashChange | currency:'BRL':true:'1.2-2'}}
+			</span>
+		</p>
+
+		<hr class="divider">
+		<p>
+			<span class="txtAddress">Pedido {{order?.numberOrder}}</span>
+		</p>
+
+		<table class="table" *ngIf="order && order.products">
+			<thead class="noBorder">
+				<tr class="noBorder">
+					<th>Q.</th>
+					<th>Descrição</th>
+					<th>R$</th>
+				</tr>
+			</thead>
+			<tbody *ngFor="let item of order.products; index as i;" class="noBorder">
+				<tr class="noBorder">
+					<td>{{item.amount}}</td>
+					<td>{{item.product}}</td>
+					<td>{{item.subtotal}}</td>
+				</tr>
+
+				<ng-container *ngIf="item.complements && item.complements.length > 0">
+					<tr>
+						<td colspan="3" class='titleComplement'>Complementos</td>
+					</tr>
+					<tr class="noBorder" *ngFor="let compl of item.complements; index as c;">
+						<td>{{compl?.amount}}</td>
+						<td>{{compl?.title + ' ' + compl?.name}}</td>
+						<td>{{compl?.subTotal}}</td>
+					</tr>
+				</ng-container>
+
+				<tr class="noBorder" *ngIf="item.comment">
+					<td colspan="3">Obs.: {{item.comment}}</td>
+				</tr>
+
+				<tr class="noBorder">
+					<td colspan="3">
+						<hr class="divider">
+					</td>
+				</tr>
+			</tbody>
+
+			<tbody class="noBorder" *ngIf="order?.priceDelivery && order?.priceDelivery > 0">
+				<tr class="noBorder">
+					<td></td>
+					<td>Taxa Entrega</td>
+					<td>&nbsp; {{ ' R$ ' + (order?.priceDelivery || 0).toFixed(2).replace('.',',') }}</td>
+				</tr>
+			</tbody>
+
+			<tbody class="noBorder" *ngIf="order?.couponPrice && order?.couponPrice > 0">
+				<tr class="noBorder">
+					<td></td>
+					<td>Cupom</td>
+					<td>{{ '- R$ ' + (order?.couponPrice || 0).toFixed(2).replace('.',',') }}</td>
+				</tr>
+			</tbody>
+
+			<tbody class="noBorder" *ngIf="order?.totalDiscount && order?.totalDiscount > 0">
+				<tr class="noBorder">
+					<td></td>
+					<td>Descontos</td>
+					<td>{{ '- R$ ' + (order?.totalDiscount || 0).toFixed(2).replace('.',',') }}</td>
+				</tr>
+			</tbody>
+
+			<tbody class="noBorder">
+				<tr class="noBorder">
+					<td></td>
+					<td>TOTAL</td>
+					<td>&nbsp; {{ 'R$ ' + (order?.totalCompany || 0).toFixed(2).replace('.',',') }}</td>
+				</tr>
+			</tbody>
+		</table>
+
+		<table class="table" *ngIf="!order?.products">
+			<tbody class="noBorder" *ngIf="order?.priceDelivery && order?.priceDelivery > 0">
+				<tr class="noBorder">
+					<td></td>
+					<td>Sub Total</td>
+					<td>&nbsp; {{ ' R$ ' + (order?.subTotal || 0).toFixed(2).replace('.',',') }}</td>
+				</tr>
+			</tbody>
+
+			<tbody class="noBorder" *ngIf="order?.priceDelivery && order?.priceDelivery > 0">
+				<tr class="noBorder">
+					<td></td>
+					<td>Taxa Entrega</td>
+					<td>&nbsp; {{ ' R$ ' + (order?.priceDelivery || 0).toFixed(2).replace('.',',') }}</td>
+				</tr>
+			</tbody>
+
+			<tbody class="noBorder">
+				<tr class="noBorder">
+					<td></td>
+					<td>TOTAL</td>
+					<td>&nbsp; {{ 'R$ ' + (order?.totalCompany || 0).toFixed(2).replace('.',',') }}</td>
+				</tr>
+			</tbody>
+		</table>
+		<span class="centered">* Obrigado pela preferência! *</span>
+		<span class="centered">Volte sempre!</span>
+	</div>
+</div>

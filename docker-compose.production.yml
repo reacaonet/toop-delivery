@@ -1,0 +1,182 @@
+version: '3.8'
+
+services:
+  # MongoDB - Admin Database
+  admin-mongodb:
+    container_name: "toop-admin-mongodb-prod"
+    image: "mongo:5.0"
+    command: [--auth]
+    restart: always
+    volumes:
+      - mongo_prod_data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ADMIN_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ADMIN_PASSWORD}
+      MONGO_INITDB_DATABASE: ecbr
+    networks:
+      - toop-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # PostgreSQL - Payment Database
+  payment-postgres:
+    container_name: "toop-payment-postgres-prod"
+    image: postgres:13
+    restart: always
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    networks:
+      - toop-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Redis - Cache and Queues
+  redis:
+    container_name: "toop-redis-prod"
+    hostname: "toop-redis-prod"
+    image: redis:7-alpine
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    restart: always
+    volumes:
+      - redis_prod_data:/data
+    networks:
+      - toop-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Admin API Service
+  admin-api:
+    container_name: "toop-admin-api-prod"
+    build:
+      context: ./delivery_toop-admin/backend
+      dockerfile: Dockerfile
+      target: production
+    ports:
+      - "8100:8100"
+    restart: always
+    environment:
+      NODE_ENV: production
+      PORT: 8100
+      MONGO_DB_CONNECTION_STRING: mongodb://${MONGO_ADMIN_USER}:${MONGO_ADMIN_PASSWORD}@admin-mongodb:27017/ecbr?retryWrites=true&authSource=admin
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      production: "true"
+    depends_on:
+      - admin-mongodb
+      - redis
+    networks:
+      - toop-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Payment Microservice
+  payment-microservice:
+    container_name: "toop-payment-microservice-prod"
+    build:
+      context: ./delivery_toop-microservice_payment
+      dockerfile: Dockerfile
+      target: production
+    ports:
+      - "8400:8400"
+    restart: always
+    environment:
+      NODE_ENV: production
+      PORT: 8400
+      POSTGRES_HOST: payment-postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    depends_on:
+      - payment-postgres
+      - redis
+    networks:
+      - toop-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Notification Microservice
+  notification-microservice:
+    container_name: "toop-notification-microservice-prod"
+    build:
+      context: ./delivery_toop-microservice_notification
+      dockerfile: Dockerfile
+      target: production
+    ports:
+      - "8200:8200"
+    restart: always
+    environment:
+      NODE_ENV: production
+      PORT: 8200
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    depends_on:
+      - redis
+    networks:
+      - toop-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Deliveryman Microservice
+  deliveryman-microservice:
+    container_name: "toop-deliveryman-microservice-prod"
+    build:
+      context: ./delivery_toop-microservice_deliveryman
+      dockerfile: Dockerfile
+      target: production
+    ports:
+      - "8300:8300"
+    restart: always
+    environment:
+      NODE_ENV: production
+      PORT: 8300
+      MONGO_DB_CONNECTION_STRING: mongodb://${MONGO_ADMIN_USER}:${MONGO_ADMIN_PASSWORD}@admin-mongodb:27017/ecbr?retryWrites=true&authSource=admin
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    depends_on:
+      - admin-mongodb
+      - redis
+    networks:
+      - toop-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  mongo_prod_data:
+  postgres_prod_data:
+  redis_prod_data:
+
+networks:
+  toop-network:
+    driver: bridge
