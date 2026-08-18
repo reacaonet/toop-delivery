@@ -16,7 +16,7 @@ export class NotificationService {
   }
 
   sendNotification(message: Notification) {
-    const header = new HttpHeaders({ 'Content-Type': 'application/json', 'authorization': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9eyJzdWIiOiIxMjM0NTY3ODkw' });
+    const header = new HttpHeaders({ 'Content-Type': 'application/json', 'authorization': environment.notificationApiKey || '' });
 
     return this.http.post(`${this.notificationURL}/v1/app-notification/general`, message, { headers: header });
   }

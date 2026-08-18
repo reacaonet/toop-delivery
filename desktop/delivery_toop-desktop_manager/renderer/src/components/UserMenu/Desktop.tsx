@@ -13,10 +13,9 @@ import React from 'react';
 import { RiArrowDropDownLine } from 'react-icons/ri';
 
 import { useAuth } from '../../contexts/Auth';
-import env from '../../environment';
 
 export function DesktopUserMenu(): JSX.Element {
-  const { isAuthenticated, user, handleSignOutWeb } = useAuth();
+  const { isAuthenticated, user, signOut } = useAuth();
 
   const backgroundColor = useColorModeValue('white', 'gray.800');
 
@@ -24,13 +23,11 @@ export function DesktopUserMenu(): JSX.Element {
     return null;
   }
 
-  const image = `${env.urlImage}/${user?.picture?.replace('./', '')}`;
-
   return (
     <Menu>
       <MenuButton flexDirection="row">
         <HStack>
-          <Avatar name={user?.name} src={image} size="md" />
+          <Avatar name={user?.name} size="md" />
           <Heading color="white" fontSize="md">
             {user?.name}
             <Icon as={RiArrowDropDownLine} />
@@ -39,7 +36,7 @@ export function DesktopUserMenu(): JSX.Element {
       </MenuButton>
 
       <MenuList backgroundColor={backgroundColor}>
-        <MenuItem onClick={handleSignOutWeb}>Sair</MenuItem>
+        <MenuItem onClick={signOut}>Sair</MenuItem>
       </MenuList>
     </Menu>
   );

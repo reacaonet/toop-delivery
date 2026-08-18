@@ -6,14 +6,21 @@ WORKDIR /home/node/app
 
 # Install dependencies
 COPY package*.json ./
-RUN npm install --omit=dev && npm cache clean --force
+RUN npm install --legacy-peer-deps --omit=dev && npm cache clean --force
 
 # Development stage
 FROM base AS development
-RUN npm install
+RUN npm install --legacy-peer-deps
 COPY . .
+RUN npx tsc
 EXPOSE 8100
-CMD ["npm", "run", "start"]
+CMD ["npx", "ts-node-dev", "--respawn", "--transpile-only", "src/server.ts"]
+
+# Build stage
+FROM base AS build
+RUN npm install --legacy-peer-deps
+COPY . .
+RUN npx tsc
 
 # Production stage
 FROM node:18-alpine AS production
@@ -29,18 +36,19 @@ WORKDIR /home/node/app
 COPY package*.json ./
 
 # Install only production dependencies
-RUN npm install --omit=dev && npm cache clean --force
+RUN npm install --legacy-peer-deps --omit=dev && npm cache clean --force
 
-# Copy application
-COPY --chown=nodejs:nodejs . .
+# Copy built application
+COPY --from=build --chown=nodejs:nodejs /home/node/app/dist ./dist
+COPY --from=build --chown=nodejs:nodejs /home/node/app/package.json ./
 
 # Switch to non-root user
 USER nodejs
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
   CMD node healthcheck.js
 
 EXPOSE 8100
 
-CMD ["npm", "run", "prod"]
+CMD ["node", "dist/server.js"]

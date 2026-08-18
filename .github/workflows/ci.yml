@@ -1,0 +1,84 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  admin-api:
+    name: Admin API (TypeScript)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: delivery_toop-admin/backend
+
+    strategy:
+      matrix:
+        node-version: [18, 20]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript build
+        run: npx tsc --noEmit
+
+      - name: Run tests
+        run: npx jest --coverage --forceExit
+        env:
+          JWT_SECRET: ci-test-secret
+          JWT_SECRET_REFRESH: ci-test-refresh
+          MONGO_ADMIN_USER: test
+          MONGO_ADMIN_PASSWORD: test
+          URL_MONGO: localhost:27017
+
+  frontend:
+    name: Frontend (React-Vite)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: delivery_toop-admin/frontend-react
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+  docker:
+    name: Docker Build
+    runs-on: ubuntu-latest
+    needs: [admin-api, frontend]
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Admin API image
+        run: docker build -t toop-admin-api ./delivery_toop-admin/backend --target production
+
+      - name: Build Payment image
+        run: docker build -t toop-payment ./delivery_toop-microservice_payment
+
+      - name: Build Notification image
+        run: docker build -t toop-notification ./delivery_toop-microservice_notification
+
+      - name: Build Deliveryman image
+        run: docker build -t toop-deliveryman ./delivery_toop-microservice_deliveryman

@@ -382,8 +382,8 @@ export class PartnersComponent implements OnInit, AfterViewInit {
 				name: name,
 				email: email,
 				status: true,
-				password: password ? password : "mudar1234",
-				confirmPassword: password ? password : "mudar1234",
+				password: password ? password : "",
+				confirmPassword: password ? password : "",
 				franchise: idFranchise,
 				// company,
 			};

@@ -3,7 +3,7 @@ import dev from './dev';
 import homolog from './homolog';
 import production from './production';
 
-let typeEnv = 'prod';
+let typeEnv = 'dev';
 // const typeEnv = 'homolog';
 let env: any = {};
 

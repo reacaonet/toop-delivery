@@ -8,8 +8,8 @@ services:
     ports:
       - 27017:27017
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: wADgFe8F7DRa8TkKgBmgtdW6wE7wQTMGHMRu2
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ADMIN_USER:-root}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ADMIN_PASSWORD}
 
   mongo-express:
     image: mongo-express

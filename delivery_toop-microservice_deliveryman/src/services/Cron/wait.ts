@@ -7,9 +7,9 @@ import captureError from './error/captureError';
 const delay = 10000;
 
 const restartService = (): void => {
-  setTimeout(() => {
+  setTimeout(async () => {
     try {
-      return WaitForProcess();
+      return await WaitForProcess();
     } catch (err) {
       captureError('restartService Wait', err);
       return restartService();

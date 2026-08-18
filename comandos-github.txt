@@ -1,7 +1,7 @@
 # COMANDOS PARA ENVIAR PARA GITHUB
 
 # 1. Substitua SEU-USER pelo seu username do GitHub
-git remote add origin https://github.com/SEU-USER/toop-delivery.git
+git remote add origin https://github.com/reacaonet/toop-delivery.git
 
 # 2. Enviar todas as branches
 git push -u origin master

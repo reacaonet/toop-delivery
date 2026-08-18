@@ -6,18 +6,18 @@ WORKDIR /usr/src/app
 
 # Install dependencies
 COPY package*.json ./
-RUN npm install --omit=dev && npm cache clean --force
+RUN npm install --legacy-peer-deps --omit=dev && npm cache clean --force
 
 # Development stage
 FROM base AS development
-RUN npm install
+RUN npm install --legacy-peer-deps
 COPY . .
 EXPOSE 8400
 CMD ["npm", "run", "dev"]
 
 # Build stage
 FROM base AS build
-RUN npm install
+RUN npm install --legacy-peer-deps
 COPY . .
 RUN npm run build
 
@@ -35,7 +35,7 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # Install only production dependencies
-RUN npm install --omit=dev && npm cache clean --force
+RUN npm install --legacy-peer-deps --omit=dev && npm cache clean --force
 
 # Copy built application
 COPY --from=build --chown=nodejs:nodejs /usr/src/app/dist ./dist

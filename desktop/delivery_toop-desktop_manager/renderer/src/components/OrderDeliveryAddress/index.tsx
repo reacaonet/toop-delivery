@@ -1,54 +1,55 @@
 import { Flex, Heading, Stack, Text } from "@chakra-ui/react";
 import React from "react";
 
-import { Link } from "../Link";
+interface DeliveryAddress {
+	street?: string;
+	number?: string;
+	complement?: string;
+	neighborhood?: string;
+	city?: string;
+	state?: string;
+	zipCode?: string;
+};
 
 interface OrderDeliveryProps {
-	customerCoordinates: [number, number];
-	companyCoordinates: [number, number];
-	customerReferencePoint: string;
-	customerAddress: string;
-	customerComplement: string;
+	deliveryAddress?: DeliveryAddress;
 }
 export function OrderDeliveryAddress({
-	companyCoordinates,
-	customerCoordinates,
-	customerAddress,
-	customerComplement,
-	customerReferencePoint
+	deliveryAddress
 }: OrderDeliveryProps): JSX.Element {
+	const fullAddress = deliveryAddress
+		? [deliveryAddress.street, deliveryAddress.number, deliveryAddress.neighborhood, deliveryAddress.city, deliveryAddress.state].filter(Boolean).join(', ')
+		: null;
+
 	return (
 		<Stack marginTop="2" spacing="1.5">
 			<Flex alignItems="flex-end" flexDirection="row">
 				<Heading fontSize="lg" fontWeight="semibold">
-					Rua:
+					Endereço:
 				</Heading>
 				<Text fontSize="sm" lineHeight="shorter" marginLeft="1">
-					{customerAddress ? customerAddress : "Não informado"}
+					{fullAddress || "Não informado"}
 				</Text>
 			</Flex>
-			<Flex alignItems="flex-end" flexDirection="row">
-				<Heading fontSize="lg" fontWeight="semibold">
-					Complemento:
-				</Heading>
-				<Text fontSize="sm" lineHeight="shorter" marginLeft="1">
-					{customerComplement ? customerComplement : "Não informado"}
-				</Text>
-			</Flex>
-			<Flex alignItems="flex-end" flexDirection="row">
-				<Heading fontSize="lg" fontWeight="semibold">
-					Ponto de Referência:
-				</Heading>
-				<Text fontSize="sm" lineHeight="shorter" marginLeft="1">
-					{customerReferencePoint ? customerReferencePoint : "Não informado"}
-				</Text>
-			</Flex>
-			{companyCoordinates && customerCoordinates && (
-				<Link
-					isExternal
-					href={`https://www.google.com/maps/dir/?api=1&origin=${companyCoordinates[1]},${companyCoordinates[0]}&destination=${customerCoordinates[1]},${customerCoordinates[0]}`}
-					label="Abrir no Google Maps"
-				/>
+			{deliveryAddress?.complement && (
+				<Flex alignItems="flex-end" flexDirection="row">
+					<Heading fontSize="lg" fontWeight="semibold">
+						Complemento:
+					</Heading>
+					<Text fontSize="sm" lineHeight="shorter" marginLeft="1">
+						{deliveryAddress.complement}
+					</Text>
+				</Flex>
+			)}
+			{deliveryAddress?.zipCode && (
+				<Flex alignItems="flex-end" flexDirection="row">
+					<Heading fontSize="lg" fontWeight="semibold">
+						CEP:
+					</Heading>
+					<Text fontSize="sm" lineHeight="shorter" marginLeft="1">
+						{deliveryAddress.zipCode}
+					</Text>
+				</Flex>
 			)}
 		</Stack>
 	);

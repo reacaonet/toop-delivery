@@ -1,36 +1,28 @@
 {
-  "parser": "babel-eslint",
+  "root": true,
   "env": {
-    "es6": true,
-    "jest": true
+    "node": true,
+    "jest": true,
+    "es2020": true
   },
-  "extends": ["airbnb", "plugin:react-native/all"],
-  "globals": {
-    "Atomics": "readonly",
-    "SharedArrayBuffer": "readonly",
-    "__DEV__": true
-  },
+  "parser": "@typescript-eslint/parser",
   "parserOptions": {
-    "ecmaFeatures": {
-      "jsx": true
-    },
-    "ecmaVersion": 2018,
-    "sourceType": "module"
+    "ecmaVersion": 2020,
+    "sourceType": "module",
+    "project": "./tsconfig.json"
   },
-  "plugins": ["react", "react-native", "jsx-a11y", "import"],
+  "plugins": ["@typescript-eslint"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
   "rules": {
-    "react/jsx-filename-extension": ["error", { "extensions": [".js", ".jsx"] }],
-    "import/prefer-default-export": "off",
-    "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
-    "react/jsx-one-expression-per-line": "off",
-    "react-native/no-color-literals": "off",
-    "react-native/sort-styles": "off",
-    "global-require": "off",
-    "react-native/no-raw-text": "off"
+    "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+    "@typescript-eslint/no-explicit-any": "warn",
+    "@typescript-eslint/explicit-function-return-type": "off",
+    "no-console": "warn",
+    "prefer-const": "error",
+    "no-var": "error"
   },
-  "settings": {
-    "import/resolver": {
-      "babel-plugin-root-import": { "rootPathSuffix": "src" }
-    }
-  }
+  "ignorePatterns": ["dist/", "node_modules/", "src/_legacy_src/", "src/__tests__/"]
 }

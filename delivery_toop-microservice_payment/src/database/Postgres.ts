@@ -1,8 +1,12 @@
 import {Sequelize} from 'sequelize';
 
+let cachedSequelize: Sequelize | null = null;
+
 const getSequelize = (): Sequelize => {
+  if (cachedSequelize) return cachedSequelize;
+
   const {PG_USER, PG_PASSWORD, PG_HOST, PG_PORT, PG_DATABASE} = process.env;
-  const sequelize = new Sequelize(
+  cachedSequelize = new Sequelize(
     `postgres://${PG_USER}:${PG_PASSWORD}@${PG_HOST}:${PG_PORT}/${PG_DATABASE}`,
     {
       logging: false,
@@ -12,7 +16,7 @@ const getSequelize = (): Sequelize => {
     },
   );
 
-  return sequelize;
+  return cachedSequelize;
 };
 
 const connectPostgres = async (): Promise<void> => {

@@ -1,168 +1,125 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-import Store from "electron-store";
-import Router from "next/router";
-import {
-  createContext,
-  ReactNode,
-  useContext,
-  useEffect,
-  useState
-} from "react";
+import React, { createContext, useCallback, useContext, useState, useEffect, ReactNode } from 'react';
+import Store from 'electron-store';
 
-import { setupApiClient } from "../services/api";
+import { setupApiClient } from '../services/api';
 
-interface ContextProps {
-  handleSignOutWeb: () => void;
-  credentialError: boolean;
-  messageErr?: string;
-  setCredentialError: (value: boolean) => void;
-  isAuthenticated: boolean;
-  signIn: (credentials: SignInCredentials) => Promise<void>;
-  user?: UserProps;
+interface SignInData {
+	email: string;
+	password: string;
 }
 
-interface ProviderProps {
-  children: ReactNode;
+interface User {
+	id: string;
+	name: string;
+	email: string;
+	role: string;
+	company?: string;
 }
 
-interface SignInCredentials {
-  email: string;
-  password: string;
+interface AuthContextData {
+	authenticated: boolean;
+	isAuthenticated: boolean;
+	user: User | null;
+	credentialError: boolean;
+	messageErr: string;
+	setCredentialError: (value: boolean) => void;
+	login(data: SignInData): Promise<void>;
+	signIn(data: SignInData): Promise<void>;
+	signOut(): void;
+	loadUser(): void;
 }
 
-interface UserProps {
-  hasOwnDelivery: boolean;
-  type: string;
-  name: string;
-  id: number;
-  picture: string;
+interface AuthProviderProps {
+	children: ReactNode;
 }
 
-const AuthContext = createContext({} as ContextProps);
+const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
-export function AuthProvider({ children }: ProviderProps): JSX.Element {
-  const [user, setUser] = useState<UserProps>();
-  const [messageErr, setMessageErr] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(!!user);
-  const [credentialError, setCredentialError] = useState(false);
+export function AuthProvider({ children }: AuthProviderProps): JSX.Element {
+	const [user, setUser] = useState<User | null>(null);
+	const [credentialError, setCredentialError] = useState(false);
+	const [messageErr, setMessageErr] = useState('');
 
-  const api = setupApiClient();
-  const store = new Store();
+	const store = new Store();
+	const isAuthenticated = !!user;
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const fetchUserData = async (): Promise<void> => {
-    const id = store.get("toop.user.id");
-    const company = store.get("toop.user.company");
+	const loadUser = useCallback(() => {
+		const storedUser = store.get('toop.user');
+		const token = store.get('accessToken');
 
-    if (id) {
-      try {
-        await api.get(`/users/${id}?type=shopper`).then(({ data }) => {
-          api.defaults.headers["Authorization"] = `Bearer ${data.accessToken}`;
-        });
+		if (storedUser && token) {
+			setUser(storedUser as User);
+		}
+	}, []);
 
-        await api
-          .get(`/company/company-delivery/${company}`)
-          .then(({ data }) => {
-            setUser((oldUser) => ({
-              ...oldUser,
-              hasOwnDelivery: data[0]?.own_delivery
-            }));
-          });
+	useEffect(() => {
+		loadUser();
+	}, [loadUser]);
 
-        await api.get("/acl/users").then(({ data }) => {
-          setUser((oldUser) => ({
-            ...oldUser,
-            name: data.company?.name,
-            type: data.company?.type,
-            id: data.company?._id,
-            picture: data.pic
-          }));
+	const login = useCallback(async (data: SignInData) => {
+		try {
+			setCredentialError(false);
+			setMessageErr('');
+			const api = setupApiClient();
+			const { data: response } = await api.post('/auth', {
+				email: data.email,
+				password: data.password,
+			});
 
-          setIsAuthenticated(true);
-        });
-      } catch (err) {
-        console.log("fail err", err);
-      }
-    } else {
-      store.delete("toop.user.id");
-      store.delete("toop.user.company");
-      store.delete("accessToken");
+			if (!response?.success) {
+				setCredentialError(true);
+				setMessageErr(response?.message || 'Credenciais inválidas');
+				return;
+			}
 
-      setIsAuthenticated(false);
-      Router.push("/home");
-    }
-  };
+			const { user: userData, token, refreshToken } = response.data;
 
-  useEffect(() => {
-    fetchUserData();
-  }, [isAuthenticated]);
+			store.set('accessToken', token);
+			store.set('refreshToken', refreshToken);
+			store.set('toop.user', userData);
+			if (userData.company) {
+				store.set('toop.user.company', userData.company);
+			}
 
-  async function signIn({ email, password }: SignInCredentials): Promise<void> {
-    try {
-      setMessageErr(null);
+			setUser(userData);
+		} catch (err: any) {
+			setCredentialError(true);
+			const msg = err?.response?.data?.message || 'Erro ao fazer login. Verifique suas credenciais.';
+			setMessageErr(msg);
+		}
+	}, []);
 
-      const response = await api.post("/users/auth-admin", {
-        email,
-        password
-      });
+	const signIn = login;
 
-      if (response.data?.code === 401) {
-        if (response.data?.message === "Email ou Senha inválido") {
-          setCredentialError(true);
-          return;
-        }
-      }
+	const signOut = useCallback(() => {
+		store.clear();
+		setUser(null);
+	}, []);
 
-      if (response.data?.code && response.data?.code !== 200) {
-        if (response.data?.message) {
-          setMessageErr(response.data?.message)
-        }
-
-        setCredentialError(true);
-        return
-      }
-
-      const { accessToken, user } = response.data;
-
-      store.set("toop.user.id", user?._id);
-      store.set("toop.user.company", user?.company);
-      store.set("accessToken", `${accessToken}`);
-
-      api.defaults.headers["Authorization"] = `Bearer ${accessToken} `;
-      api.defaults.headers["Company"] = `${user?.company} `;
-
-      await fetchUserData();
-
-      Router.push("/dashboard");
-    } catch (err) {
-      console.log(err);
-      setCredentialError(true);
-    }
-  }
-
-  function handleSignOutWeb(): void {
-    setUser(undefined);
-    setIsAuthenticated(false);
-    store.delete("toop.user.id");
-    store.delete("toop.user.company");
-    store.delete("accessToken");
-  }
-
-  return (
-    <AuthContext.Provider
-      value={{
-        credentialError,
-        messageErr,
-        setCredentialError,
-        handleSignOutWeb,
-        isAuthenticated,
-        signIn,
-        user
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
+	return (
+		<AuthContext.Provider
+			value={{
+				authenticated: isAuthenticated,
+				isAuthenticated,
+				user,
+				credentialError,
+				messageErr,
+				setCredentialError,
+				login,
+				signIn,
+				signOut,
+				loadUser,
+			}}
+		>
+			{children}
+		</AuthContext.Provider>
+	);
 }
 
-export const useAuth = (): ContextProps => useContext(AuthContext);
+export function useAuth(): AuthContextData {
+	const context = useContext(AuthContext);
+	if (!context) {
+		throw new Error('useAuth must be used within an AuthProvider');
+	}
+	return context;
+}

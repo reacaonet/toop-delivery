@@ -117,7 +117,7 @@ export function hljsLanguages(): HighlightLanguage[] {
 		InlineSVGModule.forRoot(),
 		ThemeModule,
 		AgmCoreModule.forRoot({
-			apiKey: "AIzaSyBKnJQI86pHukHoh7wtGzyRMxJfemZpRGQ",
+			apiKey: process.env.NG_APP_GOOGLE_MAPS_API_KEY || "",
 			libraries: ["places"],
 		}),
 		MatGoogleMapsAutocompleteModule,

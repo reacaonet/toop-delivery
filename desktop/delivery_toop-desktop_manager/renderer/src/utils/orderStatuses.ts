@@ -1,32 +1,30 @@
-export const nextStatus = [
-  'WAIT_COMPANY',
-  'IN_PREPARATION',
-  'WAIT_DELIVERYMAN',
-  'ACCEPT_DELIVERYMAN',
-  'DELIVERY_ROUTE',
+export const nextStatus: string[] = [
+  'confirmed',
+  'preparing',
+  'ready',
+  'delivering',
+  'delivered',
 ];
 
 export const companyStatus = [
-  'WAIT_COMPANY',
-  'IN_PREPARATION',
-  'WAIT_DELIVERYMAN',
+  'pending',
+  'confirmed',
+  'preparing',
+  'ready',
 ];
 
 export const deliveryStatus = [
-  'WAIT_DELIVERYMAN',
-  'ACCEPT_DELIVERYMAN',
-  'DISPATCH',
-  'DELIVERY_ROUTE',
+  'ready',
+  'delivering',
+  'delivered',
 ];
 
-export const humanReadableStatus = {
-  ACCEPT_DELIVERYMAN: 'MOTOBOY A CAMINHO',
-  CANCELED: 'CANCELADO',
-  DELIVERY_ROUTE: 'A CAMINHO DO CLIENTE',
-  FINISHED: 'ENTREGUE',
-  IN_PREPARATION: 'EM PREPARAÇÃO',
-  RELEASE_SHOPPER: 'PEDIDO A CAMINHO',
-  WAIT_COMPANY: 'NOVO PEDIDO',
-  WAIT_DELIVERYMAN: 'AGUARDANDO MOTOBOY',
-  DISPATCH: 'PEDIDO A CAMINHO',
+export const humanReadableStatus: Record<string, string> = {
+  pending: 'NOVO PEDIDO',
+  confirmed: 'ACEITO',
+  preparing: 'EM PREPARAÇÃO',
+  ready: 'PRONTO',
+  delivering: 'A CAMINHO DO CLIENTE',
+  delivered: 'ENTREGUE',
+  cancelled: 'CANCELADO',
 };

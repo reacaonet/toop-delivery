@@ -1,21 +1,29 @@
-/* eslint-disable prettier/prettier */
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { forwardRef, ForwardRefRenderFunction, Fragment } from 'react';
 
-import { NewOrder } from '../../@types/dashboard';
-/** Util */
+import { Order } from '../../@types/order';
 import { removeAccents } from '../../utils';
 
 interface DataToPrint {
-  data: NewOrder;
+  data: Order;
 }
+
+const paymentMethodLabel: Record<string, string> = {
+  credit_card: 'CARTÃO',
+  debit_card: 'CARTÃO DE DÉBITO',
+  money: 'DINHEIRO',
+  pix: 'PIX',
+  CARD: 'CARTÃO',
+  MONEY: 'DINHEIRO',
+  PIX: 'PIX',
+};
 
 const PrintableComponent: ForwardRefRenderFunction<
   HTMLTableElement,
   DataToPrint
 > = ({ data }, ref) => {
-  const { cart, order } = data;
+  const order = data;
 
   return (
     <table ref={ref} className="printer-ticket">
@@ -33,7 +41,9 @@ const PrintableComponent: ForwardRefRenderFunction<
           </th>
         </tr>
         <tr>
-          <th colSpan={3}>{removeAccents(order?.customer?.person[0].name)}</th>
+          <th colSpan={3}>
+            {removeAccents(order?.customer?.name || order?.customer?.person?.[0]?.name || 'Cliente')}
+          </th>
         </tr>
         <tr>
           <th className="ttu" colSpan={3}>
@@ -46,10 +56,10 @@ const PrintableComponent: ForwardRefRenderFunction<
         </tr>
       </thead>
       <tbody>
-        {cart?.map(item => (
-          <Fragment key={item?._id}>
+        {order?.items?.map((item, idx) => (
+          <Fragment key={idx}>
             <tr className="top">
-              <td colSpan={3}>{removeAccents(item?.foodProduct?.name)}</td>
+              <td colSpan={3}>{removeAccents(item?.name)}</td>
             </tr>
             <tr>
               <td>
@@ -61,34 +71,17 @@ const PrintableComponent: ForwardRefRenderFunction<
               </td>
               <td>
                 {new Intl.NumberFormat('pt-BR', {
-                  minimumFractionDigits: 1,
-                }).format(item?.amount)}
+                  minimumFractionDigits: 0,
+                }).format(item?.quantity)}
               </td>
               <td>
                 {new Intl.NumberFormat('pt-BR', {
                   currency: 'BRL',
                   minimumFractionDigits: 2,
                   style: 'currency',
-                }).format(item?.price * item?.amount)}
+                }).format(item?.total || item?.price * item?.quantity)}
               </td>
             </tr>
-            {item?.complements?.map(complement => (
-              <Fragment key={complement?._id}>
-                <tr>
-                  <td className="complement-text" colSpan={2}>
-                    {complement?.foodProductComplement.name.trim()}:{' '}
-                    {complement?.name}
-                  </td>
-                  <td align="right">
-                    {new Intl.NumberFormat('pt-BR', {
-                      currency: 'BRL',
-                      minimumFractionDigits: 2,
-                      style: 'currency',
-                    }).format(complement?.price)}
-                  </td>
-                </tr>
-              </Fragment>
-            ))}
           </Fragment>
         ))}
       </tbody>
@@ -105,21 +98,9 @@ const PrintableComponent: ForwardRefRenderFunction<
               currency: 'BRL',
               minimumFractionDigits: 2,
               style: 'currency',
-            }).format(order?.payment?.totalCompany)}
+            }).format(order?.subtotal || 0)}
           </td>
         </tr>
-        {order?.payment?.serviceCharge > 0 && (
-          <tr className="ttu">
-            <td colSpan={2}>Taxa de serviço</td>
-            <td align="right">
-              {new Intl.NumberFormat('pt-BR', {
-                currency: 'BRL',
-                minimumFractionDigits: 2,
-                style: 'currency',
-              }).format(order?.payment?.serviceCharge)}
-            </td>
-          </tr>
-        )}
         <tr className="ttu">
           <td colSpan={2}>Entrega</td>
           <td align="right">
@@ -127,30 +108,22 @@ const PrintableComponent: ForwardRefRenderFunction<
               currency: 'BRL',
               minimumFractionDigits: 2,
               style: 'currency',
-            }).format(order?.payment?.priceDelivery)}
+            }).format(order?.deliveryFee || 0)}
           </td>
         </tr>
-        <tr className="ttu">
-          <td colSpan={2}>Gorjeta</td>
-          <td align="right">
-            {new Intl.NumberFormat('pt-BR', {
-              currency: 'BRL',
-              minimumFractionDigits: 2,
-              style: 'currency',
-            }).format(order?.payment?.valueTip)}
-          </td>
-        </tr>
-        <tr className="ttu">
-          <td colSpan={2}>Descontos</td>
-          <td align="right">
-            -
-            {new Intl.NumberFormat('pt-BR', {
-              currency: 'BRL',
-              minimumFractionDigits: 2,
-              style: 'currency',
-            }).format(order?.payment?.couponPrice)}
-          </td>
-        </tr>
+        {order?.discount > 0 && (
+          <tr className="ttu">
+            <td colSpan={2}>Descontos</td>
+            <td align="right">
+              -
+              {new Intl.NumberFormat('pt-BR', {
+                currency: 'BRL',
+                minimumFractionDigits: 2,
+                style: 'currency',
+              }).format(order?.discount)}
+            </td>
+          </tr>
+        )}
         <tr className="ttu">
           <td colSpan={2}>Total</td>
           <td align="right">
@@ -158,7 +131,7 @@ const PrintableComponent: ForwardRefRenderFunction<
               currency: 'BRL',
               minimumFractionDigits: 2,
               style: 'currency',
-            }).format(order?.payment?.total)}
+            }).format(order?.total || 0)}
           </td>
         </tr>
         <tr className="sup ttu p--0">
@@ -166,42 +139,10 @@ const PrintableComponent: ForwardRefRenderFunction<
             <b>Pagamentos</b>
           </td>
         </tr>
-        {order?.payment?.typePayment === 'MONEY' && (
-          <>
-            <tr className="ttu">
-              <td colSpan={2}>Método</td>
-              <td align="right">Dinheiro</td>
-            </tr>
-            <tr className="ttu">
-              <td colSpan={2}>Total Pago</td>
-              <td align="right">
-                {new Intl.NumberFormat('pt-BR', {
-                  currency: 'BRL',
-                  minimumFractionDigits: 2,
-                  style: 'currency',
-                }).format(order?.payment?.cashChange)}
-              </td>
-            </tr>
-            {order?.payment?.cashChange - order?.payment?.total > 0 && (
-              <tr className="ttu">
-                <td colSpan={2}>Troco</td>
-                <td align="right">
-                  {new Intl.NumberFormat('pt-BR', {
-                    currency: 'BRL',
-                    minimumFractionDigits: 2,
-                    style: 'currency',
-                  }).format(order?.payment?.cashChange - order?.payment?.total)}
-                </td>
-              </tr>
-            )}
-          </>
-        )}
-        {order?.payment?.typePayment === 'CARD' && (
-          <tr className="ttu">
-            <td colSpan={2}>Método</td>
-            <td align="right">Cartão</td>
-          </tr>
-        )}
+        <tr className="ttu">
+          <td colSpan={2}>Método</td>
+          <td align="right">{paymentMethodLabel[order?.paymentMethod] || order?.paymentMethod || 'N/I'}</td>
+        </tr>
         <tr className="sup">
           <td colSpan={3} align="center">
             <b>Obrigado!</b>

@@ -11,6 +11,12 @@ const binCard = async (req: Request, res: Response): Promise<Response> => {
   try {
     const {cardNumber} = req.params;
 
+    if (!cardNumber || cardNumber.length < 4) {
+      return res.status(400).json({
+        message: 'cardNumber is required (min 4 digits)',
+      });
+    }
+
 
     // const response = await apiQueryCielo.get(`/1/cardBin/${cardNumber}`, {
     //   headers: {
@@ -28,7 +34,7 @@ const binCard = async (req: Request, res: Response): Promise<Response> => {
     //   data: response.data,
     // });
 
-    const firstNumbers =cardNumber.slice(0, 4);
+    const firstNumbers = cardNumber.slice(0, 4);
     const bandeiraTipo = creditCardType(firstNumbers);
     let bandeira = '';
 

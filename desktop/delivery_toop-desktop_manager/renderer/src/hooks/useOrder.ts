@@ -1,14 +1,14 @@
 import { useQuery, UseQueryOptions, UseQueryResult } from 'react-query';
 
-import { NewOrder } from '../@types/dashboard';
+import { Order } from '../@types/order';
 import { setupApiClient } from '../services/api';
 
-async function getOrder(orderId: string): Promise<NewOrder> {
+async function getOrder(orderId: string): Promise<Order> {
   const api = setupApiClient();
 
   if (orderId) {
-    const { data } = await api.get(`/v1/front/order/${orderId}`);
-    return data;
+    const { data: response } = await api.get(`/orders/${orderId}`);
+    return response?.data || response;
   }
 
   return null;
@@ -16,8 +16,8 @@ async function getOrder(orderId: string): Promise<NewOrder> {
 
 export function useOrder(
   orderId: string,
-  options?: UseQueryOptions<NewOrder, unknown>,
-): UseQueryResult<NewOrder, unknown> {
+  options?: UseQueryOptions<Order, unknown>,
+): UseQueryResult<Order, unknown> {
   return useQuery(['order', orderId], () => getOrder(orderId), {
     staleTime: 1000 * 60 * 5,
     refetchInterval: 1000 * 60 * 5,

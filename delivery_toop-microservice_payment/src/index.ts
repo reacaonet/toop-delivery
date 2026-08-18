@@ -16,7 +16,9 @@ import startQueue from './services/queueSplit';
 
 const app = express();
 const corsConfig = {
-  origin: '*',
+  origin: process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(',')
+    : ['http://localhost:4202', 'http://localhost:3000'],
   methods: 'POST, GET, PUT, DELETE, OPTIONS, PATCH',
 };
 

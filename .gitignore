@@ -79,6 +79,28 @@ release/
 *.crt
 *.p12
 
+# Keystores
+*.keystore
+*.keystore.old
+
+# Service accounts and private keys (NEVER commit)
+firebase-adminsdk*.json
+*-adminsdk*.json
+src/config/privateKey/
+src/config/https/
+
 # Configuration files with sensitive data
 config/googlecloud.json
 config/firebase-admin.json
+firebase-adminsdk.json
+firebase-adminsdk-*.json
+google-services.json
+GoogleService-Info.plist
+
+# API keys in config
+.env
+.env.local
+.env.*.local
+
+# Desktop
+desktop/**/firebase/index.ts

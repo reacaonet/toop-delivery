@@ -1,90 +1,70 @@
 import {
 	Flex,
 	Heading,
-	Img,
 	Stack,
-	Text,
-	useColorModeValue
+	Text
 } from "@chakra-ui/react";
 import React from "react";
 
-import { Cart } from "../../@types/cart";
-
-interface ComponentProps {
-	item: Cart;
+interface OrderItem {
+	name: string;
+	quantity: number;
+	price: number;
+	total: number;
 }
 
-export function CartItem({ item }: ComponentProps): JSX.Element {
-	const itemBoxBackgroundColor = useColorModeValue("gray.200", "gray.900");
+interface ComponentProps {
+	items: OrderItem[];
+}
 
+export function CartItem({ items }: ComponentProps): JSX.Element {
 	return (
-		<Flex
-			alignItems="center"
-			backgroundColor={itemBoxBackgroundColor}
-			borderRadius="xl"
-			flexDirection="row"
-			key={item?._id}
-			minHeight="40"
-			padding="2"
-			width="full"
-		>
-			<Img
-				alignSelf="flex-start"
-				borderRadius={6}
-				src={item?.foodProduct.images[0]}
-				maxHeight="36"
-				width="36"
-			/>
-			<Flex
-				alignSelf="flex-start"
-				flexDirection="column"
-				padding="3"
-				width="full"
-			>
-				<Flex width="full">
-					<Heading fontSize="xl">{item?.foodProduct.name}</Heading>
-					<Text fontSize="md" lineHeight="shorter" marginLeft="1.5">
-						x{item?.amount}
-					</Text>
+		<Stack spacing={2} width="full">
+			{items?.map((item, idx) => (
+				<Flex
+					alignItems="center"
+					backgroundColor="gray.200"
+					_dark={{ backgroundColor: "gray.900" }}
+					borderRadius="xl"
+					flexDirection="row"
+					key={idx}
+					minHeight="16"
+					padding="3"
+					width="full"
+				>
+					<Flex
+						flexDirection="column"
+						padding="1"
+						width="full"
+					>
+						<Flex width="full" alignItems="center">
+							<Heading fontSize="lg">{item?.name}</Heading>
+							<Text fontSize="md" lineHeight="shorter" marginLeft="1.5">
+								x{item?.quantity}
+							</Text>
+							<Text fontSize="sm" marginLeft="auto">
+								{new Intl.NumberFormat("pt-BR", {
+									currency: "BRL",
+									minimumFractionDigits: 2,
+									style: "currency"
+								}).format(item?.total || item?.price * item?.quantity)}
+							</Text>
+						</Flex>
+						<Flex alignItems="flex-end" flexDirection="row" marginTop="1">
+							<Heading fontSize="sm" fontWeight="bold">
+								Preço unit.:
+							</Heading>
+							<Text fontSize="sm" lineHeight="shorter" marginLeft="1">
+								{new Intl.NumberFormat("pt-BR", {
+									currency: "BRL",
+									minimumFractionDigits: 2,
+									style: "currency"
+								}).format(item?.price)}
+							</Text>
+						</Flex>
+					</Flex>
 				</Flex>
-				<Stack marginTop="1.5" spacing="0.5">
-					<Flex alignItems="flex-end" flexDirection="row">
-						<Heading fontSize="md" fontWeight="bold">
-							Subtotal:
-						</Heading>
-						<Text fontSize="sm" lineHeight="shorter" marginLeft="1">
-							{new Intl.NumberFormat("pt-BR", {
-								currency: "BRL",
-								minimumFractionDigits: 2,
-								style: "currency"
-							}).format(item?.amount * item.price)}
-						</Text>
-					</Flex>
-					<Flex alignItems="flex-end" flexDirection="row">
-						<Heading fontSize="md" fontWeight="bold">
-							Comentário:
-						</Heading>
-						<Text fontSize="sm" lineHeight="shorter" marginLeft="1">
-							{item?.comment ? item?.comment : "Sem comentário"}
-						</Text>
-					</Flex>
-					<Flex alignItems="flex-start" flexDirection="column">
-						<Heading fontSize="md" fontWeight="bold">
-							Complementos/Adicionais:
-						</Heading>
-						{item?.complements?.map((comp) => (
-							<Flex alignItems="flex-end" flexDirection="row" key={comp?._id}>
-								<Heading fontSize="md" fontWeight="bold">
-									{comp?.foodProductComplement?.name}:
-								</Heading>
-								<Text fontSize="sm" lineHeight="shorter" marginLeft="1">
-									{comp?.name}
-								</Text>
-							</Flex>
-						))}
-					</Flex>
-				</Stack>
-			</Flex>
-		</Flex>
+			))}
+		</Stack>
 	);
 }

@@ -2,7 +2,7 @@ import * as Dev from './dev';
 import * as Homolog from './homologation';
 import * as Production from './production';
 
-let env = 'homolog';
+let env = 'dev';
 let config: any = {};
 
 switch (env) {

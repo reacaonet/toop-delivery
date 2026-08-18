@@ -18,11 +18,11 @@ const cancellationTotal = async (
       });
     }
 
-    apiCielo.defaults.headers.common[
-      'Authorization'
-    ] = `Bearer ${token.access_token}`;
-
-    const response = await apiCielo.put(`/1/sales/${PaymentId}/void`);
+    const response = await apiCielo.put(`/1/sales/${PaymentId}/void`, undefined, {
+      headers: {
+        Authorization: `Bearer ${token.access_token}`,
+      },
+    });
 
     return res.status(200).json({
       message: 'Successful cancellation total',

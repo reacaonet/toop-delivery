@@ -42,7 +42,7 @@ const ListTransactions = () => {
       url += `&eventStatus=${eventStatus}`;
 
       if (merchantId) {
-        url += `&merchantIds${merchantId}`;
+        url += `&merchantIds=${merchantId}`;
       }
 
       const token = await generateToken();

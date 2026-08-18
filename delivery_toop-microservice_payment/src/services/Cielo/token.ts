@@ -11,13 +11,15 @@ const generateToken = async (): Promise<TypeToken> => {
   const buff = Buffer.from(`${clienteId}:${clienteSecret}`, 'utf8');
   const base64 = buff.toString('base64');
 
-  apiBraspag.defaults.headers.common['Authorization'] = `Basic ${base64}`;
-  apiBraspag.defaults.headers.common['Content-Type'] =
-    'application/x-www-form-urlencoded;charset=utf-8';
-
   const response = await apiBraspag.post(
     '/oauth2/token',
     qs.stringify({grant_type: 'client_credentials'}),
+    {
+      headers: {
+        'Authorization': `Basic ${base64}`,
+        'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
+      },
+    },
   );
 
   return response.data;

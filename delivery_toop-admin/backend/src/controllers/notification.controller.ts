@@ -1,0 +1,24 @@
+import { Request, Response, NextFunction } from "express";
+import notificationService from "../services/notification.service";
+
+export class NotificationController {
+  async list(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await notificationService.list(req.query as any);
+      return res.status(200).json({ success: true, data: result });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getById(req: Request, res: Response, next: NextFunction) {
+    try {
+      const notification = await notificationService.getById(req.params.id);
+      return res.status(200).json({ success: true, data: notification });
+    } catch (error) {
+      next(error);
+    }
+  }
+}
+
+export default new NotificationController();

@@ -1,44 +1,45 @@
 export interface Order {
 	_id: string;
+	orderNumber: string;
 	createdAt: string;
-	order_number: number;
-	payment: {
+	total: number;
+	subtotal: number;
+	deliveryFee: number;
+	discount: number;
+	status: string;
+	paymentMethod: string;
+	paymentStatus: string;
+	notes?: string;
+	items: {
+		name: string;
+		quantity: number;
+		price: number;
 		total: number;
-		status: string;
-		totalCompany: number;
-		priceDelivery: number;
-		cashChange: number;
-		typePayment: string;
-		valueTip: number;
-		serviceCharge: number;
-		couponPrice: number;
-	};
-	shoppingCart: {
-		_id: string;
-	};
+	}[];
 	company: {
-		location: {
-			coordinates: [number, number];
-		};
+		_id: string;
 		name: string;
 	};
 	customer: {
-		person: {
-			_id: string;
+		_id: string;
+		name: string;
+		email?: string;
+		person?: {
 			name: string;
 			phone: string;
 		}[];
+	};
+	deliveryman?: {
 		_id: string;
+		name: string;
 	};
-	customerDelivery: {
-		location: {
-			coordinates: [number, number];
-		};
-		referencePoint: string;
-		complement: string;
-		address: string;
+	deliveryAddress?: {
+		street?: string;
+		number?: string;
+		complement?: string;
+		neighborhood?: string;
+		city?: string;
+		state?: string;
+		zipCode?: string;
 	};
-	typePayment: string;
-	typeSchedule: string;
-	status: string;
 }

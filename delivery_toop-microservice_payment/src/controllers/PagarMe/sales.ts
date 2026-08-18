@@ -165,13 +165,11 @@ const acquirerMessage = (code: string) => {
   }
 };
 
-let appDebug: any = {};
-
 const sales = async (req: Request, res: Response): Promise<Response> => {
+  const appDebug: any = {};
   try {
     const data = req.body;
-    appDebug = {};
-    appDebug.body = data;
+    appDebug.body = {reference_key: data.reference_key, customer: data.customer};
 
     if ( !data.reference_key ) {
       registerLog({

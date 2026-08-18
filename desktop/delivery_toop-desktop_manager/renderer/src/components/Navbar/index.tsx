@@ -19,7 +19,7 @@ import { DesktopNav } from './Desktop';
 import { MobileNav } from './Mobile';
 
 export function WithSubnavigation(): JSX.Element {
-  const { handleSignOutWeb } = useAuth();
+  const { signOut } = useAuth();
 
   const { isOpen, onToggle } = useDisclosure();
   const { colorMode, toggleColorMode } = useColorMode();
@@ -72,7 +72,7 @@ export function WithSubnavigation(): JSX.Element {
             display={{ base: 'none', md: 'flex' }}
             marginLeft={10}
             width={'30%'}>
-            <button style={{ cursor: 'pointer' }} onClick={handleSignOutWeb}>
+            <button style={{ cursor: 'pointer' }} onClick={signOut}>
               Limpar Sessão
             </button>
           </Flex>

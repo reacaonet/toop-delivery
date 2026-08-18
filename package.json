@@ -1,35 +1,33 @@
 {
   "name": "toop-delivery",
   "version": "1.0.0",
-  "description": "Plataforma completa de delivery com microserviços",
+  "description": "Plataforma completa de delivery com microservicos",
   "private": true,
   "workspaces": [
     "delivery_toop-admin/backend",
     "delivery_toop-microservice_payment",
     "delivery_toop-microservice_notification",
-    "delivery_toop-microservice_deliveryman",
-    "delivery_toop-desktop_manager",
-    "delivery_toop-desktop_integration"
+    "delivery_toop-microservice_deliveryman"
   ],
   "scripts": {
     "install:all": "npm install && npm run install:services",
-    "install:services": "npm run install:admin && npm run install:payment && npm run install:notification && npm run install:deliveryman && npm run install:desktop",
+    "install:services": "npm run install:admin && npm run install:payment && npm run install:notification && npm run install:deliveryman",
     "install:admin": "cd delivery_toop-admin/backend && npm install",
     "install:payment": "cd delivery_toop-microservice_payment && npm install",
     "install:notification": "cd delivery_toop-microservice_notification && npm install",
     "install:deliveryman": "cd delivery_toop-microservice_deliveryman && npm install",
-    "install:desktop": "cd delivery_toop-desktop_manager && npm install",
     "start:dev": "concurrently \"npm run start:admin\" \"npm run start:payment\" \"npm run start:notification\" \"npm run start:deliveryman\"",
     "start:admin": "cd delivery_toop-admin/backend && npm run start",
     "start:payment": "cd delivery_toop-microservice_payment && npm run dev",
     "start:notification": "cd delivery_toop-microservice_notification && npm run dev",
     "start:deliveryman": "cd delivery_toop-microservice_deliveryman && npm run dev",
-    "docker:dev": "docker-compose -f docker-compose.dev.yml up -d",
-    "docker:staging": "docker-compose -f docker-compose.staging.yml up -d",
-    "docker:prod": "docker-compose -f docker-compose.production.yml up -d",
-    "docker:stop": "docker-compose -f docker-compose.dev.yml -f docker-compose.staging.yml -f docker-compose.production.yml down",
-    "build": "npm run build:admin && npm run build:payment && npm run build:notification && npm run build:deliveryman",
-    "build:admin": "cd delivery_toop-admin/backend && npm run build",
+    "docker:dev": "docker compose -f docker-compose.dev.yml up -d",
+    "docker:dev:stop": "docker compose -f docker-compose.dev.yml down",
+    "docker:staging": "docker compose -f docker-compose.staging.yml up -d",
+    "docker:prod": "docker compose -f docker-compose.production.yml up -d",
+    "lint": "echo 'TODO: configure lint per service'",
+    "test": "echo 'TODO: configure tests per service'",
+    "build": "npm run build:payment && npm run build:notification && npm run build:deliveryman",
     "build:payment": "cd delivery_toop-microservice_payment && npm run build",
     "build:notification": "cd delivery_toop-microservice_notification && npm run build",
     "build:deliveryman": "cd delivery_toop-microservice_deliveryman && npm run build"
@@ -43,7 +41,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-username/toop-delivery.git"
+    "url": "https://github.com/reacaonet/toop-delivery.git"
   },
   "author": "ToopDelivery Team",
   "license": "MIT"

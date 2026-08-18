@@ -28,7 +28,7 @@ export function MobileUserMenu({
   onToggleUp,
 }: MobileUserMenuProps): JSX.Element {
   const { isOpen, onToggle } = useDisclosure();
-  const { user, handleSignOutWeb, isAuthenticated } = useAuth();
+  const { user, signOut, isAuthenticated } = useAuth();
 
   const borderColor = useColorModeValue('gray.200', 'gray.700');
   const color = useColorModeValue('gray.600', 'gray.200');
@@ -92,7 +92,7 @@ export function MobileUserMenu({
           <NavMenuMobileItem
             icon={RiLogoutCircleLine}
             label={'Sair'}
-            onClick={handleSignOutWeb}
+            onClick={signOut}
           />
         </Stack>
       </Collapse>

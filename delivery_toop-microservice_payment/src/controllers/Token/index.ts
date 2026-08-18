@@ -1,5 +1,4 @@
 import jwt from 'jsonwebtoken';
-import fs from 'fs';
 import {Request, Response} from 'express';
 
 import {TypeResponse} from './types';
@@ -15,7 +14,7 @@ export default {
     }
 
     if (
-      appToken !== process.env.appToken &&
+      appToken !== process.env.appToken ||
       appSecret !== process.env.appSecret
     ) {
       return res.status(400).json({
@@ -23,10 +22,13 @@ export default {
       });
     }
 
-    const privateKey = fs.readFileSync(
-      'src/config/privateKey/index.key',
-      'utf8',
-    );
+    const privateKey = process.env.JWT_PRIVATE_KEY;
+    if (!privateKey) {
+      return res.status(500).json({
+        message: 'Chave de assinatura não configurada',
+      });
+    }
+
     const token = jwt.sign(
       {
         appToken,
@@ -35,6 +37,7 @@ export default {
       privateKey,
       {
         algorithm: 'HS256',
+        expiresIn: '1h',
       },
     );
 

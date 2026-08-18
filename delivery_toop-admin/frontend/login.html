@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <title>Toop Delivery Admin</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700|Roboto:300,400,500,600,700" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .login-container {
+      background: white;
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+    .logo {
+      font-size: 28px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 10px;
+    }
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      color: #333;
+      font-weight: 500;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    .btn {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+    .error {
+      color: #e74c3c;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    .success {
+      color: #27ae60;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    .loading {
+      display: none;
+      margin-top: 10px;
+    }
+    .spinner {
+      border: 2px solid #f3f3f3;
+      border-top: 2px solid #667eea;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-container">
+    <div class="logo">Toop Delivery</div>
+    <div class="subtitle">Painel Administrativo</div>
+    
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" value="admin@economizebr.com" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="password">Senha</label>
+        <input type="password" id="password" name="password" value="admin123" required>
+      </div>
+      
+      <button type="submit" class="btn">Entrar</button>
+      
+      <div class="error" id="error"></div>
+      <div class="success" id="success"></div>
+      <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <div>Autenticando...</div>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const errorDiv = document.getElementById('error');
+      const successDiv = document.getElementById('success');
+      const loadingDiv = document.getElementById('loading');
+      
+      errorDiv.textContent = '';
+      successDiv.textContent = '';
+      loadingDiv.style.display = 'block';
+      
+      try {
+        console.log('Tentando fazer login...');
+        const response = await fetch('http://localhost:8100/auth', {
+          method: 'POST',
+          mode: 'cors',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({ email, password })
+        });
+        
+        console.log('Resposta recebida:', response.status);
+        const data = await response.json();
+        console.log('Dados:', data);
+        
+        if (response.ok) {
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('user', JSON.stringify(data.user));
+          successDiv.textContent = 'Login realizado com sucesso! Redirecionando...';
+          
+          setTimeout(() => {
+            window.location.href = '/dashboard.html';
+          }, 1500);
+        } else {
+          console.log('Erro na resposta:', response.status, data);
+          errorDiv.textContent = data.message || 'Erro ao fazer login';
+        }
+      } catch (err) {
+        console.error('Erro completo:', err);
+        errorDiv.textContent = 'Erro de conexão: ' + err.message;
+      } finally {
+        loadingDiv.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>

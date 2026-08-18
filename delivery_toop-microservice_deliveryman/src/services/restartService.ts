@@ -1,9 +1,9 @@
 import captureError from './error/captureError';
 
 const restartService = (service: any, delay: number, source: string): void => {
-  setTimeout(() => {
+  setTimeout(async () => {
     try {
-      return service();
+      return await service();
     } catch (err) {
       captureError(source, err);
 

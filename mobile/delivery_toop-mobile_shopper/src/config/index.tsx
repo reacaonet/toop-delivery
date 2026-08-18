@@ -2,7 +2,7 @@ import * as Dev from './dev';
 import * as Production from './production';
 import * as Homologation from './homologation';
 
-let productionStatus = true;
+let productionStatus = false;
 let homologationStatus = false;
 
 let config: any = {};

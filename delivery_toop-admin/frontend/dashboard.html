@@ -1,0 +1,1402 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Toop Delivery Admin - Dashboard</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700|Roboto:300,400,500,600,700" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f5f5f5;
+      color: #333;
+    }
+    
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 250px;
+      height: 100vh;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    
+    .logo {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+    
+    .nav-menu {
+      list-style: none;
+    }
+    
+    .nav-item {
+      margin-bottom: 10px;
+    }
+    
+    .nav-link {
+      display: block;
+      padding: 12px 15px;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      transition: background 0.3s;
+    }
+    
+    .nav-link:hover, .nav-link.active {
+      background: rgba(255,255,255,0.1);
+    }
+    
+    .main-content {
+      margin-left: 250px;
+      min-height: 100vh;
+    }
+    
+    .header {
+      background: white;
+      padding: 15px 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .header h1 {
+      font-size: 24px;
+      color: #333;
+    }
+    
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+    }
+    
+    .content {
+      padding: 30px;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .stat-card {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    
+    .stat-icon {
+      font-size: 30px;
+      margin-bottom: 15px;
+      color: #667eea;
+    }
+    
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 5px;
+    }
+    
+    .stat-label {
+      color: #666;
+      font-size: 14px;
+    }
+    
+    .card {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    
+    .card h2 {
+      margin-bottom: 20px;
+      color: #333;
+    }
+    
+    .btn {
+      padding: 10px 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: transform 0.2s;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+    
+    .btn-danger {
+      background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    }
+    
+    .status-badge {
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
+    .status-online {
+      background: #d4edda;
+      color: #155724;
+    }
+    
+    .status-offline {
+      background: #f8d7da;
+      color: #721c24;
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <div class="logo">
+      <i class="fas fa-utensils"></i> Toop Delivery
+    </div>
+    
+    <ul class="nav-menu">
+      <li class="nav-item">
+        <a href="#" class="nav-link active" data-page="dashboard">
+          <i class="fas fa-tachometer-alt"></i> Dashboard
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#" class="nav-link" data-page="companies">
+          <i class="fas fa-store"></i> Empresas
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#" class="nav-link" data-page="users">
+          <i class="fas fa-users"></i> Usuários
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#" class="nav-link" data-page="orders">
+          <i class="fas fa-shopping-cart"></i> Pedidos
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#" class="nav-link" data-page="deliverymen">
+          <i class="fas fa-motorcycle"></i> Entregadores
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#" class="nav-link" data-page="payments">
+          <i class="fas fa-credit-card"></i> Pagamentos
+        </a>
+      </li>
+      <li class="nav-item">
+        <a href="#" class="nav-link" data-page="settings">
+          <i class="fas fa-cog"></i> Configurações
+        </a>
+      </li>
+    </ul>
+  </div>
+  
+  <div class="main-content">
+    <div class="header">
+      <h1 id="pageTitle">Dashboard</h1>
+      <div class="user-info">
+        <span id="userName">Carregando...</span>
+        <div class="user-avatar" id="userAvatar">A</div>
+        <button class="btn btn-danger" onclick="logout()">Sair</button>
+      </div>
+    </div>
+    
+    <div id="content" class="content">
+      <!-- Dashboard Content -->
+      <div id="dashboard-page" class="page-content">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fas fa-store"></i>
+            </div>
+            <div class="stat-value">12</div>
+            <div class="stat-label">Empresas Ativas</div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fas fa-shopping-cart"></i>
+            </div>
+            <div class="stat-value">248</div>
+            <div class="stat-label">Pedidos Hoje</div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-value">1,847</div>
+            <div class="stat-label">Clientes Cadastrados</div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon">
+              <i class="fas fa-motorcycle"></i>
+            </div>
+            <div class="stat-value">28</div>
+            <div class="stat-label">Entregadores Online</div>
+          </div>
+        </div>
+        
+        <div class="card">
+          <h2>Status dos Serviços</h2>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+            <div style="padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
+              <h4>API Admin</h4>
+              <span class="status-badge status-online">Online</span>
+              <p style="margin: 5px 0; color: #666;">Porta: 8100</p>
+            </div>
+            
+            <div style="padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
+              <h4>Database</h4>
+              <span class="status-badge status-online">Conectado</span>
+              <p style="margin: 5px 0; color: #666;">MongoDB</p>
+            </div>
+            
+            <div style="padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
+              <h4>Pagamentos</h4>
+              <span class="status-badge status-offline">Offline</span>
+              <p style="margin: 5px 0; color: #666;">Porta: 8400</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card">
+          <h2>Ações Rápidas</h2>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="btn" onclick="testApi()">
+              <i class="fas fa-plug"></i> Testar API
+            </button>
+            <button class="btn" onclick="checkAuth()">
+              <i class="fas fa-key"></i> Verificar Autenticação
+            </button>
+            <button class="btn" onclick="refreshData()">
+              <i class="fas fa-sync"></i> Atualizar Dados
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Empresas Content -->
+      <div id="companies-page" class="page-content" style="display: none;">
+        <div class="card">
+          <h2>Empresas</h2>
+          <p>Gerenciamento de empresas do sistema.</p>
+          <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+            <button class="btn" onclick="loadCompanies()">
+              <i class="fas fa-sync"></i> Carregar Empresas
+            </button>
+            <button class="btn" onclick="showAddCompanyForm()">
+              <i class="fas fa-plus"></i> Nova Empresa
+            </button>
+          </div>
+          
+          <!-- Formulário de Adição/Edição -->
+          <div id="companyForm" style="display: none; margin-bottom: 20px; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
+            <h3 id="companyFormTitle">Nova Empresa</h3>
+            <form id="companyFormElement">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div>
+                  <label style="display: block; margin-bottom: 5px;">Nome*</label>
+                  <input type="text" id="companyName" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 3px;">
+                </div>
+                <div>
+                  <label style="display: block; margin-bottom: 5px;">Telefone</label>
+                  <input type="text" id="companyPhone" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 3px;">
+                </div>
+                <div style="grid-column: 1fr;">
+                  <label style="display: block; margin-bottom: 5px;">Endereço*</label>
+                  <input type="text" id="companyAddress" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 3px;">
+                </div>
+                <div style="grid-column: 1fr;">
+                  <label style="display: block; margin-bottom: 5px;">
+                    <input type="checkbox" id="companyStatus" checked> Status Ativo
+                  </label>
+                </div>
+              </div>
+              <div style="margin-top: 15px; display: flex; gap: 10px;">
+                <button type="submit" class="btn">Salvar</button>
+                <button type="button" class="btn btn-danger" onclick="hideCompanyForm()">Cancelar</button>
+              </div>
+            </form>
+          </div>
+          
+          <div id="companies-list" style="margin-top: 20px;"></div>
+        </div>
+      </div>
+      
+      <!-- Usuários Content -->
+      <div id="users-page" class="page-content" style="display: none;">
+        <div class="card">
+          <h2>Usuários</h2>
+          <p>Gerenciamento de usuários do sistema.</p>
+          <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+            <button class="btn" onclick="loadUsers()">
+              <i class="fas fa-sync"></i> Carregar Usuários
+            </button>
+            <button class="btn" onclick="showAddUserForm()">
+              <i class="fas fa-plus"></i> Novo Usuário
+            </button>
+          </div>
+          
+          <!-- Formulário de Adição/Edição -->
+          <div id="userForm" style="display: none; margin-bottom: 20px; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
+            <h3 id="userFormTitle">Novo Usuário</h3>
+            <form id="userFormElement">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div>
+                  <label style="display: block; margin-bottom: 5px;">Nome*</label>
+                  <input type="text" id="userName" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 3px;">
+                </div>
+                <div>
+                  <label style="display: block; margin-bottom: 5px;">Email*</label>
+                  <input type="email" id="userEmail" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 3px;">
+                </div>
+                <div id="passwordField">
+                  <label style="display: block; margin-bottom: 5px;">Senha*</label>
+                  <input type="password" id="userPassword" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 3px;">
+                </div>
+                <div>
+                  <label style="display: block; margin-bottom: 5px;">
+                    <input type="checkbox" id="userStatus" checked> Status Ativo
+                  </label>
+                </div>
+              </div>
+              <div style="margin-top: 15px; display: flex; gap: 10px;">
+                <button type="submit" class="btn">Salvar</button>
+                <button type="button" class="btn btn-danger" onclick="hideUserForm()">Cancelar</button>
+              </div>
+            </form>
+          </div>
+          
+          <div id="users-list" style="margin-top: 20px;"></div>
+        </div>
+      </div>
+      
+      <!-- Pedidos Content -->
+      <div id="orders-page" class="page-content" style="display: none;">
+        <div class="card">
+          <h2>Pedidos</h2>
+          <p>Visualização e gerenciamento de pedidos.</p>
+          <button class="btn" onclick="loadOrders()">
+            <i class="fas fa-sync"></i> Carregar Pedidos
+          </button>
+          <div id="orders-list" style="margin-top: 20px;"></div>
+        </div>
+      </div>
+      
+      <!-- Entregadores Content -->
+      <div id="deliverymen-page" class="page-content" style="display: none;">
+        <div class="card">
+          <h2>Entregadores</h2>
+          <p>Gerenciamento de entregadores do sistema.</p>
+          <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+            <button class="btn" onclick="loadDeliverymen()">
+              <i class="fas fa-sync"></i> Carregar Entregadores
+            </button>
+            <button class="btn" onclick="showAddDeliverymanForm()">
+              <i class="fas fa-plus"></i> Novo Entregador
+            </button>
+          </div>
+          
+          <!-- Formulário de Adição/Edição -->
+          <div id="deliverymanForm" style="display: none; margin-bottom: 20px; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
+            <h3 id="deliverymanFormTitle">Novo Entregador</h3>
+            <form id="deliverymanFormElement">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div>
+                  <label style="display: block; margin-bottom: 5px;">Nome*</label>
+                  <input type="text" id="deliverymanName" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 3px;">
+                </div>
+                <div>
+                  <label style="display: block; margin-bottom: 5px;">Email*</label>
+                  <input type="email" id="deliverymanEmail" required style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 3px;">
+                </div>
+                <div>
+                  <label style="display: block; margin-bottom: 5px;">Telefone</label>
+                  <input type="text" id="deliverymanPhone" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 3px;">
+                </div>
+                <div>
+                  <label style="display: block; margin-bottom: 5px;">Tipo Veículo</label>
+                  <select id="deliverymanVehicleType" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 3px;">
+                    <option value="Moto">Moto</option>
+                    <option value="Bicicleta">Bicicleta</option>
+                    <option value="Carro">Carro</option>
+                    <option value="Van">Van</option>
+                  </select>
+                </div>
+                <div style="grid-column: 1fr;">
+                  <label style="display: block; margin-bottom: 5px;">
+                    <input type="checkbox" id="deliverymanStatus" checked> Status Ativo
+                  </label>
+                </div>
+              </div>
+              <div style="margin-top: 15px; display: flex; gap: 10px;">
+                <button type="submit" class="btn">Salvar</button>
+                <button type="button" class="btn btn-danger" onclick="hideDeliverymanForm()">Cancelar</button>
+              </div>
+            </form>
+          </div>
+          
+          <div id="deliverymen-list" style="margin-top: 20px;"></div>
+        </div>
+      </div>
+      
+      <!-- Pagamentos Content -->
+      <div id="payments-page" class="page-content" style="display: none;">
+        <div class="card">
+          <h2>Pagamentos</h2>
+          <p>Configurações e relatórios de pagamentos.</p>
+          <button class="btn" onclick="loadPayments()">
+            <i class="fas fa-sync"></i> Carregar Pagamentos
+          </button>
+          <div id="payments-list" style="margin-top: 20px;"></div>
+        </div>
+      </div>
+      
+      <!-- Configurações Content -->
+      <div id="settings-page" class="page-content" style="display: none;">
+        <div class="card">
+          <h2>Configurações</h2>
+          <p>Configurações gerais do sistema.</p>
+          <button class="btn" onclick="loadSettings()">
+            <i class="fas fa-sync"></i> Carregar Configurações
+          </button>
+          <div id="settings-list" style="margin-top: 20px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Verificar autenticação
+    function checkAuth() {
+      const token = localStorage.getItem('token');
+      const user = localStorage.getItem('user');
+      
+      if (!token || !user) {
+        window.location.href = '/login.html';
+        return;
+      }
+      
+      const userData = JSON.parse(user);
+      document.getElementById('userName').textContent = userData.name || 'Admin';
+      document.getElementById('userAvatar').textContent = (userData.name || 'A').charAt(0).toUpperCase();
+    }
+    
+    function logout() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login.html';
+    }
+    
+    async function testApi() {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:8100/health', {
+          mode: 'cors',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          alert('API está funcionando corretamente!');
+        } else {
+          alert('Erro na API: ' + response.status);
+        }
+      } catch (err) {
+        alert('Erro de conexão: ' + err.message);
+      }
+    }
+    
+    function refreshData() {
+      location.reload();
+    }
+    
+    // Sistema de navegação
+    function navigateTo(pageName) {
+      // Esconder todas as páginas
+      const pages = document.querySelectorAll('.page-content');
+      pages.forEach(page => page.style.display = 'none');
+      
+      // Remover classe active de todos os links
+      const links = document.querySelectorAll('.nav-link');
+      links.forEach(link => link.classList.remove('active'));
+      
+      // Mostrar página selecionada
+      const selectedPage = document.getElementById(pageName + '-page');
+      if (selectedPage) {
+        selectedPage.style.display = 'block';
+      }
+      
+      // Adicionar classe active ao link clicado
+      const activeLink = document.querySelector(`[data-page="${pageName}"]`);
+      if (activeLink) {
+        activeLink.classList.add('active');
+      }
+      
+      // Atualizar título
+      const titles = {
+        dashboard: 'Dashboard',
+        companies: 'Empresas',
+        users: 'Usuários',
+        orders: 'Pedidos',
+        deliverymen: 'Entregadores',
+        payments: 'Pagamentos',
+        settings: 'Configurações'
+      };
+      
+      document.getElementById('pageTitle').textContent = titles[pageName] || 'Dashboard';
+    }
+    
+    // Adicionar event listeners aos links de navegação
+    document.addEventListener('DOMContentLoaded', function() {
+      // Verificar autenticação primeiro
+      checkAuth();
+      
+      // Configurar navegação
+      const navLinks = document.querySelectorAll('.nav-link');
+      navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+          e.preventDefault();
+          const pageName = this.getAttribute('data-page');
+          if (pageName) {
+            navigateTo(pageName);
+          }
+        });
+      });
+      
+      // Configurar formulário de empresas
+      const companyForm = document.getElementById('companyFormElement');
+      if (companyForm) {
+        companyForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          
+          const formData = new FormData();
+          formData.append('mode', this.getAttribute('data-mode') || 'add');
+          formData.append('id', this.getAttribute('data-id') || '');
+          formData.append('name', document.getElementById('companyName').value);
+          formData.append('address', document.getElementById('companyAddress').value);
+          formData.append('phone', document.getElementById('companyPhone').value);
+          formData.append('status', document.getElementById('companyStatus').checked ? 'on' : 'off');
+          
+          saveCompany(formData);
+        });
+      }
+      
+      // Configurar formulário de usuários
+      const userForm = document.getElementById('userFormElement');
+      if (userForm) {
+        userForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          
+          const userNameValue = document.getElementById('userName').value;
+          const userEmailValue = document.getElementById('userEmail').value;
+          const userPasswordValue = document.getElementById('userPassword').value;
+          const userStatusValue = document.getElementById('userStatus').checked ? 'on' : 'off';
+          
+          console.log('Valores do formulário antes de salvar:');
+          console.log('Nome campo:', userNameValue);
+          console.log('Email campo:', userEmailValue);
+          console.log('Status campo:', userStatusValue);
+          
+          const formData = new FormData();
+          formData.append('mode', this.getAttribute('data-mode') || 'add');
+          formData.append('id', this.getAttribute('data-id') || '');
+          formData.append('name', userNameValue);
+          formData.append('email', userEmailValue);
+          formData.append('password', userPasswordValue);
+          formData.append('status', userStatusValue);
+          
+          saveUser(formData);
+        });
+      }
+      
+      // Configurar formulário de entregadores
+      const deliverymanForm = document.getElementById('deliverymanFormElement');
+      if (deliverymanForm) {
+        deliverymanForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          
+          const formData = new FormData();
+          formData.append('mode', this.getAttribute('data-mode') || 'add');
+          formData.append('id', this.getAttribute('data-id') || '');
+          formData.append('name', document.getElementById('deliverymanName').value);
+          formData.append('email', document.getElementById('deliverymanEmail').value);
+          formData.append('phone', document.getElementById('deliverymanPhone').value);
+          formData.append('vehicleType', document.getElementById('deliverymanVehicleType').value);
+          formData.append('status', document.getElementById('deliverymanStatus').checked ? 'on' : 'off');
+          
+          saveDeliveryman(formData);
+        });
+      }
+      
+      // Carregar dados iniciais
+      loadDashboardData();
+    });
+    
+    // Funções para carregar dados de cada página
+    async function loadCompanies() {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:8100/companies', {
+          mode: 'cors',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          displayCompanies(data);
+        } else {
+          document.getElementById('companies-list').innerHTML = '<p>Erro ao carregar empresas</p>';
+        }
+      } catch (err) {
+        document.getElementById('companies-list').innerHTML = '<p>Erro de conexão: ' + err.message + '</p>';
+      }
+    }
+    
+    function displayCompanies(companies) {
+      const container = document.getElementById('companies-list');
+      if (!companies || companies.length === 0) {
+        container.innerHTML = '<p>Nenhuma empresa encontrada</p>';
+        return;
+      }
+      
+      let html = '<table style="width: 100%; border-collapse: collapse;">';
+      html += '<thead><tr style="background: #f5f5f5;"><th>Nome</th><th>Endereço</th><th>Telefone</th><th>Status</th><th>Ações</th></tr></thead>';
+      html += '<tbody>';
+      
+      companies.forEach(company => {
+        html += `<tr>
+          <td>${company.name || 'N/A'}</td>
+          <td>${company.address || 'N/A'}</td>
+          <td>${company.phone || 'N/A'}</td>
+          <td><span class="status-badge ${company.status ? 'status-online' : 'status-offline'}">${company.status ? 'Ativo' : 'Inativo'}</span></td>
+          <td>
+            <button class="btn" onclick="editCompany('${company._id}')" style="margin-right: 5px;">Editar</button>
+            <button class="btn btn-danger" onclick="deleteCompany('${company._id}')">Excluir</button>
+          </td>
+        </tr>`;
+      });
+      
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    }
+    
+    // Funções para formulário de empresas
+    function showAddCompanyForm() {
+      document.getElementById('companyForm').style.display = 'block';
+      document.getElementById('companyFormTitle').textContent = 'Nova Empresa';
+      document.getElementById('companyFormElement').reset();
+      document.getElementById('companyFormElement').setAttribute('data-mode', 'add');
+    }
+    
+    function hideCompanyForm() {
+      document.getElementById('companyForm').style.display = 'none';
+    }
+    
+    function showEditCompanyForm(company) {
+      document.getElementById('companyForm').style.display = 'block';
+      document.getElementById('companyFormTitle').textContent = 'Editar Empresa';
+      document.getElementById('companyFormElement').setAttribute('data-mode', 'edit');
+      document.getElementById('companyFormElement').setAttribute('data-id', company._id);
+      
+      document.getElementById('companyName').value = company.name || '';
+      document.getElementById('companyAddress').value = company.address || '';
+      document.getElementById('companyPhone').value = company.phone || '';
+      document.getElementById('companyStatus').checked = company.status || false;
+    }
+    
+    async function saveCompany(formData) {
+      try {
+        const token = localStorage.getItem('token');
+        const mode = formData.get('mode');
+        const id = formData.get('id');
+        
+        const companyData = {
+          name: formData.get('name'),
+          address: formData.get('address'),
+          phone: formData.get('phone'),
+          status: formData.get('status') === 'on'
+        };
+        
+        let response;
+        if (mode === 'edit' && id) {
+          response = await fetch(`http://localhost:8100/companies/${id}`, {
+            method: 'PUT',
+            mode: 'cors',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(companyData)
+          });
+        } else {
+          response = await fetch('http://localhost:8100/companies', {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(companyData)
+          });
+        }
+        
+        if (response.ok) {
+          hideCompanyForm();
+          loadCompanies();
+          alert(mode === 'edit' ? 'Empresa atualizada com sucesso!' : 'Empresa criada com sucesso!');
+        } else {
+          const error = await response.json();
+          alert('Erro: ' + (error.error || 'Erro ao salvar empresa'));
+        }
+      } catch (err) {
+        alert('Erro de conexão: ' + err.message);
+      }
+    }
+    
+    async function editCompany(id) {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`http://localhost:8100/companies`, {
+          mode: 'cors',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          const companies = await response.json();
+          const company = companies.find(c => c._id === id);
+          if (company) {
+            showEditCompanyForm(company);
+          }
+        }
+      } catch (err) {
+        alert('Erro ao carregar empresa: ' + err.message);
+      }
+    }
+    
+    async function deleteCompany(id) {
+      if (!confirm('Tem certeza que deseja excluir esta empresa?')) {
+        return;
+      }
+      
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`http://localhost:8100/companies/${id}`, {
+          method: 'DELETE',
+          mode: 'cors',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          loadCompanies();
+          alert('Empresa excluída com sucesso!');
+        } else {
+          const error = await response.json();
+          alert('Erro: ' + (error.error || 'Erro ao excluir empresa'));
+        }
+      } catch (err) {
+        alert('Erro de conexão: ' + err.message);
+      }
+    }
+    
+    async function loadUsers() {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:8100/users', {
+          mode: 'cors',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          displayUsers(data);
+        } else {
+          document.getElementById('users-list').innerHTML = '<p>Erro ao carregar usuários</p>';
+        }
+      } catch (err) {
+        document.getElementById('users-list').innerHTML = '<p>Erro de conexão: ' + err.message + '</p>';
+      }
+    }
+    
+    function displayUsers(users) {
+      const container = document.getElementById('users-list');
+      if (!users || users.length === 0) {
+        container.innerHTML = '<p>Nenhum usuário encontrado</p>';
+        return;
+      }
+      
+      let html = '<table style="width: 100%; border-collapse: collapse;">';
+      html += '<thead><tr style="background: #f5f5f5;"><th>Nome</th><th>Email</th><th>Status</th><th>Ações</th></tr></thead>';
+      html += '<tbody>';
+      
+      users.forEach(user => {
+        const userName = user.person?.name || user.name || 'N/A';
+        const userEmail = user.email || 'N/A';
+        
+        html += `<tr>
+          <td>${userName}</td>
+          <td>${userEmail}</td>
+          <td><span class="status-badge ${user.status ? 'status-online' : 'status-offline'}">${user.status ? 'Ativo' : 'Inativo'}</span></td>
+          <td>
+            <button class="btn" onclick="editUser('${user._id}')" style="margin-right: 5px;">Editar</button>
+            <button class="btn btn-danger" onclick="deleteUser('${user._id}')">Excluir</button>
+          </td>
+        </tr>`;
+      });
+      
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    }
+    
+    // Funções para formulário de usuários
+    function showAddUserForm() {
+      document.getElementById('userForm').style.display = 'block';
+      document.getElementById('userFormTitle').textContent = 'Novo Usuário';
+      document.getElementById('userFormElement').reset();
+      document.getElementById('userFormElement').setAttribute('data-mode', 'add');
+      document.getElementById('passwordField').style.display = 'block';
+      document.getElementById('userPassword').required = true;
+    }
+    
+    function hideUserForm() {
+      document.getElementById('userForm').style.display = 'none';
+    }
+    
+    function showEditUserForm(user) {
+      document.getElementById('userForm').style.display = 'block';
+      document.getElementById('userFormTitle').textContent = 'Editar Usuário';
+      document.getElementById('userFormElement').setAttribute('data-mode', 'edit');
+      document.getElementById('userFormElement').setAttribute('data-id', user._id);
+      
+      // Priorizar person.name, mas usar user.name como fallback
+      const userName = user.person?.name || user.name || '';
+      console.log('Carregando usuário para edição:', user);
+      console.log('Nome a ser carregado:', userName);
+      
+      const nameField = document.getElementById('userName');
+      const emailField = document.getElementById('userEmail');
+      const statusField = document.getElementById('userStatus');
+      
+      // Verificar estado dos campos antes de definir valores
+      console.log('Campo nome antes de definir:', nameField.value, 'readonly:', nameField.readOnly, 'disabled:', nameField.disabled);
+      
+      nameField.value = userName;
+      emailField.value = user.email || '';
+      statusField.checked = user.status || false;
+      
+      // Garantir que o campo não está bloqueado
+      nameField.readOnly = false;
+      nameField.disabled = false;
+      
+      console.log('Campo nome depois de definir:', nameField.value, 'readonly:', nameField.readOnly, 'disabled:', nameField.disabled);
+      
+      // Esconder campo de senha na edição
+      document.getElementById('passwordField').style.display = 'none';
+      document.getElementById('userPassword').required = false;
+      
+      // Adicionar listener para detectar mudanças no campo
+      nameField.addEventListener('input', function() {
+        console.log('Campo nome alterado para:', this.value);
+      });
+    }
+    
+    async function saveUser(formData) {
+      try {
+        const token = localStorage.getItem('token');
+        const mode = formData.get('mode');
+        const id = formData.get('id');
+        
+        const userData = {
+          name: formData.get('name'),
+          email: formData.get('email'),
+          status: formData.get('status') === 'on'
+        };
+        
+        console.log('Salvando usuário:', userData);
+        console.log('Modo:', mode, 'ID:', id);
+        
+        // Adicionar senha apenas para novos usuários
+        if (mode === 'add') {
+          userData.password = formData.get('password');
+        }
+        
+        let response;
+        if (mode === 'edit' && id) {
+          response = await fetch(`http://localhost:8100/users/${id}`, {
+            method: 'PUT',
+            mode: 'cors',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(userData)
+          });
+        } else {
+          response = await fetch('http://localhost:8100/users', {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(userData)
+          });
+        }
+        
+        if (response.ok) {
+          hideUserForm();
+          loadUsers();
+          alert(mode === 'edit' ? 'Usuário atualizado com sucesso!' : 'Usuário criado com sucesso!');
+        } else {
+          const error = await response.json();
+          alert('Erro: ' + (error.error || 'Erro ao salvar usuário'));
+        }
+      } catch (err) {
+        alert('Erro de conexão: ' + err.message);
+      }
+    }
+    
+    async function editUser(id) {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`http://localhost:8100/users`, {
+          mode: 'cors',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          const users = await response.json();
+          const user = users.find(u => u._id === id);
+          if (user) {
+            showEditUserForm(user);
+          }
+        }
+      } catch (err) {
+        alert('Erro ao carregar usuário: ' + err.message);
+      }
+    }
+    
+    async function deleteUser(id) {
+      if (!confirm('Tem certeza que deseja excluir este usuário?')) {
+        return;
+      }
+      
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`http://localhost:8100/users/${id}`, {
+          method: 'DELETE',
+          mode: 'cors',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          loadUsers();
+          alert('Usuário excluído com sucesso!');
+        } else {
+          const error = await response.json();
+          alert('Erro: ' + (error.error || 'Erro ao excluir usuário'));
+        }
+      } catch (err) {
+        alert('Erro de conexão: ' + err.message);
+      }
+    }
+    
+    async function loadOrders() {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:8100/orders', {
+          mode: 'cors',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          displayOrders(data);
+        } else {
+          document.getElementById('orders-list').innerHTML = '<p>Erro ao carregar pedidos</p>';
+        }
+      } catch (err) {
+        document.getElementById('orders-list').innerHTML = '<p>Erro de conexão: ' + err.message + '</p>';
+      }
+    }
+    
+    function displayOrders(orders) {
+      const container = document.getElementById('orders-list');
+      if (!orders || orders.length === 0) {
+        container.innerHTML = '<p>Nenhum pedido encontrado</p>';
+        return;
+      }
+      
+      let html = '<table style="width: 100%; border-collapse: collapse;">';
+      html += '<thead><tr style="background: #f5f5f5;"><th>ID</th><th>Empresa</th><th>Cliente</th><th>Valor</th><th>Status</th><th>Data</th></tr></thead>';
+      html += '<tbody>';
+      
+      orders.forEach(order => {
+        const companyName = order.company?.name || 'N/A';
+        const userName = order.user?.name || 'N/A';
+        const value = order.totalValue ? `R$ ${order.totalValue.toFixed(2)}` : 'N/A';
+        const date = order.createdAt ? new Date(order.createdAt).toLocaleString() : 'N/A';
+        
+        html += `<tr>
+          <td>${order._id?.slice(-8) || 'N/A'}</td>
+          <td>${companyName}</td>
+          <td>${userName}</td>
+          <td>${value}</td>
+          <td><span class="status-badge ${order.status === 'completed' ? 'status-online' : 'status-offline'}">${order.status || 'Pendente'}</span></td>
+          <td>${date}</td>
+        </tr>`;
+      });
+      
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    }
+    
+    async function loadDeliverymen() {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:8100/deliverymen', {
+          mode: 'cors',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          displayDeliverymen(data);
+        } else {
+          document.getElementById('deliverymen-list').innerHTML = '<p>Erro ao carregar entregadores</p>';
+        }
+      } catch (err) {
+        document.getElementById('deliverymen-list').innerHTML = '<p>Erro de conexão: ' + err.message + '</p>';
+      }
+    }
+    
+    function displayDeliverymen(deliverymen) {
+      const container = document.getElementById('deliverymen-list');
+      if (!deliverymen || deliverymen.length === 0) {
+        container.innerHTML = '<p>Nenhum entregador encontrado</p>';
+        return;
+      }
+      
+      let html = '<table style="width: 100%; border-collapse: collapse;">';
+      html += '<thead><tr style="background: #f5f5f5;"><th>Nome</th><th>Email</th><th>Telefone</th><th>Tipo Veículo</th><th>Status</th><th>Ações</th></tr></thead>';
+      html += '<tbody>';
+      
+      deliverymen.forEach(deliveryman => {
+        const personName = deliveryman.person?.name || deliveryman.name || 'N/A';
+        const personEmail = deliveryman.email || 'N/A';
+        const personPhone = deliveryman.person?.phone || 'N/A';
+        const vehicleType = deliveryman.vehicleType || 'N/A';
+        
+        html += `<tr>
+          <td>${personName}</td>
+          <td>${personEmail}</td>
+          <td>${personPhone}</td>
+          <td>${vehicleType}</td>
+          <td><span class="status-badge ${deliveryman.status ? 'status-online' : 'status-offline'}">${deliveryman.status ? 'Ativo' : 'Inativo'}</span></td>
+          <td>
+            <button class="btn" onclick="editDeliveryman('${deliveryman._id}')" style="margin-right: 5px;">Editar</button>
+            <button class="btn btn-danger" onclick="deleteDeliveryman('${deliveryman._id}')">Excluir</button>
+          </td>
+        </tr>`;
+      });
+      
+      html += '</tbody></table>';
+      container.innerHTML = html;
+    }
+    
+    // Funções para formulário de entregadores
+    function showAddDeliverymanForm() {
+      document.getElementById('deliverymanForm').style.display = 'block';
+      document.getElementById('deliverymanFormTitle').textContent = 'Novo Entregador';
+      document.getElementById('deliverymanFormElement').reset();
+      document.getElementById('deliverymanFormElement').setAttribute('data-mode', 'add');
+    }
+    
+    function hideDeliverymanForm() {
+      document.getElementById('deliverymanForm').style.display = 'none';
+    }
+    
+    function showEditDeliverymanForm(deliveryman) {
+      document.getElementById('deliverymanForm').style.display = 'block';
+      document.getElementById('deliverymanFormTitle').textContent = 'Editar Entregador';
+      document.getElementById('deliverymanFormElement').setAttribute('data-mode', 'edit');
+      document.getElementById('deliverymanFormElement').setAttribute('data-id', deliveryman._id);
+      
+      const personName = deliveryman.person?.name || deliveryman.name || '';
+      document.getElementById('deliverymanName').value = personName;
+      document.getElementById('deliverymanEmail').value = deliveryman.email || '';
+      document.getElementById('deliverymanPhone').value = deliveryman.person?.phone || '';
+      document.getElementById('deliverymanVehicleType').value = deliveryman.vehicleType || 'Moto';
+      document.getElementById('deliverymanStatus').checked = deliveryman.status || false;
+    }
+    
+    async function saveDeliveryman(formData) {
+      try {
+        const token = localStorage.getItem('token');
+        const mode = formData.get('mode');
+        const id = formData.get('id');
+        
+        const deliverymanData = {
+          name: formData.get('name'),
+          email: formData.get('email'),
+          phone: formData.get('phone'),
+          vehicleType: formData.get('vehicleType'),
+          status: formData.get('status') === 'on'
+        };
+        
+        let response;
+        if (mode === 'edit' && id) {
+          response = await fetch(`http://localhost:8100/deliverymen/${id}`, {
+            method: 'PUT',
+            mode: 'cors',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(deliverymanData)
+          });
+        } else {
+          response = await fetch('http://localhost:8100/deliverymen', {
+            method: 'POST',
+            mode: 'cors',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(deliverymanData)
+          });
+        }
+        
+        if (response.ok) {
+          hideDeliverymanForm();
+          loadDeliverymen();
+          alert(mode === 'edit' ? 'Entregador atualizado com sucesso!' : 'Entregador criado com sucesso!');
+        } else {
+          const error = await response.json();
+          alert('Erro: ' + (error.error || 'Erro ao salvar entregador'));
+        }
+      } catch (err) {
+        alert('Erro de conexão: ' + err.message);
+      }
+    }
+    
+    async function editDeliveryman(id) {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`http://localhost:8100/deliverymen`, {
+          mode: 'cors',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          const deliverymen = await response.json();
+          const deliveryman = deliverymen.find(d => d._id === id);
+          if (deliveryman) {
+            showEditDeliverymanForm(deliveryman);
+          }
+        }
+      } catch (err) {
+        alert('Erro ao carregar entregador: ' + err.message);
+      }
+    }
+    
+    async function deleteDeliveryman(id) {
+      if (!confirm('Tem certeza que deseja excluir este entregador?')) {
+        return;
+      }
+      
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`http://localhost:8100/deliverymen/${id}`, {
+          method: 'DELETE',
+          mode: 'cors',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          loadDeliverymen();
+          alert('Entregador excluído com sucesso!');
+        } else {
+          const error = await response.json();
+          alert('Erro: ' + (error.error || 'Erro ao excluir entregador'));
+        }
+      } catch (err) {
+        alert('Erro de conexão: ' + err.message);
+      }
+    }
+    
+    async function loadSettings() {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:8100/notifications', {
+          mode: 'cors',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          displaySettings(data);
+        } else {
+          document.getElementById('settings-list').innerHTML = '<p>Erro ao carregar configurações</p>';
+        }
+      } catch (err) {
+        document.getElementById('settings-list').innerHTML = '<p>Erro de conexão: ' + err.message + '</p>';
+      }
+    }
+    
+    function displaySettings(notifications) {
+      const container = document.getElementById('settings-list');
+      
+      let html = '<div style="display: grid; gap: 20px;">';
+      
+      // Estatísticas do sistema
+      html += '<div style="padding: 20px; border: 1px solid #ddd; border-radius: 5px;">';
+      html += '<h4>📊 Estatísticas do Sistema</h4>';
+      html += '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">';
+      html += '<div><strong>Total Notificações:</strong> ' + notifications.length + '</div>';
+      html += '<div><strong>Notificações Lidas:</strong> ' + notifications.filter(n => n.read).length + '</div>';
+      html += '<div><strong>Notificações Não Lidas:</strong> ' + notifications.filter(n => !n.read).length + '</div>';
+      html += '</div></div>';
+      
+      // Configurações gerais
+      html += '<div style="padding: 20px; border: 1px solid #ddd; border-radius: 5px;">';
+      html += '<h4>⚙️ Configurações Gerais</h4>';
+      html += '<div style="margin-top: 15px;">';
+      html += '<label style="display: block; margin-bottom: 10px;"><input type="checkbox" checked> Habilitar notificações push</label>';
+      html += '<label style="display: block; margin-bottom: 10px;"><input type="checkbox" checked> Modo manutenção</label>';
+      html += '<label style="display: block; margin-bottom: 10px;"><input type="checkbox"> Backup automático</label>';
+      html += '<button class="btn" style="margin-top: 10px;">Salvar Configurações</button>';
+      html += '</div></div>';
+      
+      // Últimas notificações
+      if (notifications.length > 0) {
+        html += '<div style="padding: 20px; border: 1px solid #ddd; border-radius: 5px;">';
+        html += '<h4>🔔 Últimas Notificações</h4>';
+        html += '<div style="margin-top: 15px; max-height: 200px; overflow-y: auto;">';
+        
+        notifications.slice(0, 5).forEach(notification => {
+          const userName = notification.user?.name || 'Sistema';
+          const companyName = notification.company?.name || 'Geral';
+          
+          html += `<div style="padding: 10px; border-bottom: 1px solid #eee; margin-bottom: 5px;">
+            <div style="font-weight: 600;">${notification.title}</div>
+            <div style="font-size: 12px; color: #666; margin: 3px 0;">${notification.message}</div>
+            <div style="font-size: 11px; color: #999;">${userName} • ${companyName} • ${new Date(notification.createdAt).toLocaleString()}</div>
+          </div>`;
+        });
+        
+        html += '</div></div>';
+      }
+      
+      html += '</div>';
+      container.innerHTML = html;
+    }
+    
+    async function loadDashboardData() {
+      // Carregar estatísticas reais do backend
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('http://localhost:8100/health', {
+          mode: 'cors',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json'
+          }
+        });
+        
+        if (response.ok) {
+          console.log('Dashboard conectado à API');
+        }
+      } catch (err) {
+        console.log('Dashboard funcionando offline');
+      }
+    }
+    
+    // Inicializar
+    checkAuth();
+    
+    // Atualizar timestamp
+    setInterval(() => {
+      const now = new Date();
+      console.log('Dashboard atualizado em:', now.toLocaleString());
+    }, 30000);
+  </script>
+</body>
+</html>

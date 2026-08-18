@@ -1,10 +1,9 @@
-version: '3.8'
-
 services:
-  # MongoDB - Admin Database
+  # ─── Infra ────────────────────────────────────────────
+
   admin-mongodb:
-    container_name: "toop-admin-mongodb-prod"
-    image: "mongo:5.0"
+    container_name: toop-mongodb-prod
+    image: mongo:5.0
     command: [--auth]
     restart: always
     volumes:
@@ -16,14 +15,13 @@ services:
     networks:
       - toop-network
     logging:
-      driver: "json-file"
+      driver: json-file
       options:
-        max-size: "10m"
+        max-size: 10m
         max-file: "3"
 
-  # PostgreSQL - Payment Database
   payment-postgres:
-    container_name: "toop-payment-postgres-prod"
+    container_name: toop-postgres-prod
     image: postgres:13
     restart: always
     volumes:
@@ -35,31 +33,30 @@ services:
     networks:
       - toop-network
     logging:
-      driver: "json-file"
+      driver: json-file
       options:
-        max-size: "10m"
+        max-size: 10m
         max-file: "3"
 
-  # Redis - Cache and Queues
   redis:
-    container_name: "toop-redis-prod"
-    hostname: "toop-redis-prod"
+    container_name: toop-redis-prod
     image: redis:7-alpine
-    command: redis-server --requirepass ${REDIS_PASSWORD}
+    command: redis-server --requirepass ${REDIS_PASSWORD} --maxmemory 256mb --maxmemory-policy allkeys-lru
     restart: always
     volumes:
       - redis_prod_data:/data
     networks:
       - toop-network
     logging:
-      driver: "json-file"
+      driver: json-file
       options:
-        max-size: "10m"
+        max-size: 10m
         max-file: "3"
 
-  # Admin API Service
+  # ─── Services ─────────────────────────────────────────
+
   admin-api:
-    container_name: "toop-admin-api-prod"
+    container_name: toop-admin-api-prod
     build:
       context: ./delivery_toop-admin/backend
       dockerfile: Dockerfile
@@ -70,25 +67,34 @@ services:
     environment:
       NODE_ENV: production
       PORT: 8100
-      MONGO_DB_CONNECTION_STRING: mongodb://${MONGO_ADMIN_USER}:${MONGO_ADMIN_PASSWORD}@admin-mongodb:27017/ecbr?retryWrites=true&authSource=admin
+      MONGO_ADMIN_USER: ${MONGO_ADMIN_USER}
+      MONGO_ADMIN_PASSWORD: ${MONGO_ADMIN_PASSWORD}
+      URL_MONGO: mongodb://${MONGO_ADMIN_USER}:${MONGO_ADMIN_PASSWORD}@admin-mongodb:27017/ecbr?authSource=admin
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD}
-      production: "true"
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_SECRET_REFRESH: ${JWT_SECRET_REFRESH}
+      PAYMENT_URL: http://payment-microservice:8400
+      NOTIFICATION_URL: http://notification-microservice:8200
+      DELIVERYMAN_URL: http://deliveryman-microservice:8300
+      NOTIFICATION_API_KEY: ${APP_KEY}
+      GOOGLE_MAPS: ${GOOGLE_MAPS}
     depends_on:
-      - admin-mongodb
-      - redis
+      admin-mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - toop-network
     logging:
-      driver: "json-file"
+      driver: json-file
       options:
-        max-size: "10m"
+        max-size: 10m
         max-file: "3"
 
-  # Payment Microservice
   payment-microservice:
-    container_name: "toop-payment-microservice-prod"
+    container_name: toop-payment-prod
     build:
       context: ./delivery_toop-microservice_payment
       dockerfile: Dockerfile
@@ -107,20 +113,22 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
     depends_on:
-      - payment-postgres
-      - redis
+      payment-postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - toop-network
     logging:
-      driver: "json-file"
+      driver: json-file
       options:
-        max-size: "10m"
+        max-size: 10m
         max-file: "3"
 
-  # Notification Microservice
   notification-microservice:
-    container_name: "toop-notification-microservice-prod"
+    container_name: toop-notification-prod
     build:
       context: ./delivery_toop-microservice_notification
       dockerfile: Dockerfile
@@ -128,25 +136,38 @@ services:
     ports:
       - "8200:8200"
     restart: always
+    volumes:
+      - ${FIREBASE_SERVICE_ACCOUNT_PATH}:/usr/src/app/firebase-adminsdk.json:ro
     environment:
       NODE_ENV: production
       PORT: 8200
+      DB_HOST: admin-mongodb
+      DB_PORT: 27017
+      DB_DATABASE: ecbr
+      DB_USER: ${MONGO_ADMIN_USER}
+      DB_PASSWORD: ${MONGO_ADMIN_PASSWORD}
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD}
+      APP_KEY: ${APP_KEY}
+      JWT_SECRET: ${JWT_SECRET}
+      FIREBASE_serviceAccount: ${FIREBASE_serviceAccount}
+      FIREBASE_databaseURL: ${FIREBASE_databaseURL}
     depends_on:
-      - redis
+      admin-mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - toop-network
     logging:
-      driver: "json-file"
+      driver: json-file
       options:
-        max-size: "10m"
+        max-size: 10m
         max-file: "3"
 
-  # Deliveryman Microservice
   deliveryman-microservice:
-    container_name: "toop-deliveryman-microservice-prod"
+    container_name: toop-deliveryman-prod
     build:
       context: ./delivery_toop-microservice_deliveryman
       dockerfile: Dockerfile
@@ -161,21 +182,95 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      API_KEY: ${APP_KEY}
     depends_on:
-      - admin-mongodb
-      - redis
+      admin-mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - toop-network
     logging:
-      driver: "json-file"
+      driver: json-file
       options:
-        max-size: "10m"
+        max-size: 10m
+        max-file: "3"
+
+  # ─── Frontend ─────────────────────────────────────────
+
+  frontend:
+    container_name: toop-frontend-prod
+    build:
+      context: ./delivery_toop-admin/frontend-react
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    restart: always
+    depends_on:
+      admin-api:
+        condition: service_healthy
+    networks:
+      - toop-network
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  # ─── Monitoring ───────────────────────────────────────
+
+  prometheus:
+    container_name: toop-prometheus-prod
+    image: prom/prometheus:latest
+    restart: always
+    volumes:
+      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_prod_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.retention.time=30d'
+      - '--web.enable-lifecycle'
+    ports:
+      - "9090:9090"
+    networks:
+      - toop-network
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  grafana:
+    container_name: toop-grafana-prod
+    image: grafana/grafana:latest
+    restart: always
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /etc/grafana/provisioning/dashboards/json/toopdelivery-overview.json
+    volumes:
+      - ./config/grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana_prod_data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - toop-network
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
         max-file: "3"
 
 volumes:
   mongo_prod_data:
   postgres_prod_data:
   redis_prod_data:
+  prometheus_prod_data:
+  grafana_prod_data:
 
 networks:
   toop-network:

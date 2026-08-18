@@ -1,0 +1,40 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'admin-api'
+    static_configs:
+      - targets: ['admin-api:8100']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  - job_name: 'payment'
+    static_configs:
+      - targets: ['payment-microservice:8400']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  - job_name: 'notification'
+    static_configs:
+      - targets: ['notification-microservice:8200']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  - job_name: 'deliveryman'
+    static_configs:
+      - targets: ['deliveryman-microservice:8300']
+    metrics_path: '/metrics'
+    scrape_interval: 10s
+
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:6379']
+
+  - job_name: 'mongodb'
+    static_configs:
+      - targets: ['admin-mongodb:27017']
+
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['payment-postgres:5432']

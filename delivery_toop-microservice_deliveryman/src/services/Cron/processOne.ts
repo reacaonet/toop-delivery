@@ -12,9 +12,9 @@ const delay = 10000;
 const delayFirebase = 20000;
 
 const restartService = (): void => {
-  setTimeout(() => {
+  setTimeout(async () => {
     try {
-      return processOne();
+      return await processOne();
     } catch (err) {
       captureError('restartService processOne', err);
       return restartService();

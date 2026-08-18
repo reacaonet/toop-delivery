@@ -1,30 +1,14 @@
 import mongoose from 'mongoose';
-let mongoURI = '';
-
-const opcoes = {
-  keepAlive: true,
-  keepAliveInitialDelay: 300000,
-  useUnifiedTopology: true,
-  useCreateIndex: true,
-  useNewUrlParser: true,
-  useFindAndModify: false,
-};
 
 const connect = async (): Promise<void> => {
-  if (process.env.MONGO_ADMIN_USER && process.env.MONGO_ADMIN_PASSWORD) {
-    mongoURI = `${process.env.MONGO_CONNECT_TYPE}://${process.env.MONGO_ADMIN_USER}:${process.env.MONGO_ADMIN_PASSWORD}@${process.env.URL_MONGO}?authSource=admin`;
-  } else {
-    mongoURI = `${process.env.MONGO_CONNECT_TYPE}://${process.env.URL_MONGO}`;
-  }
+  const uri = process.env.URL_MONGO || `mongodb://${process.env.MONGO_ADMIN_USER}:${process.env.MONGO_ADMIN_PASSWORD}@admin-mongodb:27017/ecbr?authSource=admin`;
 
-  mongoose
-    .connect(mongoURI, opcoes)
-    .then(async () => {
-      console.log('Conexão estabelecida', process.env.URL_MONGO);
-    })
-    .catch((err) => {
-      console.log('Conexão foi encerrada', err);
-    });
+  try {
+    await mongoose.connect(uri);
+    console.log('MongoDB connected for queueSplit');
+  } catch (err) {
+    console.error('MongoDB connection failed (non-critical):', (err as Error).message);
+  }
 };
 
 export default connect;

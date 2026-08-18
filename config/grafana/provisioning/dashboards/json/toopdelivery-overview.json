@@ -1,0 +1,104 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "title": "Services Status",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 24, "x": 0, "y": 0 },
+      "targets": [
+        { "expr": "up{job=~\"admin-api|payment|notification|deliveryman\"}", "legendFormat": "{{job}}" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            { "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } }, "type": "value" }
+          ],
+          "thresholds": { "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
+        }
+      }
+    },
+    {
+      "title": "Request Rate (req/s)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "targets": [
+        { "expr": "rate(http_requests_total{job=~\"admin-api|payment|notification|deliveryman\"}[5m])", "legendFormat": "{{job}} {{method}} {{status}}" }
+      ]
+    },
+    {
+      "title": "Response Time (p95)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "targets": [
+        { "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=~\"admin-api|payment|notification|deliveryman\"}[5m]))", "legendFormat": "{{job}}" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "s" } }
+    },
+    {
+      "title": "Error Rate (5xx)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "targets": [
+        { "expr": "rate(http_requests_total{status=~\"5..\"}[5m])", "legendFormat": "{{job}}" }
+      ],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "red" } } }
+    },
+    {
+      "title": "Active Connections",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "targets": [
+        { "expr": "nodejs_active_handles_total{job=~\"admin-api|payment|notification|deliveryman\"}", "legendFormat": "{{job}}" }
+      ]
+    },
+    {
+      "title": "Memory Usage (MB)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 20 },
+      "targets": [
+        { "expr": "process_resident_memory_bytes{job=~\"admin-api|payment|notification|deliveryman\"} / 1024 / 1024", "legendFormat": "{{job}}" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "decmbytes" } }
+    },
+    {
+      "title": "CPU Usage %",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 20 },
+      "targets": [
+        { "expr": "rate(process_cpu_seconds_total{job=~\"admin-api|payment|notification|deliveryman\"}[5m]) * 100", "legendFormat": "{{job}}" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "percent" } }
+    },
+    {
+      "title": "MongoDB Connections",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 28 },
+      "targets": [
+        { "expr": "mongodb_connections{state=~\"current|available\"}", "legendFormat": "{{state}}" }
+      ]
+    },
+    {
+      "title": "Redis Memory",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 28 },
+      "targets": [
+        { "expr": "redis_memory_used_bytes / 1024 / 1024", "legendFormat": "Used (MB)" },
+        { "expr": "redis_memory_max_bytes / 1024 / 1024", "legendFormat": "Max (MB)" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "decmbytes" } }
+    }
+  ],
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["toopdelivery", "production"],
+  "templating": { "list": [] },
+  "time": { "from": "now-1h", "to": "now" },
+  "title": "ToopDelivery - Services Overview",
+  "uid": "toopdelivery-overview",
+  "version": 1
+}

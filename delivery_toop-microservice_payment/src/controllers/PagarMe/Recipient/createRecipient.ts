@@ -30,7 +30,7 @@ const createRecipient = async (
     }
 
     return res.status(400).send({
-      status: true,
+      status: false,
       error: errorMessage,
     });
   }

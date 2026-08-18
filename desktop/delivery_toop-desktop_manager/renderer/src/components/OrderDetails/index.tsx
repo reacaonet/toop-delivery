@@ -1,41 +1,28 @@
-/* eslint-disable prettier/prettier */
 import { Flex, Heading, Stack, Text } from '@chakra-ui/react';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 import { Order } from '../../@types/order';
-import { OrderCart } from '../../@types/orderCart';
-import { getCart } from '../../services/order/cart/getCart';
 import { humanReadableStatus } from '../../utils/orderStatuses';
 
-interface OrderDetails {
+interface OrderDetailsProps {
   order: Order;
 }
 
-export function OrderDetails({ order }: OrderDetails): JSX.Element {
-  const [orderCart, setOrderCart] = useState<OrderCart | null>(null);
+const paymentMethodLabel: Record<string, string> = {
+  credit_card: 'CARTÃO',
+  debit_card: 'CARTÃO DE DÉBITO',
+  money: 'DINHEIRO',
+  pix: 'PIX',
+  CARD: 'CARTÃO',
+  MONEY: 'DINHEIRO',
+  PIX: 'PIX',
+  PAGARME: 'Pelo App',
+  BRASPAG: 'Pelo App',
+};
 
-  useEffect(() => {
-    (async () => {
-      const cart = await getCart(order?.shoppingCart?._id);
-      setOrderCart(cart);
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [order?.shoppingCart?._id]);
-
+export function OrderDetails({ order }: OrderDetailsProps): JSX.Element {
   return (
     <Stack marginTop="2" spacing="1.5">
-      <Flex alignItems="flex-end" flexDirection="row">
-        <Heading fontSize="lg" fontWeight="semibold">
-          Cupom:
-        </Heading>
-        <Text fontSize="sm" lineHeight="shorter" marginLeft="1">
-          {new Intl.NumberFormat('pt-BR', {
-            currency: 'BRL',
-            minimumFractionDigits: 2,
-            style: 'currency',
-          }).format(order?.payment?.couponPrice || 0)}
-        </Text>
-      </Flex>
       <Flex alignItems="flex-end" flexDirection="row">
         <Heading fontSize="lg" fontWeight="semibold">
           Taxa de entrega:
@@ -45,21 +32,23 @@ export function OrderDetails({ order }: OrderDetails): JSX.Element {
             currency: 'BRL',
             minimumFractionDigits: 2,
             style: 'currency',
-          }).format(orderCart?.deliveryFee || 0)}
+          }).format(order?.deliveryFee || 0)}
         </Text>
       </Flex>
-      <Flex alignItems="flex-end" flexDirection="row">
-        <Heading fontSize="lg" fontWeight="semibold">
-          Gorjeta:
-        </Heading>
-        <Text fontSize="sm" lineHeight="shorter" marginLeft="1">
-          {new Intl.NumberFormat('pt-BR', {
-            currency: 'BRL',
-            minimumFractionDigits: 2,
-            style: 'currency',
-          }).format(orderCart?.valueTip || 0)}
-        </Text>
-      </Flex>
+      {order?.discount > 0 && (
+        <Flex alignItems="flex-end" flexDirection="row">
+          <Heading fontSize="lg" fontWeight="semibold">
+            Desconto:
+          </Heading>
+          <Text fontSize="sm" lineHeight="shorter" marginLeft="1">
+            -{new Intl.NumberFormat('pt-BR', {
+              currency: 'BRL',
+              minimumFractionDigits: 2,
+              style: 'currency',
+            }).format(order?.discount)}
+          </Text>
+        </Flex>
+      )}
       <Flex alignItems="flex-end" flexDirection="row">
         <Heading fontSize="lg" fontWeight="semibold">
           Preço base:
@@ -69,7 +58,7 @@ export function OrderDetails({ order }: OrderDetails): JSX.Element {
             currency: 'BRL',
             minimumFractionDigits: 2,
             style: 'currency',
-          }).format(orderCart?.subTotal || 0)}
+          }).format(order?.subtotal || 0)}
         </Text>
       </Flex>
       <Flex alignItems="flex-end" flexDirection="row">
@@ -81,12 +70,7 @@ export function OrderDetails({ order }: OrderDetails): JSX.Element {
             currency: 'BRL',
             minimumFractionDigits: 2,
             style: 'currency',
-          }).format(
-            orderCart?.subTotal +
-            orderCart?.deliveryFee || 0 +
-            orderCart?.valueTip || 0 -
-            order?.payment?.couponPrice || 0
-          )}
+          }).format(order?.total || 0)}
         </Text>
       </Flex>
       <Flex alignItems="flex-end" flexDirection="row">
@@ -94,33 +78,7 @@ export function OrderDetails({ order }: OrderDetails): JSX.Element {
           Método de Pagamento:
         </Heading>
         <Text fontSize="sm" lineHeight="shorter" marginLeft="1">
-          {order?.typePayment === 'CARD' ? 'CARTÃO' : ''}
-          {order?.typePayment === 'MONEY' ? 'Dinheiro' : ''}
-          {order?.typePayment === 'BRASPAG' ? 'Pelo App' : ''}
-          {order?.typePayment === 'PAGARME' ? 'Pelo App' : ''}
-          {order?.typePayment === 'PIX' ? 'PIX' : ''}
-        </Text>
-      </Flex>
-      {order?.typePayment === 'MONEY' && (
-        <Flex alignItems="flex-end" flexDirection="row">
-          <Heading fontSize="lg" fontWeight="semibold">
-            Troco para:
-          </Heading>
-          <Text fontSize="sm" lineHeight="shorter" marginLeft="1">
-            {new Intl.NumberFormat('pt-BR', {
-              currency: 'BRL',
-              minimumFractionDigits: 2,
-              style: 'currency',
-            }).format(order?.payment?.cashChange || 0)}
-          </Text>
-        </Flex>
-      )}
-      <Flex alignItems="flex-end" flexDirection="row">
-        <Heading fontSize="lg" fontWeight="semibold">
-          Retirada:
-        </Heading>
-        <Text fontSize="sm" lineHeight="shorter" marginLeft="1">
-          {order?.typeSchedule}
+          {paymentMethodLabel[order?.paymentMethod] || order?.paymentMethod || 'Não informado'}
         </Text>
       </Flex>
       <Flex alignItems="flex-end" flexDirection="row">
@@ -128,9 +86,19 @@ export function OrderDetails({ order }: OrderDetails): JSX.Element {
           Status:
         </Heading>
         <Text fontSize="sm" lineHeight="shorter" marginLeft="1">
-          {humanReadableStatus[order?.status]}
+          {humanReadableStatus[order?.status] || order?.status}
         </Text>
       </Flex>
+      {order?.notes && (
+        <Flex alignItems="flex-end" flexDirection="row">
+          <Heading fontSize="lg" fontWeight="semibold">
+            Observações:
+          </Heading>
+          <Text fontSize="sm" lineHeight="shorter" marginLeft="1">
+            {order?.notes}
+          </Text>
+        </Flex>
+      )}
     </Stack>
   );
 }

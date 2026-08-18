@@ -37,7 +37,7 @@ const userRegisterTopicController = async (req, res) => {
           listError.push({
             topic: topic,
             token: registrationTokens,
-            err: response.errors,
+            err: response ? response.errors : 'Subscription failed',
           });
         }
 

@@ -7,14 +7,14 @@ export const timeout = 40000;
 export const tokenAuth = 'tokenAuth';
 export const appName = 'Toop Delivery';
 export const appSubiTitle = '';
-export const apiGeoLocation = 'AIzaSyBKnJQI86pHukHoh7wtGzyRMxJfemZpRGQ';
+export const apiGeoLocation = process.env.GOOGLE_MAPS_API_KEY || 'YOUR_GOOGLE_MAPS_API_KEY';
 export const FIREBASE_PATH = '';
 
 export const IUGU_TOKEN_API =
-  'AE1CEE3A078ABABB009EAD715636DC2B17B6C9CE31E9E2369D7E8E35F1D2237B';
-export const IUGU_ACCOUNT_ID = 'D1A7A02C622A4F6AAFE2B588AE47049B';
+  process.env.IUGU_TOKEN_API || 'YOUR_IUGU_TOKEN_API';
+export const IUGU_ACCOUNT_ID = process.env.IUGU_ACCOUNT_ID || 'YOUR_IUGU_ACCOUNT_ID';
 export const IUGU_ENVIRORMENT_TEST = false;
 
 // CyberSorce
-export const keyCyberSorce = 'k8vif92e'; // Production
+export const keyCyberSorce = process.env.CYBERSOURCE_KEY || 'YOUR_CYBERSOURCE_KEY';
 export const atributeCyberSorce = 'braspag_split_toopdelivery';

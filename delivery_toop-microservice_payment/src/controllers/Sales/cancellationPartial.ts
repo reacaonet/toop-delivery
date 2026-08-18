@@ -14,7 +14,7 @@ const cancellationPartial = async (
     const {PaymentId} = req.params;
     const {payload, amount} = req.body;
 
-    if (!amount || amount <= 0) {
+    if (!amount || typeof amount !== 'number' || amount <= 0) {
       return res.status(400).json({
         message: 'amount is invalid',
       });
@@ -40,14 +40,16 @@ const cancellationPartial = async (
       });
     }
 
-    apiCielo.defaults.headers.common['Authorization'] =
-    `Bearer ${token.access_token}`;
-
     const {data: response} =
       await apiCielo.put(
         `/1/sales/${PaymentId}/void?amount=${amount}`,
         {
           VoidSplitPayments: payload,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token.access_token}`,
+          },
         },
       );
 

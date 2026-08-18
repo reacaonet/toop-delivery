@@ -8,5 +8,5 @@ export const urlNotification = 'https://admin.toopdelivery.com.br:8300/v1';
 export const FIREBASE_PATH = 'homolog/';
 export const appName = 'Toop Comerciante';
 export const appSubiTitle = '';
-export const apiGeoLocation = 'AIzaSyD4PBZU5Hr3AgmBPAtGrqm4_iTS6ZHPCX0';
+export const apiGeoLocation = process.env.GOOGLE_MAPS_API_KEY || 'YOUR_GOOGLE_MAPS_API_KEY';
 export const urlAppOffer = 'https://admin.toopdelivery.com.br:3000';

@@ -8,5 +8,6 @@ export const urlNotification = 'https://homologation.toopdelivery.com.br:8300/v1
 export const FIREBASE_PATH = 'homolog/';
 export const appName = 'Toop Comerciante';
 export const appSubiTitle = '';
-export const apiGeoLocation = 'AIzaSyBKnJQI86pHukHoh7wtGzyRMxJfemZpRGQ';
+export const apiGeoLocation = process.env.GOOGLE_MAPS_API_KEY || 'YOUR_GOOGLE_MAPS_API_KEY';
 export const urlAppOffer = 'https://homologation.toopdelivery.com.br:3000';
+export const NOTIFICATION_API_KEY = process.env.NOTIFICATION_API_KEY || '';

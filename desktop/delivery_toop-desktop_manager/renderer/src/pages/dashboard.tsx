@@ -31,11 +31,10 @@ import { useAuth } from '../contexts/Auth';
 import env from '../environment';
 import { useOrder } from '../hooks/useOrder';
 import { useOrders } from '../hooks/useOrders';
-import { database } from '../services/firebase';
 
 export default function Home(): JSX.Element {
   const [selectedOrderId, setSelectedOrderId] = useState('');
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
   const {
     data: selectedOrder,
     isLoading: isLoadingOrder,
@@ -55,37 +54,6 @@ export default function Home(): JSX.Element {
   const scrollbarColor = useColorModeValue('#CBD5E0', '#2D3748');
   const buttonBg = useColorModeValue('white', 'gray.800');
   const iconColor = useColorModeValue('green.500', 'green.700');
-  let player: HTMLAudioElement;
-
-  useEffect(() => {
-    const newOrdersRef = database.ref(`newOrder/${user?.id}/`);
-    const ordersRef = database.ref(`order`);
-
-    newOrdersRef.on('child_added', async () => {
-      await refetchOrders().then(() => {
-        toast({
-          title: 'Os pedidos foram recarregados.',
-          description: 'Novos pedidos foram feitos.',
-          status: 'success',
-          duration: 5000,
-          position: 'bottom-right',
-        });
-        new Audio('/alert.mp3').play();
-      });
-    });
-
-    ordersRef.on('child_changed', async () => {
-      console.log('Atualizacao nos pedidos');
-      await refetchOrder();
-      await refetchOrders();
-    });
-
-    return () => {
-      newOrdersRef.off();
-      ordersRef.off();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   useEffect(() => {
     if (isAuthenticated === false) {
@@ -103,38 +71,8 @@ export default function Home(): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
-  useEffect(() => {
-    //console.log(ordersData.ongoingOrders);
-  }, [ordersData?.ongoingOrders]);
-
   function hasPending(): boolean {
-    let pending = false;
-    ordersData?.ongoingOrders.forEach(order => {
-      if (order.status === 'WAIT_COMPANY') {
-        pending = true;
-      }
-    });
-
-    return pending;
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  function toggleAlert(): void {
-    if (hasPending()) {
-      console.log('PLAY AUDIO');
-      if (player.paused) {
-        player.play();
-      }
-
-      player.addEventListener('ended', () => {
-        if (hasPending()) {
-          player.play();
-        } else {
-          player.pause();
-        }
-      });
-    }
-    console.log('NO PLAY AUDIO');
+    return ordersData?.ongoingOrders?.some(order => order.status === 'pending') || false;
   }
 
   function handleChangeSelectedOrderId(id: string): void {
@@ -145,6 +83,8 @@ export default function Home(): JSX.Element {
     await refetchOrders();
     await refetchOrder();
   }
+
+  const order = selectedOrder as any;
 
   return (
     <>
@@ -255,11 +195,11 @@ export default function Home(): JSX.Element {
           <Box marginX="auto" marginY="auto">
             <Spinner color="red.600" size="xl" speed="0.65s" thickness="2px" />
           </Box>
-        ) : selectedOrder ? (
+        ) : order ? (
           <Box marginY="1.5">
             <Heading fontWeight="normal">
-              Pedido de <b>{selectedOrder?.order.customer.person[0].name}</b> -
-              Nº <b>{selectedOrder?.order.order_number}</b>
+              Pedido de <b>{order?.customer?.name || order?.customer?.person?.[0]?.name || 'Cliente'}</b> -
+              Nº <b>{order?.orderNumber}</b>
             </Heading>
 
             <Stack
@@ -273,28 +213,14 @@ export default function Home(): JSX.Element {
                 <Heading fontSize="xl" fontWeight="semibold">
                   DETALHES
                 </Heading>
-                <OrderDetails order={selectedOrder?.order} />
+                <OrderDetails order={order} />
               </Box>
               <Box height="72" flex={1}>
                 <Heading fontSize="xl" fontWeight="semibold">
                   ENDEREÇO DO CLIENTE
                 </Heading>
                 <OrderDeliveryAddress
-                  companyCoordinates={
-                    selectedOrder?.order.company.location.coordinates
-                  }
-                  customerCoordinates={
-                    selectedOrder?.order.customerDelivery.location.coordinates
-                  }
-                  customerReferencePoint={
-                    selectedOrder?.order.customerDelivery.referencePoint
-                  }
-                  customerAddress={
-                    selectedOrder?.order.customerDelivery.address
-                  }
-                  customerComplement={
-                    selectedOrder?.order.customerDelivery.complement
-                  }
+                  deliveryAddress={order?.deliveryAddress}
                 />
               </Box>
               <Box height="72" flex={1}>
@@ -303,12 +229,10 @@ export default function Home(): JSX.Element {
                 </Heading>
                 <Flex alignItems="flex-end" flexDirection="row">
                   <Heading fontSize="lg" fontWeight="semibold">
-                    Celular:
+                    Cliente:
                   </Heading>
                   <Text fontSize="sm" lineHeight="shorter" marginLeft="1">
-                    {selectedOrder?.order.customer.person[0].phone
-                      ? selectedOrder?.order.customer.person[0].phone
-                      : 'Não informado'}
+                    {order?.customer?.name || order?.customer?.person?.[0]?.name || 'Não informado'}
                   </Text>
                 </Flex>
               </Box>
@@ -317,18 +241,16 @@ export default function Home(): JSX.Element {
                   clearSelectedOrderId={() => setSelectedOrderId(null)}
                   refetchOrder={refetchOrder}
                   refetchOrders={refetchOrders}
-                  selectedOrder={selectedOrder}
+                  selectedOrder={order}
                 />
               </Box>
             </Stack>
 
             <Heading fontSize="lg" marginY={6}>
-              CARRINHO
+              ITENS DO PEDIDO
             </Heading>
             <Stack paddingBottom="3" width="full">
-              {selectedOrder?.cart?.map(item => (
-                <CartItem key={item._id} item={item} />
-              ))}
+              <CartItem items={order?.items || []} />
             </Stack>
           </Box>
         ) : (
@@ -339,7 +261,7 @@ export default function Home(): JSX.Element {
           </Box>
         )}
         <Text fontSize={10} textAlign={'end'}>
-          2021.11.05 - 14:18
+          Toop Delivery Desktop Manager
         </Text>
       </Container>
     </>

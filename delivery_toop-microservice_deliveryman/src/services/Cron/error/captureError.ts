@@ -1,10 +1,11 @@
 const captureError = (source: string, err: any): void => {
   try {
-    if (err.response && err.response.data) {
+    if (err?.response?.data) {
       console.log(`${source}`, err.response.data);
     } else {
-      if ( err.message.search('ECONNREFUSED') >= 0 ) {
-        console.log(`${source}`, err.message);
+      const msg = err?.message || String(err);
+      if ( msg.includes('ECONNREFUSED') ) {
+        console.log(`${source}`, msg);
       } else {
         console.log(`${source}`, err);
       }

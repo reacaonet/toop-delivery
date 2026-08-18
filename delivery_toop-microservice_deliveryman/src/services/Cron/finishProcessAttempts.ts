@@ -10,9 +10,9 @@ const delay = 20000;
 const maxAttempt = 20;
 
 const restartService = (): void => {
-  setTimeout(() => {
+  setTimeout(async () => {
     try {
-      finishProcessAttempts();
+      await finishProcessAttempts();
     } catch (err) {
       captureError('restartService processNext', err);
       restartService();

@@ -15,9 +15,14 @@ const sales = async (req: Request, res: Response): Promise<Response> => {
     const isCustomer = validateSales.validateCustomer(
       data.Customer && data.Customer.Name ? data.Customer.Name : '',
     );
-    const isPayment = validateSales.validatePayment(
-      data.Payment ? data.Payment : '',
-    );
+    if (!data.Payment) {
+      return res.status(400).json({
+        message: 'Fail save Card',
+        data: 'Payment is required',
+      });
+    }
+
+    const isPayment = validateSales.validatePayment(data.Payment);
 
     if (
       isMerchantOrderId !== true ||

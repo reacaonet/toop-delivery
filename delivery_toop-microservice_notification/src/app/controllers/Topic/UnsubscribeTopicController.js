@@ -37,7 +37,7 @@ const unsubscribeController = async (req, res) => {
           listError.push({
             topic: topic,
             token: registrationTokens,
-            err: response.errors,
+            err: response ? response.errors : 'Unsubscribe failed',
           });
         }
       } catch (err) {

@@ -1,5 +1,5 @@
 export default {
-  apiUrl: 'http://192.168.0.100:8100',
-  urlImage: 'https://homologation.toopdelivery.com.br',
+  apiUrl: 'http://localhost:8100',
+  urlImage: 'http://localhost:8100',
   name: 'Toop Delivery',
 };

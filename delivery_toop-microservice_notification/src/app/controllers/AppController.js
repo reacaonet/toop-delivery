@@ -5,21 +5,14 @@ import EconomizeBrasil from '../../service/economizeBrasil';
 module.exports = {
   async General(req, res) {
     try {
-      const appKey = req.header('authorization');
-      if (!appKey || `${appKey}` !== `${process.env.APP_KEY}`) {
-        return res.status(404).send({
-          message: 'You do not have access or did not enter the right key',
-        });
-      }
-
       const {message} = req.body;
       if (!message) {
-        return res.status(404).send({message: 'Message not informed'});
+        return res.status(400).send({message: 'Mensagem não informada'});
       }
 
       if (String(message).length > 255) {
         return res.status(400).send({
-          message: 'Number of characters is greater than 255',
+          message: 'Número de caracteres maior que 255',
         });
       }
 
@@ -37,7 +30,6 @@ module.exports = {
         '',
         {
           priority: 'high',
-          // registration_ids,
           notification: {
             body: message,
           },
@@ -59,7 +51,7 @@ module.exports = {
     } catch (err) {
       return res.status(400).send({
         message: 'Erro!',
-        err,
+        err: err.message,
       });
     }
   },
@@ -67,27 +59,24 @@ module.exports = {
   async UserId(req, res) {
     try {
       const {id} = req.params;
-      const appKey = req.header('authorization');
 
-      if (!appKey || `${appKey}` !== `${process.env.APP_KEY}`) {
-        return res.status(404).send({
-          message: 'You do not have access or did not enter the right key',
+      const { message, auth, params } = req.body.user || {};
+
+      if (!auth) {
+        return res.status(400).send({
+          message: 'Informe o token de notificação',
         });
       }
 
-      const {
-        user: {message, auth, params},
-      } = req.body;
-
       if (!message) {
-        return res.status(404).send({
-          message: 'Message not informed',
+        return res.status(400).send({
+          message: 'Mensagem não informada',
         });
       }
 
       if (String(message).length > 200) {
         return res.status(400).send({
-          message: 'Number of characters is greater than 45',
+          message: 'Número de caracteres maior que 200',
         });
       }
 
@@ -108,15 +97,6 @@ module.exports = {
         },
       );
 
-      // se utilizar posteriormente verificar as regras do firebase de leitura e gravação
-      // if (params) {
-      //   await database.ref().child(`user_${id}`).push({ message, params });
-      //   await database.ref().child(`user_${id}`).remove();
-      // } else {
-      //   await database.ref().child(`user_${id}`).push({ message });
-      //   await database.ref().child(`user_${id}`).remove();
-      // }
-
       return res.status(200).send({message});
     } catch (err) {
       return res.status(400).send({
@@ -129,33 +109,33 @@ module.exports = {
   async Push(req, res) {
     try {
       const {
-        user: { message = null, auth = null },
+        user,
         image = null,
         params = {},
         clickAction = null,
-        cloud_messaging_token = process.env.CLOUD_MESSAGING_TOKEN ?? '',
       } = req.body;
-  
-      console.log(cloud_messaging_token);
-  
+
+      const message = user?.message ?? null;
+      const auth = user?.auth ?? null;
+
       if (!auth) {
-        return res.code(404).send({
+        return res.status(404).send({
           message: 'Informe o token de notificação',
         });
       }
-  
+
       if (!message) {
-        return res.code(404).send({
+        return res.status(404).send({
           message: 'Informe uma mensagem',
         });
       }
-  
+
       if (String(message).length > 200) {
-        return res.code(400).send({
+        return res.status(400).send({
           message: 'Mensagem notificação pode ter até 200 caracteres',
         });
       }
-  
+
       const { data: response } = await cloudMessage.post(
         '',
         {
@@ -177,11 +157,11 @@ module.exports = {
         {
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `key=${cloud_messaging_token}`,
+            Authorization: `key=${process.env.CLOUD_MESSAGING_TOKEN}`,
           },
         },
       );
-  
+
       return res.send(response);
     } catch (err) {
       return res.status(400).send({

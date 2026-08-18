@@ -10,7 +10,7 @@ services:
     environment:
       HOST: notification-api
       PORT: 8300
-      APP_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9eyJzdWIiOiIxMjM0NTY3ODkw
+      APP_KEY: ${APP_KEY}
       PRODUCTION: 'true'
     expose:
       - '8300'

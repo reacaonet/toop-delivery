@@ -30,7 +30,7 @@ export class NotificationComponent implements OnInit {
 	};
 
 	topicCurrent = null;
-	token = "lwqZm4QBCbFNFiS";
+	token = "";
 	load = false;
 	users: [];
 	listUsers = [];

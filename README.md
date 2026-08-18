@@ -1,126 +1,255 @@
-# ToopDelivery - Plataforma de Delivery
+# ToopDelivery
 
-## 🏗️ Arquitetura
+Plataforma de delivery (iFood + Uber style) — Monorepo com API Admin, 4 microserviços, 4 apps mobile, 2 frontends e desktop.
 
-### Microserviços
-- **admin**: Painel administrativo (Node.js + MongoDB)
-- **microservice_payment**: Serviço de pagamentos (Node.js + PostgreSQL)
-- **microservice_notification**: Serviço de notificações (Node.js)
-- **microservice_deliveryman**: Serviço de entregadores (Node.js)
+## Arquitetura
 
-### Aplicações
-- **mobile_client**: App cliente (React Native)
-- **mobile_deliveryman**: App entregador (React Native)
-- **mobile_driver**: App motorista (React Native)
-- **mobile_shopper**: App shopper (React Native)
-- **desktop_manager**: Gerenciador desktop (Electron)
-- **desktop_integration**: Integração desktop (Electron)
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        FRONTENDS                            │
+│  React-Vite (port 80)  │  Angular Legacy (port 4200)       │
+└────────────┬────────────┴────────────┬──────────────────────┘
+             │                         │
+┌────────────▼─────────────────────────▼──────────────────────┐
+│                     NGINX / API GATEWAY                     │
+└────────────┬────────────┬────────────┬────────────┬─────────┘
+             │            │            │            │
+┌────────────▼───┐ ┌──────▼──────┐ ┌───▼────────┐ ┌▼────────────┐
+│  Admin API     │ │  Payment    │ │ Notification│ │ Deliveryman │
+│  (port 8100)   │ │  (port 8400)│ │ (port 8200) │ │ (port 8300) │
+│  TypeScript    │ │  TypeScript │ │ JavaScript  │ │ TypeScript  │
+│  Express       │ │  Express    │ │ Fastify     │ │ Express     │
+└───────┬────────┘ └──────┬──────┘ └───┬────────┘ └┬────────────┘
+        │                 │            │            │
+┌───────▼────────┐ ┌──────▼──────┐ ┌───▼────────┐ ┌▼────────────┐
+│  MongoDB       │ │ PostgreSQL  │ │ MongoDB    │ │ MongoDB     │
+│  (port 27017)  │ │ (port 5432) │ │            │ │             │
+└────────────────┘ └─────────────┘ └────────────┘ └─────────────┘
+                        │
+                   ┌────▼────┐
+                   │  Redis  │
+                   │(6379)   │
+                   └─────────┘
+```
 
-## 🚀 Setup Rápido
+## Quick Start
 
 ### Pré-requisitos
-- Node.js 18+
-- Docker & Docker Compose
-- Git
+- Docker + Docker Compose v2
+- Node.js 18+ (desenvolvimento local)
 
-### Ambiente de Desenvolvimento
+### 1. Clonar e configurar
 
-1. Clone o repositório
-2. Copie os arquivos de ambiente:
-   ```bash
-   cp .env.example .env
-   ```
-
-3. Suba os serviços com Docker:
-   ```bash
-   docker-compose up -d
-   ```
-
-4. Instale dependências e inicie os serviços:
-   ```bash
-   # Admin API
-   cd delivery_toop-admin/backend && npm install && npm start
-
-   # Payment API
-   cd delivery_toop-microservice_payment && npm install && npm start
-   ```
-
-## 📁 Estrutura de Diretórios
-
-```
-toop-delivery/
-├── services/
-│   ├── delivery_toop-admin/
-│   ├── delivery_toop-microservice_payment/
-│   ├── delivery_toop-microservice_notification/
-│   └── delivery_toop-microservice_deliveryman/
-├── apps/
-│   ├── mobile/
-│   │   ├── delivery_toop-mobile_client/
-│   │   ├── delivery_toop-mobile_deliveryman/
-│   │   ├── delivery_toop-mobile_driver/
-│   │   └── delivery_toop-mobile_shopper/
-│   └── desktop/
-│       ├── delivery_toop-desktop_manager/
-│       └── delivery_toop-desktop_integration/
-├── docker-compose.yml
-├── docker-compose.staging.yml
-├── docker-compose.production.yml
-└── .env.example
-```
-
-## 🔧 Configurações
-
-### Variáveis de Ambiente
-Copie `.env.example` para `.env` e configure:
-
-- **Bancos de Dados**: MongoDB, PostgreSQL
-- **APIs Externas**: Firebase, Google Maps, Twilio
-- **Pagamentos**: Cielo, Braspag
-- **Armazenamento**: AWS S3/DigitalOcean Spaces
-
-### Portas Padrão
-- Admin API: 8100
-- Payment API: 8400
-- MongoDB: 27017
-- PostgreSQL: 5432
-- Redis: 6379
-
-## 🚀 Deploy
-
-### Staging
 ```bash
-docker-compose -f docker-compose.staging.yml up -d
+git clone <repo-url>
+cd toop-delivery-clean
+
+# Copiar variáveis de ambiente
+cp .env.example .env
+# Editar .env com suas credenciais
 ```
 
-### Produção
+### 2. Subir infra local
+
 ```bash
-docker-compose -f docker-compose.production.yml up -d
+# MongoDB + PostgreSQL + Redis
+docker compose -f docker-compose.dev.yml up -d
+
+# Verificar health
+docker compose -f docker-compose.dev.yml ps
 ```
 
-## 📋 CI/CD
+### 3. Rodar Admin API (TypeScript)
 
-O projeto usa **GitHub Actions** para deploy automático:
-- **Branch develop**: Deploy para ambiente de desenvolvimento
-- **Branch homologation**: Deploy para ambiente de staging  
-- **Branch master**: Deploy para produção
+```bash
+cd delivery_toop-admin/backend
+npm install
+npm run dev
+# API rodando em http://localhost:8100
+```
 
-### **Secrets Necessárias no GitHub:**
-- `SSH_USER`: Usuário SSH dos servidores
-- `SSH_KEY`: Chave privada SSH
-- `DEV_SERVER`: IP do servidor de desenvolvimento
-- `STAGING_SERVER`: IP do servidor de staging
-- `PROD_SERVER`: IP do servidor de produção
-- `STAGING_URL`: URL do ambiente de staging
-- `PROD_URL`: URL do ambiente de produção
+### 4. Rodar Microserviços
 
-## 🔐 Segurança
+```bash
+# Payment
+cd delivery_toop-microservice_payment && npm install && npm run dev
 
-- Senhas e chaves devem ser configuradas via variáveis de ambiente
-- Nunca commitar arquivos `.env`
-- Usar senhas fortes para bancos de dados
-- Configurar HTTPS em produção
+# Notification
+cd delivery_toop-microservice_notification && npm install && npm run dev
 
-## 📞 Suporte
+# Deliveryman
+cd delivery_toop-microservice_deliveryman && npm install && npm run dev
+```
 
-Para dúvidas e suporte, consulte a documentação técnica ou abra um issue no repositório.
+### 5. Rodar Frontend React
+
+```bash
+cd delivery_toop-admin/frontend-react
+npm install
+npm run dev
+# Frontend em http://localhost:5173
+```
+
+### 6. Deploy Produção
+
+```bash
+# Criar .env de produção
+cp .env.production.example .env
+# Editar com senhas fortes
+
+# Build e subir tudo
+docker compose -f docker-compose.production.yml up -d --build
+
+# Verificar
+docker compose -f docker-compose.production.yml ps
+docker compose -f docker-compose.production.yml logs -f
+```
+
+## Variáveis de Ambiente
+
+Ver `.env.example` para a lista completa. As principais:
+
+| Variável | Descrição | Obrigatória |
+|----------|-----------|-------------|
+| `MONGO_ADMIN_USER` | Usuário root MongoDB | ✅ |
+| `MONGO_ADMIN_PASSWORD` | Senha root MongoDB | ✅ |
+| `POSTGRES_USER` | Usuário PostgreSQL | ✅ |
+| `POSTGRES_PASSWORD` | Senha PostgreSQL | ✅ |
+| `REDIS_PASSWORD` | Senha Redis | ✅ |
+| `JWT_SECRET` | Segredo JWT (mín 64 chars) | ✅ |
+| `JWT_SECRET_REFRESH` | Segredo Refresh Token | ✅ |
+| `APP_KEY` | Chave de autenticação entre serviços | ✅ |
+| `GOOGLE_MAPS` | API key Google Maps | Para geolocalização |
+| `FIREBASE_serviceAccount` | Service account Firebase | Para push notifications |
+
+## Endpoints
+
+### Admin API (port 8100)
+
+| Método | Rota | Auth | Descrição |
+|--------|------|------|-----------|
+| POST | `/auth` | — | Login |
+| POST | `/auth/refresh` | — | Refresh token |
+| GET | `/health` | — | Health check |
+| GET | `/metrics` | — | Prometheus metrics |
+| GET | `/companies` | ✅ | Listar empresas |
+| POST | `/companies` | ✅ | Criar empresa |
+| GET | `/users` | ✅ | Listar usuários |
+| POST | `/users` | ✅ | Criar usuário |
+| GET | `/orders` | ✅ | Listar pedidos |
+| POST | `/orders` | ✅ | Criar pedido |
+| GET | `/deliverymen` | ✅ | Listar entregadores |
+| POST | `/deliverymen` | ✅ | Criar entregador |
+
+### Microserviços
+
+| Serviço | Porta | Health | Auth |
+|---------|-------|--------|------|
+| Payment | 8400 | `GET /health` | JWT |
+| Notification | 8200 | `GET /health` | APP_KEY |
+| Deliveryman | 8300 | `GET /health` | JWT |
+
+## Desenvolvimento
+
+### Estrutura de pastas
+
+```
+toop-delivery-clean/
+├── delivery_toop-admin/
+│   ├── backend/              # Admin API (TypeScript + Express + Mongoose)
+│   │   ├── src/
+│   │   │   ├── config/       # Env validation (Zod)
+│   │   │   ├── models/       # Mongoose models
+│   │   │   ├── services/     # Business logic
+│   │   │   ├── controllers/  # Request handlers
+│   │   │   ├── routes/       # Express routes
+│   │   │   ├── middleware/    # Auth, validation, rate limiting, metrics
+│   │   │   └── __tests__/    # Jest tests
+│   │   └── _legacy_src/      # Old JS code (reference only)
+│   ├── frontend-react/       # React-Vite (new)
+│   └── frontend/             # Angular (legacy)
+├── delivery_toop-microservice_payment/
+├── delivery_toop-microservice_notification/
+├── delivery_toop-microservice_deliveryman/
+├── mobile/                   # 4 React Native apps
+├── desktop/                  # Electron apps
+├── config/
+│   ├── prometheus/           # Prometheus config
+│   └── grafana/              # Grafana dashboards
+├── scripts/                  # Init scripts
+├── docker-compose.dev.yml    # Local development
+└── docker-compose.production.yml  # Production
+```
+
+### Testes
+
+```bash
+cd delivery_toop-admin/backend
+npm test              # Rodar todos
+npm test -- --coverage # Com coverage
+```
+
+### Lint
+
+```bash
+cd delivery_toop-admin/backend
+npx eslint src --ext .ts
+```
+
+## Monitoramento
+
+### URLs de acesso (produção)
+
+| Serviço | URL | Credenciais |
+|---------|-----|-------------|
+| Frontend | `http://localhost` | — |
+| Admin API | `http://localhost:8100` | — |
+| Grafana | `http://localhost:3000` | admin/admin |
+| Prometheus | `http://localhost:9090` | — |
+
+### Dashboard Grafana
+
+O dashboard "ToopDelivery - Services Overview" é provisionado automaticamente com:
+- Status de todos os serviços (UP/DOWN)
+- Request rate por serviço
+- Tempo de resposta (p95)
+- Taxa de erro (5xx)
+- Uso de memória e CPU
+- Conexões MongoDB
+- Uso de memória Redis
+
+## Segurança
+
+- Todos os Dockerfiles usam non-root user (`nodejs:1001`)
+- JWT authentication em todas as rotas protegidas
+- Rate limiting (100 req/min por IP)
+- Helmet.js para security headers
+- Variáveis sensíveis em `.env` (nunca no código)
+- `.gitignore` bloqueia `*.key`, `*.pem`, `*adminsdk*.json`
+
+### Ações pendentes
+
+1. **Revogar** service account Firebase `food-syulnv` no Google Cloud Console
+2. **Limpar** histórico git com BFG Repo-Cleaner (chaves comprometidas)
+3. **Gerar** `.env` com senhas fortes para produção
+
+## Stack
+
+| Camada | Tecnologia |
+|--------|------------|
+| Runtime | Node.js 18 |
+| Language | TypeScript 5.x |
+| Framework | Express 4.x, Fastify (notification) |
+| Database | MongoDB 5.x, PostgreSQL 13 |
+| Cache | Redis 7.x |
+| Auth | JWT (jsonwebtoken + bcryptjs) |
+| Validation | Zod |
+| Testing | Jest + ts-jest |
+| Lint | ESLint + @typescript-eslint |
+| Build | TypeScript compiler |
+| Frontend | React 18 + Vite |
+| Mobile | React Native |
+| Desktop | Electron |
+| Container | Docker + Docker Compose |
+| Monitoring | Prometheus + Grafana |
+| CI/CD | GitHub Actions |

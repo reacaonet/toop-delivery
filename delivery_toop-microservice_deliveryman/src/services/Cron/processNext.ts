@@ -15,9 +15,9 @@ const waitingTime = 30; // in seconds
 let deliveryLoop: Array<string | number>[] = [];
 
 const restartService = (): void => {
-  setTimeout(() => {
+  setTimeout(async () => {
     try {
-      processNext();
+      await processNext();
     } catch (err) {
       captureError('restartService processNext', err);
       restartService();
