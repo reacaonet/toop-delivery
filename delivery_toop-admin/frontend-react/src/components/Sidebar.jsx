@@ -10,7 +10,10 @@ import {
   Settings,
   User,
   LogOut,
-  Monitor
+  Monitor,
+  Tag,
+  Package,
+  Image
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -20,9 +23,12 @@ const Sidebar = () => {
 
   const menuItems = [
     { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
-    { path: '/users', icon: Users, label: 'Usuários' },
     { path: '/companies', icon: Building2, label: 'Empresas' },
+    { path: '/categories', icon: Tag, label: 'Categorias' },
+    { path: '/products', icon: Package, label: 'Produtos' },
+    { path: '/banners', icon: Image, label: 'Banners' },
     { path: '/orders', icon: ShoppingCart, label: 'Pedidos' },
+    { path: '/users', icon: Users, label: 'Usuários' },
     { path: '/deliverymen', icon: Truck, label: 'Entregadores' },
     { path: '/payments', icon: CreditCard, label: 'Pagamentos' },
     { path: '/settings', icon: Settings, label: 'Configurações' },

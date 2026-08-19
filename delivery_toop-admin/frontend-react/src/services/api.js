@@ -138,6 +138,74 @@ export const notificationService = {
   }
 };
 
+export const categoryService = {
+  getCategories: async (params = {}) => {
+    const response = await api.get('/categories', { params });
+    return response.data?.data ?? response.data;
+  },
+  createCategory: async (data) => {
+    const response = await api.post('/categories', data);
+    return response.data;
+  },
+  updateCategory: async (id, data) => {
+    const response = await api.put(`/categories/${id}`, data);
+    return response.data;
+  },
+  deleteCategory: async (id) => {
+    const response = await api.delete(`/categories/${id}`);
+    return response.data;
+  }
+};
+
+export const productService = {
+  getProducts: async (params = {}) => {
+    const response = await api.get('/products', { params });
+    return response.data?.data ?? response.data;
+  },
+  createProduct: async (data) => {
+    const response = await api.post('/products', data);
+    return response.data;
+  },
+  updateProduct: async (id, data) => {
+    const response = await api.put(`/products/${id}`, data);
+    return response.data;
+  },
+  deleteProduct: async (id) => {
+    const response = await api.delete(`/products/${id}`);
+    return response.data;
+  }
+};
+
+export const bannerService = {
+  getBanners: async (params = {}) => {
+    const response = await api.get('/banners', { params });
+    return response.data?.data ?? response.data;
+  },
+  createBanner: async (data) => {
+    const response = await api.post('/banners', data);
+    return response.data;
+  },
+  updateBanner: async (id, data) => {
+    const response = await api.put(`/banners/${id}`, data);
+    return response.data;
+  },
+  deleteBanner: async (id) => {
+    const response = await api.delete(`/banners/${id}`);
+    return response.data;
+  }
+};
+
+export const uploadService = {
+  uploadSingle: async (file) => {
+    const fd = new FormData();
+    fd.append('file', file);
+    const response = await api.post('/upload/single', fd, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data;
+  }
+};
+
 export const healthService = {
   getHealth: async () => {
     const response = await api.get('/health');

@@ -2,6 +2,7 @@ import express from "express";
 import helmet from "helmet";
 import cors from "cors";
 import compression from "compression";
+import path from "path";
 import routes from "./routes";
 import { notFoundHandler, errorHandler } from "./middleware/errorHandler";
 import { rateLimiter } from "./middleware/rateLimiter";
@@ -17,6 +18,8 @@ app.use(express.json());
 app.use(requestLogger);
 app.use(rateLimiter);
 app.use(metricsCollector);
+
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 app.get("/health", (_req, res) => {
   res.status(200).json({

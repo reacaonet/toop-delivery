@@ -9,6 +9,8 @@ import notificationRoutes from "./notification.routes";
 import categoryRoutes from "./category.routes";
 import productRoutes from "./product.routes";
 import cartRoutes from "./cart.routes";
+import bannerRoutes from "./banner.routes";
+import uploadRoutes from "./upload.routes";
 
 const router = Router();
 
@@ -22,5 +24,7 @@ router.use("/notifications", notificationRoutes);
 router.use("/categories", categoryRoutes);
 router.use("/products", productRoutes);
 router.use("/cart", cartRoutes);
+router.use("/banners", bannerRoutes);
+router.use("/upload", uploadRoutes);
 
 export default router;
