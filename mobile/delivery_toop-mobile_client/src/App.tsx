@@ -6,6 +6,7 @@ import { StatusBar, NativeModules, Platform } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 
 import Navigator from './navigations';
+import { OTAProvider } from './services/ota/OTAProvider';
 import UserRefreshToken from './services/service/tokenMessage/userRefreshToken';
 import PushNotificationIOS from '@react-native-community/push-notification-ios';
 import PushNotification from 'react-native-push-notification';
@@ -246,15 +247,17 @@ const App = () => {
   };
 
   return (
-    <>
-      <StatusBar
-        translucent
-        barStyle="light-content"
-        backgroundColor="transparent"
-      />
-      {/* <NewMessage modal={modal} setModal={setModal} /> */}
-      <Navigator />
-    </>
+    <OTAProvider app="client" currentVersion="2.6.7" serverUrl="http://localhost:8500">
+      <>
+        <StatusBar
+          translucent
+          barStyle="light-content"
+          backgroundColor="transparent"
+        />
+        {/* <NewMessage modal={modal} setModal={setModal} /> */}
+        <Navigator />
+      </>
+    </OTAProvider>
   );
 };
 

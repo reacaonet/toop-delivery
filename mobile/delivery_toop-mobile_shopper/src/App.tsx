@@ -4,6 +4,7 @@ import {StatusBar, Linking, Platform} from 'react-native';
 import {Colors} from './styles';
 import Navigator from './navigations';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { OTAProvider } from './services/ota/OTAProvider';
 
 
 import PushNotificationIOS from '@react-native-community/push-notification-ios';
@@ -62,16 +63,18 @@ export default function App() {
   useEffect(() => {}, []);
 
   return (
-    <>
-      <StatusBar
-        translucent={true}
-        hidden={false}
-        barStyle="light-content"
-        backgroundColor="transparent"
-      />
-      <SafeAreaProvider>
-      <Navigator />
-      </SafeAreaProvider>
-    </>
+    <OTAProvider app="shopper" currentVersion="2.1.4" serverUrl="http://localhost:8500">
+      <>
+        <StatusBar
+          translucent={true}
+          hidden={false}
+          barStyle="light-content"
+          backgroundColor="transparent"
+        />
+        <SafeAreaProvider>
+        <Navigator />
+        </SafeAreaProvider>
+      </>
+    </OTAProvider>
   );
 }

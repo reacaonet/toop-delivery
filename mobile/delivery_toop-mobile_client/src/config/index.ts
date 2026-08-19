@@ -12,7 +12,7 @@ if (!global.atob) {
   global.atob = base64.decode;
 }
 
-let env = 'prod';
+let env = 'dev';
 let config: any = {};
 
 switch (env) {

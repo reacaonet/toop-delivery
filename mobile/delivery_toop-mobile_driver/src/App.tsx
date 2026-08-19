@@ -14,6 +14,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import TextDefault from './config/textdefaultProps';
 import Navigator from './navigations';
 import { navigationRef, navigate } from './navigations/rootNavigation';
+import { OTAProvider } from './services/ota/OTAProvider';
 import database, {
   FirebaseDatabaseTypes,
 } from '@react-native-firebase/database';
@@ -267,19 +268,21 @@ const App = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar
-        barStyle={configurations?.statusBar?.barStyle || 'light-content'}
-        backgroundColor={
-          configurations?.statusBar?.backgroundColor || Colors.GRAY_DARK
-        }
-        translucent={configurations?.statusBar?.translucent || false}
-      />
-      <Navigator navigationRef={navigationRef} />
+    <OTAProvider app="driver" currentVersion="1.0.6" serverUrl="http://localhost:8500">
+      <SafeAreaView style={styles.container}>
+        <StatusBar
+          barStyle={configurations?.statusBar?.barStyle || 'light-content'}
+          backgroundColor={
+            configurations?.statusBar?.backgroundColor || Colors.GRAY_DARK
+          }
+          translucent={configurations?.statusBar?.translucent || false}
+        />
+        <Navigator navigationRef={navigationRef} />
 
-      <NewRace />
-      <Toast />
-    </SafeAreaView>
+        <NewRace />
+        <Toast />
+      </SafeAreaView>
+    </OTAProvider>
   );
 };
 

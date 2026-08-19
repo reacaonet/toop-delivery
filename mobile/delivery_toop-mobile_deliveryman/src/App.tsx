@@ -31,6 +31,7 @@ import {
 } from './services/location/distanceCoordinate';
 
 import Navigator from './navigations';
+import { OTAProvider } from './services/ota/OTAProvider';
 import database from '@react-native-firebase/database';
 
 import {StorageGet} from './services/deviceStorage';
@@ -308,40 +309,42 @@ function App({userAuth, onSetUpdate}: AppProps) {
   };
 
   return (
-    <>
-      <StatusBar
-        translucent
-        barStyle="light-content"
-        backgroundColor="transparent"
-      />
-
-      <Navigator />
-
-      <Modal
-        animationType="fade"
-        transparent={true}
-        // onShow={() => setCount(20)}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}>
-        <NewOrder
-          closeModal={setModalVisible}
-          distanceOrder={distanceOrder}
-          acceptOrderDelivery={() => {
-            acceptOrderDelivery();
-          }}
-          rejectOrderDelivery={rejectOrderDelivery}
+    <OTAProvider app="deliveryman" currentVersion="2.1.3" serverUrl="http://localhost:8500">
+      <>
+        <StatusBar
+          translucent
+          barStyle="light-content"
+          backgroundColor="transparent"
         />
-      </Modal>
 
-      <Modal
-        animated={true}
-        animationType="slide"
-        transparent={true}
-        visible={!connState?.isInternetReachable}
-        onRequestClose={() => {}}>
-        <IsNotConnected />
-      </Modal>
-    </>
+        <Navigator />
+
+        <Modal
+          animationType="fade"
+          transparent={true}
+          // onShow={() => setCount(20)}
+          visible={modalVisible}
+          onRequestClose={() => setModalVisible(false)}>
+          <NewOrder
+            closeModal={setModalVisible}
+            distanceOrder={distanceOrder}
+            acceptOrderDelivery={() => {
+              acceptOrderDelivery();
+            }}
+            rejectOrderDelivery={rejectOrderDelivery}
+          />
+        </Modal>
+
+        <Modal
+          animated={true}
+          animationType="slide"
+          transparent={true}
+          visible={!connState?.isInternetReachable}
+          onRequestClose={() => {}}>
+          <IsNotConnected />
+        </Modal>
+      </>
+    </OTAProvider>
   );
 }
 

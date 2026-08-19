@@ -22,6 +22,13 @@ export interface ICompany extends Document {
   logo?: string;
   description?: string;
   openingHours?: Record<string, { open: string; close: string }>;
+  deliveryFee?: number;
+  minimumOrder?: number;
+  estimatedDeliveryTime?: number;
+  rating?: number;
+  totalOrders?: number;
+  images?: string[];
+  tags?: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -49,6 +56,13 @@ const CompanySchema = new Schema<ICompany>(
     logo: { type: String },
     description: { type: String },
     openingHours: { type: Schema.Types.Mixed },
+    deliveryFee: { type: Number, default: 0 },
+    minimumOrder: { type: Number, default: 0 },
+    estimatedDeliveryTime: { type: Number },
+    rating: { type: Number, min: 0, max: 5 },
+    totalOrders: { type: Number, default: 0 },
+    images: [{ type: String }],
+    tags: [{ type: String }],
   },
   { timestamps: true, toJSON: { transform(_doc, ret) { const { __v: _v, ...rest } = ret; return rest; } } }
 );
