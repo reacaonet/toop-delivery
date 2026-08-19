@@ -1,10 +1,13 @@
-import { useState, type FormEvent } from 'react'
+import { useState, useEffect, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
+import { useToast } from '../context/ToastContext'
 import api from '../api'
 
-interface Address {
+interface SavedAddress {
+  id: string
+  label: string
   street: string
   number: string
   complement: string
@@ -12,6 +15,7 @@ interface Address {
   city: string
   state: string
   zipCode: string
+  isDefault: boolean
 }
 
 const paymentMethods = [
@@ -21,30 +25,48 @@ const paymentMethods = [
   { value: 'cash', label: 'Dinheiro', icon: '💵' },
 ]
 
+function loadAddresses(): SavedAddress[] {
+  try {
+    return JSON.parse(localStorage.getItem('deliveryAddresses') || '[]')
+  } catch {
+    return []
+  }
+}
+
 export default function CheckoutPage() {
   const { cart, companyId, clearCart } = useCart()
   const { user } = useAuth()
   const navigate = useNavigate()
+  const { showToast } = useToast()
+
   const [paymentMethod, setPaymentMethod] = useState('pix')
   const [notes, setNotes] = useState('')
   const [submitting, setSubmitting] = useState(false)
-  const [address, setAddress] = useState<Address>({
-    street: '',
-    number: '',
-    complement: '',
-    neighborhood: '',
-    city: '',
-    state: '',
-    zipCode: '',
-  })
 
-  const updateAddress = (field: keyof Address, value: string) => {
-    setAddress((prev) => ({ ...prev, [field]: value }))
-  }
+  const [addresses, setAddresses] = useState<SavedAddress[]>([])
+  const [selectedAddressId, setSelectedAddressId] = useState<string>('')
+  const [showAddressPicker, setShowAddressPicker] = useState(false)
+
+  useEffect(() => {
+    const addrs = loadAddresses()
+    setAddresses(addrs)
+    const defaultAddr = addrs.find((a) => a.isDefault) || addrs[0]
+    if (defaultAddr) {
+      setSelectedAddressId(defaultAddr.id)
+    }
+  }, [])
+
+  const selectedAddress = addresses.find((a) => a.id === selectedAddressId)
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     if (!cart || !companyId || !user) return
+
+    if (!selectedAddress) {
+      showToast('Adicione um endereço de entrega', 'error')
+      navigate('/addresses')
+      return
+    }
 
     setSubmitting(true)
     try {
@@ -58,9 +80,18 @@ export default function CheckoutPage() {
           total: item.total,
         })),
         subtotal: cart.subtotal,
+        deliveryFee: cart.deliveryFee,
         total: cart.total,
         paymentMethod,
-        deliveryAddress: address,
+        deliveryAddress: {
+          street: selectedAddress.street,
+          number: selectedAddress.number,
+          complement: selectedAddress.complement,
+          neighborhood: selectedAddress.neighborhood,
+          city: selectedAddress.city,
+          state: selectedAddress.state,
+          zipCode: selectedAddress.zipCode,
+        },
         notes: notes || undefined,
       }
       const { data } = await api.post('/orders', orderData)
@@ -95,96 +126,53 @@ export default function CheckoutPage() {
 
       <form onSubmit={handleSubmit} className="checkout-layout">
         <div className="checkout-form">
+          {/* Address section */}
           <section className="checkout-section">
             <h2>
               <span className="section-icon">📍</span>
               Endereço de Entrega
             </h2>
-            <div className="form-row">
-              <div className="form-group flex-3">
-                <label htmlFor="street">Rua</label>
-                <input
-                  id="street"
-                  type="text"
-                  value={address.street}
-                  onChange={(e) => updateAddress('street', e.target.value)}
-                  placeholder="Nome da rua"
-                  required
-                />
+
+            {addresses.length === 0 ? (
+              <div className="checkout-no-address">
+                <p>Você ainda não tem endereços salvos</p>
+                <button
+                  type="button"
+                  className="btn btn-primary btn-sm"
+                  onClick={() => navigate('/addresses')}
+                >
+                  Adicionar endereço
+                </button>
               </div>
-              <div className="form-group flex-1">
-                <label htmlFor="number">Nº</label>
-                <input
-                  id="number"
-                  type="text"
-                  value={address.number}
-                  onChange={(e) => updateAddress('number', e.target.value)}
-                  placeholder="Nº"
-                  required
-                />
+            ) : selectedAddress ? (
+              <div className="checkout-address-card" onClick={() => setShowAddressPicker(true)}>
+                <div className="checkout-address-info">
+                  <div className="checkout-address-label">
+                    <span className="checkout-address-icon">
+                      {selectedAddress.label?.toLowerCase().includes('trabalho') ? '🏢' :
+                       selectedAddress.label?.toLowerCase().includes('casa') ? '🏠' : '📍'}
+                    </span>
+                    <span className="checkout-address-name">
+                      {selectedAddress.label || 'Endereço'}
+                    </span>
+                    {selectedAddress.isDefault && (
+                      <span className="checkout-address-default">Principal</span>
+                    )}
+                  </div>
+                  <p className="checkout-address-line">
+                    {selectedAddress.street}, {selectedAddress.number}
+                    {selectedAddress.complement && ` - ${selectedAddress.complement}`}
+                  </p>
+                  <p className="checkout-address-line">
+                    {selectedAddress.neighborhood} - {selectedAddress.city}/{selectedAddress.state}
+                  </p>
+                </div>
+                <span className="checkout-address-change">Trocar ›</span>
               </div>
-            </div>
-            <div className="form-row">
-              <div className="form-group flex-1">
-                <label htmlFor="complement">Complemento</label>
-                <input
-                  id="complement"
-                  type="text"
-                  value={address.complement}
-                  onChange={(e) => updateAddress('complement', e.target.value)}
-                  placeholder="Apto, bloco..."
-                />
-              </div>
-              <div className="form-group flex-1">
-                <label htmlFor="neighborhood">Bairro</label>
-                <input
-                  id="neighborhood"
-                  type="text"
-                  value={address.neighborhood}
-                  onChange={(e) => updateAddress('neighborhood', e.target.value)}
-                  placeholder="Bairro"
-                  required
-                />
-              </div>
-            </div>
-            <div className="form-row">
-              <div className="form-group flex-2">
-                <label htmlFor="city">Cidade</label>
-                <input
-                  id="city"
-                  type="text"
-                  value={address.city}
-                  onChange={(e) => updateAddress('city', e.target.value)}
-                  placeholder="Cidade"
-                  required
-                />
-              </div>
-              <div className="form-group flex-1">
-                <label htmlFor="state">Estado</label>
-                <input
-                  id="state"
-                  type="text"
-                  value={address.state}
-                  onChange={(e) => updateAddress('state', e.target.value)}
-                  required
-                  maxLength={2}
-                  placeholder="UF"
-                />
-              </div>
-              <div className="form-group flex-1">
-                <label htmlFor="zipCode">CEP</label>
-                <input
-                  id="zipCode"
-                  type="text"
-                  value={address.zipCode}
-                  onChange={(e) => updateAddress('zipCode', e.target.value)}
-                  placeholder="00000-000"
-                  required
-                />
-              </div>
-            </div>
+            ) : null}
           </section>
 
+          {/* Payment section */}
           <section className="checkout-section">
             <h2>
               <span className="section-icon">💳</span>
@@ -210,6 +198,7 @@ export default function CheckoutPage() {
             </div>
           </section>
 
+          {/* Notes section */}
           <section className="checkout-section">
             <h2>
               <span className="section-icon">📝</span>
@@ -220,13 +209,14 @@ export default function CheckoutPage() {
                 id="notes"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Instruções especiais para a entrega,ex: troco, rangos sem cebola..."
+                placeholder="Instruções especiais para a entrega, ex: troco, rangos sem cebola..."
                 rows={3}
               />
             </div>
           </section>
         </div>
 
+        {/* Order summary */}
         <div className="cart-summary">
           <h2>Resumo</h2>
           <div className="checkout-items">
@@ -262,12 +252,65 @@ export default function CheckoutPage() {
           <button
             type="submit"
             className="cart-checkout-btn"
-            disabled={submitting}
+            disabled={submitting || !selectedAddress}
           >
             {submitting ? 'Confirmando...' : 'Confirmar Pedido'}
           </button>
         </div>
       </form>
+
+      {/* Address picker modal */}
+      {showAddressPicker && (
+        <div className="modal-overlay" onClick={() => setShowAddressPicker(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setShowAddressPicker(false)}>✕</button>
+            <div style={{ padding: 20 }}>
+              <h2 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: 16 }}>
+                Escolher endereço de entrega
+              </h2>
+              <div className="address-picker-list">
+                {addresses.map((addr) => (
+                  <button
+                    key={addr.id}
+                    type="button"
+                    className={`address-picker-item ${addr.id === selectedAddressId ? 'selected' : ''}`}
+                    onClick={() => {
+                      setSelectedAddressId(addr.id)
+                      setShowAddressPicker(false)
+                    }}
+                  >
+                    <div className="address-picker-icon">
+                      {addr.label?.toLowerCase().includes('trabalho') ? '🏢' :
+                       addr.label?.toLowerCase().includes('casa') ? '🏠' : '📍'}
+                    </div>
+                    <div className="address-picker-info">
+                      <span className="address-picker-name">
+                        {addr.label || 'Endereço'}
+                        {addr.isDefault && <span className="address-picker-badge">Principal</span>}
+                      </span>
+                      <span className="address-picker-detail">
+                        {addr.street}, {addr.number} - {addr.neighborhood}, {addr.city}/{addr.state}
+                      </span>
+                    </div>
+                    {addr.id === selectedAddressId && <span className="address-picker-check">✓</span>}
+                  </button>
+                ))}
+              </div>
+              <button
+                type="button"
+                className="btn btn-secondary btn-full"
+                style={{ marginTop: 12 }}
+                onClick={() => {
+                  setShowAddressPicker(false)
+                  navigate('/addresses')
+                }}
+              >
+                Gerenciar endereços
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

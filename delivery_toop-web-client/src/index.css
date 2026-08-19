@@ -2471,6 +2471,166 @@ img { max-width: 100%; display: block; }
 }
 
 /* ============================================
+   CHECKOUT ADDRESS
+   ============================================ */
+.checkout-no-address {
+  text-align: center;
+  padding: 20px;
+  color: var(--text-secondary);
+}
+
+.checkout-no-address p {
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+}
+
+.checkout-address-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--bg);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--duration) var(--ease);
+  border: 1.5px solid var(--border-light);
+}
+
+.checkout-address-card:hover {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+
+.checkout-address-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.checkout-address-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.checkout-address-icon {
+  font-size: 1rem;
+}
+
+.checkout-address-name {
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.checkout-address-default {
+  font-size: 0.65rem;
+  font-weight: 700;
+  background: var(--primary);
+  color: white;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+}
+
+.checkout-address-line {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.checkout-address-change {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--primary);
+  white-space: nowrap;
+}
+
+/* Address Picker Modal */
+.address-picker-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.address-picker-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--duration) var(--ease);
+  text-align: left;
+  width: 100%;
+  font-family: var(--font);
+}
+
+.address-picker-item:hover {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+
+.address-picker-item.selected {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  box-shadow: 0 0 0 1px var(--primary);
+}
+
+.address-picker-icon {
+  font-size: 1.3rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.address-picker-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.address-picker-name {
+  font-weight: 700;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.address-picker-badge {
+  font-size: 0.6rem;
+  font-weight: 700;
+  background: var(--primary);
+  color: white;
+  padding: 2px 6px;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+}
+
+.address-picker-detail {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.address-picker-check {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+/* ============================================
    RESPONSIVE
    ============================================ */
 @media (max-width: 768px) {
@@ -2514,17 +2674,31 @@ img { max-width: 100%; display: block; }
 
   .cart-layout {
     grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .cart-items {
+    order: 1;
   }
 
   .cart-summary {
+    order: 2;
+    position: static;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-xs);
+    border: 1px solid var(--border-light);
+    padding-bottom: 8px;
+  }
+
+  .cart-summary .cart-checkout-btn {
     position: fixed;
     bottom: 56px;
     left: 0;
     right: 0;
-    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-    padding: 16px 20px;
+    border-radius: 0;
     z-index: 50;
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+    margin: 0;
+    padding: 16px;
   }
 
   .checkout-layout {
