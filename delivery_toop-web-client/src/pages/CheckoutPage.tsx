@@ -15,10 +15,10 @@ interface Address {
 }
 
 const paymentMethods = [
-  { value: 'credit_card', label: 'Cartão de Crédito' },
-  { value: 'debit_card', label: 'Cartão de Débito' },
-  { value: 'pix', label: 'PIX' },
-  { value: 'cash', label: 'Dinheiro' },
+  { value: 'credit_card', label: 'Cartão de Crédito', icon: '💳' },
+  { value: 'debit_card', label: 'Cartão de Débito', icon: '💳' },
+  { value: 'pix', label: 'PIX', icon: '⚡' },
+  { value: 'cash', label: 'Dinheiro', icon: '💵' },
 ]
 
 export default function CheckoutPage() {
@@ -75,6 +75,7 @@ export default function CheckoutPage() {
     return (
       <div className="page">
         <div className="empty-state">
+          <div className="empty-icon">🛒</div>
           <h2>Carrinho vazio</h2>
           <button className="btn btn-primary" onClick={() => navigate('/')}>
             Ir às compras
@@ -86,11 +87,148 @@ export default function CheckoutPage() {
 
   return (
     <div className="page">
+      <button className="btn-back" onClick={() => navigate('/cart')}>
+        ← Voltar ao carrinho
+      </button>
+
       <h1 className="page-title">Finalizar Pedido</h1>
 
-      <form onSubmit={handleSubmit} className="checkout-form">
-        <section className="checkout-section">
-          <h2>Resumo do Pedido</h2>
+      <form onSubmit={handleSubmit} className="checkout-layout">
+        <div className="checkout-form">
+          <section className="checkout-section">
+            <h2>
+              <span className="section-icon">📍</span>
+              Endereço de Entrega
+            </h2>
+            <div className="form-row">
+              <div className="form-group flex-3">
+                <label htmlFor="street">Rua</label>
+                <input
+                  id="street"
+                  type="text"
+                  value={address.street}
+                  onChange={(e) => updateAddress('street', e.target.value)}
+                  placeholder="Nome da rua"
+                  required
+                />
+              </div>
+              <div className="form-group flex-1">
+                <label htmlFor="number">Nº</label>
+                <input
+                  id="number"
+                  type="text"
+                  value={address.number}
+                  onChange={(e) => updateAddress('number', e.target.value)}
+                  placeholder="Nº"
+                  required
+                />
+              </div>
+            </div>
+            <div className="form-row">
+              <div className="form-group flex-1">
+                <label htmlFor="complement">Complemento</label>
+                <input
+                  id="complement"
+                  type="text"
+                  value={address.complement}
+                  onChange={(e) => updateAddress('complement', e.target.value)}
+                  placeholder="Apto, bloco..."
+                />
+              </div>
+              <div className="form-group flex-1">
+                <label htmlFor="neighborhood">Bairro</label>
+                <input
+                  id="neighborhood"
+                  type="text"
+                  value={address.neighborhood}
+                  onChange={(e) => updateAddress('neighborhood', e.target.value)}
+                  placeholder="Bairro"
+                  required
+                />
+              </div>
+            </div>
+            <div className="form-row">
+              <div className="form-group flex-2">
+                <label htmlFor="city">Cidade</label>
+                <input
+                  id="city"
+                  type="text"
+                  value={address.city}
+                  onChange={(e) => updateAddress('city', e.target.value)}
+                  placeholder="Cidade"
+                  required
+                />
+              </div>
+              <div className="form-group flex-1">
+                <label htmlFor="state">Estado</label>
+                <input
+                  id="state"
+                  type="text"
+                  value={address.state}
+                  onChange={(e) => updateAddress('state', e.target.value)}
+                  required
+                  maxLength={2}
+                  placeholder="UF"
+                />
+              </div>
+              <div className="form-group flex-1">
+                <label htmlFor="zipCode">CEP</label>
+                <input
+                  id="zipCode"
+                  type="text"
+                  value={address.zipCode}
+                  onChange={(e) => updateAddress('zipCode', e.target.value)}
+                  placeholder="00000-000"
+                  required
+                />
+              </div>
+            </div>
+          </section>
+
+          <section className="checkout-section">
+            <h2>
+              <span className="section-icon">💳</span>
+              Forma de Pagamento
+            </h2>
+            <div className="payment-options">
+              {paymentMethods.map((pm) => (
+                <label
+                  key={pm.value}
+                  className={`payment-option ${paymentMethod === pm.value ? 'selected' : ''}`}
+                >
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value={pm.value}
+                    checked={paymentMethod === pm.value}
+                    onChange={(e) => setPaymentMethod(e.target.value)}
+                  />
+                  <span className="payment-icon">{pm.icon}</span>
+                  {pm.label}
+                </label>
+              ))}
+            </div>
+          </section>
+
+          <section className="checkout-section">
+            <h2>
+              <span className="section-icon">📝</span>
+              Observações
+            </h2>
+            <div className="form-group">
+              <textarea
+                id="notes"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Instruções especiais para a entrega,ex: troco, rangos sem cebola..."
+                rows={3}
+              />
+            </div>
+          </section>
+        </div>
+
+        <div className="cart-summary">
+          <h2>Resumo</h2>
           <div className="checkout-items">
             {cart.items.map((item) => (
               <div key={item._id} className="checkout-item">
@@ -101,132 +239,34 @@ export default function CheckoutPage() {
               </div>
             ))}
           </div>
+          <div className="cart-summary-row">
+            <span>Subtotal</span>
+            <span>R$ {cart.subtotal.toFixed(2)}</span>
+          </div>
+          <div className="cart-summary-row">
+            <span>Frete</span>
+            <span>
+              {cart.deliveryFee > 0 ? `R$ ${cart.deliveryFee.toFixed(2)}` : 'Grátis'}
+            </span>
+          </div>
+          {cart.discount > 0 && (
+            <div className="cart-summary-row discount">
+              <span>Desconto</span>
+              <span>- R$ {cart.discount.toFixed(2)}</span>
+            </div>
+          )}
           <div className="cart-summary-row total">
             <span>Total</span>
             <span>R$ {cart.total.toFixed(2)}</span>
           </div>
-        </section>
-
-        <section className="checkout-section">
-          <h2>Endereço de Entrega</h2>
-          <div className="form-row">
-            <div className="form-group flex-3">
-              <label htmlFor="street">Rua</label>
-              <input
-                id="street"
-                type="text"
-                value={address.street}
-                onChange={(e) => updateAddress('street', e.target.value)}
-                required
-              />
-            </div>
-            <div className="form-group flex-1">
-              <label htmlFor="number">Nº</label>
-              <input
-                id="number"
-                type="text"
-                value={address.number}
-                onChange={(e) => updateAddress('number', e.target.value)}
-                required
-              />
-            </div>
-          </div>
-          <div className="form-row">
-            <div className="form-group flex-1">
-              <label htmlFor="complement">Complemento</label>
-              <input
-                id="complement"
-                type="text"
-                value={address.complement}
-                onChange={(e) => updateAddress('complement', e.target.value)}
-                placeholder="Apto, bloco..."
-              />
-            </div>
-            <div className="form-group flex-1">
-              <label htmlFor="neighborhood">Bairro</label>
-              <input
-                id="neighborhood"
-                type="text"
-                value={address.neighborhood}
-                onChange={(e) => updateAddress('neighborhood', e.target.value)}
-                required
-              />
-            </div>
-          </div>
-          <div className="form-row">
-            <div className="form-group flex-2">
-              <label htmlFor="city">Cidade</label>
-              <input
-                id="city"
-                type="text"
-                value={address.city}
-                onChange={(e) => updateAddress('city', e.target.value)}
-                required
-              />
-            </div>
-            <div className="form-group flex-1">
-              <label htmlFor="state">Estado</label>
-              <input
-                id="state"
-                type="text"
-                value={address.state}
-                onChange={(e) => updateAddress('state', e.target.value)}
-                required
-                maxLength={2}
-                placeholder="UF"
-              />
-            </div>
-            <div className="form-group flex-1">
-              <label htmlFor="zipCode">CEP</label>
-              <input
-                id="zipCode"
-                type="text"
-                value={address.zipCode}
-                onChange={(e) => updateAddress('zipCode', e.target.value)}
-                required
-              />
-            </div>
-          </div>
-        </section>
-
-        <section className="checkout-section">
-          <h2>Forma de Pagamento</h2>
-          <div className="payment-options">
-            {paymentMethods.map((pm) => (
-              <label key={pm.value} className={`payment-option ${paymentMethod === pm.value ? 'selected' : ''}`}>
-                <input
-                  type="radio"
-                  name="paymentMethod"
-                  value={pm.value}
-                  checked={paymentMethod === pm.value}
-                  onChange={(e) => setPaymentMethod(e.target.value)}
-                />
-                {pm.label}
-              </label>
-            ))}
-          </div>
-        </section>
-
-        <section className="checkout-section">
-          <div className="form-group">
-            <label htmlFor="notes">Observações</label>
-            <textarea
-              id="notes"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Instruções especiais para a entrega..."
-              rows={3}
-            />
-          </div>
-        </section>
-
-        <button
-          type="submit"
-          className="btn btn-primary btn-full"
-          disabled={submitting}
-        >
-          {submitting ? 'Confirmando...' : 'Confirmar Pedido'}
-        </button>
+          <button
+            type="submit"
+            className="cart-checkout-btn"
+            disabled={submitting}
+          >
+            {submitting ? 'Confirmando...' : 'Confirmar Pedido'}
+          </button>
+        </div>
       </form>
     </div>
   )

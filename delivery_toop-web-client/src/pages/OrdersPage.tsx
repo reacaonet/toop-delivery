@@ -54,8 +54,9 @@ export default function OrdersPage() {
         <div className="empty-state">
           <div className="empty-icon">📦</div>
           <h2>Nenhum pedido ainda</h2>
+          <p>Faça seu primeiro pedido e ele aparecerá aqui</p>
           <button className="btn btn-primary" onClick={() => navigate('/')}>
-            Fazer primeiro pedido
+            Explorar restaurantes
           </button>
         </div>
       ) : (
@@ -73,7 +74,7 @@ export default function OrdersPage() {
                 </span>
               </div>
               <div className="order-card-body">
-                <p className="order-date">
+                <p>
                   {new Date(order.createdAt).toLocaleDateString('pt-BR', {
                     day: '2-digit',
                     month: '2-digit',
@@ -82,11 +83,14 @@ export default function OrdersPage() {
                     minute: '2-digit',
                   })}
                 </p>
-                <p className="order-items-summary">
+                <p>
                   {order.items.length} {order.items.length === 1 ? 'item' : 'itens'}
                 </p>
               </div>
               <div className="order-card-footer">
+                <span className="order-store-name">
+                  {typeof order.company === 'object' ? order.company.name : ''}
+                </span>
                 <span className="order-total">R$ {order.total.toFixed(2)}</span>
               </div>
             </div>

@@ -44,6 +44,13 @@ const paymentLabels: Record<string, string> = {
   cash: 'Dinheiro',
 }
 
+const paymentIcons: Record<string, string> = {
+  credit_card: '💳',
+  debit_card: '💳',
+  pix: '⚡',
+  cash: '💵',
+}
+
 export default function OrderDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
@@ -117,9 +124,7 @@ export default function OrderDetailPage() {
           <div className="order-items">
             {order.items.map((item, i) => (
               <div key={i} className="order-item">
-                <span>
-                  {item.quantity}x {item.name}
-                </span>
+                <span>{item.quantity}x {item.name}</span>
                 <span>R$ {item.total.toFixed(2)}</span>
               </div>
             ))}
@@ -152,7 +157,10 @@ export default function OrderDetailPage() {
 
         <section className="order-section">
           <h2>Pagamento</h2>
-          <p>{paymentLabels[order.paymentMethod] ?? order.paymentMethod}</p>
+          <p>
+            <span style={{ marginRight: '8px' }}>{paymentIcons[order.paymentMethod] || '💰'}</span>
+            {paymentLabels[order.paymentMethod] ?? order.paymentMethod}
+          </p>
         </section>
 
         <section className="order-section">
@@ -162,8 +170,7 @@ export default function OrderDetailPage() {
             {order.deliveryAddress.complement && ` - ${order.deliveryAddress.complement}`}
           </p>
           <p>
-            {order.deliveryAddress.neighborhood} - {order.deliveryAddress.city}/
-            {order.deliveryAddress.state}
+            {order.deliveryAddress.neighborhood} - {order.deliveryAddress.city}/{order.deliveryAddress.state}
           </p>
           <p>CEP: {order.deliveryAddress.zipCode}</p>
         </section>
