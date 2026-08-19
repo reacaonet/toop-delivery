@@ -9,18 +9,23 @@ export default defineConfig(({ mode }) => {
     plugins: [react()],
     server: {
       host: '0.0.0.0',
-      port: 4200,
+      port: 4203,
       proxy: {
         '/api': {
           target: apiTarget,
           changeOrigin: true,
+          secure: false,
           rewrite: (path) => path.replace(/^\/api/, ''),
         },
         '/uploads': {
           target: apiTarget,
           changeOrigin: true,
+          secure: false,
         },
       },
+    },
+    build: {
+      outDir: 'dist',
     },
   };
 })

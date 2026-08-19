@@ -12,7 +12,6 @@ import {
   LogOut,
   Monitor,
   Tag,
-  Package,
   Image
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -25,7 +24,6 @@ const Sidebar = () => {
     { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
     { path: '/companies', icon: Building2, label: 'Empresas' },
     { path: '/categories', icon: Tag, label: 'Categorias' },
-    { path: '/products', icon: Package, label: 'Produtos' },
     { path: '/banners', icon: Image, label: 'Banners' },
     { path: '/orders', icon: ShoppingCart, label: 'Pedidos' },
     { path: '/users', icon: Users, label: 'Usuários' },

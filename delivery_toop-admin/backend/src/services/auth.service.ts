@@ -9,7 +9,7 @@ import { AppError } from "../middleware/errorHandler";
 
 export class AuthService {
   async login(email: string, password: string) {
-    const user = await UserModel.findOne({ email }).select("+password");
+    const user = await UserModel.findOne({ email }).select("+password").populate("company");
 
     if (!user) {
       throw new AppError("Email ou senha invalidos", 401);

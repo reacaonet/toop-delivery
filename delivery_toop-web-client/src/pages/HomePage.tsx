@@ -36,6 +36,23 @@ interface Order {
   items: Array<{ name: string; quantity: number; total: number }>
 }
 
+interface Banner {
+  _id: string
+  title: string
+  subtitle?: string
+  image?: string
+  link?: string
+  order: number
+}
+
+interface Category {
+  _id: string
+  name: string
+  description?: string
+  icon?: string
+  order: number
+}
+
 const categoryIcons: Record<string, string> = {
   'Lanches': '🍔',
   'Pizzas': '🍕',
@@ -48,14 +65,6 @@ const categoryIcons: Record<string, string> = {
   'Açaí': '💜',
   'Café': '☕',
 }
-
-const defaultCategories = ['Todos', 'Lanches', 'Pizzas', 'Bebidas', 'Doces', 'Combos', 'Japonesa', 'Açaí']
-
-const banners = [
-  { title: 'Frete Grátis', subtitle: 'Em pedidos acima de R$ 39,90', gradient: 'linear-gradient(135deg, #EA1D2C, #D41925)', icon: '🚚' },
-  { title: '50% OFF', subtitle: 'No seu primeiro pedido', gradient: 'linear-gradient(135deg, #7B2FF7, #5B1FD4)', icon: '🎉' },
-  { title: 'Super Combos', subtitle: 'Aproveite promoções imperdíveis', gradient: 'linear-gradient(135deg, #F5A623, #E8941C)', icon: '🔥' },
-]
 
 function getCompanyId(c: Company | Order): string {
   return typeof c === 'object' && '_id' in c ? c._id : ''
@@ -77,6 +86,8 @@ export default function HomePage() {
   const [companies, setCompanies] = useState<Company[]>([])
   const [allProducts, setAllProducts] = useState<Product[]>([])
   const [recentOrders, setRecentOrders] = useState<Order[]>([])
+  const [banners, setBanners] = useState<Banner[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
   const [search, setSearch] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('Todos')
   const [loading, setLoading] = useState(true)
@@ -90,15 +101,23 @@ export default function HomePage() {
   useEffect(() => {
     async function load() {
       try {
-        const [companiesRes, productsRes] = await Promise.all([
+        const [companiesRes, productsRes, bannersRes, categoriesRes] = await Promise.all([
           api.get('/companies', { params: { page: 1, limit: 50 } }),
           api.get('/products', { params: { page: 1, limit: 200 } }),
+          api.get('/banners/active').catch(() => ({ data: { data: [] } })),
+          api.get('/categories/public').catch(() => ({ data: { data: [] } })),
         ])
         const cData = companiesRes.data.data
         setCompanies(Array.isArray(cData) ? cData : cData?.data ?? [])
 
         const pData = productsRes.data.data
         setAllProducts(Array.isArray(pData) ? pData : pData?.data ?? [])
+
+        const bData = bannersRes.data.data
+        setBanners(Array.isArray(bData) ? bData : bData?.data ?? [])
+
+        const catData = categoriesRes.data.data
+        setCategories(Array.isArray(catData) ? catData : catData?.data ?? [])
       } catch {
         // handle silently
       } finally {
@@ -122,11 +141,12 @@ export default function HomePage() {
   }, [])
 
   useEffect(() => {
+    if (banners.length === 0) return
     const timer = setInterval(() => {
       setCurrentBanner((prev) => (prev + 1) % banners.length)
     }, 4000)
     return () => clearInterval(timer)
-  }, [])
+  }, [banners.length])
 
   const toggleFavorite = useCallback((e: React.MouseEvent, companyId: string) => {
     e.stopPropagation()
@@ -204,35 +224,41 @@ export default function HomePage() {
 
       {/* Category carousel */}
       <div className="category-carousel">
-        {defaultCategories.map((cat) => (
+        <button
+          className={`category-chip ${selectedCategory === 'Todos' ? 'active' : ''}`}
+          onClick={() => setSelectedCategory('Todos')}
+        >
+          <span className="category-chip-icon">🔥</span>
+          <span className="category-chip-label">Todos</span>
+        </button>
+        {categories.map((cat) => (
           <button
-            key={cat}
-            className={`category-chip ${selectedCategory === cat ? 'active' : ''}`}
-            onClick={() => setSelectedCategory(cat)}
+            key={cat._id}
+            className={`category-chip ${selectedCategory === cat.name ? 'active' : ''}`}
+            onClick={() => setSelectedCategory(cat.name)}
           >
             <span className="category-chip-icon">
-              {cat === 'Todos' ? '🔥' : categoryIcons[cat] || '📁'}
+              {cat.icon || categoryIcons[cat.name] || '📁'}
             </span>
-            <span className="category-chip-label">{cat}</span>
+            <span className="category-chip-label">{cat.name}</span>
           </button>
         ))}
       </div>
 
       {/* Promotional banners */}
-      {!search && selectedCategory === 'Todos' && (
+      {!search && selectedCategory === 'Todos' && banners.length > 0 && (
         <div className="banner-carousel">
           {banners.map((banner, i) => (
             <div
-              key={i}
+              key={banner._id}
               className={`banner-slide ${i === currentBanner ? 'active' : ''}`}
-              style={{ background: banner.gradient }}
+              style={{ background: banner.image ? `url(${banner.image}) center/cover` : 'linear-gradient(135deg, #667eea, #764ba2)' }}
             >
               <div className="banner-content">
                 <div>
                   <h3 className="banner-title">{banner.title}</h3>
-                  <p className="banner-subtitle">{banner.subtitle}</p>
+                  {banner.subtitle && <p className="banner-subtitle">{banner.subtitle}</p>}
                 </div>
-                <span className="banner-icon">{banner.icon}</span>
               </div>
             </div>
           ))}

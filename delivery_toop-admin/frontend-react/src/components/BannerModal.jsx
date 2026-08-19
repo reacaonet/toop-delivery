@@ -56,7 +56,7 @@ const BannerModal = ({ isOpen, onClose, banner, onSave }) => {
     fd.append('file', file);
     try {
       const res = await api.post('/upload/single', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-      const url = res.data?.data?.url;
+      const url = res.data?.url;
       if (url) { setFormData(prev => ({ ...prev, image: url })); setImagePreview(url); }
     } catch (err) {
       alert('Erro ao enviar imagem: ' + (err.response?.data?.error || err.message));

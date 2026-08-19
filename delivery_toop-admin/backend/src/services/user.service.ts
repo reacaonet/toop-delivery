@@ -21,6 +21,7 @@ export class UserService {
     password: string;
     phone?: string;
     role?: string;
+    company?: string;
   }) {
     const existingUser = await UserModel.findOne({ email: data.email });
     if (existingUser) {
@@ -72,6 +73,7 @@ export class UserService {
       phone?: string;
       role?: string;
       active?: boolean;
+      company?: string;
     }
   ) {
     if (data.email) {

@@ -7,7 +7,6 @@ import Dashboard from './pages/Dashboard';
 import Users from './pages/Users';
 import Companies from './pages/Companies';
 import Categories from './pages/Categories';
-import Products from './pages/Products';
 import Banners from './pages/Banners';
 import Orders from './pages/Orders';
 import Deliverymen from './pages/Deliverymen';
@@ -29,7 +28,6 @@ function AdminLayout() {
             <Route path="/" element={<Dashboard />} />
             <Route path="/companies" element={<Companies />} />
             <Route path="/categories" element={<Categories />} />
-            <Route path="/products" element={<Products />} />
             <Route path="/banners" element={<Banners />} />
             <Route path="/orders" element={<Orders />} />
             <Route path="/users" element={<Users />} />

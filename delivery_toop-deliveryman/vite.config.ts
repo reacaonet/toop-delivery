@@ -3,25 +3,29 @@ import react from '@vitejs/plugin-react'
 
 const apiTarget = process.env.VITE_API_PROXY || 'http://localhost:8100'
 
-const proxyRoutes = ['/auth', '/users', '/companies', '/orders', '/deliverymen', '/payments', '/notifications', '/categories', '/banners', '/upload', '/products', '/cart', '/health']
-
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 4202,
+    port: 4204,
     host: '0.0.0.0',
-    proxy: Object.fromEntries(
-      proxyRoutes.map(route => [route, {
+    proxy: {
+      '/api': {
         target: apiTarget,
         changeOrigin: true,
         secure: false,
+        rewrite: (path) => path.replace(/^\/api/, ''),
         bypass: (req) => {
           if (req.headers.accept?.includes('text/html')) {
             return '/index.html'
           }
         }
-      }])
-    )
+      },
+      '/uploads': {
+        target: apiTarget,
+        changeOrigin: true,
+        secure: false
+      }
+    }
   },
   build: {
     outDir: 'dist'

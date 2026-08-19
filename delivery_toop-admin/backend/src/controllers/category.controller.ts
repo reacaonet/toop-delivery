@@ -23,6 +23,13 @@ export class CategoryController {
     } catch (error) { next(error); }
   }
 
+  async listPublic(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await categoryService.listPublic(req.query as any);
+      return res.status(200).json({ success: true, data: result });
+    } catch (error) { next(error); }
+  }
+
   async update(req: Request, res: Response, next: NextFunction) {
     try {
       const category = await categoryService.update(req.params.id, req.body);

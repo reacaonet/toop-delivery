@@ -37,9 +37,9 @@ const Categories = () => {
     )},
     { key: 'description', title: 'Descrição', render: (val) => val || '-' },
     { key: 'order', title: 'Ordem', render: (val) => <span style={{ fontWeight: 600 }}>{val || 0}</span> },
-    { key: 'image', title: 'Imagem', render: (val) => val ? (
-      <img src={val} alt="" style={{ width: 36, height: 36, objectFit: 'cover', borderRadius: 6, border: '1px solid #e5e7eb' }} />
-    ) : <span style={{ color: '#9ca3af', fontSize: '0.8rem' }}>Sem imagem</span> },
+    { key: 'icon', title: 'Ícone', render: (val) => val ? (
+      <span style={{ fontSize: '1.5rem' }}>{val}</span>
+    ) : <span style={{ color: '#9ca3af', fontSize: '0.8rem' }}>Sem ícone</span> },
     { key: 'active', title: 'Status', render: (val) => (
       <span className={`status-badge ${val ? 'status-active' : 'status-inactive'}`}>{val ? 'Ativo' : 'Inativo'}</span>
     )},

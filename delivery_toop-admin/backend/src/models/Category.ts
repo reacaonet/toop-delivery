@@ -2,9 +2,9 @@ import mongoose, { Schema, Document } from 'mongoose';
 
 export interface ICategory extends Document {
   name: string;
-  company: mongoose.Types.ObjectId;
+  company?: mongoose.Types.ObjectId;
   description?: string;
-  image?: string;
+  icon?: string;
   order: number;
   active: boolean;
   createdAt: Date;
@@ -14,9 +14,9 @@ export interface ICategory extends Document {
 const CategorySchema = new Schema<ICategory>(
   {
     name: { type: String, required: true, trim: true },
-    company: { type: Schema.Types.ObjectId, ref: 'Company', required: true },
+    company: { type: Schema.Types.ObjectId, ref: 'Company' },
     description: { type: String },
-    image: { type: String },
+    icon: { type: String },
     order: { type: Number, default: 0 },
     active: { type: Boolean, default: true },
   },

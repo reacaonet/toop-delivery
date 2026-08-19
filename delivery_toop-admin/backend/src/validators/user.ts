@@ -9,6 +9,7 @@ export const createUserSchema = z.object({
     password: z.string().min(6, "Senha deve ter no mínimo 6 caracteres"),
     phone: z.string().optional(),
     role: roleEnum.optional(),
+    company: z.string().optional(),
   }),
 });
 
@@ -20,6 +21,7 @@ export const updateUserSchema = z.object({
     phone: z.string().optional(),
     role: roleEnum.optional(),
     active: z.boolean().optional(),
+    company: z.string().optional(),
   }),
 });
 

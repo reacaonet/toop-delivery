@@ -7,6 +7,7 @@ export interface IUser extends Document {
   phone?: string;
   role: 'admin' | 'manager' | 'operator';
   active: boolean;
+  company?: mongoose.Types.ObjectId;
   avatar?: string;
   lastLogin?: Date;
   createdAt: Date;
@@ -21,6 +22,7 @@ const UserSchema = new Schema<IUser>(
     phone: { type: String, trim: true },
     role: { type: String, enum: ['admin', 'manager', 'operator'], default: 'operator' },
     active: { type: Boolean, default: true },
+    company: { type: Schema.Types.ObjectId, ref: 'Company' },
     avatar: { type: String },
     lastLogin: { type: Date },
   },
