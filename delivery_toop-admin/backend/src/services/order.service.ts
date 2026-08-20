@@ -7,6 +7,7 @@ interface PaginationQuery {
   limit?: string;
   status?: string;
   company?: string;
+  customer?: string;
   startDate?: string;
   endDate?: string;
 }
@@ -71,6 +72,10 @@ export class OrderService {
 
     if (query.company) {
       filter.company = query.company;
+    }
+
+    if (query.customer) {
+      filter.customer = query.customer;
     }
 
     if (query.startDate || query.endDate) {

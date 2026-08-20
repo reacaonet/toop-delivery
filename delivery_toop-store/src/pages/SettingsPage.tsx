@@ -45,6 +45,7 @@ const SettingsPage = () => {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [uploadingLogo, setUploadingLogo] = useState(false)
+  const [categories, setCategories] = useState<{ _id: string; name: string; icon?: string }[]>([])
   const logoInputRef = useRef<HTMLInputElement>(null)
 
   const [formData, setFormData] = useState({
@@ -76,8 +77,21 @@ const SettingsPage = () => {
   })
 
   useEffect(() => {
-    if (companyId) loadCompany()
+    if (companyId) {
+      loadCompany()
+      loadCategories()
+    }
   }, [companyId])
+
+  const loadCategories = async () => {
+    try {
+      const res = await api.get('/categories/public')
+      const data = res.data?.data ?? res.data
+      setCategories(Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [])
+    } catch (e) {
+      console.error('Erro ao carregar categorias:', e)
+    }
+  }
 
   const loadCompany = async () => {
     try {
@@ -300,13 +314,14 @@ const SettingsPage = () => {
               </div>
               <div className="form-group">
                 <label>Categoria</label>
-                <input
-                  type="text"
-                  name="category"
-                  value={formData.category}
-                  onChange={handleChange}
-                  placeholder="Restaurante, Pizzaria..."
-                />
+                <select name="category" value={formData.category} onChange={handleChange}>
+                  <option value="">Selecione uma categoria</option>
+                  {categories.map((c) => (
+                    <option key={c._id} value={c.name}>
+                      {c.icon ? `${c.icon} ` : ''}{c.name}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 

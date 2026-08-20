@@ -6,14 +6,35 @@ interface User {
   email: string
   role: string
   name?: string
+  deliveryman?: {
+    _id: string
+    name: string
+    email: string
+    phone?: string
+    vehicleType?: string
+    vehiclePlate?: string
+    cpf?: string
+    cnh?: string
+    avatar?: string
+    rating?: number
+    totalDeliveries?: number
+    active?: boolean
+    documents?: {
+      cnh?: string
+      vehicleDocument?: string
+      photo?: string
+    }
+  }
   [key: string]: unknown
 }
 
 interface AuthContextType {
   user: User | null
   token: string | null
+  deliverymanId: string | null
   login: (credentials: { email: string; password: string }) => Promise<void>
   logout: () => void
+  refreshUser: () => void
   isAuthenticated: boolean
   loading: boolean
 }
@@ -32,6 +53,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null)
   const [token, setToken] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+
+  const deliverymanId = user?.deliveryman?._id || null
 
   useEffect(() => {
     const savedToken = localStorage.getItem('token')
@@ -82,13 +105,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null)
   }
 
+  const refreshUser = async () => {
+    try {
+      const savedToken = localStorage.getItem('token')
+      if (!savedToken) return
+      const response = await fetch('/api/auth/me', {
+        headers: { Authorization: `Bearer ${savedToken}` },
+      })
+      const body = await response.json()
+      const freshUser = body?.data?.user ?? body?.data
+      if (freshUser) {
+        localStorage.setItem('user', JSON.stringify(freshUser))
+        setUser(freshUser)
+      }
+    } catch {
+      // ignore
+    }
+  }
+
   return (
     <AuthContext.Provider
       value={{
         user,
         token,
+        deliverymanId,
         login,
         logout,
+        refreshUser,
         isAuthenticated: !!token,
         loading,
       }}

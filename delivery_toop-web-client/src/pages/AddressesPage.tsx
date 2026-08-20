@@ -1,6 +1,7 @@
 import { useState, useEffect, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useToast } from '../context/ToastContext'
+import { useAuth } from '../context/AuthContext'
 
 interface Address {
   id: string
@@ -30,29 +31,33 @@ function generateId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8)
 }
 
-function loadAddresses(): Address[] {
+function loadAddresses(userId: string): Address[] {
   try {
-    return JSON.parse(localStorage.getItem('deliveryAddresses') || '[]')
+    return JSON.parse(localStorage.getItem(`deliveryAddresses_${userId}`) || '[]')
   } catch {
     return []
   }
 }
 
-function saveAddresses(addresses: Address[]) {
-  localStorage.setItem('deliveryAddresses', JSON.stringify(addresses))
+function saveAddresses(userId: string, addresses: Address[]) {
+  localStorage.setItem(`deliveryAddresses_${userId}`, JSON.stringify(addresses))
 }
 
 export default function AddressesPage() {
   const navigate = useNavigate()
   const { showToast } = useToast()
+  const { user } = useAuth()
+  const userId = user?._id || ''
   const [addresses, setAddresses] = useState<Address[]>([])
   const [editing, setEditing] = useState<Address | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState(emptyAddress)
 
   useEffect(() => {
-    setAddresses(loadAddresses())
-  }, [])
+    if (userId) {
+      setAddresses(loadAddresses(userId))
+    }
+  }, [userId])
 
   const updateField = (field: string, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }))
@@ -104,7 +109,7 @@ export default function AddressesPage() {
     }
 
     setAddresses(updated)
-    saveAddresses(updated)
+    saveAddresses(userId, updated)
     setShowForm(false)
     setEditing(null)
     setForm(emptyAddress)
@@ -121,7 +126,7 @@ export default function AddressesPage() {
       updated[0].isDefault = true
     }
     setAddresses(updated)
-    saveAddresses(updated)
+    saveAddresses(userId, updated)
     showToast('Endereço removido!')
   }
 
@@ -131,7 +136,7 @@ export default function AddressesPage() {
       isDefault: a.id === id,
     }))
     setAddresses(updated)
-    saveAddresses(updated)
+    saveAddresses(userId, updated)
     showToast('Endereço principal definido!')
   }
 

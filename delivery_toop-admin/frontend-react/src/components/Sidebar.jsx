@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
@@ -15,10 +15,29 @@ import {
   Image
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { deliverymanService } from '../services/api';
 
 const Sidebar = () => {
   const location = useLocation();
   const { user, logout } = useAuth();
+  const [pendingDocsCount, setPendingDocsCount] = useState(0);
+
+  useEffect(() => {
+    const fetchPendingDocs = async () => {
+      try {
+        const data = await deliverymanService.getDeliverymen();
+        const list = Array.isArray(data) ? data : (data?.data || []);
+        const pending = list.filter((dm) => {
+          const docs = dm.documents || {};
+          return !(docs.cnh && docs.vehicleDocument && docs.photo);
+        });
+        setPendingDocsCount(pending.length);
+      } catch (error) {
+        console.error('Erro ao buscar docs pendentes:', error);
+      }
+    };
+    fetchPendingDocs();
+  }, []);
 
   const menuItems = [
     { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
@@ -52,9 +71,31 @@ const Sidebar = () => {
               key={item.path}
               to={item.path}
               className={`nav-item ${isActive ? 'active' : ''}`}
+              style={{ position: 'relative' }}
             >
               <Icon size={20} />
               {item.label}
+              {item.path === '/deliverymen' && pendingDocsCount > 0 && (
+                <span style={{
+                  position: 'absolute',
+                  top: '4px',
+                  right: '8px',
+                  backgroundColor: '#ef4444',
+                  color: '#fff',
+                  borderRadius: '50%',
+                  minWidth: '18px',
+                  height: '18px',
+                  fontSize: '0.7rem',
+                  fontWeight: 700,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '0 4px',
+                  lineHeight: 1,
+                }}>
+                  {pendingDocsCount}
+                </span>
+              )}
             </Link>
           );
         })}

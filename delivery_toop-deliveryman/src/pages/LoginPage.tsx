@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 
 const LoginPage: React.FC = () => {
@@ -66,6 +66,9 @@ const LoginPage: React.FC = () => {
               {loading ? 'Entrando...' : 'Entrar'}
             </button>
           </form>
+          <p style={{ textAlign: 'center', marginTop: '1rem' }}>
+            Não tem conta? <Link to="/register">Cadastre-se</Link>
+          </p>
         </div>
       </div>
     </div>

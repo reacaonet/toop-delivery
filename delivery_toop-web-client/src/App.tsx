@@ -4,6 +4,7 @@ import { CartProvider } from './context/CartContext'
 import { ToastProvider } from './context/ToastContext'
 import Layout from './components/Layout'
 import LoginPage from './pages/LoginPage'
+import RegisterPage from './pages/RegisterPage'
 import HomePage from './pages/HomePage'
 import CompanyPage from './pages/CompanyPage'
 import CartPage from './pages/CartPage'
@@ -25,6 +26,7 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={token ? <Navigate to="/" replace /> : <LoginPage />} />
+      <Route path="/register" element={token ? <Navigate to="/" replace /> : <RegisterPage />} />
       <Route
         element={
           <ProtectedRoute>

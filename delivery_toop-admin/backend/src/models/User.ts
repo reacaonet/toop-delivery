@@ -5,9 +5,10 @@ export interface IUser extends Document {
   email: string;
   password: string;
   phone?: string;
-  role: 'admin' | 'manager' | 'operator';
+  role: 'admin' | 'manager' | 'operator' | 'deliveryman' | 'customer';
   active: boolean;
   company?: mongoose.Types.ObjectId;
+  deliveryman?: mongoose.Types.ObjectId;
   avatar?: string;
   lastLogin?: Date;
   createdAt: Date;
@@ -20,9 +21,10 @@ const UserSchema = new Schema<IUser>(
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     password: { type: String, required: true, select: false },
     phone: { type: String, trim: true },
-    role: { type: String, enum: ['admin', 'manager', 'operator'], default: 'operator' },
+    role: { type: String, enum: ['admin', 'manager', 'operator', 'deliveryman', 'customer'], default: 'operator' },
     active: { type: Boolean, default: true },
     company: { type: Schema.Types.ObjectId, ref: 'Company' },
+    deliveryman: { type: Schema.Types.ObjectId, ref: 'Deliveryman' },
     avatar: { type: String },
     lastLogin: { type: Date },
   },

@@ -1,13 +1,15 @@
 import React from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
-import { Home, Package, Truck, History } from 'lucide-react'
+import { Home, Package, Truck, History, User } from 'lucide-react'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import Layout from './components/Layout'
 import LoginPage from './pages/LoginPage'
+import RegisterPage from './pages/RegisterPage'
 import DashboardPage from './pages/DashboardPage'
 import AvailableOrdersPage from './pages/AvailableOrdersPage'
 import ActiveDeliveryPage from './pages/ActiveDeliveryPage'
 import HistoryPage from './pages/HistoryPage'
+import ProfilePage from './pages/ProfilePage'
 
 function BottomNav() {
   const location = useLocation()
@@ -41,7 +43,14 @@ function BottomNav() {
         onClick={() => window.location.href = '/history'}
       >
         <History size={22} />
-        Histórico
+        Historico
+      </button>
+      <button
+        className={`bottom-nav-item ${isActive('/profile') ? 'active' : ''}`}
+        onClick={() => window.location.href = '/profile'}
+      >
+        <User size={22} />
+        Perfil
       </button>
     </nav>
   )
@@ -56,6 +65,7 @@ function ProtectedLayout() {
           <Route path="/available" element={<AvailableOrdersPage />} />
           <Route path="/active" element={<ActiveDeliveryPage />} />
           <Route path="/history" element={<HistoryPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Layout>
@@ -79,6 +89,7 @@ function AppContent() {
     return (
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     )

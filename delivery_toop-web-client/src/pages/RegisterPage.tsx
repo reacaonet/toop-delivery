@@ -1,24 +1,26 @@
 import { useState, type FormEvent } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
-export default function LoginPage() {
+export default function RegisterPage() {
+  const [name, setName] = useState('')
   const [email, setEmail] = useState('')
+  const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
-  const { login, loading } = useAuth()
+  const { register, loading } = useAuth()
   const navigate = useNavigate()
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     setError('')
     try {
-      await login(email, password)
+      await register({ name, email, phone: phone || undefined, password })
       navigate('/', { replace: true })
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
-        'Email ou senha inválidos'
+        'Erro ao criar conta'
       setError(msg)
     }
   }
@@ -52,8 +54,8 @@ export default function LoginPage() {
             <h1>Toop</h1>
             <span>Delivery</span>
           </div>
-          <h2>Entrar</h2>
-          <p className="subtitle">Acesse sua conta para fazer pedidos</p>
+          <h2>Criar conta</h2>
+          <p className="subtitle">Cadastre-se para começar a pedir</p>
 
           <form onSubmit={handleSubmit}>
             {error && (
@@ -61,6 +63,22 @@ export default function LoginPage() {
                 <span>⚠️</span> {error}
               </div>
             )}
+
+            <div className="form-group">
+              <label htmlFor="name">Nome</label>
+              <div className="form-input-wrapper">
+                <span className="input-icon">👤</span>
+                <input
+                  id="name"
+                  className="form-input"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Seu nome completo"
+                  required
+                />
+              </div>
+            </div>
 
             <div className="form-group">
               <label htmlFor="email">Email</label>
@@ -79,6 +97,21 @@ export default function LoginPage() {
             </div>
 
             <div className="form-group">
+              <label htmlFor="phone">Telefone</label>
+              <div className="form-input-wrapper">
+                <span className="input-icon">📱</span>
+                <input
+                  id="phone"
+                  className="form-input"
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="(11) 99999-9999"
+                />
+              </div>
+            </div>
+
+            <div className="form-group">
               <label htmlFor="password">Senha</label>
               <div className="form-input-wrapper">
                 <span className="input-icon">🔒</span>
@@ -88,7 +121,8 @@ export default function LoginPage() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Sua senha"
+                  placeholder="Mínimo 6 caracteres"
+                  minLength={6}
                   required
                 />
               </div>
@@ -99,15 +133,12 @@ export default function LoginPage() {
               className="btn btn-primary btn-full btn-lg"
               disabled={loading}
             >
-              {loading ? 'Entrando...' : 'Entrar'}
+              {loading ? 'Criando conta...' : 'Criar conta'}
             </button>
           </form>
 
-          <p style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '0.9rem', color: '#6b7280' }}>
-            Nao tem conta?{' '}
-            <Link to="/register" style={{ color: '#f97316', fontWeight: 600, textDecoration: 'none' }}>
-              Cadastre-se
-            </Link>
+          <p style={{ textAlign: 'center', marginTop: '1rem' }}>
+            Já tem conta? <Link to="/login">Entrar</Link>
           </p>
         </div>
       </div>

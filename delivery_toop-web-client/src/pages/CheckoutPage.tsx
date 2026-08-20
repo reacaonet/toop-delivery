@@ -25,9 +25,9 @@ const paymentMethods = [
   { value: 'cash', label: 'Dinheiro', icon: '💵' },
 ]
 
-function loadAddresses(): SavedAddress[] {
+function loadAddresses(userId: string): SavedAddress[] {
   try {
-    return JSON.parse(localStorage.getItem('deliveryAddresses') || '[]')
+    return JSON.parse(localStorage.getItem(`deliveryAddresses_${userId}`) || '[]')
   } catch {
     return []
   }
@@ -48,7 +48,7 @@ export default function CheckoutPage() {
   const [showAddressPicker, setShowAddressPicker] = useState(false)
 
   useEffect(() => {
-    const addrs = loadAddresses()
+    const addrs = loadAddresses(user?._id || '')
     setAddresses(addrs)
     const defaultAddr = addrs.find((a) => a.isDefault) || addrs[0]
     if (defaultAddr) {

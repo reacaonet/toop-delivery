@@ -19,6 +19,11 @@ export interface IDeliveryman extends Document {
     vehicleDocument?: string;
     photo?: string;
   };
+  documentStatus?: {
+    cnh: 'pending' | 'approved' | 'rejected';
+    vehicleDocument: 'pending' | 'approved' | 'rejected';
+    photo: 'pending' | 'approved' | 'rejected';
+  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -45,6 +50,11 @@ const DeliverymanSchema = new Schema<IDeliveryman>(
       cnh: String,
       vehicleDocument: String,
       photo: String,
+    },
+    documentStatus: {
+      cnh: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
+      vehicleDocument: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
+      photo: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
     },
   },
   { timestamps: true, toJSON: { transform(_doc, ret) { const { __v: _v, ...rest } = ret; return rest; } } }

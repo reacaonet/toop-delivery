@@ -1,5 +1,7 @@
 import { DeliverymanModel } from "../models/Deliveryman";
+import { UserModel } from "../models/User";
 import { AppError } from "../middleware/errorHandler";
+import bcrypt from "bcrypt";
 
 interface PaginationQuery {
   page?: string;
@@ -19,6 +21,7 @@ export class DeliverymanService {
     email: string;
     phone: string;
     vehicleType?: string;
+    password?: string;
   }) {
     const existingDeliveryman = await DeliverymanModel.findOne({
       email: data.email,
@@ -27,7 +30,25 @@ export class DeliverymanService {
       throw new AppError("Email já está em uso", 409);
     }
 
+    const existingUser = await UserModel.findOne({ email: data.email });
+    if (existingUser) {
+      throw new AppError("Email já está em uso", 409);
+    }
+
     const deliveryman = await DeliverymanModel.create(data);
+
+    const plainPassword = data.password || "entregador123";
+    const hashedPassword = await bcrypt.hash(plainPassword, 10);
+    await UserModel.create({
+      name: data.name,
+      email: data.email,
+      password: hashedPassword,
+      phone: data.phone,
+      role: "deliveryman",
+      active: true,
+      deliveryman: deliveryman._id,
+    });
+
     return deliveryman;
   }
 
@@ -65,6 +86,20 @@ export class DeliverymanService {
       phone?: string;
       vehicleType?: string;
       active?: boolean;
+      cpf?: string;
+      cnh?: string;
+      vehiclePlate?: string;
+      avatar?: string;
+      documents?: {
+        cnh?: string;
+        vehicleDocument?: string;
+        photo?: string;
+      };
+      documentStatus?: {
+        cnh?: 'pending' | 'approved' | 'rejected';
+        vehicleDocument?: 'pending' | 'approved' | 'rejected';
+        photo?: 'pending' | 'approved' | 'rejected';
+      };
     }
   ) {
     if (data.email) {
@@ -77,7 +112,28 @@ export class DeliverymanService {
       }
     }
 
-    const deliveryman = await DeliverymanModel.findByIdAndUpdate(id, data, {
+    const updateData: any = { ...data };
+
+    if (data.documentStatus) {
+      const current = await DeliverymanModel.findById(id);
+      const merged = {
+        cnh: data.documentStatus.cnh || current?.documentStatus?.cnh || 'pending',
+        vehicleDocument: data.documentStatus.vehicleDocument || current?.documentStatus?.vehicleDocument || 'pending',
+        photo: data.documentStatus.photo || current?.documentStatus?.photo || 'pending',
+      };
+      updateData.documentStatus = merged;
+
+      const allApproved = merged.cnh === 'approved' && merged.vehicleDocument === 'approved' && merged.photo === 'approved';
+      const anyRejected = merged.cnh === 'rejected' || merged.vehicleDocument === 'rejected' || merged.photo === 'rejected';
+
+      if (allApproved) {
+        updateData.active = true;
+      } else if (anyRejected) {
+        updateData.active = false;
+      }
+    }
+
+    const deliveryman = await DeliverymanModel.findByIdAndUpdate(id, updateData, {
       new: true,
       runValidators: true,
     });

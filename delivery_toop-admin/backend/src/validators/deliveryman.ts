@@ -18,6 +18,20 @@ export const updateDeliverymanSchema = z.object({
     phone: z.string().optional(),
     vehicleType: vehicleTypeEnum.optional(),
     active: z.boolean().optional(),
+    cpf: z.string().optional(),
+    cnh: z.string().optional(),
+    vehiclePlate: z.string().optional(),
+    avatar: z.string().optional(),
+    documents: z.object({
+      cnh: z.string().optional(),
+      vehicleDocument: z.string().optional(),
+      photo: z.string().optional(),
+    }).optional(),
+    documentStatus: z.object({
+      cnh: z.enum(['pending', 'approved', 'rejected']).optional(),
+      vehicleDocument: z.enum(['pending', 'approved', 'rejected']).optional(),
+      photo: z.enum(['pending', 'approved', 'rejected']).optional(),
+    }).optional(),
   }),
 });
 
