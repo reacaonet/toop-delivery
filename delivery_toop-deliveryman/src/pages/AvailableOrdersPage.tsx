@@ -64,7 +64,11 @@ const AvailableOrdersPage: React.FC = () => {
   }
 
   const getAddress = (order: Order) => {
-    return order.deliveryAddress || order.address || 'Endereço não informado'
+    const addr = order.deliveryAddress || order.address
+    if (!addr) return 'Endereço não informado'
+    if (typeof addr === 'string') return addr
+    const parts = [addr.street, addr.number, addr.neighborhood, addr.city].filter(Boolean)
+    return parts.length > 0 ? parts.join(', ') : 'Endereço não informado'
   }
 
   const getCustomerName = (order: Order) => {
