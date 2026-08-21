@@ -1,12 +1,21 @@
 import { CartModel } from "../models/Cart";
 import { ProductModel } from "../models/Product";
+import { CompanyModel } from "../models/Company";
 import { AppError } from "../middleware/errorHandler";
 
 export class CartService {
   async getOrCreate(customerId: string, companyId: string) {
     let cart = await CartModel.findOne({ customer: customerId, company: companyId, status: 'active' });
     if (!cart) {
-      cart = await CartModel.create({ customer: customerId, company: companyId, items: [], subtotal: 0, total: 0 });
+      const company = await CompanyModel.findById(companyId).select('deliveryFee');
+      cart = await CartModel.create({ customer: customerId, company: companyId, items: [], subtotal: 0, deliveryFee: company?.deliveryFee || 0, total: 0 });
+    } else {
+      const company = await CompanyModel.findById(companyId).select('deliveryFee');
+      if (company?.deliveryFee != null && cart.deliveryFee !== company.deliveryFee) {
+        cart.deliveryFee = company.deliveryFee;
+        this.recalculateTotals(cart);
+        await cart.save();
+      }
     }
     return cart;
   }

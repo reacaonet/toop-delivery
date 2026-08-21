@@ -11,6 +11,7 @@ import productRoutes from "./product.routes";
 import cartRoutes from "./cart.routes";
 import bannerRoutes from "./banner.routes";
 import uploadRoutes from "./upload.routes";
+import settingsRoutes from "./settings.routes";
 
 const router = Router();
 
@@ -26,5 +27,6 @@ router.use("/products", productRoutes);
 router.use("/cart", cartRoutes);
 router.use("/banners", bannerRoutes);
 router.use("/upload", uploadRoutes);
+router.use("/settings", settingsRoutes);
 
 export default router;

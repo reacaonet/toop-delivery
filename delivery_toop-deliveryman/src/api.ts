@@ -91,4 +91,11 @@ export const orderService = {
   },
 }
 
+export const settingsService = {
+  getSettings: async () => {
+    const response = await api.get('/settings')
+    return response.data?.data ?? response.data
+  },
+}
+
 export default api

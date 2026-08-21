@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Bell, Settings as SettingsIcon, User, Building2, Mail, CheckCircle, XCircle, Clock, Percent, Save } from 'lucide-react';
-import { notificationService } from '../services/api';
+import { notificationService, settingsService } from '../services/api';
 
 const Settings = () => {
   const [notifications, setNotifications] = useState([]);
@@ -31,13 +31,16 @@ const Settings = () => {
     }
   };
 
-  const loadSettings = () => {
-    const savedSettings = localStorage.getItem('systemSettings');
-    if (savedSettings) {
-      try {
-        setSettings(JSON.parse(savedSettings));
-      } catch {
-        localStorage.removeItem('systemSettings');
+  const loadSettings = async () => {
+    try {
+      const data = await settingsService.getSettings();
+      if (data) {
+        setSettings(prev => ({ ...prev, ...data }));
+      }
+    } catch {
+      const saved = localStorage.getItem('systemSettings');
+      if (saved) {
+        try { setSettings(prev => ({ ...prev, ...JSON.parse(saved) })); } catch {}
       }
     }
   };
@@ -52,16 +55,12 @@ const Settings = () => {
   const saveSettings = async () => {
     setSaving(true);
     try {
-      // Salvar no localStorage (poderia ser na API)
+      await settingsService.updateSettings(settings);
       localStorage.setItem('systemSettings', JSON.stringify(settings));
-      
-      // Simular salvamento na API
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      alert('Configurações salvas com sucesso!');
+      alert('Configuracoes salvas com sucesso!');
     } catch (error) {
-      console.error('Erro ao salvar configurações:', error);
-      alert('Erro ao salvar configurações');
+      console.error('Erro ao salvar configuracoes:', error);
+      alert('Erro ao salvar configuracoes');
     } finally {
       setSaving(false);
     }
