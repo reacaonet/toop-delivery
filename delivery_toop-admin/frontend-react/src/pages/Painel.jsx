@@ -53,6 +53,7 @@ export default function Painel() {
   const [tab, setTab] = useState('ongoing');
   const [updating, setUpdating] = useState(false);
   const [deliverymen, setDeliverymen] = useState([]);
+  const [loadingDm, setLoadingDm] = useState(false);
   const [showDmModal, setShowDmModal] = useState(false);
   const [pendingOrderId, setPendingOrderId] = useState(null);
   const { user, logout, token } = useAuth();
@@ -88,16 +89,19 @@ export default function Painel() {
   useEffect(() => { if (selectedId) loadDetail(selectedId); }, [selectedId, loadDetail]);
 
   const loadDeliverymen = useCallback(async () => {
+    setLoadingDm(true);
     try {
       const r = await deliverymanService.getDeliverymen();
       const list = Array.isArray(r?.data) ? r.data : Array.isArray(r) ? r : [];
       setDeliverymen(list.filter(d => d.active && d.documentStatus?.cnh === 'approved' && d.documentStatus?.vehicleDocument === 'approved' && d.documentStatus?.photo === 'approved'));
     } catch { /* ignore */ }
+    setLoadingDm(false);
   }, []);
 
-  const handleEnviarEntrega = async (id) => {
+  useEffect(() => { if (showDmModal) loadDeliverymen(); }, [showDmModal, loadDeliverymen]);
+
+  const handleEnviarEntrega = (id) => {
     setPendingOrderId(id);
-    await loadDeliverymen();
     setShowDmModal(true);
   };
 
@@ -291,7 +295,9 @@ export default function Painel() {
             <h3 style={{ margin: '0 0 1rem', display: 'flex', alignItems: 'center', gap: 8 }}>
               <Truck size={20} /> Selecionar Entregador
             </h3>
-            {deliverymen.length === 0 ? (
+            {loadingDm ? (
+              <p style={{ color: '#6b7280', textAlign: 'center', padding: 20 }}>Carregando...</p>
+            ) : deliverymen.length === 0 ? (
               <p style={{ color: '#6b7280', textAlign: 'center', padding: 20 }}>Nenhum entregador disponivel</p>
             ) : (
               deliverymen.map(dm => (
