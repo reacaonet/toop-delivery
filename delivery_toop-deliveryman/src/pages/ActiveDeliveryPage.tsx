@@ -12,9 +12,8 @@ interface Order {
   storeName?: string
   store?: { name: string }
   customerName?: string
-  customer?: { name: string }
-  customerPhone?: string
   customer?: { name: string; phone?: string }
+  deliveryman?: string | { _id: string; name?: string }
   deliveryAddress?: string
   address?: string
   items?: Array<{ name: string; quantity: number; price: number }>
@@ -33,7 +32,12 @@ const ActiveDeliveryPage: React.FC = () => {
       const data = await orderService.getOrders({ status: 'delivering' })
       const orderList = Array.isArray(data) ? data : []
       const active = orderList.find(
-        (o: Order) => o.deliverymanId === user?._id
+        (o: Order) => {
+          const dm = o.deliveryman
+          if (!dm) return false
+          const dmId = typeof dm === 'string' ? dm : (dm as any)._id
+          return dmId === user?.deliveryman?._id
+        }
       )
       setOrder(active || null)
     } catch {

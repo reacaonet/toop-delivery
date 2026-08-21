@@ -33,7 +33,8 @@ export class OrderController {
     try {
       const order = await orderService.updateStatus(
         req.params.id,
-        req.body.status
+        req.body.status,
+        req.body.deliverymanId
       );
       return res.status(200).json({ success: true, data: order });
     } catch (error) {

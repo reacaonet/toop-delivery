@@ -52,7 +52,7 @@ export class OrderService {
   }
 
   async getById(id: string) {
-    const order = await OrderModel.findById(id).populate("company");
+    const order = await OrderModel.findById(id).populate("company").populate("customer").populate("deliveryman");
     if (!order) {
       throw new AppError("Pedido não encontrado", 404);
     }
@@ -110,18 +110,45 @@ export class OrderService {
     };
   }
 
-  async updateStatus(id: string, status: string) {
-    const order = await OrderModel.findByIdAndUpdate(
-      id,
-      { status },
-      { new: true, runValidators: true }
-    );
-
+  async updateStatus(id: string, status: string, deliverymanId?: string) {
+    const order = await OrderModel.findById(id);
     if (!order) {
       throw new AppError("Pedido não encontrado", 404);
     }
 
-    return order;
+    const allowedTransitions: Record<string, string[]> = {
+      pending: ["confirmed", "cancelled"],
+      confirmed: ["preparing", "cancelled"],
+      preparing: ["ready", "cancelled"],
+      ready: ["delivering", "cancelled"],
+      delivering: ["delivered", "cancelled"],
+      delivered: [],
+      cancelled: [],
+    };
+
+    const allowed = allowedTransitions[order.status] || [];
+    if (!allowed.includes(status)) {
+      throw new AppError(
+        `Transição de status inválida: ${order.status} → ${status}`,
+        400
+      );
+    }
+
+    const updateData: any = { status };
+
+    if (status === "delivering") {
+      if (!deliverymanId) {
+        throw new AppError("deliverymanId é obrigatório ao aceitar entrega", 400);
+      }
+      updateData.deliveryman = deliverymanId;
+    }
+
+    const updated = await OrderModel.findByIdAndUpdate(id, updateData, {
+      new: true,
+      runValidators: true,
+    });
+
+    return updated;
   }
 
   async cancel(id: string) {

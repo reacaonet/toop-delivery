@@ -132,17 +132,32 @@ describe('OrderService', () => {
   });
 
   describe('updateStatus', () => {
-    it('should update order status', async () => {
-      const mockOrder = { _id: 'order123', status: 'delivered' };
-      MockOrderModel.findByIdAndUpdate.mockResolvedValue(mockOrder as any);
+    it('should update order status with valid transition', async () => {
+      const mockOrder = { _id: 'order123', status: 'ready' };
+      MockOrderModel.findById.mockResolvedValue(mockOrder as any);
+      MockOrderModel.findByIdAndUpdate.mockResolvedValue({ _id: 'order123', status: 'delivering' } as any);
 
-      const result = await orderService.updateStatus('order123', 'delivered');
+      const result = await orderService.updateStatus('order123', 'delivering', 'deliveryman123');
 
-      expect(result.status).toBe('delivered');
+      expect(result!.status).toBe('delivering');
+    });
+
+    it('should throw on invalid transition', async () => {
+      const mockOrder = { _id: 'order123', status: 'pending' };
+      MockOrderModel.findById.mockResolvedValue(mockOrder as any);
+
+      await expect(orderService.updateStatus('order123', 'delivered')).rejects.toThrow('Transição de status inválida');
+    });
+
+    it('should require deliverymanId when transitioning to delivering', async () => {
+      const mockOrder = { _id: 'order123', status: 'ready' };
+      MockOrderModel.findById.mockResolvedValue(mockOrder as any);
+
+      await expect(orderService.updateStatus('order123', 'delivering')).rejects.toThrow('deliverymanId é obrigatório');
     });
 
     it('should throw if order not found', async () => {
-      MockOrderModel.findByIdAndUpdate.mockResolvedValue(null);
+      MockOrderModel.findById.mockResolvedValue(null);
 
       await expect(orderService.updateStatus('nonexistent', 'delivered')).rejects.toThrow(AppError);
     });

@@ -13,6 +13,7 @@ interface Order {
   store?: { name: string }
   customerName?: string
   customer?: { name: string }
+  deliveryman?: string | { _id: string; name?: string }
   deliveryAddress?: string
   address?: string
   items?: Array<{ name: string; quantity: number; price: number }>
@@ -45,10 +46,11 @@ const AvailableOrdersPage: React.FC = () => {
   }, [fetchOrders])
 
   const handleAccept = async (orderId: string) => {
-    if (!user?._id) return
+    const dmId = user?.deliveryman?._id
+    if (!dmId) return
     setAcceptingId(orderId)
     try {
-      await orderService.updateOrderStatus(orderId, 'delivering', user._id)
+      await orderService.updateOrderStatus(orderId, 'delivering', dmId)
       navigate('/active')
     } catch {
       alert('Erro ao aceitar entrega')
