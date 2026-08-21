@@ -95,8 +95,10 @@ export const orderService = {
     const response = await api.get(`/orders/${id}`);
     return response.data?.data ?? response.data;
   },
-  updateOrderStatus: async (id, status) => {
-    const response = await api.put(`/orders/${id}/status`, { status });
+  updateOrderStatus: async (id, status, deliverymanId) => {
+    const payload = { status };
+    if (deliverymanId) payload.deliverymanId = deliverymanId;
+    const response = await api.put(`/orders/${id}/status`, payload);
     return response.data?.data ?? response.data;
   },
   cancelOrder: async (id) => {

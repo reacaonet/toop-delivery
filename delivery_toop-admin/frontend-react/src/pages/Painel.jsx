@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { RefreshCw, Clock, CheckCircle, XCircle, Package, MapPin, Phone, User, LogOut } from 'lucide-react';
-import { orderService } from '../services/api';
+import { RefreshCw, Clock, CheckCircle, XCircle, Package, MapPin, Phone, User, LogOut, Truck } from 'lucide-react';
+import { orderService, deliverymanService } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 
 const STATUS_LABELS = {
@@ -52,6 +52,9 @@ export default function Painel() {
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [tab, setTab] = useState('ongoing');
   const [updating, setUpdating] = useState(false);
+  const [deliverymen, setDeliverymen] = useState([]);
+  const [showDmModal, setShowDmModal] = useState(false);
+  const [pendingOrderId, setPendingOrderId] = useState(null);
   const { user, logout, token } = useAuth();
 
   const loadOrders = useCallback(async () => {
@@ -84,14 +87,34 @@ export default function Painel() {
   useEffect(() => { const i = setInterval(loadOrders, 30000); return () => clearInterval(i); }, [loadOrders]);
   useEffect(() => { if (selectedId) loadDetail(selectedId); }, [selectedId, loadDetail]);
 
+  const loadDeliverymen = useCallback(async () => {
+    try {
+      const r = await deliverymanService.getDeliverymen();
+      const list = Array.isArray(r?.data) ? r.data : Array.isArray(r) ? r : [];
+      setDeliverymen(list.filter(d => d.active && d.documentStatus?.cnh === 'approved' && d.documentStatus?.vehicleDocument === 'approved' && d.documentStatus?.photo === 'approved'));
+    } catch { /* ignore */ }
+  }, []);
+
+  const handleEnviarEntrega = async (id) => {
+    setPendingOrderId(id);
+    await loadDeliverymen();
+    setShowDmModal(true);
+  };
+
+  const handleConfirmarEntrega = (dmId) => {
+    setShowDmModal(false);
+    changeStatus(pendingOrderId, 'delivering', dmId);
+    setPendingOrderId(null);
+  };
+
   const ongoing = orders.filter(o => o.status !== 'cancelled' && o.status !== 'delivered');
   const ended = orders.filter(o => o.status === 'cancelled' || o.status === 'delivered');
   const list = tab === 'ongoing' ? ongoing : ended;
 
-  const changeStatus = async (id, status) => {
+  const changeStatus = async (id, status, deliverymanId) => {
     setUpdating(true);
     try {
-      await orderService.updateOrderStatus(id, status);
+      await orderService.updateOrderStatus(id, status, deliverymanId);
       await loadOrders();
       await loadDetail(id);
     } catch (e) {
@@ -135,7 +158,7 @@ export default function Painel() {
     if (s === 'pending') actions.push(btn('pm-green', 'Aceitar', icons.check, () => changeStatus(id, 'confirmed')));
     if (s === 'confirmed') actions.push(btn('pm-orange', 'Iniciar Preparação', icons.package, () => changeStatus(id, 'preparing')));
     if (s === 'preparing') actions.push(btn('pm-yellow', 'Marcar Pronto', icons.check, () => changeStatus(id, 'ready')));
-    if (s === 'ready') actions.push(btn('pm-blue', 'Enviar Entrega', icons.package, () => changeStatus(id, 'delivering')));
+    if (s === 'ready') actions.push(btn('pm-blue', 'Enviar Entrega', icons.package, () => handleEnviarEntrega(id)));
     if (s === 'delivering') actions.push(btn('pm-green', 'Finalizar', icons.check, () => changeStatus(id, 'delivered')));
     if (s !== 'pending') actions.push(btn('pm-red', 'Cancelar', icons.x, () => cancelOrder(id)));
 
@@ -259,6 +282,44 @@ export default function Painel() {
           )}
         </div>
       </div>
+
+      {showDmModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}
+          onClick={() => setShowDmModal(false)}>
+          <div style={{ background: '#fff', borderRadius: 12, padding: 24, width: '100%', maxWidth: 400, maxHeight: '80vh', overflow: 'auto' }}
+            onClick={e => e.stopPropagation()}>
+            <h3 style={{ margin: '0 0 1rem', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Truck size={20} /> Selecionar Entregador
+            </h3>
+            {deliverymen.length === 0 ? (
+              <p style={{ color: '#6b7280', textAlign: 'center', padding: 20 }}>Nenhum entregador disponivel</p>
+            ) : (
+              deliverymen.map(dm => (
+                <div key={dm._id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem', border: '1px solid #e5e7eb', borderRadius: 8, marginBottom: 8, cursor: 'pointer' }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#f3f4f6'}
+                  onMouseLeave={e => e.currentTarget.style.background = '#fff'}
+                  onClick={() => handleConfirmarEntrega(dm._id)}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    {dm.avatar ? (
+                      <img src={dm.avatar} alt="" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover' }} />
+                    ) : (
+                      <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <User size={16} color="#9ca3af" />
+                      </div>
+                    )}
+                    <div>
+                      <div style={{ fontWeight: 600, fontSize: 14 }}>{dm.name}</div>
+                      <div style={{ fontSize: 12, color: '#6b7280' }}>{dm.vehicleType} {dm.vehiclePlate ? `- ${dm.vehiclePlate}` : ''}</div>
+                    </div>
+                  </div>
+                  <CheckCircle size={20} color="#10b981" />
+                </div>
+              ))
+            )}
+            <button className="pm-btn pm-red" style={{ width: '100%', marginTop: 8 }} onClick={() => setShowDmModal(false)}>Cancelar</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
