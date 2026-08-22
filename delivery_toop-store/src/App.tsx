@@ -7,6 +7,7 @@ import ProductsPage from './pages/ProductsPage'
 import OrdersPage from './pages/OrdersPage'
 import SettingsPage from './pages/SettingsPage'
 import PainelPage from './pages/PainelPage'
+import ReportsPage from './pages/ReportsPage'
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, loading } = useAuth()
@@ -46,6 +47,7 @@ function App() {
                   <Route path="/products" element={<ProductsPage />} />
                   <Route path="/orders" element={<OrdersPage />} />
                   <Route path="/settings" element={<SettingsPage />} />
+                  <Route path="/reports" element={<ReportsPage />} />
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </Layout>
