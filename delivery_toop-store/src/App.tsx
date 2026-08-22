@@ -6,6 +6,7 @@ import DashboardPage from './pages/DashboardPage'
 import ProductsPage from './pages/ProductsPage'
 import OrdersPage from './pages/OrdersPage'
 import SettingsPage from './pages/SettingsPage'
+import PainelPage from './pages/PainelPage'
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, loading } = useAuth()
@@ -30,6 +31,11 @@ function App() {
     <AuthProvider>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/painel/*" element={
+          <AuthGuard>
+            <PainelPage />
+          </AuthGuard>
+        } />
         <Route
           path="/*"
           element={

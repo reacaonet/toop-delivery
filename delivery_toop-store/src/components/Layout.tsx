@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, Package, ShoppingCart, Settings, LogOut, Store } from 'lucide-react'
+import { LayoutDashboard, Package, ShoppingCart, Settings, LogOut, Store, Monitor } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 
 interface LayoutProps {
@@ -14,6 +14,7 @@ const Layout = ({ children }: LayoutProps) => {
     { path: '/products', icon: Package, label: 'Produtos' },
     { path: '/orders', icon: ShoppingCart, label: 'Pedidos' },
     { path: '/settings', icon: Settings, label: 'Configuracoes' },
+    { path: '/painel', icon: Monitor, label: 'Painel de Pedidos' },
   ]
 
   return (

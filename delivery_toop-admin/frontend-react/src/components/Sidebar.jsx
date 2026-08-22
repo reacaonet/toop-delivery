@@ -10,7 +10,6 @@ import {
   Settings,
   User,
   LogOut,
-  Monitor,
   Tag,
   Image
 } from 'lucide-react';
@@ -49,7 +48,6 @@ const Sidebar = () => {
     { path: '/deliverymen', icon: Truck, label: 'Entregadores' },
     { path: '/payments', icon: CreditCard, label: 'Pagamentos' },
     { path: '/settings', icon: Settings, label: 'Configurações' },
-    { path: '/painel', icon: Monitor, label: 'Painel de Pedidos' },
   ];
 
   return (

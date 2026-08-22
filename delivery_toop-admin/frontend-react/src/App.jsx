@@ -13,7 +13,6 @@ import Deliverymen from './pages/Deliverymen';
 import Payments from './pages/Payments';
 import Settings from './pages/Settings';
 import Profile from './pages/Profile';
-import Painel from './pages/Painel';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 
@@ -60,7 +59,6 @@ function AppContent() {
 
   return (
     <Routes>
-      <Route path="/painel/*" element={<Painel />} />
       <Route path="/*" element={<AdminLayout />} />
     </Routes>
   );
