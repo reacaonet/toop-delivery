@@ -13,6 +13,7 @@ import Deliverymen from './pages/Deliverymen';
 import Payments from './pages/Payments';
 import Settings from './pages/Settings';
 import Profile from './pages/Profile';
+import Reports from './pages/Reports';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 
@@ -34,6 +35,7 @@ function AdminLayout() {
             <Route path="/payments" element={<Payments />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/reports" element={<Reports />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>

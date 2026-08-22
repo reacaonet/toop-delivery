@@ -11,7 +11,8 @@ import {
   User,
   LogOut,
   Tag,
-  Image
+  Image,
+  FileText
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { deliverymanService } from '../services/api';
@@ -48,6 +49,7 @@ const Sidebar = () => {
     { path: '/deliverymen', icon: Truck, label: 'Entregadores' },
     { path: '/payments', icon: CreditCard, label: 'Pagamentos' },
     { path: '/settings', icon: Settings, label: 'Configurações' },
+    { path: '/reports', icon: FileText, label: 'Relatórios' },
   ];
 
   return (

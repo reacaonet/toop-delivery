@@ -31,6 +31,7 @@ const Header = () => {
       case '/deliverymen': return 'Entregadores';
       case '/payments': return 'Pagamentos';
       case '/settings': return 'Configurações';
+      case '/reports': return 'Relatórios';
       default: return 'Dashboard';
     }
   };
