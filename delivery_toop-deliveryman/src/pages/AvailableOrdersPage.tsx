@@ -31,7 +31,7 @@ const AvailableOrdersPage: React.FC = () => {
     try {
       const data = await orderService.getOrders({ status: 'ready' })
       const orderList = Array.isArray(data) ? data : []
-      setOrders(orderList)
+      setOrders(orderList.filter(o => !o.deliveryman))
     } catch {
       // ignore
     } finally {
@@ -41,16 +41,14 @@ const AvailableOrdersPage: React.FC = () => {
 
   useEffect(() => {
     fetchOrders()
-    const interval = setInterval(fetchOrders, 10000)
+    const interval = setInterval(fetchOrders, 8000)
     return () => clearInterval(interval)
   }, [fetchOrders])
 
   const handleAccept = async (orderId: string) => {
-    const dmId = user?.deliveryman?._id
-    if (!dmId) return
     setAcceptingId(orderId)
     try {
-      await orderService.updateOrderStatus(orderId, 'delivering', dmId)
+      await orderService.acceptOrder(orderId)
       navigate('/active')
     } catch {
       alert('Erro ao aceitar entrega')

@@ -89,6 +89,10 @@ export const orderService = {
     const response = await api.put(`/orders/${id}/status`, payload)
     return response.data?.data ?? response.data
   },
+  acceptOrder: async (id: string) => {
+    const response = await api.put(`/orders/${id}/accept`)
+    return response.data?.data ?? response.data
+  },
 }
 
 export const settingsService = {

@@ -151,6 +151,20 @@ export class OrderService {
     return updated;
   }
 
+  async acceptOrder(orderId: string, deliverymanId: string) {
+    const order = await OrderModel.findOneAndUpdate(
+      { _id: orderId, status: 'ready', deliveryman: null },
+      { $set: { status: 'delivering', deliveryman: deliverymanId } },
+      { new: true }
+    );
+
+    if (!order) {
+      throw new AppError("Pedido não está mais disponível para entrega", 400);
+    }
+
+    return order;
+  }
+
   async cancel(id: string) {
     const order = await OrderModel.findById(id);
 

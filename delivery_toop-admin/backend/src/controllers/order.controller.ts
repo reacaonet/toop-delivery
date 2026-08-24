@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import orderService from "../services/order.service";
+import { UserModel } from "../models/User";
 
 export class OrderController {
   async create(req: Request, res: Response, next: NextFunction) {
@@ -36,6 +37,20 @@ export class OrderController {
         req.body.status,
         req.body.deliverymanId
       );
+      return res.status(200).json({ success: true, data: order });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async accept(req: Request, res: Response, next: NextFunction) {
+    try {
+      const user = await UserModel.findById((req as any).user?._id).populate('deliveryman');
+      const deliverymanId = user?.deliveryman?._id?.toString();
+      if (!deliverymanId) {
+        return res.status(400).json({ success: false, error: "Entregador não encontrado" });
+      }
+      const order = await orderService.acceptOrder(req.params.id, deliverymanId);
       return res.status(200).json({ success: true, data: order });
     } catch (error) {
       next(error);

@@ -23,6 +23,7 @@ router.put(
   validate(updateOrderStatusSchema),
   orderController.updateStatus
 );
+router.put("/:id/accept", authenticate, orderController.accept);
 router.put("/:id/cancel", authenticate, orderController.cancel);
 router.delete("/:id", authenticate, orderController.cancel);
 

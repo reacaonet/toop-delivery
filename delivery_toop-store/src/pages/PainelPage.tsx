@@ -207,7 +207,9 @@ export default function PainelPage() {
     if (s === 'pending') actions.push(btn('pm-green', 'Aceitar', icons.check, () => changeStatus(id, 'confirmed')))
     if (s === 'confirmed') actions.push(btn('pm-orange', 'Iniciar Preparação', icons.package, () => changeStatus(id, 'preparing')))
     if (s === 'preparing') actions.push(btn('pm-yellow', 'Marcar Pronto', icons.check, () => changeStatus(id, 'ready')))
-    if (s === 'ready') actions.push(btn('pm-blue', 'Enviar Entrega', icons.package, () => handleEnviarEntrega(id)))
+    if (s === 'ready') {
+      actions.push(btn('pm-blue', 'Atribuir Entregador', icons.package, () => handleEnviarEntrega(id)))
+    }
     if (s === 'delivering') actions.push(btn('pm-green', 'Finalizar', icons.check, () => changeStatus(id, 'delivered')))
     if (s !== 'pending') actions.push(btn('pm-red', 'Cancelar', icons.x, () => cancelOrder(id)))
 
@@ -257,6 +259,11 @@ export default function PainelPage() {
                 <span className="pm-badge" style={{ background: STATUS_COLORS[o.status] }}>
                   {STATUS_LABELS[o.status] || o.status}
                 </span>
+                {o.status === 'ready' && !o.deliveryman && (
+                  <span className="pm-badge" style={{ background: '#f59e0b', fontSize: 10, marginLeft: 4 }}>
+                    Aguardando Entregador
+                  </span>
+                )}
                 <span className="pm-card-total">{formatCurrency(o.total)}</span>
               </div>
             </div>
