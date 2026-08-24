@@ -384,6 +384,21 @@ services:
     networks:
       - toop-network
 
+  # Landing Page
+  landpage:
+    container_name: "toop-landpage-dev"
+    image: node:20-alpine
+    working_dir: /app
+    ports:
+      - "4205:4205"
+    restart: unless-stopped
+    volumes:
+      - ./delivery_toop-landpage:/app
+      - landpage_node_modules:/app/node_modules
+    command: sh -c "npm install && npx vite --port 4205 --host 0.0.0.0"
+    networks:
+      - toop-network
+
 volumes:
   mongo_data:
   postgres_data:
@@ -392,6 +407,7 @@ volumes:
   web_client_node_modules:
   store_node_modules:
   deliveryman_app_node_modules:
+  landpage_node_modules:
   ota_storage:
 
 networks:
