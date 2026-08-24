@@ -23,6 +23,7 @@ router.put(
   validate(updateDeliverymanSchema),
   deliverymanController.update
 );
+router.put("/me/availability", authenticate, deliverymanController.toggleAvailability);
 router.delete("/:id", authenticate, deliverymanController.delete);
 
 export default router;

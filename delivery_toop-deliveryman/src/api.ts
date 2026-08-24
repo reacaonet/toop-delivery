@@ -102,4 +102,11 @@ export const settingsService = {
   },
 }
 
+export const deliverymanService = {
+  toggleAvailability: async () => {
+    const response = await api.put('/deliverymen/me/availability')
+    return response.data?.data ?? response.data
+  },
+}
+
 export default api

@@ -23,7 +23,14 @@ interface Order {
     state: string
     zipCode: string
   }
-  company: { name: string } | string
+  company: { name: string; _id?: string } | string
+}
+
+interface Review {
+  _id: string
+  type: string
+  rating: number
+  comment?: string
 }
 
 const statusLabels: Record<string, string> = {
@@ -56,6 +63,11 @@ export default function OrderDetailPage() {
   const navigate = useNavigate()
   const [order, setOrder] = useState<Order | null>(null)
   const [loading, setLoading] = useState(true)
+  const [reviews, setReviews] = useState<Review[]>([])
+  const [showReviewModal, setShowReviewModal] = useState<'store' | 'deliveryman' | null>(null)
+  const [reviewRating, setReviewRating] = useState(5)
+  const [reviewComment, setReviewComment] = useState('')
+  const [submittingReview, setSubmittingReview] = useState(false)
 
   useEffect(() => {
     if (!id) return
@@ -63,6 +75,8 @@ export default function OrderDetailPage() {
       try {
         const { data } = await api.get(`/orders/${id}`)
         setOrder(data.data)
+        const reviewsRes = await api.get(`/reviews/order/${id}`).catch(() => ({ data: { data: [] } }))
+        setReviews(Array.isArray(reviewsRes.data.data) ? reviewsRes.data.data : [])
       } catch {
         navigate('/orders')
       } finally {
@@ -71,6 +85,30 @@ export default function OrderDetailPage() {
     }
     load()
   }, [id, navigate])
+
+  const hasReview = (type: string) => reviews.some(r => r.type === type)
+
+  const submitReview = async () => {
+    if (!order || !showReviewModal) return
+    setSubmittingReview(true)
+    try {
+      await api.post('/reviews', {
+        orderId: order._id,
+        rating: reviewRating,
+        comment: reviewComment || undefined,
+        type: showReviewModal,
+      })
+      const reviewsRes = await api.get(`/reviews/order/${order._id}`)
+      setReviews(Array.isArray(reviewsRes.data.data) ? reviewsRes.data.data : [])
+      setShowReviewModal(null)
+      setReviewRating(5)
+      setReviewComment('')
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Erro ao enviar avaliação')
+    } finally {
+      setSubmittingReview(false)
+    }
+  }
 
   if (loading) return <div className="loading">Carregando pedido...</div>
   if (!order) return <div className="empty-state">Pedido não encontrado</div>
@@ -181,7 +219,75 @@ export default function OrderDetailPage() {
             <p>{order.notes}</p>
           </section>
         )}
+
+        {order.status === 'delivered' && (
+          <section className="order-section">
+            <h2>Avaliar</h2>
+            <div style={{ display: 'flex', gap: 12 }}>
+              {!hasReview('store') && (
+                <button
+                  className="btn btn-primary"
+                  onClick={() => { setShowReviewModal('store'); setReviewRating(5); setReviewComment('') }}
+                >
+                  ★ Avaliar Loja
+                </button>
+              )}
+              {!hasReview('deliveryman') && (
+                <button
+                  className="btn btn-primary"
+                  onClick={() => { setShowReviewModal('deliveryman'); setReviewRating(5); setReviewComment('') }}
+                >
+                  ★ Avaliar Entregador
+                </button>
+              )}
+              {hasReview('store') && hasReview('deliveryman') && (
+                <p style={{ color: 'var(--text-secondary)' }}>Você já avaliou este pedido</p>
+              )}
+            </div>
+          </section>
+        )}
       </div>
+
+      {showReviewModal && (
+        <div className="modal-overlay" onClick={() => setShowReviewModal(null)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: 400 }}>
+            <button className="modal-close" onClick={() => setShowReviewModal(null)}>✕</button>
+            <div style={{ padding: 20 }}>
+              <h2 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: 16 }}>
+                Avaliar {showReviewModal === 'store' ? 'a Loja' : 'o Entregador'}
+              </h2>
+              <div style={{ textAlign: 'center', marginBottom: 16 }}>
+                <div style={{ display: 'flex', justifyContent: 'center', gap: 8, fontSize: 32 }}>
+                  {[1, 2, 3, 4, 5].map(star => (
+                    <span
+                      key={star}
+                      style={{ cursor: 'pointer', opacity: star <= reviewRating ? 1 : 0.3 }}
+                      onClick={() => setReviewRating(star)}
+                    >
+                      ★
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <textarea
+                value={reviewComment}
+                onChange={e => setReviewComment(e.target.value)}
+                placeholder="Deixe um comentário (opcional)"
+                rows={3}
+                style={{ width: '100%', padding: 10, border: '1px solid var(--border)', borderRadius: 8, resize: 'vertical', fontFamily: 'inherit' }}
+              />
+              <button
+                className="btn btn-primary btn-full"
+                style={{ marginTop: 12 }}
+                onClick={submitReview}
+                disabled={submittingReview}
+              >
+                {submittingReview ? 'Enviando...' : 'Enviar Avaliação'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

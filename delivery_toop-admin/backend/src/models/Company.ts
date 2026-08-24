@@ -25,6 +25,7 @@ export interface ICompany extends Document {
   deliveryFee?: number;
   minimumOrder?: number;
   estimatedDeliveryTime?: number;
+  preparationTime?: number;
   rating?: number;
   totalOrders?: number;
   images?: string[];
@@ -59,6 +60,7 @@ const CompanySchema = new Schema<ICompany>(
     deliveryFee: { type: Number, default: 0 },
     minimumOrder: { type: Number, default: 0 },
     estimatedDeliveryTime: { type: Number },
+    preparationTime: { type: Number, default: 20 },
     rating: { type: Number, min: 0, max: 5 },
     totalOrders: { type: Number, default: 0 },
     images: [{ type: String }],

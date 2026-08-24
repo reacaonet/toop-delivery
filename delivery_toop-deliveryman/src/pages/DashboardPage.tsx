@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Package, Truck, History, Star } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
-import { orderService, settingsService } from '../api'
+import { orderService, settingsService, deliverymanService } from '../api'
 
 interface Order {
   _id: string
@@ -21,7 +21,8 @@ interface Order {
 const DashboardPage: React.FC = () => {
   const { user } = useAuth()
   const navigate = useNavigate()
-  const [isOnline, setIsOnline] = useState(true)
+  const [isOnline, setIsOnline] = useState(user?.deliveryman?.available ?? true)
+  const [togglingAvailability, setTogglingAvailability] = useState(false)
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [dmFeePct, setDmFeePct] = useState(2)
@@ -65,6 +66,18 @@ const DashboardPage: React.FC = () => {
       return sum + fee * (1 - dmFeePct / 100);
     }, 0)
 
+  const handleToggleAvailability = async () => {
+    setTogglingAvailability(true)
+    try {
+      const result = await deliverymanService.toggleAvailability()
+      setIsOnline(result.available)
+    } catch {
+      alert('Erro ao alterar disponibilidade')
+    } finally {
+      setTogglingAvailability(false)
+    }
+  }
+
   return (
     <div className="dashboard-page">
       <h2>Olá, {user?.name || user?.email}</h2>
@@ -76,7 +89,8 @@ const DashboardPage: React.FC = () => {
         </div>
         <button
           className={`toggle-switch ${isOnline ? 'active' : ''}`}
-          onClick={() => setIsOnline(!isOnline)}
+          onClick={handleToggleAvailability}
+          disabled={togglingAvailability}
         >
           <div className="toggle-switch-handle" />
         </button>

@@ -60,6 +60,14 @@ export class CompanyService {
       email?: string;
       category?: string;
       active?: boolean;
+      preparationTime?: number;
+      estimatedDeliveryTime?: number;
+      deliveryFee?: number;
+      minimumOrder?: number;
+      openingHours?: Record<string, { open: string; close: string }>;
+      description?: string;
+      logo?: string;
+      address?: any;
     }
   ) {
     const company = await CompanyModel.findByIdAndUpdate(id, data, {

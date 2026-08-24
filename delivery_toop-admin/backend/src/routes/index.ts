@@ -12,6 +12,7 @@ import cartRoutes from "./cart.routes";
 import bannerRoutes from "./banner.routes";
 import uploadRoutes from "./upload.routes";
 import settingsRoutes from "./settings.routes";
+import reviewRoutes from "./review.routes";
 
 const router = Router();
 
@@ -28,5 +29,6 @@ router.use("/cart", cartRoutes);
 router.use("/banners", bannerRoutes);
 router.use("/upload", uploadRoutes);
 router.use("/settings", settingsRoutes);
+router.use("/reviews", reviewRoutes);
 
 export default router;

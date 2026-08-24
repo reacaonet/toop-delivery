@@ -14,9 +14,11 @@ interface Company {
   category: string
   deliveryFee: number
   minimumOrder: number
-  estimatedDeliveryTime: string
+  estimatedDeliveryTime: number
+  preparationTime: number
   rating: number
   address: { street: string; number: string; city: string; state: string }
+  openingHours?: Record<string, { open: string; close: string }>
 }
 
 interface Category {
@@ -43,6 +45,27 @@ export default function CompanyPage() {
   const navigate = useNavigate()
   const { addItem, companyId, setCompanyId } = useCart()
   const { showToast } = useToast()
+
+  const isCompanyOpen = (company: Company): boolean => {
+    if (!company.openingHours || Object.keys(company.openingHours).length === 0) return true
+    const now = new Date()
+    const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+    const today = dayNames[now.getDay()]
+    const hours = company.openingHours[today]
+    if (!hours) return false
+    const currentMinutes = now.getHours() * 60 + now.getMinutes()
+    const [openH, openM] = hours.open.split(':').map(Number)
+    const [closeH, closeM] = hours.close.split(':').map(Number)
+    return currentMinutes >= openH * 60 + openM && currentMinutes < closeH * 60 + closeM
+  }
+
+  const formatDeliveryTime = (company: Company): string => {
+    const prep = company.preparationTime || 20
+    const delivery = company.estimatedDeliveryTime || 25
+    const total = prep + delivery
+    return `${total}-${total + 10} min`
+  }
+
   const [company, setCompany] = useState<Company | null>(null)
   const [categories, setCategories] = useState<Category[]>([])
   const [products, setProducts] = useState<Product[]>([])
@@ -153,8 +176,11 @@ export default function CompanyPage() {
               <h1>{company.name}</h1>
               <p className="company-header-desc">{company.description}</p>
               <div className="company-header-meta">
+                <span className={`company-open-badge ${isCompanyOpen(company) ? 'open' : 'closed'}`}>
+                  {isCompanyOpen(company) ? 'Aberto agora' : 'Fechado'}
+                </span>
                 <span className="meta-item">★ {company.rating?.toFixed(1) ?? '0.0'}</span>
-                <span className="meta-item">⏱ {company.estimatedDeliveryTime}</span>
+                <span className="meta-item">⏱ {formatDeliveryTime(company)}</span>
                 <span className="meta-item">
                   {company.deliveryFee > 0
                     ? `Frete R$ ${company.deliveryFee.toFixed(2)}`

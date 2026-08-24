@@ -86,6 +86,19 @@ const ActiveDeliveryPage: React.FC = () => {
     return o.customerPhone || o.customer?.phone || ''
   }
 
+  const openInMaps = () => {
+    const addr = order?.deliveryAddress || order?.address
+    if (!addr || typeof addr === 'string') {
+      const query = encodeURIComponent(getAddress(order))
+      window.open(`https://www.google.com/maps/dir/?api=1&destination=${query}`, '_blank')
+      return
+    }
+    const query = encodeURIComponent(
+      `${addr.street || ''} ${addr.number || ''} ${addr.neighborhood || ''} ${addr.city || ''}`
+    )
+    window.open(`https://www.google.com/maps/dir/?api=1&destination=${query}`, '_blank')
+  }
+
   return (
     <div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
@@ -148,10 +161,14 @@ const ActiveDeliveryPage: React.FC = () => {
               </span>
             </div>
 
-            <div className="map-placeholder" style={{ marginTop: 16 }}>
-              <MapPin size={20} />
-              Mapa (em breve)
-            </div>
+            <button
+              className="btn btn-primary btn-full"
+              onClick={openInMaps}
+              style={{ marginTop: 16 }}
+            >
+              <MapPin size={16} />
+              Abrir no Google Maps
+            </button>
 
             <div className="delivery-actions">
               <div className="order-items" style={{ textAlign: 'center', background: '#fef3c7', border: '1px solid #fcd34d' }}>

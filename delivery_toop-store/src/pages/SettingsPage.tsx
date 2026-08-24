@@ -66,6 +66,7 @@ const SettingsPage = () => {
     deliveryFee: '',
     minimumOrder: '',
     estimatedDeliveryTime: '',
+    preparationTime: '20',
   })
 
   const [openingHours, setOpeningHours] = useState<Record<string, { open: string; close: string; closed: boolean }>>(() => {
@@ -115,6 +116,7 @@ const SettingsPage = () => {
         deliveryFee: data.deliveryFee ?? '',
         minimumOrder: data.minimumOrder ?? '',
         estimatedDeliveryTime: data.estimatedDeliveryTime ?? '',
+        preparationTime: data.preparationTime ?? '20',
       })
       if (data.openingHours) {
         const hours: Record<string, { open: string; close: string; closed: boolean }> = {}
@@ -206,6 +208,7 @@ const SettingsPage = () => {
         deliveryFee: formData.deliveryFee ? Number(formData.deliveryFee) : 0,
         minimumOrder: formData.minimumOrder ? Number(formData.minimumOrder) : 0,
         estimatedDeliveryTime: formData.estimatedDeliveryTime ? Number(formData.estimatedDeliveryTime) : undefined,
+        preparationTime: formData.preparationTime ? Number(formData.preparationTime) : 20,
         openingHours: oh,
       }
       await api.put(`/companies/${companyId}`, payload)
@@ -375,7 +378,7 @@ const SettingsPage = () => {
 
           <div className="form-section">
             <h4>Entrega</h4>
-            <div className="form-row-3">
+            <div className="form-row">
               <div className="form-group">
                 <label>Taxa de Entrega (R$)</label>
                 <input
@@ -398,14 +401,29 @@ const SettingsPage = () => {
                   step={0.01}
                 />
               </div>
+            </div>
+            <div className="form-row">
               <div className="form-group">
-                <label>Tempo Estimado (min)</label>
+                <label>Tempo Estimado de Preparo (min)</label>
+                <input
+                  type="number"
+                  name="preparationTime"
+                  value={formData.preparationTime}
+                  onChange={handleChange}
+                  min={5}
+                  max={120}
+                />
+              </div>
+              <div className="form-group">
+                <label>Tempo Estimado de Entrega (min)</label>
                 <input
                   type="number"
                   name="estimatedDeliveryTime"
                   value={formData.estimatedDeliveryTime}
                   onChange={handleChange}
-                  min={0}
+                  min={5}
+                  max={120}
+                  placeholder="Ex: 30"
                 />
               </div>
             </div>

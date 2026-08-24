@@ -10,10 +10,12 @@ interface Company {
   description: string
   deliveryFee: number
   minimumOrder: number
-  estimatedDeliveryTime: string
+  estimatedDeliveryTime: number
+  preparationTime: number
   rating: number
   totalOrders: number
   tags: string[]
+  openingHours?: Record<string, { open: string; close: string }>
 }
 
 interface Product {
@@ -80,6 +82,28 @@ function getCompanyLogo(c: { logo?: string } | string): string {
   if (typeof c === 'string') return ''
   if (typeof c === 'object' && 'logo' in c) return (c as { logo?: string }).logo ?? ''
   return ''
+}
+
+function isCompanyOpen(company: Company): boolean {
+  if (!company.openingHours || Object.keys(company.openingHours).length === 0) return true
+  const now = new Date()
+  const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+  const today = dayNames[now.getDay()]
+  const hours = company.openingHours[today]
+  if (!hours) return false
+  const currentMinutes = now.getHours() * 60 + now.getMinutes()
+  const [openH, openM] = hours.open.split(':').map(Number)
+  const [closeH, closeM] = hours.close.split(':').map(Number)
+  const openMinutes = openH * 60 + openM
+  const closeMinutes = closeH * 60 + closeM
+  return currentMinutes >= openMinutes && currentMinutes < closeMinutes
+}
+
+function formatDeliveryTime(company: Company): string {
+  const prep = company.preparationTime || 20
+  const delivery = company.estimatedDeliveryTime || 25
+  const total = prep + delivery
+  return `${total}-${total + 10} min`
 }
 
 export default function HomePage() {
@@ -338,10 +362,12 @@ export default function HomePage() {
                 : selectedCategory}
           </h2>
           <div className="company-grid">
-            {filtered.map((company) => (
+            {filtered.map((company) => {
+              const isOpen = isCompanyOpen(company)
+              return (
               <div
                 key={company._id}
-                className="company-card"
+                className={`company-card ${!isOpen ? 'closed' : ''}`}
                 onClick={() => navigate(`/company/${company._id}`)}
               >
                 <div className="company-card-logo">
@@ -350,6 +376,9 @@ export default function HomePage() {
                   ) : (
                     <span className="logo-placeholder">{company.name.charAt(0)}</span>
                   )}
+                  <span className={`company-status-badge ${isOpen ? 'open' : 'closed'}`}>
+                    {isOpen ? 'Aberto' : 'Fechado'}
+                  </span>
                 </div>
                 <div className="company-card-info">
                   <h3>{company.name}</h3>
@@ -357,7 +386,7 @@ export default function HomePage() {
                   <div className="company-meta">
                     <span className="rating">★ {company.rating?.toFixed(1) ?? '0.0'}</span>
                     <span className="dot" />
-                    <span className="delivery-time">{company.estimatedDeliveryTime}</span>
+                    <span className="delivery-time">{formatDeliveryTime(company)}</span>
                     <span className="dot" />
                     <span className="delivery-fee">
                       {company.deliveryFee > 0
@@ -380,7 +409,8 @@ export default function HomePage() {
                   {favorites.has(company._id) ? '❤️' : '🤍'}
                 </button>
               </div>
-            ))}
+              )
+            })}
           </div>
         </>
       )}
