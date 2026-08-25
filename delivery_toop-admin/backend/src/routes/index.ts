@@ -13,6 +13,10 @@ import bannerRoutes from "./banner.routes";
 import uploadRoutes from "./upload.routes";
 import settingsRoutes from "./settings.routes";
 import reviewRoutes from "./review.routes";
+import branchRoutes from "./branch.routes";
+import stockItemRoutes from "./stockItem.routes";
+import stockBatchRoutes from "./stockBatch.routes";
+import stockMovementRoutes from "./stockMovement.routes";
 
 const router = Router();
 
@@ -30,5 +34,9 @@ router.use("/banners", bannerRoutes);
 router.use("/upload", uploadRoutes);
 router.use("/settings", settingsRoutes);
 router.use("/reviews", reviewRoutes);
+router.use("/branches", branchRoutes);
+router.use("/stock-items", stockItemRoutes);
+router.use("/stock-batches", stockBatchRoutes);
+router.use("/stock-movements", stockMovementRoutes);
 
 export default router;

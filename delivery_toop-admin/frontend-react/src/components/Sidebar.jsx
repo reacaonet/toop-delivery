@@ -57,7 +57,7 @@ const Sidebar = () => {
       <div className="sidebar-header">
         <h1>
           <Truck size={24} />
-          Toop Delivery
+          Gojá Delivery
         </h1>
       </div>
       

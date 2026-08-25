@@ -124,11 +124,11 @@ export function DrawerContent(props) {
   const onShare = async () => {
     try {
       await Share.share({
-        message: `Estou te indicando o aplicativo ToopDelivery para economizar sem sair de casa!
+        message: `Estou te indicando o aplicativo GojáDelivery para economizar sem sair de casa!
           Android: https://play.google.com/store/apps/details?id=br.com.toopdelivery.cliente&hl=pt_BR
           IOS: https://apps.apple.com/br/app/toop-delivery/id1560718286
           `,
-        title: 'ToopDelivery',
+        title: 'GojáDelivery',
         url: 'https://apps.apple.com/br/app/toop-delivery/id1560718286',
       });
     } catch (err) {

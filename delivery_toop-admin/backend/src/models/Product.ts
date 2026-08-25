@@ -10,6 +10,10 @@ export interface IProduct extends Document {
   image?: string;
   images?: string[];
   preparationTime?: number;
+  ingredients: Array<{
+    stockItem: mongoose.Types.ObjectId;
+    quantity: number;
+  }>;
   active: boolean;
   available: boolean;
   createdAt: Date;
@@ -27,6 +31,12 @@ const ProductSchema = new Schema<IProduct>(
     image: { type: String },
     images: [{ type: String }],
     preparationTime: { type: Number },
+    ingredients: [
+      {
+        stockItem: { type: Schema.Types.ObjectId, ref: 'StockItem' },
+        quantity: { type: Number, default: 0 },
+      },
+    ],
     active: { type: Boolean, default: true },
     available: { type: Boolean, default: true },
   },

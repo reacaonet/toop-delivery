@@ -65,7 +65,7 @@ const Login = () => {
             <Truck size={30} color="white" />
           </div>
           <h1 style={{ color: '#1f2937', fontSize: '1.5rem', fontWeight: '600' }}>
-            Toop Delivery
+            Gojá Delivery
           </h1>
           <p style={{ color: '#6b7280', fontSize: '0.875rem' }}>
             Painel Administrativo

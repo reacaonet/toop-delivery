@@ -106,9 +106,9 @@ const sendNotification = async orderStatus => {
     if (orderStatus.company) {
       const { type } = await Company.findById(orderStatus.company);
 
-      titleEmail = `Novo pedido em ${type} feito na Toop`;
+      titleEmail = `Novo pedido em ${type} feito no Gojá`;
     } else {
-      titleEmail = `Novo pedido feito na Toop`;
+      titleEmail = `Novo pedido feito no Gojá`;
     }
 
     // mailer.sendMail(

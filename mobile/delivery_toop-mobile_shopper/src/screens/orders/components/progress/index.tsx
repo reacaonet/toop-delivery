@@ -193,7 +193,7 @@ const ProgressView: React.FC = () => {
           disabled={btnProcess}
           onPress={() => chageStatus('WAIT_DELIVERYMAN')}>
           <TextTouch>
-            {!btnProcess ? 'Liberar para entrega TOOP' : 'Aguarde ...'}
+            {!btnProcess ? 'Liberar para entrega Gojá' : 'Aguarde ...'}
           </TextTouch>
         </Touch>
       ) : null}

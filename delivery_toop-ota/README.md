@@ -1,4 +1,4 @@
-# ToopDelivery OTA Server
+# GojáDelivery OTA Server
 
 Over-The-Air updates server for React Native mobile apps.
 

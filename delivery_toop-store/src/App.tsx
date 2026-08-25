@@ -8,6 +8,11 @@ import OrdersPage from './pages/OrdersPage'
 import SettingsPage from './pages/SettingsPage'
 import PainelPage from './pages/PainelPage'
 import ReportsPage from './pages/ReportsPage'
+import StockPage from './pages/StockPage'
+import StockItemsPage from './pages/StockItemsPage'
+import StockBatchesPage from './pages/StockBatchesPage'
+import StockMovementsPage from './pages/StockMovementsPage'
+import BranchesPage from './pages/BranchesPage'
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, loading } = useAuth()
@@ -46,6 +51,11 @@ function App() {
                   <Route path="/" element={<DashboardPage />} />
                   <Route path="/products" element={<ProductsPage />} />
                   <Route path="/orders" element={<OrdersPage />} />
+                  <Route path="/stock" element={<StockPage />} />
+                  <Route path="/stock/items" element={<StockItemsPage />} />
+                  <Route path="/stock/batches" element={<StockBatchesPage />} />
+                  <Route path="/stock/movements" element={<StockMovementsPage />} />
+                  <Route path="/stock/branches" element={<BranchesPage />} />
                   <Route path="/settings" element={<SettingsPage />} />
                   <Route path="/reports" element={<ReportsPage />} />
                   <Route path="*" element={<Navigate to="/" replace />} />

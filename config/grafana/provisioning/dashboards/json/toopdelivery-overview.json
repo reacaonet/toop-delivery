@@ -98,7 +98,7 @@
   "tags": ["toopdelivery", "production"],
   "templating": { "list": [] },
   "time": { "from": "now-1h", "to": "now" },
-  "title": "ToopDelivery - Services Overview",
+  "title": "GojáDelivery - Services Overview",
   "uid": "toopdelivery-overview",
   "version": 1
 }

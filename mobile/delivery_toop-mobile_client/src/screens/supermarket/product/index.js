@@ -572,7 +572,7 @@ const Product = ({
 
   const clickWhatsapp = () => {
     Linking.openURL(
-      `https://api.whatsapp.com/send?phone=${company?.socialNetwork?.whatsapp}&text=Olá! Vim através do App TOOP Delivery`,
+      `https://api.whatsapp.com/send?phone=${company?.socialNetwork?.whatsapp}&text=Olá! Vim através do App Gojá Delivery`,
     );
   };
 

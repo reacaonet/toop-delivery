@@ -14,8 +14,8 @@ const runtimePermissionAndroid = async alwaysAsk => {
     const granted = await PermissionsAndroid.request(
       PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
       {
-        title: 'ToopDelivery',
-        message: 'Permita o ToopDelivery a ter acesso a sua localização ?',
+        title: 'GojáDelivery',
+        message: 'Permita o GojáDelivery a ter acesso a sua localização ?',
         buttonPositive: 'Permitir',
         buttonNegative: 'Negar',
       },
@@ -59,8 +59,8 @@ const runtimePermissionAndroid = async alwaysAsk => {
 const runtimePermissionIOS = async alwaysAsk => {
   try {
     await request(PERMISSIONS.IOS.LOCATION_ALWAYS, {
-      title: 'ToopDelivery',
-      message: 'Permita o ToopDelivery a ter acesso a sua localização ?',
+      title: 'GojáDelivery',
+      message: 'Permita o GojáDelivery a ter acesso a sua localização ?',
       buttonPositive: 'SIM',
       buttonNegative: 'NÃO',
     });

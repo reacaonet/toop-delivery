@@ -18,7 +18,7 @@ export default function Layout() {
     <div className="app-layout">
       <header className="navbar">
         <div className="navbar-brand" onClick={() => navigate('/')}>
-          <h1 className="navbar-logo">Toop</h1>
+          <h1 className="navbar-logo">Gojá</h1>
           <span className="navbar-logo-sub">Delivery</span>
         </div>
         <div className="navbar-actions">

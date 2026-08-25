@@ -100,7 +100,7 @@ const StatusPaymentDetail = ({
             <View>
               <Text style={styles.txtTypePayment}>
                 Método de pagamento
-                {typePayment === null ? ' ToopDelivery' : ''}
+                {typePayment === null ? ' GojáDelivery' : ''}
                 {typePayment === 'CARD' ? ' Cartão' : ''}
                 {typePayment === 'MONEY' ? ' Dinheiro' : ''}
               </Text>

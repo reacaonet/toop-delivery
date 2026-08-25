@@ -1,10 +1,10 @@
-# 🔍 **VAREDURA COMPLETA - STATUS DE TODOS OS MÓDULOS TOOPDELIVERY**
+# 🔍 **VAREDURA COMPLETA - STATUS DE TODOS OS MÓDULOS GOJA DELIVERY**
 
 ## 📊 **RESUMO DA DESCOBERTA**
 
 ### **🎉 BOA NOTÍCIA: TEMOS UM ECOSSISTEMA COMPLETO!**
 
-O projeto ToopDelivery é **MUITO MAIS COMPLETO** do que imaginávamos! Temos um ecossistema completo com:
+O projeto Gojá Delivery é **MUITO MAIS COMPLETO** do que imaginávamos! Temos um ecossistema completo com:
 
 - ✅ **4 Apps Mobile** (React Native)
 - ✅ **2 Apps Desktop** (Electron) 
@@ -169,7 +169,7 @@ npm start
 
 ## 🎉 **CONCLUSÃO**
 
-**O ToopDelivery é uma plataforma COMPLETA e MADURA!** 
+**O Gojá Delivery é uma plataforma COMPLETA e MADURA!** 
 
 Temos um ecossistema delivery completo com:
 - ✅ Backend robusto com microserviços

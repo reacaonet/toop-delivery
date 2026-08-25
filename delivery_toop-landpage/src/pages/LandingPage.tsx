@@ -58,7 +58,7 @@ export default function LandingPage() {
         <div className="lp-container lp-nav-inner">
           <a href="#" className="lp-logo">
             <span className="lp-logo-icon">🛵</span>
-            <span className="lp-logo-text">Toop<span>Delivery</span></span>
+            <span className="lp-logo-text">Gojá<span>Delivery</span></span>
           </a>
           <div className={`lp-nav-links ${mobileMenuOpen ? 'open' : ''}`}>
             {NAV_LINKS.map(l => (
@@ -245,7 +245,7 @@ export default function LandingPage() {
       <section className="lp-cta">
         <div className="lp-container lp-cta-inner">
           <h2>Pronto para começar?</h2>
-          <p>Junte-se a lojas, entregadores e clientes que já usam o Toop Delivery</p>
+          <p>Junte-se a lojas, entregadores e clientes que já usam o Gojá Delivery</p>
           <div className="lp-cta-buttons">
             <a href="/register" className="lp-btn lp-btn-lg lp-btn-white">
               Criar Conta Grátis <ArrowRight size={18} />
@@ -263,7 +263,7 @@ export default function LandingPage() {
           <div className="lp-footer-brand">
             <span className="lp-logo">
               <span className="lp-logo-icon">🛵</span>
-              <span className="lp-logo-text">Toop<span>Delivery</span></span>
+              <span className="lp-logo-text">Gojá<span>Delivery</span></span>
             </span>
             <p>A plataforma completa de delivery para o Brasil.</p>
           </div>
@@ -292,7 +292,7 @@ export default function LandingPage() {
           </div>
         </div>
         <div className="lp-container lp-footer-bottom">
-          <p>© 2026 Toop Delivery. Todos os direitos reservados.</p>
+          <p>© 2026 Gojá Delivery. Todos os direitos reservados.</p>
           <div className="lp-footer-social">
             <a href="#"><ExternalLink size={18} /></a>
             <a href="#"><Phone size={18} /></a>

@@ -30,7 +30,7 @@ import config from './config';
 
 PushNotification.configure({
   onNotification: function (notification: any) {
-    const title = notification?.title || 'ToopDelivery';
+    const title = notification?.title || 'GojáDelivery';
 
     PushNotification.localNotification({
       title: title,

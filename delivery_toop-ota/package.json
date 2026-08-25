@@ -1,7 +1,7 @@
 {
   "name": "toop-ota-server",
   "version": "1.0.0",
-  "description": "ToopDelivery OTA Update Server",
+  "description": "GojáDelivery OTA Update Server",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",

@@ -17,7 +17,7 @@ messaging().setBackgroundMessageHandler(async remoteMessage => {});
 messaging().onMessage(async remoteMessage => {
   try {
     if (remoteMessage.notification && remoteMessage.notification.body) {
-      let title = remoteMessage.notification?.title || 'ToopDelivery';
+      let title = remoteMessage.notification?.title || 'GojáDelivery';
     }
   } catch (err) {
     console.log('Error receive message', err);

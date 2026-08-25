@@ -49,7 +49,7 @@ const ShopperStack = ({navigation}: ShopperStackProps) => {
         name="Home"
         component={Home}
         options={{
-          title: 'Toop Comerciante',
+          title: 'Gojá Comerciante',
           ...globalNavigationOptions,
           ...homeHeaderStyle,
 

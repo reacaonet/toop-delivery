@@ -66,7 +66,7 @@ function App({userAuth, onSetUpdate}: AppProps) {
 
   PushNotification.configure({
     onNotification: function (notification: any) {
-      const title: string = notification?.title || 'Toop Delivery';
+      const title: string = notification?.title || 'Gojá Delivery';
 
       const payload: PushNotificationObject = {
         title: title,

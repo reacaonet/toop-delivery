@@ -52,7 +52,7 @@ const Indique = ({navigation}) => {
   const onShare = async () => {
     try {
       const result = await Share.share({
-        message: `Faça seu cadastro no Toop e infome o código ${user?.referralCode}`,
+        message: `Faça seu cadastro no Gojá e infome o código ${user?.referralCode}`,
       });
 
       if (result.action === Share.sharedAction) {

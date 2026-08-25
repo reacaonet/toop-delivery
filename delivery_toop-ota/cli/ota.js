@@ -15,7 +15,7 @@ const command = args[0];
 
 function usage() {
   console.log(`
-ToopDelivery OTA CLI
+GojáDelivery OTA CLI
 
 Usage:
   ota publish <app> <platform> <version> <bundle-path> [--desc "message"] [--min-version X.Y.Z] [--mandatory]

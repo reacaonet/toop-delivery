@@ -24,7 +24,7 @@ const messageTopicController = async (req, res) => {
 
     let content = {
       notification: {
-        title: title || 'ToopDelivery',
+        title: title || 'GojáDelivery',
         body: message,
       },
       data: data,

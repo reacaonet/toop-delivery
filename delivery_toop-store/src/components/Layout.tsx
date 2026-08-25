@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, Package, ShoppingCart, Settings, LogOut, Store, Monitor, FileText } from 'lucide-react'
+import { LayoutDashboard, Package, ShoppingCart, Settings, LogOut, Store, Monitor, FileText, Warehouse, GitBranch, Boxes, ArrowLeftRight } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 
 interface LayoutProps {
@@ -13,6 +13,11 @@ const Layout = ({ children }: LayoutProps) => {
     { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
     { path: '/products', icon: Package, label: 'Produtos' },
     { path: '/orders', icon: ShoppingCart, label: 'Pedidos' },
+    { path: '/stock', icon: Warehouse, label: 'Estoque' },
+    { path: '/stock/items', icon: Boxes, label: 'Itens de Estoque' },
+    { path: '/stock/batches', icon: GitBranch, label: 'Lotes' },
+    { path: '/stock/movements', icon: ArrowLeftRight, label: 'Movimentacoes' },
+    { path: '/stock/branches', icon: Store, label: 'Filiais' },
     { path: '/settings', icon: Settings, label: 'Configuracoes' },
     { path: '/reports', icon: FileText, label: 'Relatorios' },
     { path: '/painel', icon: Monitor, label: 'Painel de Pedidos' },
@@ -24,7 +29,7 @@ const Layout = ({ children }: LayoutProps) => {
         <div className="sidebar-header">
           <div className="sidebar-logo">
             <Store size={24} />
-            <span>Toop Loja</span>
+            <span>Gojá Loja</span>
           </div>
         </div>
 

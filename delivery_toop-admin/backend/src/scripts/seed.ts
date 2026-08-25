@@ -21,7 +21,7 @@ async function seed() {
     const hashedPassword = await bcrypt.hash('admin123', 10);
 
     const admin = await UserModel.create({
-      name: 'Admin Toop',
+      name: 'Admin Gojá',
       email: 'admin@toop.com.br',
       password: hashedPassword,
       role: 'admin',
@@ -30,7 +30,7 @@ async function seed() {
     console.log(`[SEED] Admin user created: ${admin.email} (id: ${admin._id})`);
 
     const company = await CompanyModel.create({
-      name: 'Toop Delivery - Matriz',
+      name: 'Gojá Delivery - Matriz',
       cnpj: '00.000.000/0001-00',
       phone: '(11) 99999-0000',
       email: 'contato@toopdelivery.com.br',

@@ -4,7 +4,7 @@ const router = require("express").Router();
 router.get("/health", (req, res) => {
   res.json({
     status: "OK",
-    message: "Toop Delivery API - Servidor iniciado com sucesso",
+    message: "Gojá Delivery API - Servidor iniciado com sucesso",
     timestamp: new Date().toISOString(),
     version: "1.0.0"
   });
@@ -13,7 +13,7 @@ router.get("/health", (req, res) => {
 // Rota básica
 router.get("/", (req, res) => {
   res.json({
-    message: "Toop Delivery API",
+    message: "Gojá Delivery API",
     status: "running",
     docs: "/api-docs"
   });

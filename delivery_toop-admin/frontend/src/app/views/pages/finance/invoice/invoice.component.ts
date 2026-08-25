@@ -103,7 +103,7 @@ export class InvoiceComponent implements OnInit, AfterViewInit {
 									porcent: item.payments[0].feeDebitPrice || null,
 									typeInvoice: "debitPrice",
 									ownerCompany: item._id.company.name,
-									person: "Toop Delivery",
+									person: "Gojá Delivery",
 									dateOrder: moment(
 										`2020-${item._id.month}-${item._id.day + 1}`,
 										"YYYYMMDD"
@@ -139,7 +139,7 @@ export class InvoiceComponent implements OnInit, AfterViewInit {
 								porcent: item.payments[0].feeDebitPrice || null,
 								typeInvoice: "debitPrice",
 								ownerCompany: item._id.company.name,
-								person: "Toop Delivery",
+								person: "Gojá Delivery",
 								dateOrder: moment(
 									`2020-${item._id.month}-${item._id.day + 1}`,
 									"YYYYMMDD"

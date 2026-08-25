@@ -63,8 +63,8 @@ function LocationPermission() {
   async function setPermissionIOS() {
     try {
       await request(PERMISSIONS.IOS.LOCATION_ALWAYS, {
-        title: 'ToopDelivery',
-        message: 'Permita o ToopDelivery a ter acesso a sua localização ?',
+        title: 'GojáDelivery',
+        message: 'Permita o GojáDelivery a ter acesso a sua localização ?',
         buttonPositive: 'Permitir',
         buttonNegative: 'Negar',
       });
@@ -79,8 +79,8 @@ function LocationPermission() {
       await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
         {
-          title: 'ToopDelivery',
-          message: 'Permita o ToopDelivery a ter acesso a sua localização ?',
+          title: 'GojáDelivery',
+          message: 'Permita o GojáDelivery a ter acesso a sua localização ?',
           buttonPositive: 'Permitir',
           buttonNegative: 'Negar',
         },

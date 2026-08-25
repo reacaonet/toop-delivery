@@ -89,3 +89,38 @@ api.interceptors.response.use(
 )
 
 export default api
+
+export const branchService = {
+  list: (companyId: string) => api.get(`/branches/company/${companyId}`),
+  get: (id: string) => api.get(`/branches/${id}`),
+  create: (data: any) => api.post('/branches', data),
+  update: (id: string, data: any) => api.put(`/branches/${id}`, data),
+  delete: (id: string) => api.delete(`/branches/${id}`),
+}
+
+export const stockItemService = {
+  list: (companyId: string) => api.get(`/stock-items/company/${companyId}`),
+  get: (id: string) => api.get(`/stock-items/${id}`),
+  create: (data: any) => api.post('/stock-items', data),
+  update: (id: string, data: any) => api.put(`/stock-items/${id}`, data),
+  delete: (id: string) => api.delete(`/stock-items/${id}`),
+}
+
+export const stockBatchService = {
+  listByBranch: (branchId: string) => api.get(`/stock-batches/branch/${branchId}`),
+  listByCompany: (companyId: string) => api.get(`/stock-batches/company/${companyId}`),
+  get: (id: string) => api.get(`/stock-batches/${id}`),
+  create: (data: any) => api.post('/stock-batches', data),
+  update: (id: string, data: any) => api.put(`/stock-batches/${id}`, data),
+  getAlerts: (companyId: string) => api.get(`/stock-batches/alerts/${companyId}`),
+}
+
+export const stockMovementService = {
+  listByBranch: (branchId: string, params?: any) => api.get(`/stock-movements/branch/${branchId}`, { params }),
+  listByCompany: (companyId: string, params?: any) => api.get(`/stock-movements/company/${companyId}`, { params }),
+  get: (id: string) => api.get(`/stock-movements/${id}`),
+  create: (data: any) => api.post('/stock-movements', data),
+  entry: (data: any) => api.post('/stock-movements/entry', data),
+  exit: (data: any) => api.post('/stock-movements/exit', data),
+  summary: (branchId: string) => api.get(`/stock-movements/summary/${branchId}`),
+}

@@ -14,8 +14,8 @@ const runtimePermissionAndroid = async (alwaysAsk: any): Promise<any> => {
     const granted = await PermissionsAndroid.request(
       PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
       {
-        title: 'TOOP Delivery',
-        message: 'Permita o TOOP Delivery a ter acesso a sua localização ?',
+        title: 'Gojá Delivery',
+        message: 'Permita o Gojá Delivery a ter acesso a sua localização ?',
         buttonPositive: 'Permitir',
         buttonNegative: 'Negar',
       },
@@ -27,9 +27,9 @@ const runtimePermissionAndroid = async (alwaysAsk: any): Promise<any> => {
       await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.ACCESS_BACKGROUND_LOCATION,
         {
-          title: 'TOOP Delivery',
+          title: 'Gojá Delivery',
           message:
-            'Permita que o TOOP Delivery tenha acesso a sua localização em segundo plano?',
+            'Permita que o Gojá Delivery tenha acesso a sua localização em segundo plano?',
           buttonPositive: 'Permitir',
           buttonNegative: 'Negar',
         },
@@ -67,8 +67,8 @@ const runtimePermissionAndroid = async (alwaysAsk: any): Promise<any> => {
 const runtimePermissionIOS = async (_alwaysAsk: any): Promise<any> => {
   try {
     await request(PERMISSIONS.IOS.LOCATION_ALWAYS, {
-      title: 'TOOP Delivery',
-      message: 'Permita o TOOP Delivery a ter acesso a sua localização ?',
+      title: 'Gojá Delivery',
+      message: 'Permita o Gojá Delivery a ter acesso a sua localização ?',
       buttonPositive: 'SIM',
       buttonNegative: 'NÃO',
     });

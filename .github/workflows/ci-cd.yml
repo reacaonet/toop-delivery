@@ -1,4 +1,4 @@
-name: ToopDelivery CI/CD Pipeline
+name: GojáDelivery CI/CD Pipeline
 
 on:
   push:

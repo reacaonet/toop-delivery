@@ -185,7 +185,7 @@ const sendPushNotification = async (token, status, _id) => {
 
   if (status === "APPROVED") {
     title = "Solicitação aprovada";
-    message = "Parabéns você foi aprovado no Toop!";
+    message = "Parabéns você foi aprovado no Gojá!";
   } else if (status === "ANALYZE") {
     title = "Falta pouco";
     message = "Seu cadastro está sendo analisado!";

@@ -222,7 +222,7 @@ export default function PainelPage() {
     <div className="pm-root">
       <header className="pm-topbar">
         <div className="pm-topbar-left">
-          <h1>Toop Delivery</h1>
+          <h1>Gojá Delivery</h1>
           <span className="pm-topbar-sub">Painel de Pedidos</span>
         </div>
         <div className="pm-topbar-right">

@@ -60,7 +60,7 @@ export default function TermsDescription({navigation}) {
               informações. A proteção dos seus dados e da sua privacidade são
               muito importantes para o como um todo, mas aqui estão alguns
               pontos importantes para que você entenda como seus dados são
-              tratados no TOOP DELIVERY LTDA:
+              tratados no GOJÁ DELIVERY LTDA:
             </Text>
             <Text style={styles.description}>
               Os dados que você cadastra em nossas plataformas são tratados de
@@ -82,10 +82,10 @@ export default function TermsDescription({navigation}) {
               Esta Declaração de Privacidade, também chamada de “Declaração”, é
               aplicável àqueles que acessarem ou se cadastrarem em nossa
               Plataforma (conforme definição abaixo) e àqueles que de qualquer
-              outra forma utilizarem os produtos do TOOP DELIVERY LTDA. Nosso
+              outra forma utilizarem os produtos do GOJÁ DELIVERY LTDA. Nosso
               aplicativo e site serão denominados, em conjunto, como Plataforma
-              ou Plataformas. Quando houver menção aos termos “TOOP DELIVERY
-              LTDA”, “nós” ou “nossos”, estamos nos referindo ao TOOP DELIVERY
+              ou Plataformas. Quando houver menção aos termos “GOJÁ DELIVERY
+              LTDA”, “nós” ou “nossos”, estamos nos referindo ao GOJÁ DELIVERY
               LTDA; da mesma forma, toda vez que houver menção aos termos
               “você”, “seu”, “sua”, estamos nos referindo a você.
             </Text>
@@ -95,7 +95,7 @@ export default function TermsDescription({navigation}) {
             <Text style={styles.description}>
               O controlador é a pessoa física ou jurídica que decide sobre o
               tratamento de dados pessoais. Quando você acessar ou se cadastrar
-              em nossa Plataforma, o TOOP DELIVERY LTDA exerce o papel de
+              em nossa Plataforma, o GOJÁ DELIVERY LTDA exerce o papel de
               controlador do tratamento de seus dados pessoais, atuando conforme
               a legislação aplicável e conforme descrito na presente Declaração.
             </Text>
@@ -104,7 +104,7 @@ export default function TermsDescription({navigation}) {
             </Text>
             <Text style={styles.txtMiniHeader}>
               3.1 Dados que você nos fornece Quando você criar uma conta para
-              ser um usuário registrado no TOOP DELIVERY LTDA, poderemos obter
+              ser um usuário registrado no GOJÁ DELIVERY LTDA, poderemos obter
               uma série de informações sobre você, tais como:
             </Text>
             <Text style={styles.description}>
@@ -113,21 +113,21 @@ export default function TermsDescription({navigation}) {
               de perfil e preferências de contato. Informamos que comunicar o
               CPF é opcional, sendo necessária sua indicação para certos
               estabelecimentos para fins fiscais. Para criar o seu cadastro no
-              Website ou Aplicativo do TOOP DELIVERY LTDA você pode ainda usar a
+              Website ou Aplicativo do GOJÁ DELIVERY LTDA você pode ainda usar a
               sua conta em redes sociais. Por exemplo, ao utilizar o Gmail para
-              se inscrever no nosso Serviço, você estará permitindo que o TOOP
+              se inscrever no nosso Serviço, você estará permitindo que o GOJÁ
               DELIVERY LTDA acesse as informações pessoais em sua conta do
               Gmail, tais como seu nome e e-mail (caso os tenha cadastrado no
               Gmail). As informações que iremos obter, nesse caso, são as mesmas
               assim e dependem das suas configurações de privacidade junto ao
-              serviço. B) Dados de pagamento Ao fazer o seu pedido pelo TOOP
+              serviço. B) Dados de pagamento Ao fazer o seu pedido pelo GOJÁ
               DELIVERY LTDA, é possível que, a depender do restaurante
               escolhido, você possa fazer o pagamento diretamente por nossas
               plataformas. Ao escolher fazer o pagamento direto no nosso Website
               ou Aplicativo, você poderá nos fornecer os seus dados de
               pagamento, tais como aqueles de cartão de crédito e de meios de
               pagamento parceiros. Atenção: suas informações de pagamento online
-              são armazenadas somente de forma anonimizada pelo TOOP DELIVERY
+              são armazenadas somente de forma anonimizada pelo GOJÁ DELIVERY
               LTDA (6 primeiros e 4 últimos dígitos do cartão), de modo que não
               temos acesso aos seus dados financeiros completos. C) Dados de
               localização Para realizarmos a entrega do seu pedido, nós
@@ -148,7 +148,7 @@ export default function TermsDescription({navigation}) {
             <Text style={styles.description}>
               A) Dados dos seus dispositivos Nós podemos coletar informações
               automaticamente sobre os dispositivos a partir dos quais você
-              acessa o TOOP DELIVERY LTDA como: endereços IP, IMEI, tipo de
+              acessa o GOJÁ DELIVERY LTDA como: endereços IP, IMEI, tipo de
               navegador e idioma, provedor de Serviços de Internet
               (ISP),histórico de pesquisa, páginas de consulta e saída, sistema
               operacional, registros de falha, informações sobre data e horário,
@@ -167,7 +167,7 @@ export default function TermsDescription({navigation}) {
               entregadores e estabelecimentos parceiros através da nossa
               Plataforma. Permitimos, por exemplo, que usuários, entregadores
               estabelecimentos parceiros, enviem mensagens através do chat ou de
-              telefone anonimizados. Para prestar este serviço, o TOOP DELIVERY
+              telefone anonimizados. Para prestar este serviço, o GOJÁ DELIVERY
               LTDA recebe alguns dados relativos às chamadas, textos ou outras
               comunicações, incluindo a data e hora das comunicações e o
               conteúdo das comunicações.
@@ -215,7 +215,7 @@ export default function TermsDescription({navigation}) {
               Periodicamente poderemos usar seus dados pessoais para enviar
               avisos e notificações importantes, como comunicados sobre compras,
               alterações em prazos, condições e políticas. Como estas
-              informações são importantes para a sua interação com o TOOP
+              informações são importantes para a sua interação com o GOJÁ
               DELIVERY LTDA, você não poderá optar por não receber esse tipo de
               comunicação, já que são inerentes ao uso do serviço.
             </Text>
@@ -227,7 +227,7 @@ export default function TermsDescription({navigation}) {
               utilizar informações como seus dados cadastrais para: nos
               certificarmos de que você é o usuário que solicitou o pedido em
               questão; direcionar suas dúvidas para o atendente de suporte;
-              investigar e direcionar TOOP DELIVERY LTDA seu problema e;
+              investigar e direcionar GOJÁ DELIVERY LTDA seu problema e;
               monitorar e melhorar nossos procedimentos de suporte.
             </Text>
             <Text style={styles.txtMiniHeader}>
@@ -235,13 +235,13 @@ export default function TermsDescription({navigation}) {
             </Text>
             <Text style={styles.description}>
               Segurança da informação e compliance com a legislação financeira é
-              uma das grandes preocupações do TOOP DELIVERY LTDA. Por isso,
+              uma das grandes preocupações do GOJÁ DELIVERY LTDA. Por isso,
               armazenamos suas informações financeiras apenas de forma
               anonimizada, o que nos impede de ter acesso a seus dados
               financeiros completos. Além disso, somente processamos seus dados
               para a finalidade especificada, qual seja, a de permitir que uma
               transação seja efetuada online com cobrança para você. Não se
-              preocupe: o TOOP DELIVERY LTDA nunca processará suas informações
+              preocupe: o GOJÁ DELIVERY LTDA nunca processará suas informações
               financeiras e/ou bancárias de forma a desrespeitar as normas de
               compliance aplicáveis.
             </Text>
@@ -250,7 +250,7 @@ export default function TermsDescription({navigation}) {
             </Text>
             <Text style={styles.description}>
               Nós também podemos utilizar seus dados pessoais para aprimorar a
-              nossa segurança e melhorar os serviços e as ofertas do TOOP
+              nossa segurança e melhorar os serviços e as ofertas do GOJÁ
               DELIVERY LTDA destinadas a você. Dessa forma, podemos analisar e
               solucionar problemas técnicos, bem como identificar e coibir
               fraudes na utilização do nosso serviço.
@@ -265,10 +265,10 @@ export default function TermsDescription({navigation}) {
               qualquer momento, alterando as suas preferências pelo Aplicativo,
               na aba “Gerenciar notificações” em “Configurações”. Além disso,
               poderemos compartilhar apenas as informações estritamente
-              necessárias para essa finalidade com parceiros do TOOP DELIVERY
+              necessárias para essa finalidade com parceiros do GOJÁ DELIVERY
               LTDA, para fins de desenvolver campanhas de marketing mais
-              relevantes para interessados nos produtos do TOOP DELIVERY LTDA,
-              como sua identificação de usuário, telefone ou e-mail. TOOP
+              relevantes para interessados nos produtos do GOJÁ DELIVERY LTDA,
+              como sua identificação de usuário, telefone ou e-mail. GOJÁ
               DELIVERY LTDA somente compartilhará dados com parceiros que
               possuírem política de privacidade que ofereça níveis compatíveis
               de proteção àquele oferecido por essa declaração.
@@ -299,12 +299,12 @@ export default function TermsDescription({navigation}) {
               5.Como utilizamos cookies e outras tecnologias?
             </Text>
             <Text style={styles.description}>
-              O TOOP DELIVERY LTDA se utiliza de tecnologias como cookies, pixel
+              O GOJÁ DELIVERY LTDA se utiliza de tecnologias como cookies, pixel
               tags, armazenamento local ou outros identificadores, tanto de
               dispositivos móveis ou não, ou tecnologias semelhantes (“cookies e
               outras tecnologias”), para uma variedade de funções. Essas
               tecnologias nos ajudam a autenticar a sua conta, promover e
-              aperfeiçoar os serviços do TOOP DELIVERY LTDA, personalizar a sua
+              aperfeiçoar os serviços do GOJÁ DELIVERY LTDA, personalizar a sua
               experiência e avaliar a eficácia da nossa comunicação e
               publicidade.
             </Text>
@@ -316,7 +316,7 @@ export default function TermsDescription({navigation}) {
               celular ou outro dispositivo. Pixel tags (ou GIFs limpos, web
               beacons ou pixels) são pequenos blocos de código em uma página da
               web que permitem que elas realizem ações como ler e armazenar
-              cookies e transmitir informações para o TOOP DELIVERY LTDA. A
+              cookies e transmitir informações para o GOJÁ DELIVERY LTDA. A
               conexão resultante pode incluir informações como o endereço de IP
               de um dispositivo, a hora em que uma pessoa visualizou o pixel, um
               identificador associado ao navegador ou dispositivo e o tipo de
@@ -329,20 +329,20 @@ export default function TermsDescription({navigation}) {
               5.2 Promover uma experiência personalizada
             </Text>
             <Text style={styles.description}>
-              O TOOP DELIVERY LTDA e os seus parceiros também usam cookies e
+              O GOJÁ DELIVERY LTDA e os seus parceiros também usam cookies e
               outras tecnologias para memorizar informações pessoais quando você
-              usa o nosso Website, Aplicativo ou a rede de parceiros do TOOP
+              usa o nosso Website, Aplicativo ou a rede de parceiros do GOJÁ
               DELIVERY LTDA que possam usar tecnologias similares. A nossa meta
-              nesses casos é fazer com que a sua experiência com o TOOP DELIVERY
+              nesses casos é fazer com que a sua experiência com o GOJÁ DELIVERY
               LTDA seja mais conveniente e personalizada. Por exemplo, saber o
               seu primeiro nome nos permite dar boas-vindas a você na próxima
-              vez em que você acessar o TOOP DELIVERY LTDA. Conhecer seu país e
+              vez em que você acessar o GOJÁ DELIVERY LTDA. Conhecer seu país e
               idioma nos permite viabilizar a você uma experiência de compras
               personalizada e mais útil. Saber que você adquiriu determinado
               produto ou usou um determinado Serviço permite fazer com que sua
               publicidade e comunicações de e-mail sejam mais relevantes para os
               seus interesses. Nessa linha, podemos também usar essas
-              informações para classificar os usuários dentro da rede TOOP
+              informações para classificar os usuários dentro da rede GOJÁ
               DELIVERY LTDA, identificando os usuários a partir de eventos
               realizados, como a primeira compra ou o download do nosso
               aplicativo, e a partir de determinadas características de seu
@@ -358,14 +358,14 @@ export default function TermsDescription({navigation}) {
               comportamento do usuário e obter informações demográficas sobre a
               nossa base de usuários de maneira geral. Em algumas de nossas
               mensagens de e-mail, nós usamos uma "URL click-through" (endereço
-              externo) vinculada ao conteúdo do TOOP DELIVERY LTDA. Quando os
+              externo) vinculada ao conteúdo do GOJÁ DELIVERY LTDA. Quando os
               clientes clicam em uma dessas URLs, os usuários são enviados para
               um servidor diferente antes de chegarem à página de destino no
               nosso serviço. Nós monitoramos esses dados de click-through para
               entender o interesse em determinados tópicos e avaliar a eficácia
               das comunicações com os nossos clientes. Se você preferir não ser
               monitorado dessa maneira, não clique em texto ou links contidos em
-              mensagens de e-mail enviadas pelo TOOP DELIVERY LTDA. Os pixel
+              mensagens de e-mail enviadas pelo GOJÁ DELIVERY LTDA. Os pixel
               tags nos permitem enviar mensagens de e-mail em formatos que os
               usuários possam ler e nos dizer se o e-mail foi aberto ou não. Nós
               podemos usar essas informações para reduzir ou eliminar as
@@ -375,17 +375,17 @@ export default function TermsDescription({navigation}) {
               5.4 Tecnologia de terceiros
             </Text>
             <Text style={styles.description}>
-              Além dos cookies e outras tecnologias do TOOP DELIVERY LTDA, nós
-              podemos permitir que terceiros contratados pelo TOOP DELIVERY LTDA
+              Além dos cookies e outras tecnologias do GOJÁ DELIVERY LTDA, nós
+              podemos permitir que terceiros contratados pelo GOJÁ DELIVERY LTDA
               utilizem cookies e outras tecnologias de sua propriedade para
               identificar seu navegador e dispositivo, de modo a lhe oferecer
-              publicidade direcionada do TOOP DELIVERY LTDA quando você acessa
+              publicidade direcionada do GOJÁ DELIVERY LTDA quando você acessa
               websites ou aplicativos de terceiros. Esses terceiros podem também
-              fornecer ao TOOP DELIVERY LTDA informações acerca do desempenho
+              fornecer ao GOJÁ DELIVERY LTDA informações acerca do desempenho
               das campanhas de marketing desenvolvidas por meio do
               compartilhamento de dados conosco. A título de exemplo, algumas
               dessas empresas podem utilizar cookies e outras tecnologias
-              próprios nos serviços do TOOP DELIVERY LTDA, tais como: Facebook,
+              próprios nos serviços do GOJÁ DELIVERY LTDA, tais como: Facebook,
               Google Analytics e Double Click.
             </Text>
             <Text style={styles.txtMiniHeader}>
@@ -399,7 +399,7 @@ export default function TermsDescription({navigation}) {
               de nuvem confiáveis e usualmente utilizados por empresas de
               tecnologia, tais como Estados Unidos da América (EUA) e em países
               da América Latina e da Europa. Na contratação desses serviços, o
-              TOOP DELIVERY LTDA sempre busca empresas que empregam alto nível
+              GOJÁ DELIVERY LTDA sempre busca empresas que empregam alto nível
               de segurança no armazenamento de suas informações, estabelecendo
               contratos que não violam as definições de privacidade previstas
               nesta Declaração.
@@ -408,13 +408,13 @@ export default function TermsDescription({navigation}) {
               6.2 Por quanto tempo os dados são armazenados?
             </Text>
             <Text style={styles.description}>
-              O TOOP DELIVERY LTDA armazena as suas informações durante o
+              O GOJÁ DELIVERY LTDA armazena as suas informações durante o
               período necessário para as finalidades apresentadas nos Termos e
-              Condições de Uso do TOOP DELIVERY LTDA e nesta Declaração de
+              Condições de Uso do GOJÁ DELIVERY LTDA e nesta Declaração de
               Privacidade, respeitando o período de retenção de dados
               determinado pela legislação aplicável. Caso você solicite a
               exclusão de sua conta, as suas informações pessoais fornecidas ao
-              TOOP DELIVERY LTDA durante a sua utilização dos nossos serviços
+              GOJÁ DELIVERY LTDA durante a sua utilização dos nossos serviços
               serão excluídos, salvo para as finalidades permitidas pela
               legislação de proteção de dados. Em alguns casos, poderemos reter
               suas informações mesmo que você exclua sua conta, tais como nas
@@ -427,10 +427,10 @@ export default function TermsDescription({navigation}) {
               usuários.
             </Text>
             <Text style={styles.txtMiniHeader}>
-              7.O TOOP DELIVERY LTDA transfere os dados para outros países?
+              7.O GOJÁ DELIVERY LTDA transfere os dados para outros países?
             </Text>
             <Text style={styles.description}>
-              O TOOP DELIVERY LTDA poderá realizar transferências internacionais
+              O GOJÁ DELIVERY LTDA poderá realizar transferências internacionais
               de dados para outros países, tais como Estados Unidos da América e
               para países da União Europeia e da América Latina, a fim de
               realizar algumas das atividades envolvidas nos serviços prestados
@@ -444,14 +444,14 @@ export default function TermsDescription({navigation}) {
               8.Como os dados são compartilhados? 8.1 Provedores de serviços
             </Text>
             <Text style={styles.description}>
-              Por razões de processamento de dados em nome do TOOP DELIVERY
+              Por razões de processamento de dados em nome do GOJÁ DELIVERY
               LTDA, poderemos compartilhar dados para terceiros prestadores de
               serviços. Nesse caso, os dados serão tratados de forma a proteger
               a sua privacidade, tendo essas empresas o dever contratual de
               proteção compatível com a legislação aplicável e com os termos
-              deste Declaração de Privacidade do TOOP DELIVERY LTDA. Nós podemos
+              deste Declaração de Privacidade do GOJÁ DELIVERY LTDA. Nós podemos
               utilizar os serviços dessas empresas para facilitar nosso serviço,
-              prover o serviço do TOOP DELIVERY LTDA em nosso nome e executar
+              prover o serviço do GOJÁ DELIVERY LTDA em nosso nome e executar
               atividades relacionadas ao serviço, incluindo: manutenção dos
               serviços; gerenciamento de banco de dados, sistemas de
               computadores e provedores de armazenamento em nuvem; central de
@@ -462,12 +462,12 @@ export default function TermsDescription({navigation}) {
               trabalhamos. Esse compartilhamento é feito com o fim exclusivo de
               viabilizar a compra efetivada por você. Essas empresas ou
               indivíduos têm acesso à sua informação pessoal, restrito ao
-              necessário, apenas para executar atividades solicitadas pelo TOOP
+              necessário, apenas para executar atividades solicitadas pelo GOJÁ
               DELIVERY LTDA e são obrigados a não usar ou divulgar tais
               informações para nenhuma outra finalidade.
             </Text>
             <Text style={styles.txtMiniHeader}>
-              8.2 Estabelecimentos parceiros do TOOP DELIVERY LTDA
+              8.2 Estabelecimentos parceiros do GOJÁ DELIVERY LTDA
             </Text>
             <Text style={styles.description}>
               Ao fazer um pedido em um estabelecimento parceiro por nossa
@@ -482,7 +482,7 @@ export default function TermsDescription({navigation}) {
             <Text style={styles.txtMiniHeader}>8.3 Parceiros comerciais</Text>
             <Text style={styles.description}>
               Podemos compartilhar seus dados com empresas com atividades
-              financeiras ou comerciais com as quais o TOOP DELIVERY LTDA mantém
+              financeiras ou comerciais com as quais o GOJÁ DELIVERY LTDA mantém
               um relacionamento de colaboração ou parceria, a fim de oferecer
               promoções, produtos e serviços dessas empresas em conjunto Nesses
               casos, são firmados acordos ou contratos com o objetivo de
@@ -492,17 +492,17 @@ export default function TermsDescription({navigation}) {
               confidencialidade e segurança sejam tomadas.
             </Text>
             <Text style={styles.txtMiniHeader}>
-              8.4 Empresas do Grupo TOOP DELIVERY LTDA
+              8.4 Empresas do Grupo GOJÁ DELIVERY LTDA
             </Text>
             <Text style={styles.description}>
-              As empresas do Grupo do TOOP DELIVERY LTDA seguem o mesmo padrão
+              As empresas do Grupo do GOJÁ DELIVERY LTDA seguem o mesmo padrão
               de proteção de dados pessoais descrito nesta Declaração de
-              Privacidade do TOOP DELIVERY LTDA e obedecem às mesmas finalidades
+              Privacidade do GOJÁ DELIVERY LTDA e obedecem às mesmas finalidades
               descritas neste documento. Ao compartilharmos os seus dados com
-              essas empresas, as mesmas garantias e cuidados que o TOOP DELIVERY
+              essas empresas, as mesmas garantias e cuidados que o GOJÁ DELIVERY
               LTDA possui com os seus dados serão replicados pelas empresas do
-              Grupo do TOOP DELIVERY LTDA. O compartilhamento de dados com
-              empresas do Grupo do TOOP DELIVERY LTDA terá como finalidades: (a)
+              Grupo do GOJÁ DELIVERY LTDA. O compartilhamento de dados com
+              empresas do Grupo do GOJÁ DELIVERY LTDA terá como finalidades: (a)
               o desenvolvimento de novos produtos, funcionalidades e serviços,
               bem como sua melhoria e aperfeiçoamento; (b) a oferta de produtos
               e serviços que melhor atendam aos seus interesses; (c) geração de
@@ -513,11 +513,11 @@ export default function TermsDescription({navigation}) {
               ilícitos e fraudes.
             </Text>
             <Text style={styles.txtMiniHeader}>
-              8.5 Em alteração de controle societário do TOOP DELIVERY LTDA
+              8.5 Em alteração de controle societário do GOJÁ DELIVERY LTDA
             </Text>
             <Text style={styles.description}>
               No caso de operações societárias, como reestruturação, fusão ou
-              venda de ativos do TOOP DELIVERY LTDA, do grupo econômico ou de
+              venda de ativos do GOJÁ DELIVERY LTDA, do grupo econômico ou de
               parte dele, seus dados poderão ser transferidos, desde que
               respeitados os termos da presente Declaração.
             </Text>
@@ -536,25 +536,25 @@ export default function TermsDescription({navigation}) {
               Para que seja realizada a entrega de seu pedido, podemos
               compartilhar com nossos parceiros de entrega seu nome e endereço.
               Caso sua entrega seja realizada por um entregador cadastrado na
-              plataforma do TOOP DELIVERY LTDA, você poderá iniciar um chat para
+              plataforma do GOJÁ DELIVERY LTDA, você poderá iniciar um chat para
               resolver diretamente eventuais problemas de entrega.
             </Text>
             <Text style={styles.txtMiniHeader}>8.8 Autoridades públicas</Text>
             <Text style={styles.description}>
-              O TOOP DELIVERY LTDA também poderá compartilhar suas informações
+              O GOJÁ DELIVERY LTDA também poderá compartilhar suas informações
               com autoridades policiais ou judiciais, autoridades públicas
               competentes ou outros terceiros, dentro e fora do país em que você
               reside, caso seja requerido pela legislação aplicável, por decisão
               judicial e por requisição de autoridades, ou se necessário para
               responder a processos judiciais ou para participar em eventuais
               litígios ou disputas de qualquer natureza. Nestas situações, o
-              TOOP DELIVERY LTDA cooperará com as autoridades competentes na
-              medida do estipulado por lei. Além disso, o TOOP DELIVERY LTDA
+              GOJÁ DELIVERY LTDA cooperará com as autoridades competentes na
+              medida do estipulado por lei. Além disso, o GOJÁ DELIVERY LTDA
               reserva a si a prerrogativa de compartilhar informações sobre seus
               usuários a terceiros quando houver motivos suficientes para
               considerar que a atividade de um usuário é suspeita, ilegal ou
-              prejudicial ao TOOP DELIVERY LTDA ou a terceiros. Essa
-              prerrogativa será utilizada pelo TOOP DELIVERY LTDA quando
+              prejudicial ao GOJÁ DELIVERY LTDA ou a terceiros. Essa
+              prerrogativa será utilizada pelo GOJÁ DELIVERY LTDA quando
               considerar apropriado ou necessário para manter a integridade e a
               segurança do seu serviço, para o cumprimento dos seus Termos e
               Condições de Uso, para o exercício regular de seus direitos e com
@@ -566,7 +566,7 @@ export default function TermsDescription({navigation}) {
               9.Como protegemos seus dados?
             </Text>
             <Text style={styles.description}>
-              O TOOP DELIVERY LTDA adota medidas de segurança, técnicas e
+              O GOJÁ DELIVERY LTDA adota medidas de segurança, técnicas e
               administrativas aptas a proteger os dados pessoais de acessos não
               autorizados e de situações acidentais ou ilícitas de destruição,
               perda, alteração, comunicação ou qualquer forma de tratamento
@@ -582,7 +582,7 @@ export default function TermsDescription({navigation}) {
               10.Como iremos notificá-lo em caso de mudanças à essa Declaração?
             </Text>
             <Text style={styles.description}>
-              O TOOP DELIVERY LTDA poderá atualizar essa Declaração de
+              O GOJÁ DELIVERY LTDA poderá atualizar essa Declaração de
               Privacidade periodicamente, sendo que a versão em vigor será
               sempre a mais recente. Se fizermos alguma alteração na Declaração
               em termos materiais, colocaremos um aviso no nosso Website,
@@ -595,7 +595,7 @@ export default function TermsDescription({navigation}) {
             </Text>
             <Text style={styles.description}>
               A fim de exercer seus direitos enquanto titular de dados pessoais,
-              o TOOP DELIVERY LTDA disponibiliza meios específicos para as
+              o GOJÁ DELIVERY LTDA disponibiliza meios específicos para as
               requisições através da aba “Ajuda” em nossas Plataformas.
             </Text>
             <Text style={styles.description}>
@@ -603,9 +603,9 @@ export default function TermsDescription({navigation}) {
               em seguida, “Conta” e encontrará respostas e direcionamento
               específicos para sua requisição. Se você tiver algum
               questionamento ou dúvida com relação a esta Declaração de
-              Privacidade do TOOP DELIVERY LTDA ou qualquer prática aqui
+              Privacidade do GOJÁ DELIVERY LTDA ou qualquer prática aqui
               descrita, você também poderá entrar em contato conosco através da
-              nossa página de Ajuda na Plataforma. TOOP DELIVERY LTDA
+              nossa página de Ajuda na Plataforma. GOJÁ DELIVERY LTDA
             </Text>
             <View style={styles.buttons}>
               <TouchableOpacity style={styles.button} onPress={() => go(false)}>

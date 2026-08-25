@@ -8,7 +8,7 @@ export const startSoundNotification = async () => {
           id: 'trackId',
           url: require('../../assets/mp3/sound_notification.mp3'),
           title: 'Notificação Novo Pedido',
-          artist: 'Toop Comerciante',
+          artist: 'Gojá Comerciante',
         });
 
         // await TrackPlayer.add({
@@ -34,7 +34,7 @@ export const startNewRace = async () => {
           id: 'trackId',
           url: require('../../assets/mp3/sound_notification.mp3'),
           title: 'Notificação Novo Serviço',
-          artist: 'Toop Comerciante',
+          artist: 'Gojá Comerciante',
         });
 
         await TrackPlayer.setVolume(1);

@@ -1,4 +1,4 @@
-# ToopDelivery
+# GojáDelivery
 
 Plataforma de delivery (iFood + Uber style) — Monorepo com API Admin, 4 microserviços, 4 apps mobile, 2 frontends e desktop.
 
@@ -209,7 +209,7 @@ npx eslint src --ext .ts
 
 ### Dashboard Grafana
 
-O dashboard "ToopDelivery - Services Overview" é provisionado automaticamente com:
+O dashboard "GojáDelivery - Services Overview" é provisionado automaticamente com:
 - Status de todos os serviços (UP/DOWN)
 - Request rate por serviço
 - Tempo de resposta (p95)

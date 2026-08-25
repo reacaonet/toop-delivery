@@ -406,7 +406,7 @@ export class ReportDriverComponent implements OnInit, AfterViewInit {
 		}
 
 		if (priceDelivery && priceDelivery > 0) {
-			return `Toop`;
+			return `Gojá`;
 		}
 	}
 

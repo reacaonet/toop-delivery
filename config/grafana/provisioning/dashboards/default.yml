@@ -1,9 +1,9 @@
 apiVersion: 1
 
 providers:
-  - name: 'ToopDelivery'
+  - name: 'GojáDelivery'
     orgId: 1
-    folder: 'ToopDelivery'
+    folder: 'GojáDelivery'
     type: file
     disableDeletion: false
     updateIntervalSeconds: 30

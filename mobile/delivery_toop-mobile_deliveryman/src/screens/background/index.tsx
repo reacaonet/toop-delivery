@@ -18,7 +18,7 @@ const Background: React.FC<BackgroundProps> = ({}) => {
     <View style={styles.content}>
       <View style={[styles.container]}>
         <View>
-          <Text style={styles.title}>ToopDelivery</Text>
+          <Text style={styles.title}>GojáDelivery</Text>
         </View>
         <View style={styles.imgContent}>
           <Image style={styles.logo} resizeMode="contain" source={logo} />

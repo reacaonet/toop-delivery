@@ -44,7 +44,7 @@ const CashBack = () => {
       />
       <SubText>CashBack</SubText>
       <LongText>
-        Toda vez que efetuar pagamento o pelo{'\n'}Toop, você receberá 2% do
+        Toda vez que efetuar pagamento o pelo{'\n'}Gojá, você receberá 2% do
         valor em{'\n'}créditos para ser usado em outra viagem.
       </LongText>
 

@@ -209,7 +209,7 @@ const SearchAddress = ({ navigation, closeSearch, addAddres }) => {
         let isPermission = await LocationPermission().setPermission();
         if (isPermission === false) {
           return Alert.alert(
-            'Por Favor ative o GPS e permita que o ToopDelivery acesse sua localização',
+            'Por Favor ative o GPS e permita que o GojáDelivery acesse sua localização',
           );
         }
       }

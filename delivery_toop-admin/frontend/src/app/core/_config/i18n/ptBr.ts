@@ -693,7 +693,7 @@ export const locale = {
 				COMPANYLCLICK: "Redirecionar para company",
 				OWNDELIVERY: "Entrega própria",
 				HASSPLIT: "Fazer split ao finalizar a compra?",
-				ONLINEDELIVERY: "Entregador Toop",
+				ONLINEDELIVERY: "Entregador Gojá",
 				WITHDRAWMARKET: "Permite retirada no local?",
 				COPYRIGHT: "Copyright",
 				CREATECAMPAIGN: "Criar Campanha",

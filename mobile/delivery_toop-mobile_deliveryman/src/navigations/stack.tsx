@@ -52,7 +52,7 @@ const HomeStack: any = (props: any) => {
         name="Home"
         component={Home}
         options={{
-          title: 'ToopDelivery',
+          title: 'GojáDelivery',
           ...globalNavigationOptions,
           ...homeHeaderStyle,
           // headerLeft: () => <HeaderIcon navigation={props.navigation} />,
