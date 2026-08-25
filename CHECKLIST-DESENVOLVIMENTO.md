@@ -125,6 +125,77 @@
 
 ---
 
+## MODULO DRIVER/MOBILITY - PLATAFORMA HIBRIDA
+
+### FASE 0 - SOCKET.IO + GPS (CONCLUIDA)
+- [x] socket.io + @types/socket.io instalados
+- [x] src/socket.ts criado (auth via JWT, GPS tracking, booking events, chat events)
+- [x] src/server.ts modificado (http.createServer + initSocket)
+- [x] emitToUser() e emitToAll() para notificações em tempo real
+
+### FASE 1 - DRIVER MODEL + CRUD (CONCLUIDA)
+- [x] Driver Model (name, email, phone, cpf, vehicleType, vehiclePlate, serviceCategories, active/available/online, currentLocation GeoJSON 2dsphere, rating, totalTrips, documents)
+- [x] Driver Service (create, getById, list, findNearby, updateLocation, toggleAvailability, toggleOnline, delete)
+- [x] Driver Controller + Validators (createDriverSchema, updateDriverSchema, updateLocationSchema)
+- [x] Driver Routes (CRUD + /me/location + /me/availability + /me/online + /nearby)
+
+### FASE 2 - BOOKING MODEL + RIDE LIFECYCLE (CONCLUIDA)
+- [x] Booking Model (bookingNumber, client, driver, serviceCategory, status[pending→matching→accepted→in_progress→completed→cancelled], pickup/dropoff, distance, estimatedPrice, finalPrice, qrCode, qrCodeVerified, rating bidirectional)
+- [x] Booking Service (create, accept with race condition, start, complete, cancel, rate with avg recalc)
+- [x] Distance Haversine + Price per km calculation
+- [x] Booking Routes (CRUD + /accept + /reject + /start + /complete + /cancel + /rate)
+
+### FASE 3 - MATCHING (CONCLUIDA)
+- [x] findNearby com geoNear $near query (2dsphere index)
+- [x] Matching integrado no fluxo de Booking
+
+### FASE 4 - WALLET SERVICE (CONCLUIDA)
+- [x] Wallet Model (balance, totalEarnings, totalWithdrawals)
+- [x] WalletTransaction Model (type: credit/debit, amount, booking ref)
+- [x] Service com sessões MongoDB para atomicidade
+- [x] Wallet Routes (balance, transactions, credit, debit)
+
+### FASE 5 - QR CODE (CONCLUIDA)
+- [x] qrcode npm package instalado
+- [x] Campo qrCode + qrCodeVerified no Booking Model
+- [x] generateQRCode() com token criptográfico + DataURL
+- [x] verifyQRCode() com validação de token
+- [x] Rotas PUT /:id/qr-generate + /:id/qr-verify
+
+### FASE 6 - CHAT IN-APP (CONCLUIDA)
+- [x] Message Model (booking, sender, senderModel[User|Driver], content, read, readAt)
+- [x] Message Service (send, getByBooking, markAsRead, getUnreadCount)
+- [x] Message Routes (GET/POST /:bookingId)
+
+### FASE 7 - USER MODEL UPDATE (CONCLUIDA)
+- [x] Campo driver?: ObjectId adicionado ao User Model
+- [x] Driver ref no schema
+
+### FASE 8 - ADMIN FRONTEND PAGES (CONCLUIDA)
+- [x] Drivers.jsx (CRUD com stats, tabela, modal criar/editar/detalhe)
+- [x] Bookings.jsx (lista com filtros, detalhes, cancelamento)
+- [x] api.js: driverService + bookingService adicionados
+- [x] vite.config.js: proxy routes adicionados
+- [x] App.jsx: rotas /drivers e /bookings
+- [x] Sidebar.jsx: Motoristas + Corridas no menu
+
+### FASE 9 - DELIVERYMAN APP - RIDE MODE (CONCLUIDA)
+- [x] api.ts: driverService + bookingService + walletService
+- [x] AvailableRidesPage.tsx (lista matching, accept, auto-refresh 8s)
+- [x] ActiveRidePage.tsx (ride ativo, start/complete, maps link)
+- [x] App.tsx: /available-rides + /active-ride routes
+- [x] BottomNav: Corridas + Ativa tabs
+
+### FASE 10 - WEB CLIENT - RIDE PAGES (CONCLUIDA)
+- [x] RideRequestPage.tsx (service selector, pickup/dropoff, payment, notes)
+- [x] RideTrackingPage.tsx (status timeline, driver card, cancel)
+- [x] RideHistoryPage.tsx (ride list com status, route, price)
+- [x] App.tsx: /rides, /rides/new, /rides/:id
+- [x] Layout.tsx: Corridas nav button
+- [x] index.css: ride-specific styles
+
+---
+
 ## AMBIENTE LOCAL - DOCKER COMPOSE DEV
 
 | Container | Porta | Status | Saude |
@@ -142,6 +213,9 @@
 ## CREDENCIAIS DE TESTE
 
 - **Admin:** admin@toop.com.br / admin123
+- **Store:** loja@toop.com.br / loja123
+- **Deliveryman:** entregador@teste.com / entregador123
+- **Driver:** motorista@teste.com / motorista123
 - **Database:** ecbr (MongoDB + seed via mongosh)
 
 ## COMANDOS UTILS
@@ -180,5 +254,5 @@ http://localhost:4202
 
 ---
 
-*Ultima atualizacao: 18/08/2026*
-*Status: Sistema completo e funcional - 10 containers Docker + Desktop Manager + Frontend React*
+*Ultima atualizacao: 25/08/2026*
+*Status: Sistema completo + Modulo Driver/Mobility implementado - 11 containers Docker + Frontend React + Web Client + Deliveryman App + Landing Page*

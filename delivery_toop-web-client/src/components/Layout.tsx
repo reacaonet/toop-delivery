@@ -67,6 +67,13 @@ export default function Layout() {
           <span className="bottom-nav-label">Pedidos</span>
         </button>
         <button
+          className={`bottom-nav-item ${isActive('/rides') || isActive('/rides/new') ? 'active' : ''}`}
+          onClick={() => navigate('/rides/new')}
+        >
+          <span className="bottom-nav-icon">🚗</span>
+          <span className="bottom-nav-label">Corridas</span>
+        </button>
+        <button
           className={`bottom-nav-item ${isActive('/cart') ? 'active' : ''}`}
           onClick={() => navigate('/cart')}
         >

@@ -12,7 +12,9 @@ import {
   LogOut,
   Tag,
   Image,
-  FileText
+  FileText,
+  Car,
+  CalendarCheck
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { deliverymanService } from '../services/api';
@@ -47,6 +49,8 @@ const Sidebar = () => {
     { path: '/orders', icon: ShoppingCart, label: 'Pedidos' },
     { path: '/users', icon: Users, label: 'Usuários' },
     { path: '/deliverymen', icon: Truck, label: 'Entregadores' },
+    { path: '/drivers', icon: Car, label: 'Motoristas' },
+    { path: '/bookings', icon: CalendarCheck, label: 'Corridas' },
     { path: '/payments', icon: CreditCard, label: 'Pagamentos' },
     { path: '/settings', icon: Settings, label: 'Configurações' },
     { path: '/reports', icon: FileText, label: 'Relatórios' },

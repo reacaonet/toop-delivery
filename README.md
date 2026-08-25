@@ -1,35 +1,36 @@
 # GojáDelivery
 
-Plataforma de delivery (iFood + Uber style) — Monorepo com API Admin, 4 microserviços, 4 apps mobile, 2 frontends e desktop.
+Plataforma de delivery + mobility (iFood + Uber style) — Monorepo com API Admin, 4 microserviços, 4 apps web, 4 apps mobile e desktop.
 
 ## Arquitetura
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                        FRONTENDS                            │
-│  React-Vite (port 80)  │  Angular Legacy (port 4200)       │
-└────────────┬────────────┴────────────┬──────────────────────┘
-             │                         │
-┌────────────▼─────────────────────────▼──────────────────────┐
-│                     NGINX / API GATEWAY                     │
-└────────────┬────────────┬────────────┬────────────┬─────────┘
-             │            │            │            │
-┌────────────▼───┐ ┌──────▼──────┐ ┌───▼────────┐ ┌▼────────────┐
-│  Admin API     │ │  Payment    │ │ Notification│ │ Deliveryman │
-│  (port 8100)   │ │  (port 8400)│ │ (port 8200) │ │ (port 8300) │
-│  TypeScript    │ │  TypeScript │ │ JavaScript  │ │ TypeScript  │
-│  Express       │ │  Express    │ │ Fastify     │ │ Express     │
-└───────┬────────┘ └──────┬──────┘ └───┬────────┘ └┬────────────┘
-        │                 │            │            │
-┌───────▼────────┐ ┌──────▼──────┐ ┌───▼────────┐ ┌▼────────────┐
-│  MongoDB       │ │ PostgreSQL  │ │ MongoDB    │ │ MongoDB     │
-│  (port 27017)  │ │ (port 5432) │ │            │ │             │
-└────────────────┘ └─────────────┘ └────────────┘ └─────────────┘
-                        │
-                   ┌────▼────┐
-                   │  Redis  │
-                   │(6379)   │
-                   └─────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                        FRONTENDS                                │
+│  Landing (4205) │ Admin (4202) │ Client (4200) │ Store (4203)  │
+│                 │ Deliveryman App (4204)                        │
+└────────────────┬──────────────────────┬────────────────────────┘
+                 │                      │
+┌────────────────▼──────────────────────▼────────────────────────┐
+│                     NGINX / API GATEWAY                        │
+└────────────────┬───────────┬───────────┬───────────┬──────────┘
+                 │           │           │           │
+┌────────────────▼──┐ ┌──────▼─────┐ ┌──▼─────────┐ ┌▼──────────┐
+│  Admin API        │ │ Payment    │ │Notification│ │Deliveryman│
+│  (port 8100)      │ │ (port 8400)│ │(port 8200) │ │(port 8300)│
+│  TypeScript       │ │ TypeScript │ │ JavaScript  │ │TypeScript │
+│  Express + Socket │ │ Express    │ │ Fastify     │ │Express    │
+└───────┬───────────┘ └──────┬─────┘ └────┬───────┘ └┬──────────┘
+        │                    │            │           │
+┌───────▼──────────┐  ┌──────▼─────┐ ┌───▼───────┐ ┌▼──────────┐
+│  MongoDB         │  │ PostgreSQL │ │ MongoDB   │ │ MongoDB   │
+│  (port 27017)    │  │ (port 5432)│ │           │ │           │
+└──────────────────┘  └────────────┘ └───────────┘ └───────────┘
+                         │
+                    ┌────▼────┐
+                    │  Redis  │
+                    │ (6379)  │
+                    └─────────┘
 ```
 
 ## Quick Start
@@ -140,6 +141,33 @@ Ver `.env.example` para a lista completa. As principais:
 | POST | `/orders` | ✅ | Criar pedido |
 | GET | `/deliverymen` | ✅ | Listar entregadores |
 | POST | `/deliverymen` | ✅ | Criar entregador |
+| GET | `/drivers` | ✅ | Listar motoristas |
+| POST | `/drivers` | ✅ | Criar motorista |
+| GET | `/drivers/:id` | ✅ | Detalhes motorista |
+| PUT | `/drivers/:id` | ✅ | Atualizar motorista |
+| DELETE | `/drivers/:id` | ✅ | Deletar motorista |
+| GET | `/drivers/me/location` | ✅ | Localização atual |
+| PUT | `/drivers/me/location` | ✅ | Atualizar GPS |
+| PUT | `/drivers/me/availability` | ✅ | Toggle disponível |
+| PUT | `/drivers/me/online` | ✅ | Toggle online/offline |
+| GET | `/drivers/nearby` | ✅ | Motoristas próximos |
+| GET | `/bookings` | ✅ | Listar corridas |
+| POST | `/bookings` | ✅ | Criar corrida |
+| GET | `/bookings/:id` | ✅ | Detalhes corrida |
+| PUT | `/bookings/:id/accept` | ✅ | Aceitar corrida |
+| PUT | `/bookings/:id/reject` | ✅ | Rejeitar corrida |
+| PUT | `/bookings/:id/start` | ✅ | Iniciar corrida |
+| PUT | `/bookings/:id/complete` | ✅ | Completar corrida |
+| PUT | `/bookings/:id/cancel` | ✅ | Cancelar corrida |
+| PUT | `/bookings/:id/rate` | ✅ | Avaliar corrida |
+| PUT | `/bookings/:id/qr-generate` | ✅ | Gerar QR Code |
+| PUT | `/bookings/:id/qr-verify` | ✅ | Verificar QR Code |
+| GET | `/wallet/balance` | ✅ | Saldo carteira |
+| GET | `/wallet/transactions` | ✅ | Transações |
+| POST | `/wallet/credit` | ✅ | Creditar |
+| POST | `/wallet/debit` | ✅ | Debitar |
+| GET | `/messages/:bookingId` | ✅ | Mensagens chat |
+| POST | `/messages/:bookingId` | ✅ | Enviar mensagem |
 
 ### Microserviços
 

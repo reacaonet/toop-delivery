@@ -1,6 +1,6 @@
 import React from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
-import { Home, Package, Truck, History, User } from 'lucide-react'
+import { Home, Package, Truck, History, User, Car, Navigation } from 'lucide-react'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import Layout from './components/Layout'
 import LoginPage from './pages/LoginPage'
@@ -10,6 +10,8 @@ import AvailableOrdersPage from './pages/AvailableOrdersPage'
 import ActiveDeliveryPage from './pages/ActiveDeliveryPage'
 import HistoryPage from './pages/HistoryPage'
 import ProfilePage from './pages/ProfilePage'
+import AvailableRidesPage from './pages/AvailableRidesPage'
+import ActiveRidePage from './pages/ActiveRidePage'
 
 function BottomNav() {
   const location = useLocation()
@@ -39,6 +41,20 @@ function BottomNav() {
         Entrega
       </button>
       <button
+        className={`bottom-nav-item ${isActive('/available-rides') ? 'active' : ''}`}
+        onClick={() => window.location.href = '/available-rides'}
+      >
+        <Car size={22} />
+        Corridas
+      </button>
+      <button
+        className={`bottom-nav-item ${isActive('/active-ride') ? 'active' : ''}`}
+        onClick={() => window.location.href = '/active-ride'}
+      >
+        <Navigation size={22} />
+        Ativa
+      </button>
+      <button
         className={`bottom-nav-item ${isActive('/history') ? 'active' : ''}`}
         onClick={() => window.location.href = '/history'}
       >
@@ -66,6 +82,8 @@ function ProtectedLayout() {
           <Route path="/active" element={<ActiveDeliveryPage />} />
           <Route path="/history" element={<HistoryPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/available-rides" element={<AvailableRidesPage />} />
+          <Route path="/active-ride" element={<ActiveRidePage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Layout>

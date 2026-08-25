@@ -9,6 +9,7 @@ export interface IUser extends Document {
   active: boolean;
   company?: mongoose.Types.ObjectId;
   deliveryman?: mongoose.Types.ObjectId;
+  driver?: mongoose.Types.ObjectId;
   avatar?: string;
   lastLogin?: Date;
   createdAt: Date;
@@ -25,6 +26,7 @@ const UserSchema = new Schema<IUser>(
     active: { type: Boolean, default: true },
     company: { type: Schema.Types.ObjectId, ref: 'Company' },
     deliveryman: { type: Schema.Types.ObjectId, ref: 'Deliveryman' },
+    driver: { type: Schema.Types.ObjectId, ref: 'Driver' },
     avatar: { type: String },
     lastLogin: { type: Date },
   },

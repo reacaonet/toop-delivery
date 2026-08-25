@@ -17,6 +17,10 @@ import branchRoutes from "./branch.routes";
 import stockItemRoutes from "./stockItem.routes";
 import stockBatchRoutes from "./stockBatch.routes";
 import stockMovementRoutes from "./stockMovement.routes";
+import driverRoutes from "./driver.routes";
+import bookingRoutes from "./booking.routes";
+import walletRoutes from "./wallet.routes";
+import messageRoutes from "./message.routes";
 
 const router = Router();
 
@@ -38,5 +42,9 @@ router.use("/branches", branchRoutes);
 router.use("/stock-items", stockItemRoutes);
 router.use("/stock-batches", stockBatchRoutes);
 router.use("/stock-movements", stockMovementRoutes);
+router.use("/drivers", driverRoutes);
+router.use("/bookings", bookingRoutes);
+router.use("/wallet", walletRoutes);
+router.use("/messages", messageRoutes);
 
 export default router;

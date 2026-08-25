@@ -109,4 +109,57 @@ export const deliverymanService = {
   },
 }
 
+export const driverService = {
+  toggleOnline: async () => {
+    const response = await api.put('/drivers/me/online')
+    return response.data?.data ?? response.data
+  },
+  toggleAvailability: async () => {
+    const response = await api.put('/drivers/me/availability')
+    return response.data?.data ?? response.data
+  },
+  updateLocation: async (lat: number, lng: number, heading?: number, speed?: number) => {
+    const response = await api.put('/drivers/me/location', { lat, lng, heading, speed })
+    return response.data?.data ?? response.data
+  },
+}
+
+export const bookingService = {
+  getBookings: async (params: Record<string, string | number> = {}) => {
+    const response = await api.get('/bookings', { params })
+    return response.data?.data ?? response.data
+  },
+  getBookingById: async (id: string) => {
+    const response = await api.get(`/bookings/${id}`)
+    return response.data?.data ?? response.data
+  },
+  acceptBooking: async (id: string) => {
+    const response = await api.put(`/bookings/${id}/accept`)
+    return response.data?.data ?? response.data
+  },
+  startBooking: async (id: string) => {
+    const response = await api.put(`/bookings/${id}/start`)
+    return response.data?.data ?? response.data
+  },
+  completeBooking: async (id: string) => {
+    const response = await api.put(`/bookings/${id}/complete`)
+    return response.data?.data ?? response.data
+  },
+  rejectBooking: async (id: string) => {
+    const response = await api.put(`/bookings/${id}/reject`)
+    return response.data?.data ?? response.data
+  },
+}
+
+export const walletService = {
+  getBalance: async () => {
+    const response = await api.get('/wallet/balance')
+    return response.data?.data ?? response.data
+  },
+  getTransactions: async (params: Record<string, string | number> = {}) => {
+    const response = await api.get('/wallet/transactions', { params })
+    return response.data?.data ?? response.data
+  },
+}
+
 export default api

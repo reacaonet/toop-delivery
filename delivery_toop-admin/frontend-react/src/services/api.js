@@ -126,6 +126,48 @@ export const deliverymanService = {
   }
 };
 
+export const driverService = {
+  getDrivers: async (params = {}) => {
+    const response = await api.get('/drivers', { params });
+    return response.data?.data ?? response.data;
+  },
+  getDriverById: async (id) => {
+    const response = await api.get(`/drivers/${id}`);
+    return response.data?.data ?? response.data;
+  },
+  createDriver: async (data) => {
+    const response = await api.post('/drivers', data);
+    return response.data;
+  },
+  updateDriver: async (id, data) => {
+    const response = await api.put(`/drivers/${id}`, data);
+    return response.data;
+  },
+  deleteDriver: async (id) => {
+    const response = await api.delete(`/drivers/${id}`);
+    return response.data;
+  },
+  findNearby: async (lat, lng, maxDistance = 5000) => {
+    const response = await api.get('/drivers/nearby', { params: { lat, lng, maxDistance } });
+    return response.data?.data ?? response.data;
+  }
+};
+
+export const bookingService = {
+  getBookings: async (params = {}) => {
+    const response = await api.get('/bookings', { params });
+    return response.data?.data ?? response.data;
+  },
+  getBookingById: async (id) => {
+    const response = await api.get(`/bookings/${id}`);
+    return response.data?.data ?? response.data;
+  },
+  cancelBooking: async (id, reason) => {
+    const response = await api.put(`/bookings/${id}/cancel`, { reason, cancelledBy: 'system' });
+    return response.data?.data ?? response.data;
+  }
+};
+
 export const paymentService = {
   getPayments: async () => {
     const response = await api.get('/payments');
