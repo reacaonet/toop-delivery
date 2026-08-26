@@ -6,9 +6,15 @@ interface RateLimitStore {
 
 const store: RateLimitStore = {};
 const WINDOW_MS = 60 * 1000;
-const MAX_REQUESTS = 100;
+const MAX_REQUESTS = 500;
+
+const EXEMPT_PATHS = ['/auth/login', '/auth/refresh', '/healthcheck'];
 
 export function rateLimiter(req: Request, res: Response, next: NextFunction): void {
+  if (EXEMPT_PATHS.some(p => req.path.startsWith(p))) {
+    next();
+    return;
+  }
   const key = req.ip || req.socket.remoteAddress || "unknown";
   const now = Date.now();
 

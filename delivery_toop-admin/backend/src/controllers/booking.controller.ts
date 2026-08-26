@@ -117,9 +117,20 @@ export class BookingController {
     try {
       const query = { ...req.query } as any;
 
-      // Auto-resolve driverId for deliverymen/driver users
-      // For matching status, don't filter (needs to see ALL available rides)
-      if (!query.driverId && !query.clientId && query.status && query.status !== 'matching') {
+      // For matching status, resolve driverId and exclude rejected rides
+      if (!query.driverId && !query.clientId && query.status === 'matching') {
+        const userId = (req as any).user?._id;
+        const user = await UserModel.findById(userId).select('deliveryman driver role');
+        let driverObjectId = null;
+        if (user?.deliveryman) {
+          driverObjectId = user.deliveryman;
+        } else if (user?.driver) {
+          driverObjectId = user.driver;
+        }
+        if (driverObjectId) {
+          query._excludedDriverId = driverObjectId.toString();
+        }
+      } else if (!query.driverId && !query.clientId && query.status && query.status !== 'matching') {
         const userId = (req as any).user?._id;
         const user = await UserModel.findById(userId).select('deliveryman driver role');
         if (user?.deliveryman && (user.role === 'deliveryman')) {
@@ -174,6 +185,10 @@ export class BookingController {
         driverId,
       });
 
+      // Broadcast to all other drivers that this ride is no longer available
+      const { emitToAll } = await import("../socket");
+      emitToAll("booking:ride_taken", { bookingId: booking._id.toString() });
+
       return res.status(200).json({ success: true, data: booking });
     } catch (error) {
       next(error);
@@ -206,6 +221,11 @@ export class BookingController {
       const updatedBooking = await bookingService.getById(req.params.id);
       const rejectedIds = (updatedBooking.rejectedDrivers || []).map((id: any) => id.toString());
       notifyNearbyDrivers(updatedBooking, rejectedIds);
+
+      // Notify the rejecting driver that the ride was rejected (dismiss popup)
+      emitToUser(userId.toString(), "booking:rejected_for_me", {
+        bookingId: booking._id,
+      });
 
       return res.status(200).json({ success: true, data: booking });
     } catch (error) {

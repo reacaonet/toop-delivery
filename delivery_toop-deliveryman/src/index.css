@@ -1125,7 +1125,12 @@ a {
 .order-distance { display: flex; align-items: center; gap: 4px; font-size: 0.85rem; color: #666; }
 .order-price { font-weight: 700; color: var(--primary); font-size: 1rem; }
 
-.btn-accept { width: 100%; padding: 12px; background: var(--success); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 8px; }
+.order-card-actions { display: flex; gap: 8px; margin-top: 8px; }
+.order-card-actions .btn-accept { flex: 1; width: auto; margin-top: 0; }
+.order-card-actions .btn-reject { flex: 0 0 auto; width: auto; padding: 10px 16px; background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; font-size: 0.85rem; }
+.order-card-actions .btn-reject:hover:not(:disabled) { background: #fecaca; }
+.order-card-actions .btn-reject:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-accept { width: 100%; padding: 12px; background: var(--success); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
 .btn-accept:hover:not(:disabled) { background: #3d9a5e; }
 .btn-accept:disabled { opacity: 0.6; cursor: not-allowed; }
 
@@ -1403,6 +1408,17 @@ a {
 .qr-image {
   width: 220px; height: 220px; border: 3px solid #f3f4f6; border-radius: 16px;
   margin: 0 auto 16px; display: block;
+}
+.qr-token-display {
+  margin-top: 10px;
+  padding: 10px 20px;
+  background: #f3f4f6;
+  border-radius: 10px;
+  font-size: 1.2rem;
+  letter-spacing: 3px;
+  text-align: center;
+  color: #1a1a2e;
+  width: 100%;
 }
 .qr-booking-number {
   font-size: 1rem; font-weight: 700; color: #6366f1; margin-bottom: 20px;

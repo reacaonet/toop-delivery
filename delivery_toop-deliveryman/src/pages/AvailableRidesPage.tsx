@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { MapPin, Clock, Navigation } from 'lucide-react'
+import { MapPin, Clock, Navigation, X } from 'lucide-react'
 import { bookingService } from '../api'
+import { io } from 'socket.io-client'
 
 const SERVICE_LABELS: Record<string, string> = {
   driver: 'Corrida',
@@ -14,11 +15,31 @@ export default function AvailableRidesPage() {
   const [bookings, setBookings] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [accepting, setAccepting] = useState<string | null>(null)
+  const [rejecting, setRejecting] = useState<string | null>(null)
+  const socketRef = useRef<any>(null)
 
   useEffect(() => {
     loadBookings()
     const interval = setInterval(loadBookings, 8000)
-    return () => clearInterval(interval)
+
+    const token = localStorage.getItem('token')
+    if (token) {
+      const socket = io('http://localhost:8100', { auth: { token } })
+      socketRef.current = socket
+
+      socket.on('booking:ride_taken', (data: { bookingId: string }) => {
+        setBookings(prev => prev.filter(b => b._id !== data.bookingId))
+      })
+
+      socket.on('booking:ride_request', () => {
+        loadBookings()
+      })
+    }
+
+    return () => {
+      clearInterval(interval)
+      socketRef.current?.disconnect()
+    }
   }, [])
 
   const loadBookings = async () => {
@@ -42,6 +63,18 @@ export default function AvailableRidesPage() {
       alert('Erro ao aceitar: ' + (error.response?.data?.error || error.message))
     } finally {
       setAccepting(null)
+    }
+  }
+
+  const handleReject = async (id: string) => {
+    setRejecting(id)
+    try {
+      await bookingService.rejectBooking(id)
+      setBookings(prev => prev.filter(b => b._id !== id))
+    } catch (error: any) {
+      console.error('Erro ao recusar:', error)
+    } finally {
+      setRejecting(null)
     }
   }
 
@@ -88,13 +121,23 @@ export default function AvailableRidesPage() {
                 <span className="order-price">R$ {(booking.estimatedPrice || 0).toFixed(2)}</span>
               </div>
 
-              <button
-                className="btn-accept"
-                onClick={() => handleAccept(booking._id)}
-                disabled={accepting === booking._id}
-              >
-                {accepting === booking._id ? 'Aceitando...' : 'Aceitar Corrida'}
-              </button>
+              <div className="order-card-actions">
+                <button
+                  className="btn-reject"
+                  onClick={() => handleReject(booking._id)}
+                  disabled={rejecting === booking._id || accepting === booking._id}
+                >
+                  <X size={14} />
+                  {rejecting === booking._id ? 'Recusando...' : 'Recusar'}
+                </button>
+                <button
+                  className="btn-accept"
+                  onClick={() => handleAccept(booking._id)}
+                  disabled={accepting === booking._id || rejecting === booking._id}
+                >
+                  {accepting === booking._id ? 'Aceitando...' : 'Aceitar Corrida'}
+                </button>
+              </div>
             </div>
           ))}
         </div>

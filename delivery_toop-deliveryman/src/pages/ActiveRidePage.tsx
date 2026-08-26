@@ -33,6 +33,7 @@ export default function ActiveRidePage() {
   const [currentLng, setCurrentLng] = useState<number | null>(null)
   const watchRef = useRef<number | null>(null)
   const [qrImage, setQrImage] = useState<string | null>(null)
+  const [qrToken, setQrToken] = useState<string | null>(null)
   const [qrLoading, setQrLoading] = useState(false)
   const [showQr, setShowQr] = useState(false)
 
@@ -172,7 +173,9 @@ export default function ActiveRidePage() {
     setQrLoading(true)
     try {
       const result = await bookingService.generateQRCode(booking._id) as any
-      setQrImage(result?.qrCode || result?.data?.qrCode || null)
+      const data = result?.qrCode ? result : result?.data || {}
+      setQrImage(data.qrCode || null)
+      setQrToken(data.token || null)
       setShowQr(true)
     } catch (error: any) {
       alert('Erro ao gerar QR Code: ' + (error.response?.data?.error || error.message))
@@ -315,6 +318,7 @@ export default function ActiveRidePage() {
             <h3>QR Code da Corrida</h3>
             <p className="qr-modal-subtitle">Peça para o passageiro escanear</p>
             <img src={qrImage} alt="QR Code" className="qr-image" />
+            {qrToken && <div className="qr-token-display">Código: <strong>{qrToken}</strong></div>}
             <div className="qr-booking-number">#{booking?.bookingNumber}</div>
             <button className="qr-close-btn" onClick={() => setShowQr(false)}>Fechar</button>
           </div>

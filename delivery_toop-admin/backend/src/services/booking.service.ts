@@ -90,7 +90,7 @@ export class BookingService {
     return booking;
   }
 
-  async list(query: PaginationQuery): Promise<PaginatedResult> {
+  async list(query: PaginationQuery & { _excludedDriverId?: string }): Promise<PaginatedResult> {
     const page = Math.max(1, parseInt(query.page || "1", 10));
     const limit = Math.min(100, Math.max(1, parseInt(query.limit || "10", 10)));
     const skip = (page - 1) * limit;
@@ -100,6 +100,11 @@ export class BookingService {
     if (query.clientId) filter.client = query.clientId;
     if (query.driverId) filter.driver = query.driverId;
     if (query.companyId) filter.company = query.companyId;
+
+    // Exclude rides already rejected by this driver
+    if (query._excludedDriverId) {
+      filter.rejectedDrivers = { $ne: query._excludedDriverId };
+    }
 
     const [data, total] = await Promise.all([
       BookingModel.find(filter)
@@ -349,7 +354,7 @@ export class BookingService {
       throw new AppError("QR Code só pode ser gerado para corridas aceitas ou em andamento", 400);
     }
 
-    const qrToken = crypto.randomBytes(32).toString('hex');
+    const qrToken = String(Math.floor(100000 + Math.random() * 900000));
     const qrData = JSON.stringify({
       bookingId: booking._id,
       bookingNumber: booking.bookingNumber,

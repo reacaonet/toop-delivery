@@ -151,6 +151,20 @@ const DashboardPage: React.FC = () => {
       }
     })
 
+    socket.on('booking:rejected_for_me', (data: any) => {
+      setRideQueue(prev => prev.filter(r => r._id !== data.bookingId))
+      if (pendingRideRef.current?._id === data.bookingId) {
+        dismissRide()
+      }
+    })
+
+    socket.on('booking:ride_taken', (data: any) => {
+      setRideQueue(prev => prev.filter(r => r._id !== data.bookingId))
+      if (pendingRideRef.current?._id === data.bookingId) {
+        dismissRide()
+      }
+    })
+
     socket.on('disconnect', () => {
       console.log('[Socket] Desconectado')
     })

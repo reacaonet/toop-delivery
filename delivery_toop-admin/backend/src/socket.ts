@@ -159,6 +159,9 @@ export function initSocket(httpServer: HttpServer): Server {
         bookingId: data.bookingId,
         driverId: data.driverId,
       });
+      io.emit('booking:ride_taken', {
+        bookingId: data.bookingId,
+      });
     });
 
     socket.on('booking:reject', (data: { bookingId: string; driverId: string }) => {
