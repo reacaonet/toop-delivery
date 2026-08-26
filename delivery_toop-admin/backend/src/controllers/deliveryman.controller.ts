@@ -124,12 +124,24 @@ export class DeliverymanController {
       const { lat, lng } = req.body;
       const result = await deliverymanService.updateLocation(user.deliveryman.toString(), lat, lng);
 
-      const { getIO } = await import("../socket");
+      const { getIO, emitToUser } = await import("../socket");
       const io = getIO();
       io.emit("driver:location_broadcast", {
         driverId: user.deliveryman.toString(),
         location: { lat, lng, timestamp: Date.now() },
       });
+
+      const { BookingModel } = await import("../models/Booking");
+      const activeBooking = await BookingModel.findOne({
+        driver: user.deliveryman,
+        status: { $in: ["accepted", "in_progress"] },
+      }).lean();
+      if (activeBooking?.client) {
+        emitToUser(activeBooking.client.toString(), "booking:driver_location", {
+          bookingId: activeBooking._id,
+          location: { lat, lng },
+        });
+      }
 
       return res.status(200).json({ success: true, data: result });
     } catch (error) {

@@ -421,9 +421,77 @@ const Drivers = () => {
                 <div style={{ marginTop: '1rem', borderTop: '1px solid #eee', paddingTop: '1rem' }}>
                   <strong>Documentos:</strong>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem', marginTop: '0.5rem' }}>
-                    <span>CNH: <span style={{ color: STATUS_COLORS[selected.documentStatus.cnh] }}>{selected.documentStatus.cnh}</span></span>
-                    <span>Veículo: <span style={{ color: STATUS_COLORS[selected.documentStatus.vehicleDocument] }}>{selected.documentStatus.vehicleDocument}</span></span>
-                    <span>Foto: <span style={{ color: STATUS_COLORS[selected.documentStatus.photo] }}>{selected.documentStatus.photo}</span></span>
+                    {['cnh', 'vehicleDocument', 'photo'].map(doc => (
+                      <div key={doc} style={{ padding: '8px', border: '1px solid #eee', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <span style={{ fontSize: '0.75rem', color: '#666' }}>
+                          {doc === 'cnh' ? 'CNH' : doc === 'vehicleDocument' ? 'Documento Veículo' : 'Foto'}
+                        </span>
+                        <span style={{ color: STATUS_COLORS[selected.documentStatus[doc]], fontWeight: 600 }}>
+                          {selected.documentStatus[doc] === 'pending' ? '⏳ Pendente' :
+                           selected.documentStatus[doc] === 'approved' ? '✅ Aprovado' : '❌ Rejeitado'}
+                        </span>
+                        {selected.documentStatus[doc] === 'pending' && (
+                          <div style={{ display: 'flex', gap: '4px', marginTop: '4px' }}>
+                            <button
+                              className="btn btn-primary"
+                              style={{ padding: '2px 8px', fontSize: '0.7rem' }}
+                              onClick={async () => {
+                                try {
+                                  const updateData = { documentStatus: { ...selected.documentStatus, [doc]: 'approved' } };
+                                  if (selected._source === 'deliveryman') {
+                                    await deliverymanService.updateDeliveryman(selected._id, updateData);
+                                  } else {
+                                    await driverService.updateDriver(selected._id, updateData);
+                                  }
+                                  setSelected({ ...selected, documentStatus: { ...selected.documentStatus, [doc]: 'approved' } });
+                                  loadDrivers();
+                                } catch (err) {
+                                  alert('Erro: ' + (err.response?.data?.error || err.message));
+                                }
+                              }}
+                            >Aprovar</button>
+                            <button
+                              className="btn btn-danger"
+                              style={{ padding: '2px 8px', fontSize: '0.7rem' }}
+                              onClick={async () => {
+                                try {
+                                  const updateData = { documentStatus: { ...selected.documentStatus, [doc]: 'rejected' } };
+                                  if (selected._source === 'deliveryman') {
+                                    await deliverymanService.updateDeliveryman(selected._id, updateData);
+                                  } else {
+                                    await driverService.updateDriver(selected._id, updateData);
+                                  }
+                                  setSelected({ ...selected, documentStatus: { ...selected.documentStatus, [doc]: 'rejected' } });
+                                  loadDrivers();
+                                } catch (err) {
+                                  alert('Erro: ' + (err.response?.data?.error || err.message));
+                                }
+                              }}
+                            >Rejeitar</button>
+                          </div>
+                        )}
+                        {selected.documentStatus[doc] === 'rejected' && (
+                          <button
+                            className="btn btn-primary"
+                            style={{ padding: '2px 8px', fontSize: '0.7rem', marginTop: '4px' }}
+                            onClick={async () => {
+                              try {
+                                const updateData = { documentStatus: { ...selected.documentStatus, [doc]: 'pending' } };
+                                if (selected._source === 'deliveryman') {
+                                  await deliverymanService.updateDeliveryman(selected._id, updateData);
+                                } else {
+                                  await driverService.updateDriver(selected._id, updateData);
+                                }
+                                setSelected({ ...selected, documentStatus: { ...selected.documentStatus, [doc]: 'pending' } });
+                                loadDrivers();
+                              } catch (err) {
+                                alert('Erro: ' + (err.response?.data?.error || err.message));
+                              }
+                            }}
+                          >Reenviar para revisão</button>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}

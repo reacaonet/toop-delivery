@@ -2,6 +2,7 @@ import { BookingModel } from "../models/Booking";
 import { DriverModel } from "../models/Driver";
 import { DeliverymanModel } from "../models/Deliveryman";
 import { AppError } from "../middleware/errorHandler";
+import walletService from "./wallet.service";
 import QRCode from "qrcode";
 import crypto from "crypto";
 
@@ -21,6 +22,22 @@ interface PaginatedResult {
   pages: number;
 }
 
+const CANCEL_FEE_CONFIG = {
+  client: {
+    beforeMatch: 0,
+    afterMatch: 0,
+    afterAccepted: 2.00,
+    afterStarted: 5.00,
+  },
+  driver: {
+    beforeMatch: 0,
+    afterMatch: 0,
+    afterAccepted: 3.00,
+    afterStarted: 8.00,
+  },
+  platformFeePercent: 20,
+};
+
 export class BookingService {
   async create(data: {
     clientId: string;
@@ -30,6 +47,7 @@ export class BookingService {
     dropoff: { address: string; lat: number; lng: number; complement?: string };
     paymentMethod: string;
     notes?: string;
+    scheduledAt?: string;
   }) {
     const bookingNumber = `BK${Date.now()}${Math.floor(Math.random() * 1000)}`;
 
@@ -39,19 +57,24 @@ export class BookingService {
     );
 
     const estimatedPrice = this.calculatePrice(distance, data.serviceCategory);
+    const duration = this.calculateDuration(distance);
+
+    const status = data.scheduledAt ? 'pending' : 'matching';
 
     const booking = await BookingModel.create({
       bookingNumber,
       client: data.clientId,
       company: data.companyId,
       serviceCategory: data.serviceCategory,
-      status: 'matching',
+      status,
       pickup: data.pickup,
       dropoff: data.dropoff,
       distance,
+      duration,
       estimatedPrice,
       paymentMethod: data.paymentMethod,
       notes: data.notes,
+      scheduledAt: data.scheduledAt ? new Date(data.scheduledAt) : undefined,
     });
 
     return booking;
@@ -115,6 +138,14 @@ export class BookingService {
       throw new AppError("Corrida não encontrada", 404);
     }
 
+    if (booking.status !== 'matching') {
+      throw new AppError("Corrida não está mais disponível para rejeição", 400);
+    }
+
+    await BookingModel.findByIdAndUpdate(bookingId, {
+      $addToSet: { rejectedDrivers: driverId },
+    });
+
     return booking;
   }
 
@@ -133,14 +164,34 @@ export class BookingService {
   }
 
   async complete(bookingId: string, driverId: string) {
-    const booking = await BookingModel.findOneAndUpdate(
-      { _id: bookingId, status: 'in_progress', driver: driverId },
-      { $set: { status: 'completed', completedAt: new Date(), paymentStatus: 'paid' } },
+    const booking = await BookingModel.findById(bookingId);
+    if (!booking || booking.status !== 'in_progress' || booking.driver?.toString() !== driverId) {
+      throw new AppError("Corrida não pode ser concluída", 400);
+    }
+
+    const completedAt = new Date();
+    const duration = booking.startedAt
+      ? Math.round((completedAt.getTime() - booking.startedAt.getTime()) / 60000)
+      : booking.duration || 0;
+
+    const finalPrice = booking.estimatedPrice || 0;
+    const platformFee = Math.round(finalPrice * CANCEL_FEE_CONFIG.platformFeePercent / 100 * 100) / 100;
+    const driverEarning = Math.round((finalPrice - platformFee) * 100) / 100;
+
+    const updated = await BookingModel.findByIdAndUpdate(
+      bookingId,
+      {
+        status: 'completed',
+        completedAt,
+        duration,
+        finalPrice,
+        paymentStatus: 'paid',
+      },
       { new: true }
     );
 
-    if (!booking) {
-      throw new AppError("Corrida não pode ser concluída", 400);
+    if (!updated) {
+      throw new AppError("Erro ao concluir corrida", 500);
     }
 
     if (booking.driverModel === 'Driver') {
@@ -149,7 +200,18 @@ export class BookingService {
       await DeliverymanModel.findByIdAndUpdate(driverId, { driverAvailable: true, $inc: { totalTrips: 1 } });
     }
 
-    return booking;
+    try {
+      await walletService.credit(
+        driverId,
+        driverEarning,
+        `Corrida ${booking.bookingNumber} - ${booking.distance?.toFixed(1) || 0}km`,
+        bookingId
+      );
+    } catch (err) {
+      console.error("[Booking] Erro ao creditar wallet do motorista:", err);
+    }
+
+    return updated;
   }
 
   async cancel(bookingId: string, userId: string, reason?: string, cancelledBy?: 'client' | 'driver' | 'system') {
@@ -162,13 +224,30 @@ export class BookingService {
       throw new AppError("Corrida já foi concluída ou cancelada", 400);
     }
 
+    let cancelFee = 0;
+    const cancelType = cancelledBy || 'client';
+    const feeConfig = (CANCEL_FEE_CONFIG as Record<string, any>)[cancelType] || CANCEL_FEE_CONFIG.client;
+
+    if (cancelType === 'client') {
+      if (booking.status === 'accepted') cancelFee = feeConfig.afterAccepted;
+      else if (booking.status === 'in_progress') cancelFee = feeConfig.afterStarted;
+    } else if (cancelType === 'driver') {
+      if (booking.status === 'accepted') cancelFee = feeConfig.afterAccepted;
+      else if (booking.status === 'in_progress') cancelFee = feeConfig.afterStarted;
+    }
+
+    if (booking.status === 'matching') {
+      cancelFee = 0;
+    }
+
     const updated = await BookingModel.findByIdAndUpdate(
       bookingId,
       {
         status: 'cancelled',
         cancelReason: reason,
-        cancelledBy: cancelledBy || 'client',
+        cancelledBy: cancelType,
         cancelledAt: new Date(),
+        cancelFee,
       },
       { new: true }
     );
@@ -221,7 +300,7 @@ export class BookingService {
     return updated;
   }
 
-  private calculateDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  calculateDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
     const R = 6371;
     const dLat = this.toRad(lat2 - lat1);
     const dLng = this.toRad(lng2 - lng1);
@@ -230,14 +309,19 @@ export class BookingService {
       Math.cos(this.toRad(lat1)) * Math.cos(this.toRad(lat2)) *
       Math.sin(dLng / 2) * Math.sin(dLng / 2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
+    return Math.round(R * c * 100) / 100;
+  }
+
+  calculateDuration(distanceKm: number): number {
+    const avgSpeedKmh = 30;
+    return Math.ceil((distanceKm / avgSpeedKmh) * 60);
   }
 
   private toRad(deg: number): number {
     return deg * (Math.PI / 180);
   }
 
-  private calculatePrice(distanceKm: number, serviceCategory: string): number {
+  calculatePrice(distanceKm: number, serviceCategory: string): number {
     const basePrices: Record<string, number> = {
       driver: 5.00,
       delivery: 3.00,

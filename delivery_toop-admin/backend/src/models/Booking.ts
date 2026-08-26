@@ -35,6 +35,8 @@ export interface IBooking extends Document {
   };
   cancelReason?: string;
   cancelledBy?: 'client' | 'driver' | 'system';
+  cancelFee?: number;
+  rejectedDrivers?: mongoose.Types.ObjectId[];
   qrCode?: string;
   qrCodeVerified?: boolean;
   scheduledAt?: Date;
@@ -85,6 +87,8 @@ const BookingSchema = new Schema<IBooking>(
     },
     cancelReason: String,
     cancelledBy: { type: String, enum: ['client', 'driver', 'system'] },
+    cancelFee: { type: Number, default: 0 },
+    rejectedDrivers: [{ type: Schema.Types.ObjectId, refPath: 'driverModel' }],
     qrCode: String,
     qrCodeVerified: { type: Boolean, default: false },
     scheduledAt: Date,

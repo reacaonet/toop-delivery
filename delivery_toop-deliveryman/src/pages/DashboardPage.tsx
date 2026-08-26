@@ -78,8 +78,7 @@ const DashboardPage: React.FC = () => {
     if (!isDriver || !driverOnline || !driverAvailable) return
     try {
       const result = await bookingService.getBookings({ status: 'matching' })
-      const items = result?.data || []
-      const rides: RideRequest[] = Array.isArray(items) ? items : []
+      const rides: RideRequest[] = Array.isArray(result) ? result : (result?.data || [])
       setRideQueue(rides)
       if (!pendingRide && rides.length > 0) {
         setPendingRide(rides[0])

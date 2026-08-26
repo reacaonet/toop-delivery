@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef } from 'react'
-import { User, Save, Upload, Star, Truck, Phone, Mail, FileText, Image as ImageIcon, CheckCircle, AlertCircle, MapPin } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { User, Save, Upload, Star, Truck, Phone, Mail, FileText, Image as ImageIcon, CheckCircle, AlertCircle, MapPin, DollarSign } from 'lucide-react'
 import api from '../api'
 import { useAuth } from '../contexts/AuthContext'
 
 const ProfilePage: React.FC = () => {
   const { user, deliverymanId, refreshUser } = useAuth()
+  const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [uploadingField, setUploadingField] = useState<string | null>(null)
@@ -515,6 +517,10 @@ const ProfilePage: React.FC = () => {
 
         <button type="submit" className="btn btn-primary btn-full" disabled={saving}>
           {saving ? <div className="spinner-sm" /> : <><Save size={16} /> Salvar Alteracoes</>}
+        </button>
+
+        <button type="button" className="btn btn-outline btn-full" onClick={() => navigate('/earnings')} style={{ marginTop: 12 }}>
+          <DollarSign size={16} /> Ver Ganhos
         </button>
       </form>
     </div>

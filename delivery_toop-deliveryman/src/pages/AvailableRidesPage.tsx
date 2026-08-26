@@ -24,8 +24,8 @@ export default function AvailableRidesPage() {
   const loadBookings = async () => {
     try {
       const result = await bookingService.getBookings({ status: 'matching' })
-      const items = result?.data || []
-      setBookings(Array.isArray(items) ? items : [])
+      const list = Array.isArray(result) ? result : (result?.data || [])
+      setBookings(list)
     } catch (error) {
       console.error('Erro ao carregar corridas:', error)
     } finally {

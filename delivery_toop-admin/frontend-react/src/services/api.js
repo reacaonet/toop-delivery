@@ -268,4 +268,23 @@ export const settingsService = {
   }
 };
 
+export const walletService = {
+  getBalance: async (driverId) => {
+    const response = await api.get(`/wallet/balance`, { params: { driverId } });
+    return response.data?.data ?? response.data;
+  },
+  getTransactions: async (driverId, params = {}) => {
+    const response = await api.get(`/wallet/transactions`, { params: { driverId, ...params } });
+    return response.data?.data ?? response.data;
+  },
+  credit: async (driverId, amount, description) => {
+    const response = await api.post('/wallet/credit', { driverId, amount, description });
+    return response.data?.data ?? response.data;
+  },
+  debit: async (driverId, amount, description) => {
+    const response = await api.post('/wallet/debit', { driverId, amount, description });
+    return response.data?.data ?? response.data;
+  },
+};
+
 export default api;

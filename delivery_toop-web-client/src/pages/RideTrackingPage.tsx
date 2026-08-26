@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { io, Socket } from 'socket.io-client'
 import api from '../api'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
@@ -22,15 +23,42 @@ const STATUS_ICONS: Record<string, string> = {
   cancelled: '❌',
 }
 
+function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371
+  const dLat = ((lat2 - lat1) * Math.PI) / 180
+  const dLng = ((lng2 - lng1) * Math.PI) / 180
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) *
+    Math.sin(dLng / 2) * Math.sin(dLng / 2)
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+}
+
+function formatETA(distanceKm: number): string {
+  const avgSpeedKmh = 30
+  const minutes = Math.ceil((distanceKm / avgSpeedKmh) * 60)
+  if (minutes < 1) return 'Menos de 1 min'
+  if (minutes === 1) return '1 minuto'
+  return `${minutes} minutos`
+}
+
 export default function RideTrackingPage() {
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstanceRef = useRef<L.Map | null>(null)
+  const driverMarkerRef = useRef<L.Marker | null>(null)
+  const socketRef = useRef<Socket | null>(null)
 
   const [booking, setBooking] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [driverLocation, setDriverLocation] = useState<{ lat: number; lng: number } | null>(null)
+  const [eta, setEta] = useState<string | null>(null)
+  const [showQrVerify, setShowQrVerify] = useState(false)
+  const [qrCode, setQrCode] = useState('')
+  const [qrVerifying, setQrVerifying] = useState(false)
+  const [qrResult, setQrResult] = useState<string | null>(null)
 
   useEffect(() => {
     if (!id) return
@@ -50,6 +78,65 @@ export default function RideTrackingPage() {
       setLoading(false)
     }
   }
+
+  // Socket.io connection for real-time updates — connect from matching onwards
+  useEffect(() => {
+    if (!id || !booking) return
+    if (booking.status === 'completed' || booking.status === 'cancelled') return
+
+    const token = localStorage.getItem('token')
+    if (!token) return
+
+    const socketUrl = window.location.port === '4200'
+      ? 'http://localhost:8100'
+      : window.location.origin
+
+    const socket = io(socketUrl, {
+      auth: { token },
+      transports: ['websocket', 'polling'],
+    })
+
+    socket.on('connect', () => {
+      console.log('[RideTracking] Socket conectado')
+    })
+
+    socket.on('booking:driver_location', (data: any) => {
+      if (data.bookingId === id && data.location) {
+        setDriverLocation(data.location)
+      }
+    })
+
+    socket.on('booking:accepted', (data: any) => {
+      if (data.bookingId === id) loadBooking()
+    })
+
+    socket.on('booking:in_progress', (data: any) => {
+      if (data.bookingId === id) loadBooking()
+    })
+
+    socket.on('booking:completed', (data: any) => {
+      if (data.bookingId === id) {
+        setDriverLocation(null)
+        setEta(null)
+        loadBooking()
+      }
+    })
+
+    socket.on('booking:cancelled', (data: any) => {
+      if (data.bookingId === id) {
+        setDriverLocation(null)
+        setEta(null)
+        loadBooking()
+      }
+    })
+
+    socketRef.current = socket
+
+    return () => {
+      socket.disconnect()
+      socketRef.current = null
+    }
+  }, [id, booking?.status])
 
   // Initialize map when booking loads
   useEffect(() => {
@@ -71,7 +158,6 @@ export default function RideTrackingPage() {
 
     L.control.zoom({ position: 'topright' }).addTo(map)
 
-    // Pickup marker (green)
     const pickupIcon = L.divIcon({
       html: `<div style="width:32px;height:32px;border-radius:50%;background:#22c55e;border:4px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700;">A</div>`,
       className: '',
@@ -80,7 +166,6 @@ export default function RideTrackingPage() {
     })
     L.marker([pickup.lat, pickup.lng], { icon: pickupIcon }).addTo(map)
 
-    // Dropoff marker (red)
     const dropoffIcon = L.divIcon({
       html: `<div style="width:32px;height:32px;border-radius:50%;background:#ef4444;border:4px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700;">B</div>`,
       className: '',
@@ -89,13 +174,11 @@ export default function RideTrackingPage() {
     })
     L.marker([dropoff.lat, dropoff.lng], { icon: dropoffIcon }).addTo(map)
 
-    // Route line
     L.polyline(
       [[pickup.lat, pickup.lng], [dropoff.lat, dropoff.lng]],
       { color: '#6366f1', weight: 5, opacity: 0.9 }
     ).addTo(map)
 
-    // Fit bounds
     const bounds = L.latLngBounds(
       [pickup.lat, pickup.lng],
       [dropoff.lat, dropoff.lng]
@@ -110,6 +193,41 @@ export default function RideTrackingPage() {
     }
   }, [booking])
 
+  // Update driver marker on map
+  useEffect(() => {
+    if (!mapInstanceRef.current || !driverLocation) return
+
+    const map = mapInstanceRef.current
+
+    if (driverMarkerRef.current) {
+      driverMarkerRef.current.setLatLng([driverLocation.lat, driverLocation.lng])
+    } else {
+      const driverIcon = L.divIcon({
+        html: `<div style="width:40px;height:40px;border-radius:50%;background:#6366f1;border:4px solid #fff;box-shadow:0 2px 12px rgba(99,102,241,0.5);display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;">🚗</div>`,
+        className: '',
+        iconSize: [40, 40],
+        iconAnchor: [20, 20],
+      })
+      driverMarkerRef.current = L.marker([driverLocation.lat, driverLocation.lng], { icon: driverIcon })
+        .addTo(map)
+    }
+
+    if (booking?.status === 'accepted' && booking.pickup?.lat && booking.pickup?.lng) {
+      const dist = haversineDistance(driverLocation.lat, driverLocation.lng, booking.pickup.lat, booking.pickup.lng)
+      setEta(formatETA(dist))
+      map.fitBounds(
+        L.latLngBounds(
+          [driverLocation.lat, driverLocation.lng],
+          [booking.pickup.lat, booking.pickup.lng]
+        ),
+        { padding: [80, 80] }
+      )
+    } else if (booking?.status === 'in_progress' && booking.dropoff?.lat && booking.dropoff?.lng) {
+      const dist = haversineDistance(driverLocation.lat, driverLocation.lng, booking.dropoff.lat, booking.dropoff.lng)
+      setEta(formatETA(dist))
+    }
+  }, [driverLocation, booking])
+
   const handleCancel = async () => {
     if (!confirm('Tem certeza que deseja cancelar?')) return
     try {
@@ -120,6 +238,22 @@ export default function RideTrackingPage() {
     }
   }
 
+  const handleVerifyQR = async () => {
+    if (!qrCode.trim() || !id) return
+    setQrVerifying(true)
+    setQrResult(null)
+    try {
+      await api.put(`/bookings/${id}/qr-verify`, { token: qrCode.trim() })
+      setQrResult('success')
+      loadBooking()
+      setTimeout(() => setShowQrVerify(false), 2000)
+    } catch (err: any) {
+      setQrResult('error')
+    } finally {
+      setQrVerifying(false)
+    }
+  }
+
   if (loading) return <div className="loading"><div className="spinner" /></div>
   if (error) return <div className="page"><div className="alert-error">{error}</div><button className="btn-back" onClick={() => navigate('/')}>← Voltar</button></div>
   if (!booking) return null
@@ -127,6 +261,7 @@ export default function RideTrackingPage() {
   const isCancelled = booking.status === 'cancelled'
   const isCompleted = booking.status === 'completed'
   const isActive = ['matching', 'accepted', 'in_progress'].includes(booking.status)
+  const showDriverTracking = ['accepted', 'in_progress'].includes(booking.status)
 
   return (
     <div className="track">
@@ -137,9 +272,15 @@ export default function RideTrackingPage() {
         </button>
         <div ref={mapRef} className="track-map" />
         {isActive && (
-          <div className="track-status-pill">
-            <span className="track-status-dot" />
+          <div className={`track-status-pill ${booking.status === 'matching' ? 'searching' : ''}`}>
+            <span className={`track-status-dot ${booking.status === 'matching' ? 'amber' : ''}`} />
             {STATUS_MAP[booking.status]}
+          </div>
+        )}
+        {showDriverTracking && driverLocation && eta && (
+          <div className="track-eta-pill">
+            <span style={{ fontSize: '16px' }}>🚗</span>
+            <span>Motorista chega em <strong>{eta}</strong></span>
           </div>
         )}
       </div>
@@ -155,6 +296,29 @@ export default function RideTrackingPage() {
           </div>
         </div>
 
+        {/* Uber/99-style step progress */}
+        <div className="track-progress">
+          <div className={`track-progress-step ${booking.status !== 'cancelled' ? 'done' : ''}`}>
+            <div className="track-progress-dot" />
+            <span>Solicitação enviada</span>
+          </div>
+          <div className={`track-progress-line ${booking.status === 'accepted' || booking.status === 'in_progress' || isCompleted ? 'active' : ''}`} />
+          <div className={`track-progress-step ${booking.status === 'accepted' || booking.status === 'in_progress' || isCompleted ? 'active' : ''} ${booking.status === 'in_progress' || isCompleted ? 'done' : ''}`}>
+            <div className="track-progress-dot" />
+            <span>Motorista a caminho</span>
+          </div>
+          <div className={`track-progress-line ${booking.status === 'in_progress' || isCompleted ? 'active' : ''}`} />
+          <div className={`track-progress-step ${booking.status === 'in_progress' || isCompleted ? 'active' : ''} ${isCompleted ? 'done' : ''}`}>
+            <div className="track-progress-dot" />
+            <span>Embarque</span>
+          </div>
+          <div className={`track-progress-line ${isCompleted ? 'active' : ''}`} />
+          <div className={`track-progress-step ${isCompleted ? 'active done' : ''}`}>
+            <div className="track-progress-dot" />
+            <span>Destino</span>
+          </div>
+        </div>
+
         {/* Driver */}
         {booking.driver && (
           <div className="track-driver">
@@ -163,9 +327,22 @@ export default function RideTrackingPage() {
               <strong>{booking.driver.name}</strong>
               <span>{booking.driver.vehicleType === 'car' ? '🚗' : '🏍️'} {booking.driver.vehiclePlate || ''} · ⭐ {booking.driver.rating?.toFixed(1) || '5.0'}</span>
             </div>
-            <button className="track-driver-call" onClick={() => {}}>
+            {showDriverTracking && eta && (
+              <div className="track-eta-badge">
+                <span style={{ fontSize: '13px', fontWeight: 700, color: '#6366f1' }}>{eta}</span>
+              </div>
+            )}
+            <button className="track-driver-call" onClick={() => { if (booking.driver?.phone) window.open(`tel:${booking.driver.phone}`) }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
             </button>
+          </div>
+        )}
+
+        {/* Driver tracking status */}
+        {showDriverTracking && !driverLocation && (
+          <div className="track-driver-waiting">
+            <span className="track-pulse" />
+            <span>Aguardando localização do motorista...</span>
           </div>
         )}
 
@@ -213,9 +390,85 @@ export default function RideTrackingPage() {
           </div>
         )}
 
+        {/* Detailed receipt for completed rides */}
+        {isCompleted && (
+          <div className="track-receipt">
+            <div className="track-receipt-title">📄 Recibo da Corrida</div>
+            <div className="track-receipt-row">
+              <span>Tarifa base</span>
+              <span>R$ {booking.serviceCategory === 'driver' ? '5.00' : booking.serviceCategory === 'delivery' ? '3.00' : '4.00'}</span>
+            </div>
+            <div className="track-receipt-row">
+              <span>Distância ({booking.distance?.toFixed(1) || '0'} km)</span>
+              <span>R$ {booking.distance ? (booking.distance * (booking.serviceCategory === 'driver' ? 2.50 : booking.serviceCategory === 'delivery' ? 1.50 : 2.00)).toFixed(2) : '0.00'}</span>
+            </div>
+            {booking.duration && (
+              <div className="track-receipt-row">
+                <span>Duração ({booking.duration} min)</span>
+                <span>-</span>
+              </div>
+            )}
+            <div className="track-receipt-row">
+              <span>Taxa plataforma (20%)</span>
+              <span>- R$ {((booking.finalPrice || booking.estimatedPrice || 0) * 0.20).toFixed(2)}</span>
+            </div>
+            <div className="track-receipt-row total">
+              <span>Total</span>
+              <span>R$ {(booking.finalPrice || booking.estimatedPrice || 0).toFixed(2)}</span>
+            </div>
+            <div className="track-receipt-row">
+              <span>Pagamento</span>
+              <span>{booking.paymentMethod === 'pix' ? 'PIX' : booking.paymentMethod === 'credit_card' ? 'Cartão de Crédito' : booking.paymentMethod === 'debit_card' ? 'Cartão de Débito' : 'Dinheiro'}</span>
+            </div>
+            <div className="track-receipt-row">
+              <span>Status</span>
+              <span style={{ color: '#10b981', fontWeight: 600 }}>✅ Pago</span>
+            </div>
+            {booking.cancelFee && booking.cancelFee > 0 && (
+              <div className="track-receipt-row" style={{ color: '#ef4444' }}>
+                <span>Taxa cancelamento</span>
+                <span>R$ {booking.cancelFee.toFixed(2)}</span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Rating prompt for completed rides */}
+        {isCompleted && !booking.rating?.client && (
+          <div className="track-rating-prompt">
+            <span>Como foi sua corrida?</span>
+            <div className="track-rating-stars">
+              {[1, 2, 3, 4, 5].map(star => (
+                <button
+                  key={star}
+                  className="track-rating-star"
+                  onClick={async () => {
+                    try {
+                      await api.put(`/bookings/${id}/rate`, { rating: star, ratingType: 'client' })
+                      loadBooking()
+                    } catch {}
+                  }}
+                >
+                  ⭐
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Actions */}
         {isActive && (
           <div className="track-actions">
+            {booking.status === 'accepted' && booking.qrCodeVerified !== true && (
+              <button className="track-btn primary" onClick={() => setShowQrVerify(true)}>
+                Confirmar Embarque (QR Code)
+              </button>
+            )}
+            {booking.status === 'accepted' && booking.qrCodeVerified === true && (
+              <div className="track-qr-verified">
+                ✅ Embarque confirmado — aguardando motorista iniciar
+              </div>
+            )}
             <button className="track-btn cancel" onClick={handleCancel}>Cancelar</button>
           </div>
         )}
@@ -230,6 +483,42 @@ export default function RideTrackingPage() {
           </div>
         )}
       </div>
+
+      {/* QR Code Verify Modal */}
+      {showQrVerify && (
+        <div className="track-qr-modal-overlay" onClick={() => { setShowQrVerify(false); setQrResult(null); setQrCode('') }}>
+          <div className="track-qr-modal" onClick={e => e.stopPropagation()}>
+            <h3>Confirmar Embarque</h3>
+            <p>Solicite o QR Code ao motorista e digite o código abaixo:</p>
+            <input
+              type="text"
+              className="track-qr-input"
+              placeholder="Digite o código do QR Code"
+              value={qrCode}
+              onChange={e => setQrCode(e.target.value)}
+              disabled={qrVerifying}
+            />
+            {qrResult === 'success' && (
+              <div className="track-qr-success">✅ Embarque confirmado com sucesso!</div>
+            )}
+            {qrResult === 'error' && (
+              <div className="track-qr-error">❌ Código inválido. Verifique com o motorista.</div>
+            )}
+            <div className="track-qr-actions">
+              <button className="track-btn cancel" onClick={() => { setShowQrVerify(false); setQrResult(null); setQrCode('') }}>
+                Cancelar
+              </button>
+              <button
+                className="track-btn primary"
+                onClick={handleVerifyQR}
+                disabled={qrVerifying || !qrCode.trim()}
+              >
+                {qrVerifying ? 'Verificando...' : 'Confirmar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

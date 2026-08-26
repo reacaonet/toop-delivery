@@ -175,6 +175,14 @@ export const bookingService = {
     const response = await api.put(`/bookings/${id}/reject`, { driverModel: 'Deliveryman' })
     return response.data?.data ?? response.data
   },
+  generateQRCode: async (id: string) => {
+    const response = await api.put(`/bookings/${id}/qr-generate`)
+    return response.data?.data ?? response.data
+  },
+  verifyQRCode: async (id: string, token: string) => {
+    const response = await api.put(`/bookings/${id}/qr-verify`, { token })
+    return response.data?.data ?? response.data
+  },
 }
 
 export const walletService = {
@@ -184,6 +192,10 @@ export const walletService = {
   },
   getTransactions: async (params: Record<string, string | number> = {}) => {
     const response = await api.get('/wallet/transactions', { params })
+    return response.data?.data ?? response.data
+  },
+  credit: async (amount: number, description?: string, bookingId?: string) => {
+    const response = await api.post('/wallet/credit', { amount, description, bookingId })
     return response.data?.data ?? response.data
   },
 }

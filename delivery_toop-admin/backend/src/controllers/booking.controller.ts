@@ -3,7 +3,7 @@ import bookingService from "../services/booking.service";
 import { UserModel } from "../models/User";
 import { emitToUser, emitToAll } from "../socket";
 
-async function notifyNearbyDrivers(booking: any) {
+async function notifyNearbyDrivers(booking: any, rejectedDriverIds: string[] = []) {
   try {
     const pickup = booking.pickup;
     if (!pickup?.lat || !pickup?.lng) return;
@@ -18,6 +18,7 @@ async function notifyNearbyDrivers(booking: any) {
       driverOnline: true,
       driverAvailable: true,
       active: true,
+      _id: { $nin: rejectedDriverIds },
       currentLocation: {
         $near: {
           $geometry: { type: "Point", coordinates: [pickup.lng, pickup.lat] },
@@ -31,6 +32,7 @@ async function notifyNearbyDrivers(booking: any) {
       available: true,
       active: true,
       "serviceCategories": "driver",
+      _id: { $nin: rejectedDriverIds },
       currentLocation: {
         $near: {
           $geometry: { type: "Point", coordinates: [pickup.lng, pickup.lat] },
@@ -92,7 +94,9 @@ export class BookingController {
         serviceCategory: booking.serviceCategory,
       });
 
-      notifyNearbyDrivers(booking);
+      if (!booking.scheduledAt) {
+        notifyNearbyDrivers(booking);
+      }
 
       return res.status(201).json({ success: true, data: booking });
     } catch (error) {
@@ -111,7 +115,21 @@ export class BookingController {
 
   async list(req: Request, res: Response, next: NextFunction) {
     try {
-      const result = await bookingService.list(req.query as any);
+      const query = { ...req.query } as any;
+
+      // Auto-resolve driverId for deliverymen/driver users
+      // For matching status, don't filter (needs to see ALL available rides)
+      if (!query.driverId && !query.clientId && query.status && query.status !== 'matching') {
+        const userId = (req as any).user?._id;
+        const user = await UserModel.findById(userId).select('deliveryman driver role');
+        if (user?.deliveryman && (user.role === 'deliveryman')) {
+          query.driverId = user.deliveryman.toString();
+        } else if (user?.driver && (user.role === 'deliveryman')) {
+          query.driverId = user.driver.toString();
+        }
+      }
+
+      const result = await bookingService.list(query);
       return res.status(200).json({ success: true, data: result });
     } catch (error) {
       next(error);
@@ -147,6 +165,13 @@ export class BookingController {
       emitToUser(booking.client.toString(), "booking:accepted", {
         bookingId: booking._id,
         driverId,
+        driverModel: resolvedDriverModel,
+      });
+
+      // Also emit to the driver so their ActiveRidePage can update instantly
+      emitToUser(userId.toString(), "booking:accepted", {
+        bookingId: booking._id,
+        driverId,
       });
 
       return res.status(200).json({ success: true, data: booking });
@@ -177,6 +202,10 @@ export class BookingController {
       }
 
       const booking = await bookingService.reject(req.params.id, driverId);
+
+      const updatedBooking = await bookingService.getById(req.params.id);
+      const rejectedIds = (updatedBooking.rejectedDrivers || []).map((id: any) => id.toString());
+      notifyNearbyDrivers(updatedBooking, rejectedIds);
 
       return res.status(200).json({ success: true, data: booking });
     } catch (error) {
@@ -211,6 +240,10 @@ export class BookingController {
         bookingId: booking._id,
       });
 
+      emitToUser(userId.toString(), "booking:in_progress", {
+        bookingId: booking._id,
+      });
+
       return res.status(200).json({ success: true, data: booking });
     } catch (error) {
       next(error);
@@ -241,6 +274,10 @@ export class BookingController {
       const booking = await bookingService.complete(req.params.id, driverId);
 
       emitToUser(booking.client.toString(), "booking:completed", {
+        bookingId: booking._id,
+      });
+
+      emitToUser(userId.toString(), "booking:completed", {
         bookingId: booking._id,
       });
 

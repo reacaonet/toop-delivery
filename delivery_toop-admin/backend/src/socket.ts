@@ -88,6 +88,25 @@ export function initSocket(httpServer: HttpServer): Server {
         driverId: authSocket.userId,
         location: locationData,
       });
+
+      try {
+        const { BookingModel } = await import('./models/Booking');
+        const activeBooking = await BookingModel.findOne({
+          $or: [
+            { driver: user?.deliveryman, driverModel: 'Deliveryman' },
+            { driver: user?.driver, driverModel: 'Driver' },
+          ],
+          status: { $in: ['accepted', 'in_progress'] },
+        }).lean();
+        if (activeBooking?.client) {
+          emitToUser(activeBooking.client.toString(), 'booking:driver_location', {
+            bookingId: activeBooking._id,
+            location: { lat: data.lat, lng: data.lng },
+            heading: data.heading,
+            speed: data.speed,
+          });
+        }
+      } catch {}
     });
 
     socket.on('driver:go_online', async () => {
