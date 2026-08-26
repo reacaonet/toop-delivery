@@ -107,6 +107,32 @@ export const deliverymanService = {
     const response = await api.put('/deliverymen/me/availability')
     return response.data?.data ?? response.data
   },
+  toggleDriverMode: async () => {
+    const response = await api.put('/deliverymen/me/driver-mode')
+    return response.data?.data ?? response.data
+  },
+  toggleDriverOnline: async (lat?: number, lng?: number) => {
+    const body: Record<string, number> = {};
+    if (lat != null && lng != null) { body.lat = lat; body.lng = lng; }
+    const response = await api.put('/deliverymen/me/driver-online', body)
+    return response.data?.data ?? response.data
+  },
+  toggleDriverAvailable: async () => {
+    const response = await api.put('/deliverymen/me/driver-available')
+    return response.data?.data ?? response.data
+  },
+  updateLocation: async (lat: number, lng: number) => {
+    const response = await api.put('/deliverymen/me/location', { lat, lng })
+    return response.data?.data ?? response.data
+  },
+  updateAddress: async (address: string, lat?: number, lng?: number) => {
+    const response = await api.put('/deliverymen/me/address', { address, lat, lng })
+    return response.data?.data ?? response.data
+  },
+  getProfile: async () => {
+    const response = await api.get('/deliverymen/me')
+    return response.data?.data ?? response.data
+  },
 }
 
 export const driverService = {
@@ -134,19 +160,19 @@ export const bookingService = {
     return response.data?.data ?? response.data
   },
   acceptBooking: async (id: string) => {
-    const response = await api.put(`/bookings/${id}/accept`)
+    const response = await api.put(`/bookings/${id}/accept`, { driverModel: 'Deliveryman' })
     return response.data?.data ?? response.data
   },
   startBooking: async (id: string) => {
-    const response = await api.put(`/bookings/${id}/start`)
+    const response = await api.put(`/bookings/${id}/start`, { driverModel: 'Deliveryman' })
     return response.data?.data ?? response.data
   },
   completeBooking: async (id: string) => {
-    const response = await api.put(`/bookings/${id}/complete`)
+    const response = await api.put(`/bookings/${id}/complete`, { driverModel: 'Deliveryman' })
     return response.data?.data ?? response.data
   },
   rejectBooking: async (id: string) => {
-    const response = await api.put(`/bookings/${id}/reject`)
+    const response = await api.put(`/bookings/${id}/reject`, { driverModel: 'Deliveryman' })
     return response.data?.data ?? response.data
   },
 }

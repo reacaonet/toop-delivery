@@ -4,6 +4,7 @@ export interface IBooking extends Document {
   bookingNumber: string;
   client: mongoose.Types.ObjectId;
   driver?: mongoose.Types.ObjectId;
+  driverModel?: 'Driver' | 'Deliveryman';
   company: mongoose.Types.ObjectId;
   serviceCategory: 'driver' | 'delivery' | 'package';
   status: 'pending' | 'matching' | 'accepted' | 'in_progress' | 'completed' | 'cancelled';
@@ -36,6 +37,7 @@ export interface IBooking extends Document {
   cancelledBy?: 'client' | 'driver' | 'system';
   qrCode?: string;
   qrCodeVerified?: boolean;
+  scheduledAt?: Date;
   startedAt?: Date;
   completedAt?: Date;
   cancelledAt?: Date;
@@ -47,7 +49,8 @@ const BookingSchema = new Schema<IBooking>(
   {
     bookingNumber: { type: String, required: true, unique: true },
     client: { type: Schema.Types.ObjectId, ref: 'User', required: true },
-    driver: { type: Schema.Types.ObjectId, ref: 'Driver' },
+    driver: { type: Schema.Types.ObjectId, refPath: 'driverModel' },
+    driverModel: { type: String, enum: ['Driver', 'Deliveryman'], default: 'Driver' },
     company: { type: Schema.Types.ObjectId, ref: 'Company' },
     serviceCategory: { type: String, enum: ['driver', 'delivery', 'package'], default: 'driver' },
     status: {
@@ -84,6 +87,7 @@ const BookingSchema = new Schema<IBooking>(
     cancelledBy: { type: String, enum: ['client', 'driver', 'system'] },
     qrCode: String,
     qrCodeVerified: { type: Boolean, default: false },
+    scheduledAt: Date,
     startedAt: Date,
     completedAt: Date,
     cancelledAt: Date,

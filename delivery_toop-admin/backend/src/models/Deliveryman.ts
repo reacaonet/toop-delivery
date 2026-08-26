@@ -10,9 +10,17 @@ export interface IDeliveryman extends Document {
   vehiclePlate?: string;
   active: boolean;
   available: boolean;
-  currentLocation?: { lat: number; lng: number };
+  isDriver: boolean;
+  driverOnline: boolean;
+  driverAvailable: boolean;
+  serviceCategories: ('driver' | 'delivery' | 'package')[];
+  address?: string;
+  addressLat?: number;
+  addressLng?: number;
+  currentLocation?: { type: 'Point'; coordinates: [number, number] } | { lat: number; lng: number };
   rating?: number;
   totalDeliveries: number;
+  totalTrips: number;
   avatar?: string;
   documents?: {
     cnh?: string;
@@ -39,12 +47,20 @@ const DeliverymanSchema = new Schema<IDeliveryman>(
     vehiclePlate: { type: String, trim: true },
     active: { type: Boolean, default: true },
     available: { type: Boolean, default: true },
+    isDriver: { type: Boolean, default: false },
+    driverOnline: { type: Boolean, default: false },
+    driverAvailable: { type: Boolean, default: false },
+    serviceCategories: [{ type: String, enum: ['driver', 'delivery', 'package'], default: ['delivery'] }],
+    address: { type: String, trim: true },
+    addressLat: { type: Number },
+    addressLng: { type: Number },
     currentLocation: {
-      lat: Number,
-      lng: Number,
+      type: { type: String, enum: ['Point'] },
+      coordinates: { type: [Number] },
     },
     rating: { type: Number, min: 0, max: 5 },
     totalDeliveries: { type: Number, default: 0 },
+    totalTrips: { type: Number, default: 0 },
     avatar: { type: String },
     documents: {
       cnh: String,
@@ -62,6 +78,8 @@ const DeliverymanSchema = new Schema<IDeliveryman>(
 
 DeliverymanSchema.index({ active: 1 });
 DeliverymanSchema.index({ available: 1 });
+DeliverymanSchema.index({ isDriver: 1 });
+DeliverymanSchema.index({ driverOnline: 1 });
 DeliverymanSchema.index({ 'currentLocation': '2dsphere' });
 
 export const DeliverymanModel = mongoose.model<IDeliveryman>('Deliveryman', DeliverymanSchema);

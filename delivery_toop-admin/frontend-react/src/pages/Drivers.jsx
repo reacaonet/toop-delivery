@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Car, Phone, Mail, Edit2, Trash2, Eye, CheckCircle, XCircle, Star, MapPin } from 'lucide-react';
-import { driverService } from '../services/api';
+import { Plus, Car, Phone, Mail, Edit2, Trash2, Eye, CheckCircle, XCircle, Star, MapPin, Truck } from 'lucide-react';
+import { driverService, deliverymanService } from '../services/api';
 
 const VEHICLE_LABELS = {
   motorcycle: 'Moto',
@@ -47,9 +47,21 @@ const Drivers = () => {
   const loadDrivers = async () => {
     try {
       setLoading(true);
-      const result = await driverService.getDrivers();
-      const data = Array.isArray(result?.data) ? result.data : Array.isArray(result) ? result : [];
-      setDrivers(data);
+      const [driverResult, dmResult] = await Promise.all([
+        driverService.getDrivers(),
+        deliverymanService.getDeliverymen()
+      ]);
+      const driverData = Array.isArray(driverResult?.data) ? driverResult.data : Array.isArray(driverResult) ? driverResult : [];
+      const dmData = Array.isArray(dmResult?.data) ? dmResult.data : Array.isArray(dmResult) ? dmResult : [];
+      const hybridDrivers = dmData.filter(d => d.isDriver).map(d => ({
+        ...d,
+        _source: 'deliveryman',
+        online: d.driverOnline,
+        available: d.driverAvailable,
+        serviceCategories: d.serviceCategories || ['driver'],
+      }));
+      const allDrivers = [...driverData.map(d => ({ ...d, _source: 'driver' })), ...hybridDrivers];
+      setDrivers(allDrivers);
     } catch (error) {
       console.error('Erro ao carregar motoristas:', error);
     } finally {
@@ -96,7 +108,11 @@ const Drivers = () => {
 
   const handleToggleActive = async (driver) => {
     try {
-      await driverService.updateDriver(driver._id, { active: !driver.active });
+      if (driver._source === 'deliveryman') {
+        await deliverymanService.updateDeliveryman(driver._id, { active: !driver.active });
+      } else {
+        await driverService.updateDriver(driver._id, { active: !driver.active });
+      }
       loadDrivers();
     } catch (error) {
       alert('Erro ao alterar status: ' + (error.response?.data?.error || error.message));
@@ -106,7 +122,11 @@ const Drivers = () => {
   const handleDelete = async (driver) => {
     if (!window.confirm(`Desativar motorista ${driver.name}?`)) return;
     try {
-      await driverService.deleteDriver(driver._id);
+      if (driver._source === 'deliveryman') {
+        await deliverymanService.deleteDeliveryman(driver._id);
+      } else {
+        await driverService.deleteDriver(driver._id);
+      }
       loadDrivers();
     } catch (error) {
       alert('Erro ao desativar: ' + (error.response?.data?.error || error.message));
@@ -120,7 +140,11 @@ const Drivers = () => {
       if (selected) {
         const payload = { ...formData };
         if (!payload.password) delete payload.password;
-        await driverService.updateDriver(selected._id, payload);
+        if (selected._source === 'deliveryman') {
+          await deliverymanService.updateDeliveryman(selected._id, payload);
+        } else {
+          await driverService.updateDriver(selected._id, payload);
+        }
       } else {
         await driverService.createDriver(formData);
       }
@@ -218,15 +242,17 @@ const Drivers = () => {
               {drivers.length === 0 ? (
                 <tr><td colSpan="7" style={{ textAlign: 'center', padding: '2rem' }}>Nenhum motorista encontrado</td></tr>
               ) : drivers.map(driver => (
-                <tr key={driver._id}>
+                <tr key={driver._id} style={{ opacity: driver.active === false ? 0.5 : 1 }}>
                   <td>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <div style={{ width: 32, height: 32, borderRadius: '50%', backgroundColor: '#667eea', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '0.8rem', fontWeight: 600 }}>
-                        {driver.name?.charAt(0)?.toUpperCase()}
+                      <div style={{ width: 32, height: 32, borderRadius: '50%', backgroundColor: driver._source === 'deliveryman' ? '#10b981' : '#667eea', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '0.8rem', fontWeight: 600 }}>
+                        {driver._source === 'deliveryman' ? <Truck size={14} /> : <Car size={14} />}
                       </div>
                       <div>
                         <div style={{ fontWeight: 600 }}>{driver.name}</div>
-                        <div style={{ fontSize: '0.75rem', color: '#888' }}>#{driver._id.slice(-6)}</div>
+                        <div style={{ fontSize: '0.7rem', color: '#888' }}>
+                          {driver._source === 'deliveryman' ? '🚚 Entregador + Motorista' : '🚗 Motorista'}
+                        </div>
                       </div>
                     </div>
                   </td>
@@ -256,6 +282,9 @@ const Drivers = () => {
                       </span>
                       {driver.online && (
                         <span style={{ fontSize: '0.7rem', color: '#10b981' }}>● Online</span>
+                      )}
+                      {driver._source === 'deliveryman' && driver.driverOnline && (
+                        <span style={{ fontSize: '0.7rem', color: '#6366f1' }}>● Motorista Online</span>
                       )}
                     </div>
                   </td>

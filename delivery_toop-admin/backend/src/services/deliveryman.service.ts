@@ -89,6 +89,10 @@ export class DeliverymanService {
       cpf?: string;
       cnh?: string;
       vehiclePlate?: string;
+      address?: string;
+      addressLat?: number;
+      addressLng?: number;
+      isDriver?: boolean;
       avatar?: string;
       documents?: {
         cnh?: string;
@@ -143,6 +147,109 @@ export class DeliverymanService {
     }
 
     return deliveryman;
+  }
+
+  async toggleAvailability(id: string) {
+    const deliveryman = await DeliverymanModel.findById(id);
+    if (!deliveryman) {
+      throw new AppError("Entregador não encontrado", 404);
+    }
+    deliveryman.available = !deliveryman.available;
+    await deliveryman.save();
+    return { available: deliveryman.available };
+  }
+
+  async toggleDriverMode(id: string) {
+    const deliveryman = await DeliverymanModel.findById(id);
+    if (!deliveryman) {
+      throw new AppError("Entregador não encontrado", 404);
+    }
+    deliveryman.isDriver = !deliveryman.isDriver;
+    if (!deliveryman.isDriver) {
+      deliveryman.driverOnline = false;
+      deliveryman.driverAvailable = false;
+    }
+    await deliveryman.save();
+    return { isDriver: deliveryman.isDriver, driverOnline: deliveryman.driverOnline, driverAvailable: deliveryman.driverAvailable };
+  }
+
+  async toggleDriverOnline(id: string, lat?: number, lng?: number) {
+    const deliveryman = await DeliverymanModel.findById(id);
+    if (!deliveryman) {
+      throw new AppError("Entregador não encontrado", 404);
+    }
+    if (!deliveryman.isDriver) {
+      throw new AppError("Entregador não está habilitado como motorista", 400);
+    }
+    deliveryman.driverOnline = !deliveryman.driverOnline;
+    if (!deliveryman.driverOnline) {
+      deliveryman.driverAvailable = false;
+    }
+    if (deliveryman.driverOnline) {
+      if (lat != null && lng != null) {
+        deliveryman.currentLocation = { type: 'Point', coordinates: [lng, lat] } as any;
+      } else if (deliveryman.addressLat != null && deliveryman.addressLng != null) {
+        deliveryman.currentLocation = { type: 'Point', coordinates: [deliveryman.addressLng, deliveryman.addressLat] } as any;
+      }
+    }
+    await deliveryman.save();
+    return { driverOnline: deliveryman.driverOnline, driverAvailable: deliveryman.driverAvailable };
+  }
+
+  async toggleDriverAvailable(id: string) {
+    const deliveryman = await DeliverymanModel.findById(id);
+    if (!deliveryman) {
+      throw new AppError("Entregador não encontrado", 404);
+    }
+    if (!deliveryman.isDriver) {
+      throw new AppError("Entregador não está habilitado como motorista", 400);
+    }
+    deliveryman.driverAvailable = !deliveryman.driverAvailable;
+    if (deliveryman.driverAvailable && !deliveryman.driverOnline) {
+      deliveryman.driverOnline = true;
+    }
+    await deliveryman.save();
+    return { driverOnline: deliveryman.driverOnline, driverAvailable: deliveryman.driverAvailable };
+  }
+
+  async updateLocation(id: string, lat: number, lng: number) {
+    const deliveryman = await DeliverymanModel.findByIdAndUpdate(
+      id,
+      { currentLocation: { type: 'Point', coordinates: [lng, lat] } },
+      { new: true }
+    );
+    if (!deliveryman) {
+      throw new AppError("Entregador não encontrado", 404);
+    }
+    return deliveryman;
+  }
+
+  async updateAddress(id: string, address: string, lat?: number, lng?: number) {
+    const deliveryman = await DeliverymanModel.findByIdAndUpdate(
+      id,
+      { address, addressLat: lat, addressLng: lng },
+      { new: true }
+    );
+    if (!deliveryman) {
+      throw new AppError("Entregador não encontrado", 404);
+    }
+    return deliveryman;
+  }
+
+  async findNearbyDrivers(lat: number, lng: number, maxDistance: number = 10000) {
+    const deliverymen = await DeliverymanModel.find({
+      isDriver: true,
+      driverOnline: true,
+      driverAvailable: true,
+      active: true,
+      currentLocation: {
+        $near: {
+          $geometry: { type: "Point", coordinates: [lng, lat] },
+          $maxDistance: maxDistance,
+        },
+      },
+    }).limit(10);
+    return deliverymen;
   }
 
   async delete(id: string) {

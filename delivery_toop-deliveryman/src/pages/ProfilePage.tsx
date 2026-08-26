@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { User, Save, Upload, Star, Truck, Phone, Mail, FileText, Image as ImageIcon, CheckCircle, AlertCircle } from 'lucide-react'
+import { User, Save, Upload, Star, Truck, Phone, Mail, FileText, Image as ImageIcon, CheckCircle, AlertCircle, MapPin } from 'lucide-react'
 import api from '../api'
 import { useAuth } from '../contexts/AuthContext'
 
@@ -32,6 +32,15 @@ const ProfilePage: React.FC = () => {
     photo: '',
   })
 
+  const [address, setAddress] = useState('')
+  const [addressLat, setAddressLat] = useState<number | null>(null)
+  const [addressLng, setAddressLng] = useState<number | null>(null)
+  const [addressSuggestions, setAddressSuggestions] = useState<any[]>([])
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const [savingAddress, setSavingAddress] = useState(false)
+  const addressTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const addressRef = useRef<HTMLDivElement>(null)
+
   useEffect(() => {
     if (dm) {
       setFormData({
@@ -49,6 +58,9 @@ const ProfilePage: React.FC = () => {
         vehicleDocument: dm.documents?.vehicleDocument || '',
         photo: dm.documents?.photo || '',
       })
+      setAddress(dm.address || '')
+      setAddressLat(dm.addressLat || null)
+      setAddressLng(dm.addressLng || null)
       setLoading(false)
     } else if (deliverymanId) {
       loadProfile()
@@ -76,6 +88,9 @@ const ProfilePage: React.FC = () => {
         vehicleDocument: data.documents?.vehicleDocument || '',
         photo: data.documents?.photo || '',
       })
+      setAddress(data.address || '')
+      setAddressLat(data.addressLat || null)
+      setAddressLng(data.addressLng || null)
     } catch (e) {
       console.error('Erro ao carregar perfil:', e)
     } finally {
@@ -87,6 +102,42 @@ const ProfilePage: React.FC = () => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
+
+  const searchAddress = async (query: string) => {
+    if (query.length < 3) { setAddressSuggestions([]); return }
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=br&limit=5`, {
+        headers: { 'Accept-Language': 'pt-BR' }
+      })
+      setAddressSuggestions(await res.json())
+    } catch {}
+  }
+
+  const handleAddressChange = (value: string) => {
+    setAddress(value)
+    setShowSuggestions(true)
+    if (addressTimeoutRef.current) clearTimeout(addressTimeoutRef.current)
+    addressTimeoutRef.current = setTimeout(() => searchAddress(value), 400)
+  }
+
+  const selectAddress = (s: any) => {
+    const shortAddr = s.display_name.split(',').slice(0, 3).join(',')
+    setAddress(shortAddr)
+    setAddressLat(parseFloat(s.lat))
+    setAddressLng(parseFloat(s.lon))
+    setShowSuggestions(false)
+    setAddressSuggestions([])
+  }
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (addressRef.current && !addressRef.current.contains(e.target as Node)) {
+        setShowSuggestions(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -138,7 +189,7 @@ const ProfilePage: React.FC = () => {
     }
     setSaving(true)
     try {
-      await api.put(`/deliverymen/${deliverymanId}`, {
+      await api.put('/deliverymen/me', {
         name: formData.name,
         phone: formData.phone,
         cpf: formData.cpf,
@@ -147,6 +198,9 @@ const ProfilePage: React.FC = () => {
         vehiclePlate: formData.vehiclePlate,
         avatar: formData.avatar,
         documents,
+        address,
+        addressLat,
+        addressLng,
       })
       refreshUser()
       alert('Perfil atualizado com sucesso!')
@@ -215,6 +269,12 @@ const ProfilePage: React.FC = () => {
               <Truck size={16} />
               <span>{dm?.totalDeliveries ?? 0} entregas</span>
             </div>
+            {dm?.isDriver && (
+              <div className="profile-stat">
+                <span style={{ fontSize: '0.85rem' }}>🚗</span>
+                <span>{dm?.totalTrips ?? 0} corridas</span>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -268,6 +328,29 @@ const ProfilePage: React.FC = () => {
                 onChange={handleChange}
                 placeholder="000.000.000-00"
               />
+            </div>
+          </div>
+          <div className="form-group">
+            <label>Endereço</label>
+            <div className="input-with-icon" ref={addressRef} style={{ position: 'relative' }}>
+              <MapPin size={16} />
+              <input
+                type="text"
+                value={address}
+                onChange={e => handleAddressChange(e.target.value)}
+                onFocus={() => setShowSuggestions(true)}
+                placeholder="Digite seu endereço..."
+              />
+              {showSuggestions && addressSuggestions.length > 0 && (
+                <div className="address-suggestions" style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px', zIndex: 10, maxHeight: '150px', overflow: 'auto' }}>
+                  {addressSuggestions.map((s: any, i: number) => (
+                    <button key={i} type="button" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', border: 'none', background: 'none', width: '100%', cursor: 'pointer', textAlign: 'left', fontSize: '0.85rem', borderBottom: '1px solid #f3f4f6' }} onClick={() => selectAddress(s)}>
+                      <MapPin size={14} style={{ color: '#6b7280', flexShrink: 0 }} />
+                      <span>{s.display_name.split(',').slice(0, 3).join(',')}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>

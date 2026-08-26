@@ -2860,31 +2860,231 @@ img { max-width: 100%; display: block; }
   }
 }
 
-/* RIDE REQUEST/TRACKING */
-.ride-layout { max-width: 680px; margin: 0 auto; }
-.ride-form { display: flex; flex-direction: column; gap: 16px; }
+/* RIDE REQUEST - UBER STYLE */
+.ride-req { min-height: 100vh; background: #fafafa; }
+.ride-req-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 20px; background: #fff; border-bottom: 1px solid #f0f0f0;
+  position: sticky; top: 0; z-index: 100;
+}
+.ride-req-back {
+  width: 38px; height: 38px; border-radius: 50%; border: none;
+  background: #f5f5f5; cursor: pointer; display: flex; align-items: center;
+  justify-content: center; color: #333;
+}
+.ride-req-header h1 { font-size: 1.1rem; font-weight: 700; color: #1a1a2e; }
 
-.service-options { display: flex; flex-direction: column; gap: 8px; }
-.service-option {
-  display: flex; align-items: center; gap: 12px;
-  padding: 12px 16px; border: 2px solid #eee; border-radius: var(--radius-md);
+.ride-req-body { max-width: 520px; margin: 0 auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+
+.ride-req-card { background: #fff; border-radius: 14px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.ride-req-card-title { font-size: 0.8rem; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+
+/* Services */
+.ride-req-services { display: flex; gap: 8px; }
+.ride-req-service {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 14px 8px; border: 2px solid #f0f0f0; border-radius: 12px;
   background: #fff; cursor: pointer; transition: all 0.2s;
 }
-.service-option:hover { border-color: var(--primary); }
-.service-option.selected { border-color: var(--primary); background: var(--primary-light); }
-.service-option-icon { font-size: 1.5rem; }
-.service-option-desc { display: block; font-size: 0.8rem; color: var(--text-secondary); }
+.ride-req-service:hover { border-color: #d1d5db; }
+.ride-req-service.active { border-color: #6366f1; background: #f5f3ff; }
+.ride-req-service-icon { font-size: 1.5rem; }
+.ride-req-service-name { font-size: 0.8rem; font-weight: 600; color: #374151; }
 
-.payment-methods { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.payment-method-btn {
-  display: flex; align-items: center; gap: 8px;
-  padding: 10px 14px; border: 2px solid #eee; border-radius: var(--radius-md);
-  background: #fff; cursor: pointer; font-size: 0.9rem; transition: all 0.2s;
+/* Addresses */
+.ride-req-addresses { display: flex; flex-direction: column; }
+.ride-req-address-group { display: flex; align-items: flex-start; gap: 12px; position: relative; }
+.ride-req-dot { width: 12px; height: 12px; border-radius: 50%; margin-top: 14px; flex-shrink: 0; }
+.ride-req-dot.green { background: #22c55e; }
+.ride-req-dot.red { background: #ef4444; }
+.ride-req-input-wrap { flex: 1; position: relative; }
+.ride-req-input {
+  width: 100%; padding: 14px 12px; border: none; border-bottom: 1px solid #f0f0f0;
+  font-size: 0.95rem; background: transparent; outline: none;
 }
-.payment-method-btn:hover { border-color: var(--primary); }
-.payment-method-btn.selected { border-color: var(--primary); background: var(--primary-light); color: var(--primary); font-weight: 600; }
+.ride-req-input::placeholder { color: #9ca3af; }
+.ride-req-input:focus { border-bottom-color: #6366f1; }
+.ride-req-line { width: 2px; height: 16px; background: #e5e7eb; margin-left: 5px; }
+.ride-req-complement {
+  width: 100%; padding: 10px 12px; border: 1px solid #f0f0f0; border-radius: 8px;
+  font-size: 0.85rem; color: #6b7280; margin-top: 8px; background: #fafafa;
+}
 
-.ride-tracking { max-width: 680px; margin: 0 auto; }
+/* Suggestions */
+.ride-req-suggestions {
+  position: absolute; top: 100%; left: 0; right: 0; z-index: 50;
+  background: #fff; border-radius: 0 0 12px 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  max-height: 200px; overflow-y: auto;
+}
+.ride-req-suggestion {
+  display: flex; align-items: center; gap: 10px; width: 100%; padding: 12px;
+  border: none; background: none; cursor: pointer; text-align: left; font-size: 0.85rem; color: #374151;
+  border-bottom: 1px solid #f5f5f5;
+}
+.ride-req-suggestion:hover { background: #f9fafb; }
+.ride-req-suggestion-icon { font-size: 0.9rem; flex-shrink: 0; }
+
+/* Estimation */
+.ride-req-estimation {
+  display: flex; align-items: center; justify-content: center; gap: 16px;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  border-radius: 14px; padding: 16px; color: #fff;
+}
+.ride-req-est-item { display: flex; align-items: center; gap: 6px; }
+.ride-req-est-icon { font-size: 1rem; }
+.ride-req-est-val { font-size: 0.95rem; font-weight: 700; }
+.ride-req-est-divider { width: 1px; height: 24px; background: rgba(255,255,255,0.3); }
+
+/* Payments */
+.ride-req-payments { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ride-req-payment {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 12px; border: 2px solid #f0f0f0; border-radius: 10px;
+  background: #fff; cursor: pointer; font-size: 0.85rem; font-weight: 500; color: #374151;
+  transition: all 0.2s;
+}
+.ride-req-payment:hover { border-color: #d1d5db; }
+.ride-req-payment.active { border-color: #6366f1; background: #f5f3ff; color: #6366f1; }
+
+/* Schedule */
+.ride-req-schedule-toggle { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+.ride-req-schedule-toggle input { display: none; }
+.ride-req-toggle-track {
+  width: 44px; height: 24px; background: #d1d5db; border-radius: 12px;
+  position: relative; transition: background 0.3s; flex-shrink: 0;
+}
+.ride-req-toggle-thumb {
+  position: absolute; top: 3px; left: 3px; width: 18px; height: 18px;
+  background: #fff; border-radius: 50%; transition: transform 0.3s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.ride-req-schedule-toggle input:checked + .ride-req-toggle-track { background: #6366f1; }
+.ride-req-schedule-toggle input:checked + .ride-req-toggle-track .ride-req-toggle-thumb { transform: translateX(20px); }
+.ride-req-toggle-info { display: flex; flex-direction: column; }
+.ride-req-toggle-title { font-weight: 600; font-size: 0.9rem; color: #1a1a2e; }
+.ride-req-toggle-desc { font-size: 0.75rem; color: #9ca3af; }
+.ride-req-schedule-fields { display: flex; gap: 10px; margin-top: 14px; }
+.ride-req-schedule-input {
+  flex: 1; padding: 10px 12px; border: 2px solid #f0f0f0; border-radius: 10px;
+  font-size: 0.9rem; background: #fafafa;
+}
+.ride-req-schedule-input:focus { outline: none; border-color: #6366f1; }
+
+/* Notes */
+.ride-req-notes {
+  width: 100%; padding: 12px; border: none; font-size: 0.9rem; resize: none;
+  font-family: inherit; color: #374151; background: transparent;
+}
+.ride-req-notes::placeholder { color: #9ca3af; }
+.ride-req-notes:focus { outline: none; }
+
+/* Submit */
+.ride-req-submit {
+  width: 100%; padding: 16px; background: #6366f1; color: #fff; border: none;
+  border-radius: 14px; font-size: 1rem; font-weight: 700; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  transition: background 0.2s;
+}
+.ride-req-submit:hover { background: #4f46e5; }
+.ride-req-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+.ride-req-submit-price { font-size: 1.1rem; opacity: 0.9; }
+
+/* RIDE TRACKING - UBER STYLE */
+.track { display: flex; flex-direction: column; height: 100vh; }
+.track-map-wrap { position: relative; flex: 1; min-height: 45%; }
+.track-map { width: 100%; height: 100%; }
+.track-back {
+  position: absolute; top: 14px; left: 14px; z-index: 1000;
+  width: 40px; height: 40px; border-radius: 50%; border: none;
+  background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.track-status-pill {
+  position: absolute; top: 14px; left: 50%; transform: translateX(-50%); z-index: 1000;
+  display: flex; align-items: center; gap: 8px; padding: 8px 16px;
+  background: #fff; border-radius: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+  font-size: 0.85rem; font-weight: 600; color: #1a1a2e;
+}
+.track-status-dot {
+  width: 8px; height: 8px; border-radius: 50%; background: #22c55e;
+  animation: pulse 1.5s infinite;
+}
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+.track-panel {
+  background: #fff; border-radius: 20px 20px 0 0; padding: 24px 20px;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.08); flex-shrink: 0;
+  display: flex; flex-direction: column; gap: 16px; max-height: 55vh; overflow-y: auto;
+}
+.track-panel-header { display: flex; justify-content: space-between; align-items: flex-start; }
+.track-title { font-size: 1.1rem; font-weight: 700; color: #1a1a2e; margin-bottom: 4px; }
+.track-badge {
+  display: inline-block; padding: 4px 10px; border-radius: 12px;
+  font-size: 0.75rem; font-weight: 600;
+}
+.track-badge-matching { background: #fef3c7; color: #92400e; }
+.track-badge-accepted { background: #dbeafe; color: #1e40af; }
+.track-badge-in_progress { background: #d1fae5; color: #065f46; }
+.track-badge-completed { background: #d1fae5; color: #065f46; }
+.track-badge-cancelled { background: #fee2e2; color: #991b1b; }
+.track-badge-pending { background: #f3f4f6; color: #374151; }
+
+/* Driver */
+.track-driver {
+  display: flex; align-items: center; gap: 12px; padding: 14px;
+  background: #f9fafb; border-radius: 14px;
+}
+.track-driver-avatar {
+  width: 44px; height: 44px; border-radius: 50%; background: #6366f1;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 1.1rem; font-weight: 700; flex-shrink: 0;
+}
+.track-driver-info { flex: 1; display: flex; flex-direction: column; }
+.track-driver-info strong { font-size: 0.95rem; color: #1a1a2e; }
+.track-driver-info span { font-size: 0.8rem; color: #6b7280; }
+.track-driver-call {
+  width: 40px; height: 40px; border-radius: 50%; border: none;
+  background: #22c55e; color: #fff; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* Route */
+.track-route { display: flex; flex-direction: column; gap: 0; padding: 0 4px; }
+.track-route-point { display: flex; align-items: flex-start; gap: 12px; }
+.track-route-dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+.track-route-dot.green { background: #22c55e; }
+.track-route-dot.red { background: #ef4444; }
+.track-route-line { width: 2px; height: 20px; background: #e5e7eb; margin-left: 4px; }
+.track-route-text { display: flex; flex-direction: column; }
+.track-route-label { font-size: 0.7rem; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; }
+.track-route-address { font-size: 0.9rem; color: #1a1a2e; font-weight: 500; }
+.track-route-complement { font-size: 0.8rem; color: #9ca3af; }
+
+/* Details */
+.track-details {
+  display: flex; gap: 12px; padding: 14px; background: #f9fafb; border-radius: 14px;
+}
+.track-detail { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.track-detail-icon { font-size: 0.9rem; }
+.track-detail-val { font-size: 0.85rem; font-weight: 600; color: #374151; }
+.track-detail.highlight .track-detail-val { color: #6366f1; font-size: 1rem; }
+
+/* Notes */
+.track-notes {
+  display: flex; align-items: flex-start; gap: 8px; padding: 12px;
+  background: #f9fafb; border-radius: 10px; font-size: 0.85rem; color: #6b7280;
+}
+
+/* Actions */
+.track-actions { display: flex; gap: 10px; }
+.track-btn {
+  flex: 1; padding: 14px; border: none; border-radius: 12px;
+  font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: all 0.2s;
+}
+.track-btn.cancel { background: #fee2e2; color: #991b1b; }
+.track-btn.cancel:hover { background: #fecaca; }
+.track-btn.primary { background: #6366f1; color: #fff; }
+.track-btn.primary:hover { background: #4f46e5; }
 .ride-tracking-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
 .ride-tracking-body { display: flex; flex-direction: column; gap: 16px; }
 .ride-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }

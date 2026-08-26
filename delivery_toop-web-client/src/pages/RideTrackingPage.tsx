@@ -1,6 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import api from '../api'
+import L from 'leaflet'
+import 'leaflet/dist/leaflet.css'
 
 const STATUS_MAP: Record<string, string> = {
   pending: 'Pendente',
@@ -11,11 +13,21 @@ const STATUS_MAP: Record<string, string> = {
   cancelled: 'Cancelada',
 }
 
-const STATUS_STEPS = ['matching', 'accepted', 'in_progress', 'completed']
+const STATUS_ICONS: Record<string, string> = {
+  pending: '⏳',
+  matching: '🔍',
+  accepted: '🚗',
+  in_progress: '🛣️',
+  completed: '✅',
+  cancelled: '❌',
+}
 
 export default function RideTrackingPage() {
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
+  const mapRef = useRef<HTMLDivElement>(null)
+  const mapInstanceRef = useRef<L.Map | null>(null)
+
   const [booking, setBooking] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -23,7 +35,7 @@ export default function RideTrackingPage() {
   useEffect(() => {
     if (!id) return
     loadBooking()
-    const interval = setInterval(loadBooking, 5000)
+    const interval = setInterval(loadBooking, 4000)
     return () => clearInterval(interval)
   }, [id])
 
@@ -32,20 +44,79 @@ export default function RideTrackingPage() {
       const { data } = await api.get(`/bookings/${id}`)
       setBooking(data.data)
       setError('')
-    } catch (err: any) {
+    } catch {
       setError('Corrida não encontrada')
     } finally {
       setLoading(false)
     }
   }
 
+  // Initialize map when booking loads
+  useEffect(() => {
+    if (!booking || !mapRef.current || mapInstanceRef.current) return
+
+    const pickup = booking.pickup
+    const dropoff = booking.dropoff
+
+    if (!pickup?.lat || !pickup?.lng || !dropoff?.lat || !dropoff?.lng) return
+
+    const map = L.map(mapRef.current, {
+      zoomControl: false,
+      attributionControl: false,
+    })
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+    }).addTo(map)
+
+    L.control.zoom({ position: 'topright' }).addTo(map)
+
+    // Pickup marker (green)
+    const pickupIcon = L.divIcon({
+      html: `<div style="width:32px;height:32px;border-radius:50%;background:#22c55e;border:4px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700;">A</div>`,
+      className: '',
+      iconSize: [32, 32],
+      iconAnchor: [16, 16],
+    })
+    L.marker([pickup.lat, pickup.lng], { icon: pickupIcon }).addTo(map)
+
+    // Dropoff marker (red)
+    const dropoffIcon = L.divIcon({
+      html: `<div style="width:32px;height:32px;border-radius:50%;background:#ef4444;border:4px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700;">B</div>`,
+      className: '',
+      iconSize: [32, 32],
+      iconAnchor: [16, 16],
+    })
+    L.marker([dropoff.lat, dropoff.lng], { icon: dropoffIcon }).addTo(map)
+
+    // Route line
+    L.polyline(
+      [[pickup.lat, pickup.lng], [dropoff.lat, dropoff.lng]],
+      { color: '#6366f1', weight: 5, opacity: 0.9 }
+    ).addTo(map)
+
+    // Fit bounds
+    const bounds = L.latLngBounds(
+      [pickup.lat, pickup.lng],
+      [dropoff.lat, dropoff.lng]
+    )
+    map.fitBounds(bounds, { padding: [60, 60] })
+
+    mapInstanceRef.current = map
+
+    return () => {
+      map.remove()
+      mapInstanceRef.current = null
+    }
+  }, [booking])
+
   const handleCancel = async () => {
-    if (!confirm('Tem certeza que deseja cancelar esta corrida?')) return
+    if (!confirm('Tem certeza que deseja cancelar?')) return
     try {
       await api.put(`/bookings/${id}/cancel`, { reason: 'Cancelado pelo cliente', cancelledBy: 'client' })
       loadBooking()
     } catch (err: any) {
-      alert('Erro ao cancelar: ' + (err.response?.data?.error || err.message))
+      alert(err.response?.data?.error || 'Erro ao cancelar')
     }
   }
 
@@ -53,115 +124,111 @@ export default function RideTrackingPage() {
   if (error) return <div className="page"><div className="alert-error">{error}</div><button className="btn-back" onClick={() => navigate('/')}>← Voltar</button></div>
   if (!booking) return null
 
-  const currentStep = STATUS_STEPS.indexOf(booking.status)
   const isCancelled = booking.status === 'cancelled'
   const isCompleted = booking.status === 'completed'
-  const canCancel = ['matching', 'accepted'].includes(booking.status)
+  const isActive = ['matching', 'accepted', 'in_progress'].includes(booking.status)
 
   return (
-    <div className="page">
-      <button className="btn-back" onClick={() => navigate('/')}>← Voltar</button>
-      
-      <div className="ride-tracking">
-        <div className="ride-tracking-header">
-          <h1>Corrida #{booking.bookingNumber}</h1>
-          <span className={`status-badge status-${booking.status === 'in_progress' ? 'delivering' : booking.status === 'completed' ? 'delivered' : booking.status === 'cancelled' ? 'cancelled' : 'pending'}`}>
-            {STATUS_MAP[booking.status] || booking.status}
-          </span>
+    <div className="track">
+      {/* Map */}
+      <div className="track-map-wrap">
+        <button className="track-back" onClick={() => navigate('/')}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        </button>
+        <div ref={mapRef} className="track-map" />
+        {isActive && (
+          <div className="track-status-pill">
+            <span className="track-status-dot" />
+            {STATUS_MAP[booking.status]}
+          </div>
+        )}
+      </div>
+
+      {/* Info panel */}
+      <div className="track-panel">
+        <div className="track-panel-header">
+          <div>
+            <h2 className="track-title">#{booking.bookingNumber}</h2>
+            <span className={`track-badge track-badge-${booking.status}`}>
+              {STATUS_ICONS[booking.status]} {STATUS_MAP[booking.status]}
+            </span>
+          </div>
         </div>
 
-        {!isCancelled && !isCompleted && (
-          <div className="status-timeline">
-            {STATUS_STEPS.map((step, i) => (
-              <div key={step} className={`timeline-step ${i <= currentStep ? 'active' : ''} ${i < currentStep ? 'completed' : ''}`}>
-                <div className="timeline-dot">{i < currentStep ? '✓' : i + 1}</div>
-                <span className="timeline-label">{STATUS_MAP[step]}</span>
-                {i < STATUS_STEPS.length - 1 && <div className="timeline-line" />}
-              </div>
-            ))}
+        {/* Driver */}
+        {booking.driver && (
+          <div className="track-driver">
+            <div className="track-driver-avatar">{booking.driver.name?.charAt(0)?.toUpperCase()}</div>
+            <div className="track-driver-info">
+              <strong>{booking.driver.name}</strong>
+              <span>{booking.driver.vehicleType === 'car' ? '🚗' : '🏍️'} {booking.driver.vehiclePlate || ''} · ⭐ {booking.driver.rating?.toFixed(1) || '5.0'}</span>
+            </div>
+            <button className="track-driver-call" onClick={() => {}}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+            </button>
           </div>
         )}
 
-        <div className="ride-tracking-body">
-          <div className="ride-info-grid">
-            <div className="ride-info-card">
-              <h3>📍 Origem</h3>
-              <p>{booking.pickup?.address}</p>
-              {booking.pickup?.complement && <span className="ride-complement">{booking.pickup.complement}</span>}
-            </div>
-            <div className="ride-info-card">
-              <h3>🏁 Destino</h3>
-              <p>{booking.dropoff?.address}</p>
-              {booking.dropoff?.complement && <span className="ride-complement">{booking.dropoff.complement}</span>}
-            </div>
-            <div className="ride-info-card">
-              <h3>🚗 Tipo</h3>
-              <p>{booking.serviceCategory === 'driver' ? 'Corrida' : booking.serviceCategory === 'delivery' ? 'Entrega' : 'Pacote'}</p>
-            </div>
-            <div className="ride-info-card">
-              <h3>📏 Distância</h3>
-              <p>{booking.distance?.toFixed(1) || '-'} km</p>
+        {/* Route */}
+        <div className="track-route">
+          <div className="track-route-point">
+            <div className="track-route-dot green" />
+            <div className="track-route-text">
+              <span className="track-route-label">Origem</span>
+              <span className="track-route-address">{booking.pickup?.address}</span>
+              {booking.pickup?.complement && <span className="track-route-complement">{booking.pickup.complement}</span>}
             </div>
           </div>
-
-          {booking.driver && (
-            <div className="ride-driver-card">
-              <h3>Motorista</h3>
-              <div className="driver-info">
-                <div className="driver-avatar">{booking.driver.name?.charAt(0)?.toUpperCase()}</div>
-                <div>
-                  <strong>{booking.driver.name}</strong>
-                  <span>{booking.driver.vehicleType === 'car' ? '🚗' : booking.driver.vehicleType === 'motorcycle' ? '🏍️' : '🚗'} {booking.driver.vehiclePlate || ''}</span>
-                  <span>⭐ {booking.driver.rating?.toFixed(1) || '5.0'}</span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <div className="ride-price-card">
-            <div className="cart-summary">
-              <div className="cart-summary-row">
-                <span>Distância</span>
-                <span>{booking.distance?.toFixed(2) || '-'} km</span>
-              </div>
-              <div className="cart-summary-row total">
-                <span>Total Estimado</span>
-                <span>R$ {(booking.estimatedPrice || 0).toFixed(2)}</span>
-              </div>
+          <div className="track-route-line" />
+          <div className="track-route-point">
+            <div className="track-route-dot red" />
+            <div className="track-route-text">
+              <span className="track-route-label">Destino</span>
+              <span className="track-route-address">{booking.dropoff?.address}</span>
+              {booking.dropoff?.complement && <span className="track-route-complement">{booking.dropoff.complement}</span>}
             </div>
           </div>
-
-          {booking.notes && (
-            <div className="ride-notes">
-              <h3>📝 Observações</h3>
-              <p>{booking.notes}</p>
-            </div>
-          )}
-
-          {booking.status === 'in_progress' && (
-            <div className="ride-actions">
-              <button className="btn btn-primary btn-lg btn-full" onClick={() => {}}>
-                📱 Acompanhar no Mapa
-              </button>
-            </div>
-          )}
-
-          {isCompleted && (
-            <div className="ride-completed-actions">
-              <button className="btn btn-primary btn-lg btn-full" onClick={() => navigate('/')}>
-                Solicitar Nova Corrida
-              </button>
-            </div>
-          )}
-
-          {canCancel && (
-            <div className="ride-actions">
-              <button className="btn btn-danger btn-full" onClick={handleCancel}>
-                Cancelar Corrida
-              </button>
-            </div>
-          )}
         </div>
+
+        {/* Details */}
+        <div className="track-details">
+          <div className="track-detail">
+            <span className="track-detail-icon">📏</span>
+            <span className="track-detail-val">{booking.distance?.toFixed(1) || '-'} km</span>
+          </div>
+          <div className="track-detail">
+            <span className="track-detail-icon">🚗</span>
+            <span className="track-detail-val">{booking.serviceCategory === 'driver' ? 'Corrida' : booking.serviceCategory === 'delivery' ? 'Entrega' : 'Pacote'}</span>
+          </div>
+          <div className="track-detail highlight">
+            <span className="track-detail-icon">💰</span>
+            <span className="track-detail-val">R$ {(booking.estimatedPrice || 0).toFixed(2)}</span>
+          </div>
+        </div>
+
+        {/* Notes */}
+        {booking.notes && (
+          <div className="track-notes">
+            <span>📝</span> {booking.notes}
+          </div>
+        )}
+
+        {/* Actions */}
+        {isActive && (
+          <div className="track-actions">
+            <button className="track-btn cancel" onClick={handleCancel}>Cancelar</button>
+          </div>
+        )}
+        {isCompleted && (
+          <div className="track-actions">
+            <button className="track-btn primary" onClick={() => navigate('/')}>Nova Corrida</button>
+          </div>
+        )}
+        {isCancelled && (
+          <div className="track-actions">
+            <button className="track-btn primary" onClick={() => navigate('/rides/new')}>Solicitar Nova</button>
+          </div>
+        )}
       </div>
     </div>
   )

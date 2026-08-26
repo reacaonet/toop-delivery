@@ -1,5 +1,6 @@
 import { BookingModel } from "../models/Booking";
 import { DriverModel } from "../models/Driver";
+import { DeliverymanModel } from "../models/Deliveryman";
 import { AppError } from "../middleware/errorHandler";
 import QRCode from "qrcode";
 import crypto from "crypto";
@@ -88,10 +89,10 @@ export class BookingService {
     return { data, total, page, pages: Math.ceil(total / limit) };
   }
 
-  async accept(bookingId: string, driverId: string) {
+  async accept(bookingId: string, driverId: string, driverModel: string = 'Driver') {
     const booking = await BookingModel.findOneAndUpdate(
       { _id: bookingId, status: 'matching', driver: null },
-      { $set: { status: 'accepted', driver: driverId } },
+      { $set: { status: 'accepted', driver: driverId, driverModel } },
       { new: true }
     );
 
@@ -99,7 +100,11 @@ export class BookingService {
       throw new AppError("Corrida não está mais disponível", 400);
     }
 
-    await DriverModel.findByIdAndUpdate(driverId, { available: false });
+    if (driverModel === 'Driver') {
+      await DriverModel.findByIdAndUpdate(driverId, { available: false });
+    } else {
+      await DeliverymanModel.findByIdAndUpdate(driverId, { driverAvailable: false });
+    }
 
     return booking;
   }
@@ -138,7 +143,11 @@ export class BookingService {
       throw new AppError("Corrida não pode ser concluída", 400);
     }
 
-    await DriverModel.findByIdAndUpdate(driverId, { available: true, $inc: { totalTrips: 1 } });
+    if (booking.driverModel === 'Driver') {
+      await DriverModel.findByIdAndUpdate(driverId, { available: true, $inc: { totalTrips: 1 } });
+    } else {
+      await DeliverymanModel.findByIdAndUpdate(driverId, { driverAvailable: true, $inc: { totalTrips: 1 } });
+    }
 
     return booking;
   }
@@ -165,7 +174,11 @@ export class BookingService {
     );
 
     if (booking.driver) {
-      await DriverModel.findByIdAndUpdate(booking.driver, { available: true });
+      if (booking.driverModel === 'Driver') {
+        await DriverModel.findByIdAndUpdate(booking.driver, { available: true });
+      } else {
+        await DeliverymanModel.findByIdAndUpdate(booking.driver, { driverAvailable: true });
+      }
     }
 
     return updated;

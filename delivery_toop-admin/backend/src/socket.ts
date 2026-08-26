@@ -77,9 +77,12 @@ export function initSocket(httpServer: HttpServer): Server {
       driverLocations.set(authSocket.userId, locationData);
 
       const { DeliverymanModel } = await import('./models/Deliveryman');
-      await DeliverymanModel.findByIdAndUpdate(authSocket.userId, {
-        currentLocation: { lat: data.lat, lng: data.lng },
-      }).catch(() => {});
+      const user = await UserModel.findById(authSocket.userId).select('deliveryman').lean();
+      if (user?.deliveryman) {
+        await DeliverymanModel.findByIdAndUpdate(user.deliveryman, {
+          currentLocation: { type: 'Point', coordinates: [data.lng, data.lat] },
+        }).catch(() => {});
+      }
 
       io.emit('driver:location_broadcast', {
         driverId: authSocket.userId,
@@ -93,7 +96,10 @@ export function initSocket(httpServer: HttpServer): Server {
       }
 
       const { DeliverymanModel } = await import('./models/Deliveryman');
-      await DeliverymanModel.findByIdAndUpdate(authSocket.userId, { available: true }).catch(() => {});
+      const user = await UserModel.findById(authSocket.userId).select('deliveryman').lean();
+      if (user?.deliveryman) {
+        await DeliverymanModel.findByIdAndUpdate(user.deliveryman, { available: true }).catch(() => {});
+      }
 
       io.emit('driver:status_change', {
         driverId: authSocket.userId,
@@ -107,7 +113,10 @@ export function initSocket(httpServer: HttpServer): Server {
       }
 
       const { DeliverymanModel } = await import('./models/Deliveryman');
-      await DeliverymanModel.findByIdAndUpdate(authSocket.userId, { available: false }).catch(() => {});
+      const user = await UserModel.findById(authSocket.userId).select('deliveryman').lean();
+      if (user?.deliveryman) {
+        await DeliverymanModel.findByIdAndUpdate(user.deliveryman, { available: false }).catch(() => {});
+      }
 
       driverLocations.delete(authSocket.userId);
 

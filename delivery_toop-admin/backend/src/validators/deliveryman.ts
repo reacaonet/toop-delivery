@@ -22,6 +22,10 @@ export const updateDeliverymanSchema = z.object({
     cnh: z.string().optional(),
     vehiclePlate: z.string().optional(),
     avatar: z.string().optional(),
+    address: z.string().optional(),
+    addressLat: z.number().optional(),
+    addressLng: z.number().optional(),
+    serviceCategories: z.array(z.enum(['driver', 'delivery', 'package'])).optional(),
     documents: z.object({
       cnh: z.string().optional(),
       vehicleDocument: z.string().optional(),
