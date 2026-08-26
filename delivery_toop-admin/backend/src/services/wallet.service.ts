@@ -131,6 +131,65 @@ export class WalletService {
     }
   }
 
+  async requestWithdrawal(
+    driverId: string,
+    amount: number,
+    pixKey: string,
+    pixType: string
+  ) {
+    if (amount <= 0) {
+      throw new AppError("Valor deve ser maior que zero", 400);
+    }
+
+    if (!pixKey || !pixType) {
+      throw new AppError("Chave PIX e tipo sao obrigatorios", 400);
+    }
+
+    const wallet = await this.getOrCreateWallet(driverId);
+
+    if (wallet.balance < amount) {
+      throw new AppError("Saldo insuficiente", 400);
+    }
+
+    wallet.pixKey = pixKey;
+    wallet.pixType = pixType as any;
+    await wallet.save();
+
+    const session = await WalletModel.db.startSession();
+    session.startTransaction();
+
+    try {
+      wallet.balance -= amount;
+      wallet.totalWithdrawals += amount;
+      await wallet.save({ session });
+
+      const transaction = await WalletTransactionModel.create(
+        [
+          {
+            wallet: wallet._id,
+            type: "debit",
+            amount,
+            description: "Saque solicitado",
+            status: "pending",
+          },
+        ],
+        { session }
+      );
+
+      wallet.lastTransaction = transaction[0]._id;
+      await wallet.save({ session });
+
+      await session.commitTransaction();
+
+      return { wallet, transaction: transaction[0] };
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      session.endSession();
+    }
+  }
+
   async getTransactions(
     driverId: string,
     query: PaginationQuery

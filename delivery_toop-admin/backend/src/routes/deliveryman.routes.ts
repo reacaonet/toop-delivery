@@ -18,6 +18,7 @@ router.post(
   validate(createDeliverymanSchema),
   deliverymanController.create
 );
+router.put("/me/documents", authenticate, deliverymanController.updateDocuments);
 router.put("/me", authenticate, validate(updateDeliverymanSchema), deliverymanController.updateMe);
 router.put("/me/availability", authenticate, deliverymanController.toggleAvailability);
 router.put("/me/driver-mode", authenticate, deliverymanController.toggleDriverMode);

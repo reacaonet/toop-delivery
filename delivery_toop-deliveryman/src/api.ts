@@ -133,6 +133,10 @@ export const deliverymanService = {
     const response = await api.get('/deliverymen/me')
     return response.data?.data ?? response.data
   },
+  updateDocuments: async (documents: { cnh?: string; vehicleDocument?: string; photo?: string }) => {
+    const response = await api.put('/deliverymen/me/documents', documents)
+    return response.data?.data ?? response.data
+  },
 }
 
 export const driverService = {
@@ -196,6 +200,29 @@ export const walletService = {
   },
   credit: async (amount: number, description?: string, bookingId?: string) => {
     const response = await api.post('/wallet/credit', { amount, description, bookingId })
+    return response.data?.data ?? response.data
+  },
+  withdraw: async (amount: number, pixKey: string, pixType: string) => {
+    const response = await api.post('/wallet/withdraw', { amount, pixKey, pixType })
+    return response.data?.data ?? response.data
+  },
+}
+
+export const messageService = {
+  getMessages: async (bookingId: string, page = 1) => {
+    const response = await api.get(`/messages/${bookingId}?page=${page}&limit=50`)
+    return response.data?.data ?? response.data
+  },
+  send: async (bookingId: string, content: string) => {
+    const response = await api.post(`/messages/${bookingId}`, { content })
+    return response.data?.data ?? response.data
+  },
+  markAsRead: async (bookingId: string) => {
+    const response = await api.put(`/messages/${bookingId}/read`)
+    return response.data?.data ?? response.data
+  },
+  getUnreadCount: async (bookingId: string) => {
+    const response = await api.get(`/messages/${bookingId}/unread`)
     return response.data?.data ?? response.data
   },
 }

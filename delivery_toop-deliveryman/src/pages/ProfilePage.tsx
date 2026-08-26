@@ -522,6 +522,10 @@ const ProfilePage: React.FC = () => {
         <button type="button" className="btn btn-outline btn-full" onClick={() => navigate('/earnings')} style={{ marginTop: 12 }}>
           <DollarSign size={16} /> Ver Ganhos
         </button>
+
+        <button type="button" className="btn btn-outline btn-full" onClick={() => navigate('/documents')} style={{ marginTop: 12 }}>
+          <FileText size={16} /> Documentos
+        </button>
       </form>
     </div>
   )

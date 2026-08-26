@@ -8,5 +8,6 @@ router.get("/balance", authenticate, walletController.getBalance);
 router.get("/transactions", authenticate, walletController.getTransactions);
 router.post("/credit", authenticate, walletController.credit);
 router.post("/debit", authenticate, walletController.debit);
+router.post("/withdraw", authenticate, walletController.requestWithdrawal);
 
 export default router;

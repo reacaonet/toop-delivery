@@ -94,3 +94,22 @@ api.interceptors.response.use(
 )
 
 export default api
+
+export const messageService = {
+  getMessages: async (bookingId: string, page = 1) => {
+    const { data } = await api.get(`/messages/${bookingId}?page=${page}&limit=50`)
+    return data?.data ?? data
+  },
+  send: async (bookingId: string, content: string) => {
+    const { data } = await api.post(`/messages/${bookingId}`, { content })
+    return data?.data ?? data
+  },
+  markAsRead: async (bookingId: string) => {
+    const { data } = await api.put(`/messages/${bookingId}/read`)
+    return data?.data ?? data
+  },
+  getUnreadCount: async (bookingId: string) => {
+    const { data } = await api.get(`/messages/${bookingId}/unread`)
+    return data?.data ?? data
+  },
+}

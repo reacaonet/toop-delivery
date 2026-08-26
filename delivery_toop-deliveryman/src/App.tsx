@@ -13,6 +13,7 @@ import ProfilePage from './pages/ProfilePage'
 import AvailableRidesPage from './pages/AvailableRidesPage'
 import ActiveRidePage from './pages/ActiveRidePage'
 import EarningsPage from './pages/EarningsPage'
+import DocumentsPage from './pages/DocumentsPage'
 
 function BottomNav() {
   const location = useLocation()
@@ -86,6 +87,7 @@ function ProtectedLayout() {
           <Route path="/available-rides" element={<AvailableRidesPage />} />
           <Route path="/active-ride" element={<ActiveRidePage />} />
           <Route path="/earnings" element={<EarningsPage />} />
+          <Route path="/documents" element={<DocumentsPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Layout>

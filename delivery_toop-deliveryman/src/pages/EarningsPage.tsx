@@ -28,6 +28,12 @@ const EarningsPage: React.FC = () => {
   const [topUpAmount, setTopUpAmount] = useState('')
   const [topUpLoading, setTopUpLoading] = useState(false)
 
+  const [showWithdraw, setShowWithdraw] = useState(false)
+  const [withdrawAmount, setWithdrawAmount] = useState('')
+  const [withdrawPixKey, setWithdrawPixKey] = useState('')
+  const [withdrawPixType, setWithdrawPixType] = useState<string>('cpf')
+  const [withdrawLoading, setWithdrawLoading] = useState(false)
+
   const fetchData = useCallback(async () => {
     try {
       const [walletData, txData] = await Promise.allSettled([
@@ -93,6 +99,26 @@ const EarningsPage: React.FC = () => {
     }
   }
 
+  const handleWithdraw = async () => {
+    const amount = parseFloat(withdrawAmount)
+    if (!amount || amount <= 0 || amount > wallet.balance) return
+    if (!withdrawPixKey.trim()) return
+    setWithdrawLoading(true)
+    try {
+      await walletService.withdraw(amount, withdrawPixKey, withdrawPixType)
+      setShowWithdraw(false)
+      setWithdrawAmount('')
+      setWithdrawPixKey('')
+      setWithdrawPixType('cpf')
+      fetchData()
+      alert('Solicitacao de saque enviada com sucesso!')
+    } catch (err: any) {
+      alert('Erro ao solicitar saque: ' + (err.response?.data?.error || err.message))
+    } finally {
+      setWithdrawLoading(false)
+    }
+  }
+
   if (loading) return <div className="loading"><div className="spinner" /></div>
 
   return (
@@ -115,6 +141,9 @@ const EarningsPage: React.FC = () => {
         </div>
         <button className="earnings-topup-btn" onClick={() => setShowTopUp(true)}>
           <DollarSign size={16} /> Recarregar
+        </button>
+        <button className="earnings-topup-btn" onClick={() => setShowWithdraw(true)}>
+          <CreditCard size={16} /> Sacar
         </button>
       </div>
 
@@ -211,6 +240,58 @@ const EarningsPage: React.FC = () => {
               <button className="modal-btn cancel" onClick={() => setShowTopUp(false)}>Cancelar</button>
               <button className="modal-btn confirm" onClick={handleTopUp} disabled={topUpLoading || !topUpAmount}>
                 {topUpLoading ? 'Recarregando...' : 'Recarregar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Withdraw Modal */}
+      {showWithdraw && (
+        <div className="modal-overlay" onClick={() => setShowWithdraw(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <h3>Solicitar Saque</h3>
+            <div className="modal-field">
+              <label>Saldo disponivel: R$ {wallet.balance.toFixed(2)}</label>
+            </div>
+            <div className="modal-field">
+              <label>Valor (R$)</label>
+              <input
+                type="number"
+                min="0.01"
+                max={wallet.balance}
+                step="0.01"
+                placeholder="0.00"
+                value={withdrawAmount}
+                onChange={e => setWithdrawAmount(e.target.value)}
+              />
+            </div>
+            <div className="modal-field">
+              <label>Chave PIX</label>
+              <input
+                type="text"
+                placeholder="Sua chave PIX"
+                value={withdrawPixKey}
+                onChange={e => setWithdrawPixKey(e.target.value)}
+              />
+            </div>
+            <div className="modal-field">
+              <label>Tipo da Chave PIX</label>
+              <select value={withdrawPixType} onChange={e => setWithdrawPixType(e.target.value)}>
+                <option value="cpf">CPF</option>
+                <option value="email">E-mail</option>
+                <option value="phone">Celular</option>
+                <option value="random">Aleatoria</option>
+              </select>
+            </div>
+            <div className="modal-actions">
+              <button className="modal-btn cancel" onClick={() => setShowWithdraw(false)}>Cancelar</button>
+              <button
+                className="modal-btn confirm"
+                onClick={handleWithdraw}
+                disabled={withdrawLoading || !withdrawAmount || !withdrawPixKey || parseFloat(withdrawAmount) > wallet.balance}
+              >
+                {withdrawLoading ? 'Enviando...' : 'Solicitar Saque'}
               </button>
             </div>
           </div>

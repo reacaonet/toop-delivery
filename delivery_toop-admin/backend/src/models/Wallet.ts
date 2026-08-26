@@ -6,6 +6,8 @@ export interface IWallet extends Document {
   totalEarnings: number;
   totalWithdrawals: number;
   lastTransaction?: mongoose.Types.ObjectId;
+  pixKey?: string;
+  pixType?: 'cpf' | 'email' | 'phone' | 'random';
   createdAt: Date;
   updatedAt: Date;
 }
@@ -28,6 +30,8 @@ const WalletSchema = new Schema<IWallet>(
     totalEarnings: { type: Number, default: 0 },
     totalWithdrawals: { type: Number, default: 0 },
     lastTransaction: { type: Schema.Types.ObjectId, ref: 'WalletTransaction' },
+    pixKey: { type: String, trim: true },
+    pixType: { type: String, enum: ['cpf', 'email', 'phone', 'random'] },
   },
   { timestamps: true, toJSON: { transform(_doc, ret) { const { __v: _v, ...rest } = ret; return rest; } } }
 );

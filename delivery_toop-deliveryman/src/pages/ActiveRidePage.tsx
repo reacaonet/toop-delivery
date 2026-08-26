@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { MapPin, Phone, Navigation, Play, CheckCircle, Clock, AlertCircle, QrCode } from 'lucide-react'
 import { io } from 'socket.io-client'
-import { bookingService, deliverymanService } from '../api'
+import { bookingService, deliverymanService, messageService } from '../api'
 
 function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371
@@ -36,6 +36,13 @@ export default function ActiveRidePage() {
   const [qrToken, setQrToken] = useState<string | null>(null)
   const [qrLoading, setQrLoading] = useState(false)
   const [showQr, setShowQr] = useState(false)
+  const socketRef = useRef<any>(null)
+
+  const [showChat, setShowChat] = useState(false)
+  const [messages, setMessages] = useState<any[]>([])
+  const [chatInput, setChatInput] = useState('')
+  const [unreadCount, setUnreadCount] = useState(0)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     loadActiveRide()
@@ -73,7 +80,9 @@ export default function ActiveRidePage() {
       navigate('/')
     })
 
-    return () => { socket.disconnect() }
+    socketRef.current = socket
+
+    return () => { socket.disconnect(); socketRef.current = null }
   }, [])
 
   // Track location during active ride
@@ -111,6 +120,72 @@ export default function ActiveRidePage() {
       if (watchRef.current != null) navigator.geolocation.clearWatch(watchRef.current)
     }
   }, [booking?.status])
+
+  // Chat socket listener
+  useEffect(() => {
+    if (!showChat || !booking?._id || !socketRef.current) return
+    const socket = socketRef.current
+
+    socket.emit('chat:join_booking', { bookingId: booking._id })
+
+    const handleMessage = (data: any) => {
+      if (data.bookingId === booking._id) {
+        setMessages(prev => {
+          if (prev.some(m => m._id === data.message?._id)) return prev
+          return [...prev, data.message]
+        })
+      }
+    }
+    socket.on('chat:new_message', handleMessage)
+
+    return () => {
+      socket.off('chat:new_message', handleMessage)
+      socket.emit('chat:leave_booking', { bookingId: booking._id })
+    }
+  }, [showChat, booking?._id])
+
+  // Auto-scroll to bottom
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
+
+  // Load chat messages when opening
+  useEffect(() => {
+    if (!showChat || !booking?._id) return
+    loadChatMessages()
+    messageService.markAsRead(booking._id).catch(() => {})
+    setUnreadCount(0)
+  }, [showChat, booking?._id])
+
+  const loadChatMessages = async () => {
+    if (!booking?._id) return
+    try {
+      const result = await messageService.getMessages(booking._id)
+      const msgList = Array.isArray(result) ? result : (result?.data || [])
+      setMessages(msgList)
+    } catch {}
+  }
+
+  const handleSendChat = async () => {
+    if (!chatInput.trim() || !booking?._id) return
+    const content = chatInput.trim()
+    setChatInput('')
+    try {
+      await messageService.send(booking._id, content)
+    } catch {}
+  }
+
+  const handleChatKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      handleSendChat()
+    }
+  }
+
+  const openChat = () => {
+    setShowChat(true)
+    setUnreadCount(0)
+  }
 
   const loadActiveRide = async () => {
     try {
@@ -293,6 +368,11 @@ export default function ActiveRidePage() {
             <Navigation size={16} /> {isGoingToPickup ? 'Navegar até Embarque' : 'Navegar até Destino'}
           </button>
 
+          <button className="chat-fab" onClick={openChat}>
+            💬 Chat
+            {unreadCount > 0 && <span className="chat-badge">{unreadCount}</span>}
+          </button>
+
           <button className="btn-qr" onClick={handleGenerateQR} disabled={qrLoading}>
             <QrCode size={16} /> {qrLoading ? 'Gerando...' : 'QR Code'}
           </button>
@@ -321,6 +401,47 @@ export default function ActiveRidePage() {
             {qrToken && <div className="qr-token-display">Código: <strong>{qrToken}</strong></div>}
             <div className="qr-booking-number">#{booking?.bookingNumber}</div>
             <button className="qr-close-btn" onClick={() => setShowQr(false)}>Fechar</button>
+          </div>
+        </div>
+      )}
+
+      {/* Chat Modal */}
+      {showChat && (
+        <div className="chat-overlay" onClick={() => setShowChat(false)}>
+          <div className="chat-modal" onClick={e => e.stopPropagation()}>
+            <div className="chat-header">
+              <h3>Chat com Passageiro</h3>
+              <button className="chat-close" onClick={() => setShowChat(false)}>✕</button>
+            </div>
+            <div className="chat-messages">
+              {messages.length === 0 && (
+                <div className="chat-empty">Nenhuma mensagem ainda</div>
+              )}
+              {messages.map((msg) => {
+                const isSent = msg.senderModel === 'Driver'
+                return (
+                  <div key={msg._id} className={`chat-msg ${isSent ? 'sent' : 'received'}`}>
+                    {msg.content}
+                    <span className="chat-msg-time">
+                      {new Date(msg.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                )
+              })}
+              <div ref={messagesEndRef} />
+            </div>
+            <div className="chat-input-wrap">
+              <input
+                className="chat-input"
+                placeholder="Digite sua mensagem..."
+                value={chatInput}
+                onChange={e => setChatInput(e.target.value)}
+                onKeyDown={handleChatKeyDown}
+              />
+              <button className="chat-send" onClick={handleSendChat} disabled={!chatInput.trim()}>
+                ➤
+              </button>
+            </div>
           </div>
         </div>
       )}

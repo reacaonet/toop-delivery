@@ -62,6 +62,22 @@ export class WalletController {
       next(error);
     }
   }
+
+  async requestWithdrawal(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = (req as any).user?._id;
+      const user = await UserModel.findById(userId).populate("driver");
+      if (!user?.driver) {
+        return res.status(400).json({ success: false, error: "Motorista nao encontrado" });
+      }
+      const driverId = (user.driver as any)._id.toString();
+      const { amount, pixKey, pixType } = req.body;
+      const result = await walletService.requestWithdrawal(driverId, amount, pixKey, pixType);
+      return res.status(200).json({ success: true, data: result });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export default new WalletController();

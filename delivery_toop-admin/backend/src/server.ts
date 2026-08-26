@@ -3,6 +3,7 @@ import http from "http";
 import app from "./app";
 import { env } from "./config";
 import { initSocket } from "./socket";
+import bookingService from "./services/booking.service";
 
 const PORT = env.PORT || 3000;
 
@@ -18,6 +19,15 @@ async function startServer() {
       console.log(`Servidor rodando na porta ${PORT}`);
       console.log(`Socket.io inicializado`);
     });
+
+    // Scheduled rides activation (every 30 seconds)
+    setInterval(async () => {
+      try {
+        await bookingService.activateScheduledRides();
+      } catch (err) {
+        console.error('[Scheduler] Error activating scheduled rides:', err);
+      }
+    }, 30000);
 
     const gracefulShutdown = async (signal: string) => {
       console.log(`\n${signal} recebido. Encerrando graciosamente...`);

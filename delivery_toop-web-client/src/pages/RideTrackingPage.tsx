@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { io, Socket } from 'socket.io-client'
-import api from '../api'
+import api, { messageService } from '../api'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
@@ -59,6 +59,14 @@ export default function RideTrackingPage() {
   const [qrCode, setQrCode] = useState('')
   const [qrVerifying, setQrVerifying] = useState(false)
   const [qrResult, setQrResult] = useState<string | null>(null)
+
+  const [showChat, setShowChat] = useState(false)
+  const [messages, setMessages] = useState<any[]>([])
+  const [chatInput, setChatInput] = useState('')
+  const [unreadCount, setUnreadCount] = useState(0)
+  const [notificationCount, setNotificationCount] = useState(0)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const chatInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (!id) return
@@ -228,6 +236,107 @@ export default function RideTrackingPage() {
     }
   }, [driverLocation, booking])
 
+  // Chat socket listener
+  useEffect(() => {
+    if (!showChat || !id || !socketRef.current) return
+    const socket = socketRef.current
+
+    socket.emit('chat:join_booking', { bookingId: id })
+
+    const handleMessage = (data: any) => {
+      if (data.bookingId === id) {
+        setMessages(prev => {
+          if (prev.some(m => m._id === data.message?._id)) return prev
+          return [...prev, data.message]
+        })
+      }
+    }
+    socket.on('chat:new_message', handleMessage)
+
+    return () => {
+      socket.off('chat:new_message', handleMessage)
+      socket.emit('chat:leave_booking', { bookingId: id })
+    }
+  }, [showChat, id])
+
+  // Notification counter from socket events
+  useEffect(() => {
+    if (!id || !socketRef.current) return
+    const socket = socketRef.current
+
+    const onAccepted = (data: any) => {
+      if (data.bookingId === id) setNotificationCount(c => c + 1)
+    }
+    const onCompleted = (data: any) => {
+      if (data.bookingId === id) setNotificationCount(c => c + 1)
+    }
+    const onCancelled = (data: any) => {
+      if (data.bookingId === id) setNotificationCount(c => c + 1)
+    }
+
+    socket.on('booking:accepted', onAccepted)
+    socket.on('booking:completed', onCompleted)
+    socket.on('booking:cancelled', onCancelled)
+
+    return () => {
+      socket.off('booking:accepted', onAccepted)
+      socket.off('booking:completed', onCompleted)
+      socket.off('booking:cancelled', onCancelled)
+    }
+  }, [id, booking?.status])
+
+  // Load chat messages and unread count when opening
+  useEffect(() => {
+    if (!showChat || !id) return
+    loadChatMessages()
+    loadUnreadCount()
+    messageService.markAsRead(id).catch(() => {})
+    setNotificationCount(0)
+  }, [showChat, id])
+
+  // Auto-scroll to bottom
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [messages])
+
+  const loadChatMessages = async () => {
+    if (!id) return
+    try {
+      const result = await messageService.getMessages(id)
+      const msgList = Array.isArray(result) ? result : (result?.data || [])
+      setMessages(msgList)
+    } catch {}
+  }
+
+  const loadUnreadCount = async () => {
+    if (!id) return
+    try {
+      const result = await messageService.getUnreadCount(id)
+      setUnreadCount(result?.unreadCount || 0)
+    } catch {}
+  }
+
+  const handleSendChat = async () => {
+    if (!chatInput.trim() || !id) return
+    const content = chatInput.trim()
+    setChatInput('')
+    try {
+      await messageService.send(id, content)
+    } catch {}
+  }
+
+  const handleChatKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      handleSendChat()
+    }
+  }
+
+  const openChat = () => {
+    setShowChat(true)
+    setUnreadCount(0)
+  }
+
   const handleCancel = async () => {
     if (!confirm('Tem certeza que deseja cancelar?')) return
     try {
@@ -270,6 +379,12 @@ export default function RideTrackingPage() {
         <button className="track-back" onClick={() => navigate('/')}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         </button>
+        {showDriverTracking && (
+          <button className="notification-bell-btn" onClick={() => setNotificationCount(0)}>
+            🔔
+            {notificationCount > 0 && <span className="notification-bell-badge">{notificationCount}</span>}
+          </button>
+        )}
         <div ref={mapRef} className="track-map" />
         {isActive && (
           <div className={`track-status-pill ${booking.status === 'matching' ? 'searching' : ''}`}>
@@ -514,6 +629,56 @@ export default function RideTrackingPage() {
                 disabled={qrVerifying || !qrCode.trim()}
               >
                 {qrVerifying ? 'Verificando...' : 'Confirmar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Chat FAB */}
+      {showDriverTracking && (
+        <button className="chat-fab" onClick={openChat}>
+          💬
+          {unreadCount > 0 && <span className="chat-badge">{unreadCount}</span>}
+        </button>
+      )}
+
+      {/* Chat Modal */}
+      {showChat && (
+        <div className="chat-overlay" onClick={() => setShowChat(false)}>
+          <div className="chat-modal" onClick={e => e.stopPropagation()}>
+            <div className="chat-header">
+              <h3>Chat com Motorista</h3>
+              <button className="chat-close" onClick={() => setShowChat(false)}>✕</button>
+            </div>
+            <div className="chat-messages">
+              {messages.length === 0 && (
+                <div className="chat-empty">Nenhuma mensagem ainda</div>
+              )}
+              {messages.map((msg) => {
+                const isSent = msg.senderModel === 'User'
+                return (
+                  <div key={msg._id} className={`chat-msg ${isSent ? 'sent' : 'received'}`}>
+                    {msg.content}
+                    <span className="chat-msg-time">
+                      {new Date(msg.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                )
+              })}
+              <div ref={messagesEndRef} />
+            </div>
+            <div className="chat-input-wrap">
+              <input
+                ref={chatInputRef}
+                className="chat-input"
+                placeholder="Digite sua mensagem..."
+                value={chatInput}
+                onChange={e => setChatInput(e.target.value)}
+                onKeyDown={handleChatKeyDown}
+              />
+              <button className="chat-send" onClick={handleSendChat} disabled={!chatInput.trim()}>
+                ➤
               </button>
             </div>
           </div>

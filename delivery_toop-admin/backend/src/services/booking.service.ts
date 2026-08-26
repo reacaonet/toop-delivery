@@ -392,6 +392,24 @@ export class BookingService {
 
     return { verified: true, bookingNumber: booking.bookingNumber };
   }
+
+  async activateScheduledRides(): Promise<number> {
+    const now = new Date();
+    const result = await BookingModel.updateMany(
+      { status: 'pending', scheduledAt: { $lte: now } },
+      { $set: { status: 'matching' } }
+    );
+
+    if (result.modifiedCount > 0) {
+      console.log(`[Scheduler] ${result.modifiedCount} scheduled rides activated`);
+      try {
+        const { emitToAll } = await import('../socket');
+        emitToAll('scheduler:rides_activated', { count: result.modifiedCount });
+      } catch {}
+    }
+
+    return result.modifiedCount;
+  }
 }
 
 export default new BookingService();

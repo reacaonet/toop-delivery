@@ -178,6 +178,42 @@ export class DeliverymanController {
     }
   }
 
+  async updateDocuments(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = (req as any).user?._id;
+      const user = await UserModel.findById(userId);
+      if (!user?.deliveryman) {
+        return res.status(400).json({ success: false, error: "Entregador nao encontrado" });
+      }
+      const { cnh, vehicleDocument, photo } = req.body;
+      const documents: Record<string, string> = {};
+      if (cnh !== undefined) documents.cnh = cnh;
+      if (vehicleDocument !== undefined) documents.vehicleDocument = vehicleDocument;
+      if (photo !== undefined) documents.photo = photo;
+
+      const deliveryman = await DeliverymanModel.findByIdAndUpdate(
+        user.deliveryman,
+        {
+          $set: {
+            ...(documents.cnh !== undefined && { 'documents.cnh': documents.cnh }),
+            ...(documents.vehicleDocument !== undefined && { 'documents.vehicleDocument': documents.vehicleDocument }),
+            ...(documents.photo !== undefined && { 'documents.photo': documents.photo }),
+            'documentStatus.cnh': 'pending',
+            'documentStatus.vehicleDocument': 'pending',
+            'documentStatus.photo': 'pending',
+          },
+        },
+        { new: true }
+      );
+      if (!deliveryman) {
+        return res.status(404).json({ success: false, error: "Entregador nao encontrado" });
+      }
+      return res.status(200).json({ success: true, data: deliveryman });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async delete(req: Request, res: Response, next: NextFunction) {
     try {
       const deliveryman = await deliverymanService.delete(req.params.id);
