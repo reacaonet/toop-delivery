@@ -187,6 +187,10 @@ export const bookingService = {
     const response = await api.put(`/bookings/${id}/qr-verify`, { token })
     return response.data?.data ?? response.data
   },
+  rateBooking: async (id: string, rating: number, comment?: string, ratingType: 'client' | 'driver' = 'driver') => {
+    const response = await api.put(`/bookings/${id}/rate`, { rating, comment, ratingType })
+    return response.data?.data ?? response.data
+  },
 }
 
 export const walletService = {

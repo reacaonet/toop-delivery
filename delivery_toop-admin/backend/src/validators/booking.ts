@@ -17,6 +17,7 @@ export const createBookingSchema = z.object({
     }),
     paymentMethod: z.string().min(1, "Forma de pagamento é obrigatória"),
     notes: z.string().optional(),
+    promoCode: z.string().optional(),
   }),
 });
 

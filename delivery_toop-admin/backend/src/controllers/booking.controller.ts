@@ -378,6 +378,59 @@ export class BookingController {
       next(error);
     }
   }
+
+  async getStats(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { BookingModel } = await import("../models/Booking");
+      const { DriverModel } = await import("../models/Driver");
+      const { DeliverymanModel } = await import("../models/Deliveryman");
+
+      const [byStatus, revenueResult, todayResult, avgRatingRes, popRoutes, driverAgg] = await Promise.all([
+        BookingModel.aggregate([{ $group: { _id: "$status", count: { $sum: 1 } } }]),
+        BookingModel.aggregate([
+          { $match: { status: "completed" } },
+          { $group: { _id: null, total: { $sum: "$finalPrice" } } },
+        ]),
+        BookingModel.countDocuments({
+          status: "completed",
+          completedAt: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) },
+        }),
+        BookingModel.aggregate([
+          { $match: { status: "completed", "rating.client": { $exists: true } } },
+          { $group: { _id: null, avg: { $avg: "$rating.client" } } },
+        ]),
+        BookingModel.aggregate([
+          { $match: { status: "completed" } },
+          { $group: { _id: "$dropoff.address", count: { $sum: 1 } } },
+          { $sort: { count: -1 } },
+          { $limit: 5 },
+        ]),
+        Promise.all([
+          DriverModel.countDocuments({ active: true }),
+          DriverModel.countDocuments({ active: true, online: true }),
+          DeliverymanModel.countDocuments({ active: true, isDriver: true, driverOnline: true }),
+        ]).then(([dActive, dOnline, dmOnline]) => ({ active: dActive, online: dOnline + dmOnline })),
+      ]);
+
+      const statusCounts: Record<string, number> = {};
+      byStatus.forEach((s: any) => { statusCounts[s._id] = s.count; });
+
+      return res.status(200).json({
+        success: true,
+        data: {
+          statusCounts,
+          total: byStatus.reduce((acc: number, s: any) => acc + s.count, 0),
+          revenue: revenueResult[0]?.total || 0,
+          completedToday: todayResult,
+          avgRating: avgRatingRes[0]?.avg ? Math.round(avgRatingRes[0].avg * 10) / 10 : 0,
+          popularRoutes: popRoutes.map(r => ({ address: r._id, count: r.count })),
+          drivers: driverAgg,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export default new BookingController();

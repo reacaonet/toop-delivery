@@ -3,6 +3,7 @@ import { DriverModel } from "../models/Driver";
 import { DeliverymanModel } from "../models/Deliveryman";
 import { AppError } from "../middleware/errorHandler";
 import walletService from "./wallet.service";
+import promoService from "./promo.service";
 import QRCode from "qrcode";
 import crypto from "crypto";
 
@@ -48,6 +49,7 @@ export class BookingService {
     paymentMethod: string;
     notes?: string;
     scheduledAt?: string;
+    promoCode?: string;
   }) {
     const bookingNumber = `BK${Date.now()}${Math.floor(Math.random() * 1000)}`;
 
@@ -56,8 +58,18 @@ export class BookingService {
       data.dropoff.lat, data.dropoff.lng
     );
 
-    const estimatedPrice = this.calculatePrice(distance, data.serviceCategory);
+    let estimatedPrice = this.calculatePrice(distance, data.serviceCategory);
     const duration = this.calculateDuration(distance);
+
+    let promoDiscount: number | undefined;
+    if (data.promoCode) {
+      const result = await promoService.validateCode(data.promoCode, data.clientId, estimatedPrice);
+      if (!result.valid) {
+        throw new AppError(result.message, 400);
+      }
+      promoDiscount = result.discount;
+      estimatedPrice = Math.round((estimatedPrice - result.discount) * 100) / 100;
+    }
 
     const status = data.scheduledAt ? 'pending' : 'matching';
 
@@ -72,10 +84,20 @@ export class BookingService {
       distance,
       duration,
       estimatedPrice,
+      promoCode: promoDiscount !== undefined ? data.promoCode?.toUpperCase().trim() : undefined,
+      promoDiscount,
       paymentMethod: data.paymentMethod,
       notes: data.notes,
       scheduledAt: data.scheduledAt ? new Date(data.scheduledAt) : undefined,
     });
+
+    if (promoDiscount !== undefined) {
+      try {
+        await promoService.applyToBooking(booking, data.clientId);
+      } catch (err) {
+        console.error("[Booking] Erro ao registrar uso do cupom:", err);
+      }
+    }
 
     return booking;
   }

@@ -24,6 +24,8 @@ export interface IBooking extends Document {
   duration?: number;
   estimatedPrice?: number;
   finalPrice?: number;
+  promoCode?: string;
+  promoDiscount?: number;
   paymentMethod: string;
   paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded';
   notes?: string;
@@ -76,6 +78,8 @@ const BookingSchema = new Schema<IBooking>(
     duration: Number,
     estimatedPrice: Number,
     finalPrice: Number,
+    promoCode: String,
+    promoDiscount: Number,
     paymentMethod: { type: String, required: true },
     paymentStatus: { type: String, enum: ['pending', 'paid', 'failed', 'refunded'], default: 'pending' },
     notes: String,

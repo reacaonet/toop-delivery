@@ -11,6 +11,7 @@ import {
 const router = Router();
 
 router.get("/", authenticate, bookingController.list);
+router.get("/stats", authenticate, bookingController.getStats);
 router.get("/:id", authenticate, bookingController.getById);
 router.post(
   "/",

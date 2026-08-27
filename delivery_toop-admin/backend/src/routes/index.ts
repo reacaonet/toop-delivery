@@ -21,6 +21,7 @@ import driverRoutes from "./driver.routes";
 import bookingRoutes from "./booking.routes";
 import walletRoutes from "./wallet.routes";
 import messageRoutes from "./message.routes";
+import promoRoutes from "./promo.routes";
 
 const router = Router();
 
@@ -46,5 +47,6 @@ router.use("/drivers", driverRoutes);
 router.use("/bookings", bookingRoutes);
 router.use("/wallet", walletRoutes);
 router.use("/messages", messageRoutes);
+router.use("/promo", promoRoutes);
 
 export default router;

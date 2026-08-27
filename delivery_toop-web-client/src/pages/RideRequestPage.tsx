@@ -64,6 +64,12 @@ export default function RideRequestPage() {
   const [estimatedPrice, setEstimatedPrice] = useState<number | null>(null)
   const [estimatedDuration, setEstimatedDuration] = useState<string | null>(null)
 
+  const [promoCode, setPromoCode] = useState('')
+  const [promoApplied, setPromoApplied] = useState<any>(null)
+  const [promoDiscount, setPromoDiscount] = useState(0)
+  const [promoError, setPromoError] = useState('')
+  const [promoLoading, setPromoLoading] = useState(false)
+
   const pickupTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const dropoffTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const pickupRef = useRef<HTMLDivElement>(null)
@@ -120,6 +126,16 @@ export default function RideRequestPage() {
       setEstimatedDuration(null)
     }
   }, [pickupLat, pickupLng, dropoffLat, dropoffLng, selectedService])
+
+  const promoTotal = estimatedPrice !== null
+    ? promoApplied ? Math.max(0, estimatedPrice - promoDiscount) : estimatedPrice
+    : null
+
+  useEffect(() => {
+    setPromoApplied(null)
+    setPromoDiscount(0)
+    setPromoError('')
+  }, [estimatedPrice, serviceCategory])
 
   // Close suggestions on outside click
   useEffect(() => {
@@ -185,6 +201,30 @@ export default function RideRequestPage() {
     setDropoffSuggestions([])
   }
 
+  const handleApplyPromo = async () => {
+    if (!promoCode.trim() || estimatedPrice === null) return
+    setPromoLoading(true)
+    setPromoError('')
+    try {
+      const { data } = await api.post('/promo/validate', { code: promoCode.trim(), subtotal: estimatedPrice })
+      setPromoApplied(data.data)
+      setPromoDiscount(data.data.discount || 0)
+    } catch (error: any) {
+      setPromoApplied(null)
+      setPromoDiscount(0)
+      setPromoError(error.response?.data?.error || 'Cupom inválido')
+    } finally {
+      setPromoLoading(false)
+    }
+  }
+
+  const handlePromoCodeChange = (value: string) => {
+    setPromoCode(value)
+    setPromoApplied(null)
+    setPromoDiscount(0)
+    setPromoError('')
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!pickupAddress.trim() || !dropoffAddress.trim()) {
@@ -211,6 +251,9 @@ export default function RideRequestPage() {
       }
       if (scheduleEnabled && scheduleDate && scheduleTime) {
         payload.scheduledAt = new Date(`${scheduleDate}T${scheduleTime}`).toISOString()
+      }
+      if (promoApplied) {
+        payload.promoCode = promoCode.trim()
       }
       const { data } = await api.post('/bookings', payload)
       showToast('Corrida solicitada!', 'success')
@@ -331,8 +374,57 @@ export default function RideRequestPage() {
             <div className="ride-req-est-divider" />
             <div className="ride-req-est-item">
               <span className="ride-req-est-icon">💰</span>
-              <span className="ride-req-est-val">{formatCurrency(estimatedPrice!)}</span>
+              <span className="ride-req-est-val">{formatCurrency(promoTotal!)}</span>
             </div>
+          </div>
+        )}
+
+        {/* Promo */}
+        {estimatedPrice !== null && (
+          <div className="ride-req-card">
+            <div className="ride-req-card-title">Cupom de desconto</div>
+            <div className="ride-req-promo">
+              <input
+                className="ride-req-promo-input"
+                type="text"
+                placeholder="Digite seu cupom"
+                value={promoCode}
+                onChange={e => handlePromoCodeChange(e.target.value)}
+                disabled={!!promoApplied}
+              />
+              {promoApplied ? (
+                <button
+                  className="ride-req-promo-btn remove"
+                  type="button"
+                  onClick={() => { setPromoApplied(null); setPromoDiscount(0); setPromoError('') }}
+                >
+                  Remover
+                </button>
+              ) : (
+                <button
+                  className="ride-req-promo-btn"
+                  type="button"
+                  onClick={handleApplyPromo}
+                  disabled={promoLoading || !promoCode.trim()}
+                >
+                  {promoLoading ? '...' : 'Aplicar'}
+                </button>
+              )}
+            </div>
+            {promoApplied && (
+              <div className="ride-req-promo-applied">
+                <div className="ride-req-promo-ok">✓ Cupom {promoApplied.code} aplicado</div>
+                <div className="ride-req-promo-row">
+                  <span>Desconto</span>
+                  <span className="ride-req-promo-discount">- {formatCurrency(promoDiscount)}</span>
+                </div>
+                <div className="ride-req-promo-row total">
+                  <span>Total</span>
+                  <span>{formatCurrency(promoTotal!)}</span>
+                </div>
+              </div>
+            )}
+            {promoError && <div className="ride-req-promo-error">{promoError}</div>}
           </div>
         )}
 
@@ -394,7 +486,7 @@ export default function RideRequestPage() {
           ) : (
             <>
               <span>Solicitar {selectedService?.label}</span>
-              {estimatedPrice && <span className="ride-req-submit-price">{formatCurrency(estimatedPrice)}</span>}
+              {estimatedPrice && <span className="ride-req-submit-price">{formatCurrency(promoTotal!)}</span>}
             </>
           )}
         </button>

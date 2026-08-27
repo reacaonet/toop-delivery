@@ -1650,3 +1650,30 @@ a {
   font-size: 14px; color: var(--text); background: white; -webkit-appearance: none;
 }
 .modal-field select:focus { outline: none; border-color: var(--primary); }
+
+/* ===== RATING (driver rates passenger) ===== */
+.rating-overlay {
+  position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.5);
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+}
+.rating-modal {
+  position: relative; background: white; border-radius: 20px; padding: 28px 24px;
+  max-width: 380px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); text-align: center;
+}
+.rating-modal h3 { margin: 0 0 6px; font-size: 1.15rem; font-weight: 700; color: var(--text); }
+.rating-modal p { margin: 0 0 16px; font-size: 0.85rem; color: var(--text-secondary); }
+.rating-stars-input { display: flex; justify-content: center; gap: 8px; margin-bottom: 16px; }
+.rating-star {
+  background: none; border: none; font-size: 36px; color: #d1d5db; cursor: pointer;
+  transition: transform 0.15s, color 0.15s; padding: 0;
+}
+.rating-star:hover { transform: scale(1.2); }
+.rating-star.active { color: #f59e0b; }
+.rating-comment-input {
+  width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 10px;
+  font-size: 0.9rem; outline: none; box-sizing: border-box; margin-bottom: 12px;
+}
+.rating-comment-input:focus { border-color: var(--primary); }
+.rating-msg { font-size: 0.8rem; margin-bottom: 10px; font-weight: 600; color: var(--primary); }
+.rating-actions { display: flex; gap: 10px; justify-content: center; }
+.rating-actions .btn { min-width: 100px; }

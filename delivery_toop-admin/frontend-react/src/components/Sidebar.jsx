@@ -15,7 +15,8 @@ import {
   FileText,
   Car,
   CalendarCheck,
-  Wallet
+  Wallet,
+  Ticket
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { deliverymanService } from '../services/api';
@@ -52,6 +53,7 @@ const Sidebar = () => {
     { path: '/deliverymen', icon: Truck, label: 'Entregadores' },
     { path: '/drivers', icon: Car, label: 'Motoristas' },
     { path: '/bookings', icon: CalendarCheck, label: 'Corridas' },
+    { path: '/promos', icon: Ticket, label: 'Cupons' },
     { path: '/wallet', icon: Wallet, label: 'Wallet Motoristas' },
     { path: '/payments', icon: CreditCard, label: 'Pagamentos' },
     { path: '/settings', icon: Settings, label: 'Configurações' },

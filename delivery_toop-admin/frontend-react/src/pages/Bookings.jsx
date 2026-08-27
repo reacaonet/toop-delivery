@@ -32,10 +32,21 @@ const Bookings = () => {
   const [detailOpen, setDetailOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [filter, setFilter] = useState('all');
+  const [stats, setStats] = useState(null);
 
   useEffect(() => {
     loadBookings();
+    loadStats();
   }, []);
+
+  const loadStats = async () => {
+    try {
+      const result = await bookingService.getStats();
+      setStats(result);
+    } catch (error) {
+      console.error('Erro ao carregar estatísticas:', error);
+    }
+  };
 
   const loadBookings = async () => {
     try {
@@ -115,7 +126,45 @@ const Bookings = () => {
             <p>Receita Total</p>
           </div>
         </div>
+        <div className="stat-card">
+          <div className="stat-icon" style={{ backgroundColor: 'rgba(139, 92, 246, 0.1)', color: '#8b5cf6' }}>
+            <span style={{ fontSize: 24 }}>⭐</span>
+          </div>
+          <div className="stat-info">
+            <h4>{stats?.avgRating ? `${stats.avgRating}/5` : '—'}</h4>
+            <p>Avaliação Média</p>
+          </div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-icon" style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6' }}>
+            <CalendarCheck size={24} />
+          </div>
+          <div className="stat-info">
+            <h4>{stats?.completedToday ?? statusCount('completed')}</h4>
+            <p>Concluídas Hoje</p>
+          </div>
+        </div>
       </div>
+
+      {stats?.popularRoutes?.length > 0 && (
+        <div className="card" style={{ marginBottom: '1rem' }}>
+          <div className="card-header">
+            <h3>Destinos Mais Populares</h3>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '0 0.5rem 0.5rem' }}>
+            {stats.popularRoutes.map((route, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, overflow: 'hidden' }}>
+                  <span style={{ fontWeight: 700, color: '#667eea', minWidth: 20 }}>#{i + 1}</span>
+                  <MapPin size={14} color="#ef4444" />
+                  <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{route.address}</span>
+                </div>
+                <span className="badge" style={{ flexShrink: 0 }}>{route.count}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="card">
         <div className="card-header">

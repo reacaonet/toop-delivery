@@ -158,6 +158,10 @@ export const bookingService = {
     const response = await api.get('/bookings', { params });
     return response.data?.data ?? response.data;
   },
+  getStats: async () => {
+    const response = await api.get('/bookings/stats');
+    return response.data?.data ?? response.data;
+  },
   getBookingById: async (id) => {
     const response = await api.get(`/bookings/${id}`);
     return response.data?.data ?? response.data;
@@ -235,6 +239,29 @@ export const bannerService = {
   },
   deleteBanner: async (id) => {
     const response = await api.delete(`/banners/${id}`);
+    return response.data;
+  }
+};
+
+export const promoService = {
+  getPromos: async (params = {}) => {
+    const response = await api.get('/promo', { params });
+    return response.data?.data ?? response.data;
+  },
+  createPromo: async (data) => {
+    const response = await api.post('/promo', data);
+    return response.data;
+  },
+  updatePromo: async (id, data) => {
+    const response = await api.put(`/promo/${id}`, data);
+    return response.data;
+  },
+  togglePromo: async (id) => {
+    const response = await api.patch(`/promo/${id}/toggle`);
+    return response.data;
+  },
+  deletePromo: async (id) => {
+    const response = await api.delete(`/promo/${id}`);
     return response.data;
   }
 };

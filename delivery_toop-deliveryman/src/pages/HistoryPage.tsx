@@ -30,6 +30,7 @@ interface Booking {
   estimatedPrice?: number
   finalPrice?: number
   createdAt: string
+  rating?: { driver?: number; client?: number; driverComment?: string }
 }
 
 const HistoryPage: React.FC = () => {
@@ -41,6 +42,11 @@ const HistoryPage: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [dmFeePct, setDmFeePct] = useState(2)
   const [walletBalance, setWalletBalance] = useState({ balance: 0, totalEarnings: 0, totalWithdrawals: 0 })
+  const [ratingFor, setRatingFor] = useState<string | null>(null)
+  const [ratingStars, setRatingStars] = useState(0)
+  const [ratingComment, setRatingComment] = useState('')
+  const [ratingSaving, setRatingSaving] = useState(false)
+  const [ratingMsg, setRatingMsg] = useState<string | null>(null)
 
   const fetchHistory = useCallback(async () => {
     try {
@@ -111,6 +117,26 @@ const HistoryPage: React.FC = () => {
     if (cat === 'driver') return <Car size={16} />
     if (cat === 'delivery') return <Package size={16} />
     return <Package size={16} />
+  }
+
+  const submitRating = async () => {
+    if (!ratingFor || ratingStars < 1) return
+    setRatingSaving(true)
+    setRatingMsg(null)
+    try {
+      await bookingService.rateBooking(ratingFor, ratingStars, ratingComment, 'driver')
+      setRides(prev => prev.map(r => r._id === ratingFor ? { ...r, rating: { driver: ratingStars, driverComment: ratingComment } } : r))
+      setRatingFor(null)
+      setRatingStars(0)
+      setRatingComment('')
+      setRatingMsg('Avaliação enviada!')
+      setTimeout(() => setRatingMsg(null), 2500)
+    } catch (error: any) {
+      setRatingMsg('Erro ao enviar avaliação: ' + (error.response?.data?.error || 'tente novamente'))
+      setTimeout(() => setRatingMsg(null), 3000)
+    } finally {
+      setRatingSaving(false)
+    }
   }
 
   return (
@@ -186,6 +212,16 @@ const HistoryPage: React.FC = () => {
                   {ride.status === 'completed' ? <CheckCircle size={12} style={{ marginRight: 4 }} /> : <XCircle size={12} style={{ marginRight: 4 }} />}
                   {getStatusLabel(ride.status)}
                 </span>
+                {ride.status === 'completed' && !ride.rating?.driver && (
+                  <button className="btn btn-outline btn-sm" style={{ marginTop: 6, width: '100%' }} onClick={() => { setRatingFor(ride._id); setRatingStars(0); setRatingComment('') }}>
+                    Avaliar passageiro
+                  </button>
+                )}
+                {ride.status === 'completed' && ride.rating?.driver && (
+                  <span style={{ fontSize: '0.75rem', color: '#f59e0b', marginTop: 6 }}>
+                    {'★'.repeat(ride.rating.driver)}{'☆'.repeat(5 - ride.rating.driver)}
+                  </span>
+                )}
               </div>
             </div>
           ))
@@ -214,6 +250,40 @@ const HistoryPage: React.FC = () => {
             </div>
           ))
         )
+      )}
+
+      {/* Rating modal */}
+      {ratingFor && (
+        <div className="rating-overlay" onClick={() => setRatingFor(null)}>
+          <div className="rating-modal" onClick={e => e.stopPropagation()}>
+            <h3>Avaliar passageiro</h3>
+            <p>Como foi o passageiro nesta corrida?</p>
+            <div className="rating-stars-input">
+              {[1, 2, 3, 4, 5].map(s => (
+                <button
+                  key={s}
+                  className={`rating-star ${s <= ratingStars ? 'active' : ''}`}
+                  onClick={() => setRatingStars(s)}
+                >
+                  ★
+                </button>
+              ))}
+            </div>
+            <input
+              className="rating-comment-input"
+              placeholder="Comentário (opcional)"
+              value={ratingComment}
+              onChange={e => setRatingComment(e.target.value)}
+            />
+            {ratingMsg && <div className="rating-msg">{ratingMsg}</div>}
+            <div className="rating-actions">
+              <button className="btn btn-outline" onClick={() => setRatingFor(null)}>Cancelar</button>
+              <button className="btn btn-primary" onClick={submitRating} disabled={ratingSaving || ratingStars < 1}>
+                {ratingSaving ? 'Enviando...' : 'Enviar'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

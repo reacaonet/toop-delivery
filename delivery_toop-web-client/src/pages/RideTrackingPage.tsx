@@ -498,6 +498,14 @@ export default function RideTrackingPage() {
           </div>
         </div>
 
+        {/* Promo */}
+        {booking.promoDiscount && booking.promoDiscount > 0 && (
+          <div className="track-promo">
+            <span>🎟️</span>
+            <span>Cupom <strong>{booking.promoCode}</strong> aplicado: <strong>- R$ {booking.promoDiscount.toFixed(2)}</strong></span>
+          </div>
+        )}
+
         {/* Notes */}
         {booking.notes && (
           <div className="track-notes">
@@ -521,6 +529,12 @@ export default function RideTrackingPage() {
               <div className="track-receipt-row">
                 <span>Duração ({booking.duration} min)</span>
                 <span>-</span>
+              </div>
+            )}
+            {booking.promoDiscount && booking.promoDiscount > 0 && (
+              <div className="track-receipt-row" style={{ color: '#059669' }}>
+                <span>Cupom {booking.promoCode}</span>
+                <span>- R$ {booking.promoDiscount.toFixed(2)}</span>
               </div>
             )}
             <div className="track-receipt-row">

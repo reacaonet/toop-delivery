@@ -12,6 +12,7 @@ import Orders from './pages/Orders';
 import Deliverymen from './pages/Deliverymen';
 import Drivers from './pages/Drivers';
 import Bookings from './pages/Bookings';
+import Promos from './pages/Promos';
 import WalletPage from './pages/Wallet';
 import Payments from './pages/Payments';
 import Settings from './pages/Settings';
@@ -37,6 +38,7 @@ function AdminLayout() {
             <Route path="/deliverymen" element={<Deliverymen />} />
             <Route path="/drivers" element={<Drivers />} />
             <Route path="/bookings" element={<Bookings />} />
+            <Route path="/promos" element={<Promos />} />
             <Route path="/wallet" element={<WalletPage />} />
             <Route path="/payments" element={<Payments />} />
             <Route path="/settings" element={<Settings />} />

@@ -2989,6 +2989,34 @@ img { max-width: 100%; display: block; }
 .ride-req-submit:disabled { opacity: 0.5; cursor: not-allowed; }
 .ride-req-submit-price { font-size: 1.1rem; opacity: 0.9; }
 
+/* Promo */
+.ride-req-promo { display: flex; gap: 8px; }
+.ride-req-promo-input {
+  flex: 1; padding: 12px; border: 2px solid #f0f0f0; border-radius: 10px;
+  font-size: 0.9rem; text-transform: uppercase; outline: none; background: #fafafa;
+}
+.ride-req-promo-input::placeholder { text-transform: none; color: #9ca3af; }
+.ride-req-promo-input:focus { border-color: #6366f1; }
+.ride-req-promo-input:disabled { opacity: 0.6; }
+.ride-req-promo-btn {
+  padding: 12px 18px; background: #6366f1; color: #fff; border: none;
+  border-radius: 10px; font-size: 0.85rem; font-weight: 700; cursor: pointer;
+  transition: background 0.2s;
+}
+.ride-req-promo-btn:hover { background: #4f46e5; }
+.ride-req-promo-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.ride-req-promo-btn.remove { background: #fee2e2; color: #991b1b; }
+.ride-req-promo-btn.remove:hover { background: #fecaca; }
+.ride-req-promo-applied { margin-top: 10px; }
+.ride-req-promo-ok { font-size: 0.85rem; font-weight: 600; color: #059669; margin-bottom: 4px; }
+.ride-req-promo-row { display: flex; justify-content: space-between; font-size: 0.9rem; padding: 4px 0; color: #4b5563; }
+.ride-req-promo-row.total { font-weight: 700; color: #1a1a2e; border-top: 1px solid #f0f0f0; margin-top: 4px; padding-top: 8px; }
+.ride-req-promo-discount { color: #059669; font-weight: 600; }
+.ride-req-promo-error {
+  margin-top: 10px; font-size: 0.85rem; color: #dc2626; background: #fef2f2;
+  padding: 10px; border-radius: 10px; font-weight: 500;
+}
+
 /* RIDE TRACKING - UBER STYLE */
 .track { display: flex; flex-direction: column; height: 100vh; }
 .track-map-wrap { position: relative; flex: 1; min-height: 45%; }
@@ -3104,6 +3132,13 @@ img { max-width: 100%; display: block; }
   display: flex; align-items: flex-start; gap: 8px; padding: 12px;
   background: #f9fafb; border-radius: 10px; font-size: 0.85rem; color: #6b7280;
 }
+
+/* Promo */
+.track-promo {
+  display: flex; align-items: center; gap: 8px; padding: 12px;
+  background: #f9fafb; border-radius: 10px; font-size: 0.85rem; color: #4b5563;
+}
+.track-promo strong { color: #059669; }
 
 /* Actions */
 .track-actions { display: flex; gap: 10px; }
