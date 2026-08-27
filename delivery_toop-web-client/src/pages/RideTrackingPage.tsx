@@ -53,6 +53,8 @@ export default function RideTrackingPage() {
   const [booking, setBooking] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [offers, setOffers] = useState<any[]>([])
+  const [selectingDriver, setSelectingDriver] = useState(false)
   const [driverLocation, setDriverLocation] = useState<{ lat: number; lng: number } | null>(null)
   const [eta, setEta] = useState<string | null>(null)
   const [showQrVerify, setShowQrVerify] = useState(false)
@@ -80,11 +82,24 @@ export default function RideTrackingPage() {
     try {
       const { data } = await api.get(`/bookings/${id}`)
       setBooking(data.data)
+      if (data.data?.offers) setOffers(data.data.offers)
       setError('')
     } catch {
       setError('Corrida não encontrada')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleSelectDriver = async (driverId: string, driverModel: string) => {
+    setSelectingDriver(true)
+    try {
+      await api.put(`/bookings/${id}/select-driver`, { driverId, driverModel })
+      loadBooking()
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Erro ao selecionar motorista')
+    } finally {
+      setSelectingDriver(false)
     }
   }
 
@@ -117,6 +132,12 @@ export default function RideTrackingPage() {
 
     socket.on('booking:accepted', (data: any) => {
       if (data.bookingId === id) loadBooking()
+    })
+
+    socket.on('booking:offer', (data: any) => {
+      if (data.bookingId === id && Array.isArray(data.offers)) {
+        setOffers(data.offers)
+      }
     })
 
     socket.on('booking:in_progress', (data: any) => {
@@ -472,6 +493,38 @@ export default function RideTrackingPage() {
             <button className="track-driver-call" onClick={() => { if (booking.driver?.phone) window.open(`tel:${booking.driver.phone}`) }}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
             </button>
+          </div>
+        )}
+
+        {/* Interested drivers / negotiation (matching with offers) */}
+        {booking.status === 'matching' && offers.length > 0 && (
+          <div className="track-offers">
+            <div className="track-offers-title">💬 Motoristas interessados — escolha um</div>
+            {offers.map((offer, idx) => (
+              <div key={idx} className="track-offer-card">
+                <div className="track-offer-left">
+                  <div className="track-offer-avatar">{offer.name?.charAt(0)?.toUpperCase() || 'M'}</div>
+                  <div className="track-offer-info">
+                    <strong>{offer.name}</strong>
+                    <span>{offer.vehicleType === 'moto' ? '🏍️ Moto' : '🚗 Carro'}{offer.rating ? ` · ⭐ ${Number(offer.rating).toFixed(1)}` : ''}</span>
+                  </div>
+                </div>
+                <div className="track-offer-right">
+                  <div className="track-offer-price">R$ {offer.price.toFixed(2)}</div>
+                  <button
+                    className="track-offer-select"
+                    disabled={selectingDriver}
+                    onClick={() => handleSelectDriver(offer.driverId, offer.driverModel)}
+                  >
+                    {selectingDriver ? '...' : 'Escolher'}
+                  </button>
+                </div>
+              </div>
+            ))}
+            <div className="track-offers-hint">Os motoristas aceitam sua proposta ou enviam a deles. Escolha o que preferir.</div>
+            {booking.proposedPrice != null && (
+              <div className="track-offers-mine">Sua proposta: <strong>R$ {Number(booking.proposedPrice).toFixed(2)}</strong></div>
+            )}
           </div>
         )}
 

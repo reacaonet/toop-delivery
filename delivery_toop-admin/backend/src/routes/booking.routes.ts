@@ -21,6 +21,8 @@ router.post(
 );
 router.put("/:id/accept", authenticate, bookingController.accept);
 router.put("/:id/reject", authenticate, bookingController.reject);
+router.put("/:id/counter-offer", authenticate, bookingController.counterOffer);
+router.put("/:id/select-driver", authenticate, bookingController.selectDriver);
 router.put("/:id/start", authenticate, bookingController.start);
 router.put("/:id/complete", authenticate, bookingController.complete);
 router.put(

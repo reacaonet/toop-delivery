@@ -70,6 +70,15 @@ export default function RideRequestPage() {
   const [estimatedPrice, setEstimatedPrice] = useState<number | null>(null)
   const [estimatedDuration, setEstimatedDuration] = useState<string | null>(null)
 
+  const [baseFare, setBaseFare] = useState<number>(0)
+  const [distanceFare, setDistanceFare] = useState<number>(0)
+  const [surgeAddon, setSurgeAddon] = useState<number>(0)
+  const [surgeReason, setSurgeReason] = useState('')
+  const [surgeEnabled, setSurgeEnabled] = useState(false)
+  const [surgeMultiplier, setSurgeMultiplier] = useState(1.5)
+  const [minPrice, setMinPrice] = useState<number>(0)
+  const [proposedPrice, setProposedPrice] = useState<number | null>(null)
+
   const [promoCode, setPromoCode] = useState('')
   const [promoApplied, setPromoApplied] = useState<any>(null)
   const [promoDiscount, setPromoDiscount] = useState(0)
@@ -123,7 +132,17 @@ export default function RideRequestPage() {
       setEstimatedDistance(Math.round(dist * 100) / 100)
       if (selectedService) {
         const vehicle = VEHICLE_OPTIONS.find(v => v.value === vehicleType) || VEHICLE_OPTIONS[0]
-        setEstimatedPrice(Math.round((selectedService.basePrice + dist * selectedService.perKm * vehicle.multiplier) * 100) / 100)
+        const base = Math.round(selectedService.basePrice * vehicle.multiplier * 100) / 100
+        const perKm = Math.round(selectedService.perKm * vehicle.multiplier * 100) / 100
+        const distFare = Math.round(dist * perKm * 100) / 100
+        setBaseFare(base)
+        setDistanceFare(distFare)
+        const surge = surgeEnabled ? Math.round((base + distFare) * (surgeMultiplier - 1) * 100) / 100 : 0
+        setSurgeAddon(surge)
+        const total = Math.round((base + distFare + surge) * 100) / 100
+        setEstimatedPrice(total)
+        setMinPrice(Math.round((base + distFare) * 0.6 * 100) / 100)
+        setProposedPrice(prev => prev === null ? total : prev)
       }
       const mins = Math.round(dist * 3)
       setEstimatedDuration(mins < 60 ? `${mins} min` : `${Math.floor(mins / 60)}h ${mins % 60}min`)
@@ -132,11 +151,20 @@ export default function RideRequestPage() {
       setEstimatedPrice(null)
       setEstimatedDuration(null)
     }
-  }, [pickupLat, pickupLng, dropoffLat, dropoffLng, selectedService, vehicleType])
+  }, [pickupLat, pickupLng, dropoffLat, dropoffLng, selectedService, vehicleType, surgeEnabled, surgeMultiplier])
 
   const promoTotal = estimatedPrice !== null
     ? promoApplied ? Math.max(0, estimatedPrice - promoDiscount) : estimatedPrice
     : null
+
+  const effectivePrice = proposedPrice !== null && proposedPrice > 0 ? proposedPrice : estimatedPrice
+  const effectiveMin = minPrice || (estimatedPrice ? Math.round(estimatedPrice * 0.6 * 100) / 100 : 0)
+
+  const adjustProposal = (delta: number) => {
+    if (effectivePrice === null) return
+    const next = Math.max(effectiveMin, Math.round((effectivePrice + delta) * 100) / 100)
+    setProposedPrice(Math.round(next * 100) / 100)
+  }
 
   useEffect(() => {
     setPromoApplied(null)
@@ -256,6 +284,9 @@ export default function RideRequestPage() {
         dropoff: { address: dropoffAddress, lat: dropoffLat, lng: dropoffLng, complement: dropoffComplement || undefined },
         paymentMethod,
         notes: notes || undefined,
+        proposedPrice: effectivePrice,
+        surgeAddon: surgeAddon,
+        surgeReason: surgeEnabled ? (surgeReason || `Alta demanda (${surgeMultiplier.toFixed(1)}x)`) : undefined,
       }
       if (scheduleEnabled && scheduleDate && scheduleTime) {
         payload.scheduledAt = new Date(`${scheduleDate}T${scheduleTime}`).toISOString()
@@ -405,6 +436,58 @@ export default function RideRequestPage() {
           </div>
         )}
 
+        {/* Price transparency + negotiation */}
+        {estimatedPrice !== null && (
+          <div className="ride-req-card">
+            <div className="ride-req-card-title">Como o preço é formado</div>
+            <div className="price-breakdown">
+              <div className="price-breakdown-row"><span>Tarifa base</span><span>{formatCurrency(baseFare)}</span></div>
+              <div className="price-breakdown-row"><span>Percurso ({estimatedDistance} km)</span><span>{formatCurrency(distanceFare)}</span></div>
+              {surgeEnabled && surgeAddon > 0 && (
+                <div className="price-breakdown-row surge">
+                  <span>⚡ {surgeReason || `Alta demanda (${surgeMultiplier.toFixed(1)}x)`}</span>
+                  <span>+ {formatCurrency(surgeAddon)}</span>
+                </div>
+              )}
+              <div className="price-breakdown-row total">
+                <span>Valor sugerido pelo app</span>
+                <span>{formatCurrency(promoTotal!)}</span>
+              </div>
+            </div>
+
+            {!surgeEnabled ? (
+              <button
+                type="button"
+                className="ride-req-surge-btn"
+                onClick={() => { setSurgeEnabled(true); setSurgeReason('Chuva ⚡'); setSurgeMultiplier(1.5) }}
+              >
+                ⚡ Alta demanda ativa (simular)
+              </button>
+            ) : (
+              <div className="ride-req-surge-active">
+                <span>⚡ {surgeReason} · {surgeMultiplier.toFixed(1)}x</span>
+                <button type="button" className="ride-req-surge-remove" onClick={() => { setSurgeEnabled(false); setSurgeReason(''); setSurgeMultiplier(1) }}>
+                  Remover
+                </button>
+              </div>
+            )}
+
+            <div className="negotiation-card">
+              <div className="negotiation-title">Sua proposta</div>
+              <div className="negotiation-value">
+                <button type="button" className="negotiation-step" onClick={() => adjustProposal(-5)}>−5</button>
+                <button type="button" className="negotiation-step" onClick={() => adjustProposal(-2)}>−2</button>
+                <span className="negotiation-price">{formatCurrency(effectivePrice!)}</span>
+                <button type="button" className="negotiation-step" onClick={() => adjustProposal(2)}>+2</button>
+                <button type="button" className="negotiation-step" onClick={() => adjustProposal(5)}>+5</button>
+              </div>
+              <div className="negotiation-hint">
+                Mínimo {formatCurrency(effectiveMin)} — motoristas poderão aceitar ou contrapropor.
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Promo */}
         {estimatedPrice !== null && (
           <div className="ride-req-card">
@@ -512,7 +595,7 @@ export default function RideRequestPage() {
           ) : (
             <>
               <span>Solicitar {selectedService?.label}</span>
-              {estimatedPrice && <span className="ride-req-submit-price">{formatCurrency(promoTotal!)}</span>}
+              {estimatedPrice && <span className="ride-req-submit-price">{formatCurrency(effectivePrice!)}</span>}
             </>
           )}
         </button>

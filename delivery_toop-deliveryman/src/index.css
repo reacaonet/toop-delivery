@@ -1226,6 +1226,34 @@ a {
 .btn-accept:hover:not(:disabled) { background: #3d9a5e; }
 .btn-accept:disabled { opacity: 0.6; cursor: not-allowed; }
 
+.order-proposed-hint { margin-top: 8px; font-size: 0.85rem; color: var(--text-secondary); }
+.order-proposed-hint strong { color: var(--primary); }
+.order-proposed-hint span { font-size: 0.75rem; }
+
+.btn-counter {
+  flex: 0 0 auto; width: auto; padding: 10px 16px; background: #eef2ff; color: #6366f1;
+  border: 1px solid #c7d2fe; border-radius: 8px; font-weight: 600; cursor: pointer;
+  font-size: 0.85rem; display: flex; align-items: center; gap: 4px;
+}
+.btn-counter:hover:not(:disabled) { background: #e0e7ff; }
+
+.counter-box { margin-top: 10px; padding: 12px; background: #f8fafc; border: 1px solid var(--border); border-radius: 8px; }
+.counter-input {
+  width: 100%; padding: 10px; border: 1.5px solid #c7d2fe; border-radius: 8px;
+  font-size: 0.95rem; margin-bottom: 8px; box-sizing: border-box;
+}
+.counter-actions { display: flex; gap: 8px; }
+.counter-actions .btn-cancel-small {
+  flex: 0 0 auto; padding: 10px 14px; background: #fff; border: 1px solid var(--border);
+  border-radius: 8px; color: var(--text-secondary); font-weight: 600; cursor: pointer; font-size: 0.85rem;
+}
+.counter-actions .btn-counter-send {
+  flex: 1; padding: 10px; background: var(--primary); color: #fff; border: none;
+  border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.85rem;
+}
+.counter-actions .btn-counter-send:hover:not(:disabled) { background: var(--primary-dark); }
+.counter-actions .btn-counter-send:disabled { opacity: 0.6; }
+
 .active-ride { display: flex; flex-direction: column; gap: 16px; }
 .active-ride-status { display: flex; align-items: center; gap: 8px; background: #e8f4fd; padding: 12px; border-radius: 8px; color: #3b82f6; font-weight: 600; }
 .active-ride-status.pickup { background: #fef3c7; color: #92400e; }
@@ -1334,6 +1362,14 @@ a {
   padding: 10px 14px; background: #fffbeb; border-radius: 10px;
   font-size: 0.85rem; color: #92400e; margin-top: 12px;
 }
+
+.ride-popup-proposed {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 6px;
+  padding: 10px 14px; background: #eef2ff; border-radius: 10px;
+  font-size: 0.85rem; color: #4338ca; margin-top: 12px;
+}
+.ride-popup-proposed strong { color: #4338ca; }
+.ride-popup-proposed span { font-size: 0.75rem; color: #6b7280; }
 
 .ride-popup-actions {
   display: flex; gap: 12px; margin-top: 16px;

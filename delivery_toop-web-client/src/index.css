@@ -2985,6 +2985,35 @@ img { max-width: 100%; display: block; }
 .ride-req-card { background: #fff; border-radius: 14px; padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
 .ride-req-card-title { font-size: 0.8rem; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
 
+/* Price transparency & negotiation */
+.price-breakdown { display: flex; flex-direction: column; gap: 8px; margin-bottom: 6px; }
+.price-breakdown-row { display: flex; justify-content: space-between; font-size: 0.9rem; color: #374151; }
+.price-breakdown-row.surge span:first-child { color: #d97706; font-weight: 600; }
+.price-breakdown-row.surge span:last-child { color: #d97706; font-weight: 700; }
+.price-breakdown-row.total { border-top: 1px dashed #e5e7eb; padding-top: 8px; margin-top: 4px; font-size: 1rem; font-weight: 700; color: #111827; }
+
+.ride-req-surge-btn {
+  width: 100%; margin-top: 8px; padding: 10px; border: 1.5px dashed #f59e0b; border-radius: 10px;
+  background: #fff8e6; color: #b45309; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;
+}
+.ride-req-surge-btn:hover { background: #fef3c7; }
+.ride-req-surge-active {
+  margin-top: 8px; padding: 10px 12px; border-radius: 10px; background: #fef3c7;
+  display: flex; align-items: center; justify-content: space-between; font-size: 0.85rem; color: #92400e; font-weight: 600;
+}
+.ride-req-surge-remove { border: none; background: transparent; color: #b45309; font-size: 0.78rem; font-weight: 700; cursor: pointer; text-decoration: underline; }
+
+.negotiation-card { margin-top: 14px; padding-top: 14px; border-top: 1px solid #f0f0f0; }
+.negotiation-title { font-size: 0.8rem; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+.negotiation-value { display: flex; align-items: center; justify-content: center; gap: 8px; }
+.negotiation-step {
+  padding: 8px 10px; border: 1.5px solid #e5e7eb; border-radius: 10px; background: #fff; color: #6366f1;
+  font-weight: 700; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;
+}
+.negotiation-step:hover { border-color: #6366f1; background: #eef2ff; }
+.negotiation-price { font-size: 1.5rem; font-weight: 800; color: #111827; min-width: 110px; text-align: center; }
+.negotiation-hint { margin-top: 8px; font-size: 0.75rem; color: #9ca3af; text-align: center; }
+
 /* Services */
 .ride-req-services { display: flex; gap: 8px; }
 .ride-req-service {
@@ -3223,6 +3252,34 @@ img { max-width: 100%; display: block; }
   background: #22c55e; color: #fff; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
 }
+
+/* Offers / negotiation */
+.track-offers { padding: 14px; background: #eef2ff; border-radius: 14px; }
+.track-offers-title { font-size: 0.85rem; font-weight: 700; color: #4338ca; margin-bottom: 10px; }
+.track-offer-card {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  background: #fff; border-radius: 12px; padding: 12px; margin-bottom: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.track-offer-left { display: flex; align-items: center; gap: 10px; flex: 1; }
+.track-offer-avatar {
+  width: 40px; height: 40px; border-radius: 50%; background: #6366f1;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 700; flex-shrink: 0;
+}
+.track-offer-info { display: flex; flex-direction: column; }
+.track-offer-info strong { font-size: 0.9rem; color: #1a1a2e; }
+.track-offer-info span { font-size: 0.78rem; color: #6b7280; }
+.track-offer-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.track-offer-price { font-size: 1rem; font-weight: 800; color: #111827; }
+.track-offer-select {
+  padding: 8px 14px; border: none; border-radius: 10px; background: #6366f1; color: #fff;
+  font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: all 0.2s;
+}
+.track-offer-select:hover { background: #4f46e5; }
+.track-offer-select:disabled { opacity: 0.6; }
+.track-offers-hint { font-size: 0.75rem; color: #6b7280; margin-top: 4px; }
+.track-offers-mine { font-size: 0.85rem; color: #4338ca; font-weight: 600; margin-top: 6px; }
 
 /* Route */
 .track-route { display: flex; flex-direction: column; gap: 0; padding: 0 4px; }

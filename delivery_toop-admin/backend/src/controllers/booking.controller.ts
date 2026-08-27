@@ -49,6 +49,12 @@ async function notifyNearbyDrivers(booking: any, rejectedDriverIds: string[] = [
       dropoff: booking.dropoff,
       distance: booking.distance,
       estimatedPrice: booking.estimatedPrice,
+      proposedPrice: booking.proposedPrice ?? booking.estimatedPrice,
+      minPrice: booking.minPrice,
+      baseFare: booking.baseFare,
+      perKmRate: booking.perKmRate,
+      distanceFare: booking.distanceFare,
+      surgeAddon: booking.surgeAddon,
       paymentMethod: booking.paymentMethod,
       notes: booking.notes,
       createdAt: booking.createdAt,
@@ -71,6 +77,57 @@ async function notifyNearbyDrivers(booking: any, rejectedDriverIds: string[] = [
     console.log(`[Booking] Notified ${nearbyDeliverymen.length} deliverymen + ${nearbyDrivers.length} drivers for booking ${booking.bookingNumber}`);
   } catch (error) {
     console.error("[Booking] Error notifying nearby drivers:", error);
+  }
+}
+
+async function getBookingOffers(bookingId: string) {
+  const booking = await bookingService.getById(bookingId);
+  const offers = booking.offers || [];
+  const enriched = [];
+  for (const offer of offers) {
+    let name = 'Motorista';
+    let rating = undefined;
+    let vehicleType = undefined;
+    if (offer.driverModel === 'Deliveryman') {
+      const { DeliverymanModel: DM } = await import("../models/Deliveryman");
+      const dm = await DM.findById(offer.driver).lean();
+      const user = dm ? await UserModel.findOne({ deliveryman: dm._id }).select('name').lean() : null;
+      name = user?.name || 'Entregador';
+      rating = dm?.rating;
+      vehicleType = dm?.vehicleType;
+    } else {
+      const { DriverModel: DR } = await import("../models/Driver");
+      const dr = await DR.findById(offer.driver).lean();
+      const user = dr ? await UserModel.findOne({ driver: dr._id }).select('name').lean() : null;
+      name = user?.name || 'Motorista';
+      rating = dr?.rating;
+      vehicleType = dr?.vehicleType;
+    }
+    enriched.push({
+      driverId: offer.driver.toString(),
+      driverModel: offer.driverModel,
+      price: offer.price,
+      note: offer.note,
+      name,
+      rating,
+      vehicleType,
+      createdAt: offer.createdAt,
+    });
+  }
+  enriched.sort((a, b) => (a.price || 0) - (b.price || 0));
+  return enriched;
+}
+
+async function emitToUserDriver(driverObjectId: string, driverModel: string, event: string, data: any) {
+  try {
+    const user = driverModel === 'Deliveryman'
+      ? await UserModel.findOne({ deliveryman: driverObjectId }).lean()
+      : await UserModel.findOne({ driver: driverObjectId }).lean();
+    if (user?._id) {
+      emitToUser(user._id.toString(), event, data);
+    }
+  } catch (err) {
+    console.error("[Booking] Error emitting to driver:", err);
   }
 }
 
@@ -107,7 +164,10 @@ export class BookingController {
   async getById(req: Request, res: Response, next: NextFunction) {
     try {
       const booking = await bookingService.getById(req.params.id);
-      return res.status(200).json({ success: true, data: booking });
+      const data: any = booking.toObject ? booking.toObject() : booking;
+      const offers = await getBookingOffers(req.params.id);
+      data.offers = offers;
+      return res.status(200).json({ success: true, data });
     } catch (error) {
       next(error);
     }
@@ -226,6 +286,100 @@ export class BookingController {
       emitToUser(userId.toString(), "booking:rejected_for_me", {
         bookingId: booking._id,
       });
+
+      return res.status(200).json({ success: true, data: booking });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async counterOffer(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = (req as any).user?._id;
+      const { driverModel, price } = req.body;
+
+      let driverId: string;
+      let resolvedDriverModel = driverModel || 'Driver';
+
+      if (driverModel === 'Deliveryman') {
+        const user = await UserModel.findById(userId).populate("deliveryman");
+        if (!user?.deliveryman) {
+          return res.status(400).json({ success: false, error: "Entregador nao encontrado" });
+        }
+        driverId = (user.deliveryman as any)._id.toString();
+        resolvedDriverModel = 'Deliveryman';
+      } else {
+        const user = await UserModel.findById(userId).populate("driver");
+        if (!user?.driver) {
+          return res.status(400).json({ success: false, error: "Motorista nao encontrado" });
+        }
+        driverId = (user.driver as any)._id.toString();
+        resolvedDriverModel = 'Driver';
+      }
+
+      if (!price || isNaN(Number(price)) || Number(price) <= 0) {
+        return res.status(400).json({ success: false, error: "Valor de contraproposta inválido" });
+      }
+
+      const booking = await bookingService.counterOffer(req.params.id, driverId, resolvedDriverModel, Number(price));
+
+      // Extract driver display info
+      let driverInfo: any = { driverId, driverModel: resolvedDriverModel };
+      if (resolvedDriverModel === 'Deliveryman') {
+        const dm = await UserModel.findById(userId).select('name').lean();
+        driverInfo.name = dm?.name;
+      } else {
+        const dr = await UserModel.findById(userId).select('name').lean();
+        driverInfo.name = dr?.name;
+      }
+
+      // Notify client with offers
+      const offers = await getBookingOffers(req.params.id);
+      if (booking) {
+        emitToUser(booking.client.toString(), "booking:offer", {
+          bookingId: booking._id,
+          offers,
+          lastOffer: { ...driverInfo, price: Number(price) },
+        });
+        return res.status(200).json({ success: true, data: booking });
+      }
+      return res.status(404).json({ success: false, error: "Corrida não encontrada" });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async selectDriver(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = (req as any).user?._id;
+      const { driverId, driverModel } = req.body;
+
+      if (!driverId || !driverModel) {
+        return res.status(400).json({ success: false, error: "Dados do motorista inválidos" });
+      }
+
+      const booking = await bookingService.selectDriver(req.params.id, userId, driverId, driverModel);
+
+      if (!booking) {
+        return res.status(404).json({ success: false, error: "Corrida não encontrada" });
+      }
+
+      emitToUser(booking.client.toString(), "booking:accepted", {
+        bookingId: booking._id,
+        driverId,
+        driverModel,
+      });
+
+      // Notify the chosen driver
+      emitToUserDriver(driverId, driverModel, "booking:accepted", {
+        bookingId: booking._id,
+        driverId,
+        driverModel,
+      });
+
+      // Broadcast to all other drivers that this ride is no longer available
+      const { emitToAll } = await import("../socket");
+      emitToAll("booking:ride_taken", { bookingId: booking._id.toString() });
 
       return res.status(200).json({ success: true, data: booking });
     } catch (error) {

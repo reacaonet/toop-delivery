@@ -25,6 +25,22 @@ export interface IBooking extends Document {
   duration?: number;
   estimatedPrice?: number;
   finalPrice?: number;
+  // Price components for transparency
+  baseFare?: number;
+  perKmRate?: number;
+  distanceFare?: number;
+  surgeAddon?: number;
+  suggestedPrice?: number;
+  // Negotiation (InDrive-style)
+  proposedPrice?: number;
+  minPrice?: number;
+  offers?: {
+    driver: mongoose.Types.ObjectId;
+    driverModel: 'Driver' | 'Deliveryman';
+    price: number;
+    note?: string;
+    createdAt: Date;
+  }[];
   promoCode?: string;
   promoDiscount?: number;
   paymentMethod: string;
@@ -80,6 +96,22 @@ const BookingSchema = new Schema<IBooking>(
     duration: Number,
     estimatedPrice: Number,
     finalPrice: Number,
+    baseFare: Number,
+    perKmRate: Number,
+    distanceFare: Number,
+    surgeAddon: Number,
+    suggestedPrice: Number,
+    proposedPrice: Number,
+    minPrice: Number,
+    offers: [
+      {
+        driver: { type: Schema.Types.ObjectId },
+        driverModel: { type: String, enum: ['Driver', 'Deliveryman'], default: 'Driver' },
+        price: { type: Number, required: true },
+        note: String,
+        createdAt: { type: Date, default: Date.now },
+      },
+    ],
     promoCode: String,
     promoDiscount: Number,
     paymentMethod: { type: String, required: true },

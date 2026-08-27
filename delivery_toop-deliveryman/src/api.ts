@@ -179,6 +179,10 @@ export const bookingService = {
     const response = await api.put(`/bookings/${id}/reject`, { driverModel: 'Deliveryman' })
     return response.data?.data ?? response.data
   },
+  counterOfferBooking: async (id: string, price: number) => {
+    const response = await api.put(`/bookings/${id}/counter-offer`, { driverModel: 'Deliveryman', price })
+    return response.data?.data ?? response.data
+  },
   generateQRCode: async (id: string) => {
     const response = await api.put(`/bookings/${id}/qr-generate`)
     return response.data?.data ?? response.data

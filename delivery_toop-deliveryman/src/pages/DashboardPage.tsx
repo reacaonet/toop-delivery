@@ -24,6 +24,8 @@ interface RideRequest {
   dropoff: { address: string; lat: number; lng: number }
   distance: number
   estimatedPrice: number
+  proposedPrice?: number
+  minPrice?: number
   client?: { name: string; phone?: string }
   notes?: string
 }
@@ -50,6 +52,9 @@ const DashboardPage: React.FC = () => {
   const [acceptTimer, setAcceptTimer] = useState(ACCEPT_TIMEOUT)
   const [accepting, setAccepting] = useState(false)
   const [rideQueue, setRideQueue] = useState<RideRequest[]>([])
+  const [counterOpen, setCounterOpen] = useState(false)
+  const [counterPrice, setCounterPrice] = useState('')
+  const [countering, setCountering] = useState(false)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const socketRef = useRef<Socket | null>(null)
   const pendingRideRef = useRef<RideRequest | null>(null)
@@ -134,6 +139,8 @@ const DashboardPage: React.FC = () => {
         dropoff: data.dropoff,
         distance: data.distance,
         estimatedPrice: data.estimatedPrice,
+        proposedPrice: data.proposedPrice ?? data.estimatedPrice,
+        minPrice: data.minPrice,
         notes: data.notes,
       }
       if (!pendingRideRef.current) {
@@ -253,6 +260,29 @@ const DashboardPage: React.FC = () => {
     dismissRide()
   }
 
+  const handleCounterOfferRide = async () => {
+    if (!pendingRide) {
+      setCounterOpen(false)
+      return
+    }
+    const value = parseFloat((counterPrice || '').replace(',', '.'))
+    if (!value || isNaN(value) || value <= 0) {
+      alert('Digite um valor válido para a contraproposta')
+      return
+    }
+    setCountering(true)
+    try {
+      await bookingService.counterOfferBooking(pendingRide._id, value)
+      setCounterOpen(false)
+      setCounterPrice('')
+      dismissRide()
+    } catch (error: any) {
+      alert('Erro ao enviar contraproposta: ' + (error.response?.data?.error || error.message))
+    } finally {
+      setCountering(false)
+    }
+  }
+
   const handleToggleAvailability = async () => {
     setTogglingAvailability(true)
     try {
@@ -359,13 +389,45 @@ const DashboardPage: React.FC = () => {
                 <span>{pendingRide.distance?.toFixed(1) || '-'} km</span>
               </div>
               <div className="ride-popup-info-item price">
-                <span>R$ {(pendingRide.estimatedPrice || 0).toFixed(2)}</span>
+                <span>R$ {(pendingRide.proposedPrice ?? pendingRide.estimatedPrice ?? 0).toFixed(2)}</span>
               </div>
             </div>
+            {pendingRide.proposedPrice != null && (
+              <div className="ride-popup-proposed">
+                💬 Proposta do cliente: <strong>R$ {Number(pendingRide.proposedPrice).toFixed(2)}</strong>
+                {pendingRide.minPrice != null && <span> · mín. R$ {pendingRide.minPrice.toFixed(2)}</span>}
+              </div>
+            )}
             {pendingRide.notes && (
               <div className="ride-popup-notes"><span>📝</span> {pendingRide.notes}</div>
             )}
+            {counterOpen && (
+              <div className="counter-box">
+                <input
+                  className="counter-input"
+                  type="number"
+                  step="0.5"
+                  min={pendingRide.minPrice || 0}
+                  placeholder="Sua contraproposta (R$)"
+                  value={counterPrice}
+                  onChange={e => setCounterPrice(e.target.value)}
+                />
+                <div className="counter-actions">
+                  <button className="btn-cancel-small" onClick={() => { setCounterOpen(false); setCounterPrice('') }}>
+                    Cancelar
+                  </button>
+                  <button className="btn-counter-send" onClick={handleCounterOfferRide} disabled={countering}>
+                    {countering ? 'Enviando...' : 'Enviar'}
+                  </button>
+                </div>
+              </div>
+            )}
             <div className="ride-popup-actions">
+              {!counterOpen && (
+                <button className="ride-popup-btn reject" onClick={() => setCounterOpen(true)} disabled={accepting}>
+                  💬 Contrapor
+                </button>
+              )}
               <button className="ride-popup-btn reject" onClick={handleRejectRide} disabled={accepting}>
                 <X size={20} /> Recusar
               </button>

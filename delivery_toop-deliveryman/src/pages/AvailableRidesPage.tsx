@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { MapPin, Clock, Navigation, X } from 'lucide-react'
+import { MapPin, Navigation, X } from 'lucide-react'
 import { bookingService } from '../api'
 import { io } from 'socket.io-client'
 
@@ -16,6 +16,9 @@ export default function AvailableRidesPage() {
   const [loading, setLoading] = useState(true)
   const [accepting, setAccepting] = useState<string | null>(null)
   const [rejecting, setRejecting] = useState<string | null>(null)
+  const [countering, setCountering] = useState<string | null>(null)
+  const [counterOpen, setCounterOpen] = useState<string | null>(null)
+  const [counterPrice, setCounterPrice] = useState<Record<string, string>>({})
   const socketRef = useRef<any>(null)
 
   useEffect(() => {
@@ -78,6 +81,25 @@ export default function AvailableRidesPage() {
     }
   }
 
+  const handleCounterOffer = async (booking: any) => {
+    const value = parseFloat((counterPrice[booking._id] || '').replace(',', '.'))
+    if (!value || isNaN(value) || value <= 0) {
+      alert('Digite um valor válido para a contraproposta')
+      return
+    }
+    setCountering(booking._id)
+    try {
+      await bookingService.counterOfferBooking(booking._id, value)
+      alert('Contraproposta enviada ao cliente de R$ ' + value.toFixed(2).replace('.', ',') + '. Aguarde a resposta do cliente.')
+      setCounterOpen(null)
+      setCounterPrice(prev => ({ ...prev, [booking._id]: '' }))
+    } catch (error: any) {
+      alert('Erro ao enviar contraproposta: ' + (error.response?.data?.error || error.message))
+    } finally {
+      setCountering(null)
+    }
+  }
+
   if (loading) return <div className="loading"><div className="spinner" /></div>
 
   return (
@@ -118,8 +140,43 @@ export default function AvailableRidesPage() {
                 <span className="order-distance">
                   <Navigation size={12} /> {booking.distance?.toFixed(1) || '-'} km
                 </span>
-                <span className="order-price">R$ {(booking.estimatedPrice || 0).toFixed(2)}</span>
+                <span className="order-price">
+                  R$ {(booking.proposedPrice ?? booking.estimatedPrice ?? 0).toFixed(2)}
+                </span>
               </div>
+
+              {booking.minPrice != null && (
+                <div className="order-proposed-hint">
+                  💬 Proposta do cliente: <strong>R$ {(booking.proposedPrice ?? booking.estimatedPrice ?? 0).toFixed(2)}</strong>
+                  <span> · mín. R$ {booking.minPrice.toFixed(2)}</span>
+                </div>
+              )}
+
+              {counterOpen === booking._id && (
+                <div className="counter-box">
+                  <input
+                    className="counter-input"
+                    type="number"
+                    step="0.5"
+                    min={booking.minPrice || 0}
+                    placeholder="Sua contraproposta (R$)"
+                    value={counterPrice[booking._id] || ''}
+                    onChange={e => setCounterPrice(prev => ({ ...prev, [booking._id]: e.target.value }))}
+                  />
+                  <div className="counter-actions">
+                    <button className="btn-cancel-small" onClick={() => { setCounterOpen(null); setCounterPrice(prev => ({ ...prev, [booking._id]: '' })) }}>
+                      Cancelar
+                    </button>
+                    <button
+                      className="btn-counter-send"
+                      disabled={countering === booking._id}
+                      onClick={() => handleCounterOffer(booking)}
+                    >
+                      {countering === booking._id ? 'Enviando...' : 'Enviar contraproposta'}
+                    </button>
+                  </div>
+                </div>
+              )}
 
               <div className="order-card-actions">
                 <button
@@ -130,6 +187,14 @@ export default function AvailableRidesPage() {
                   <X size={14} />
                   {rejecting === booking._id ? 'Recusando...' : 'Recusar'}
                 </button>
+                {accepting !== booking._id && (
+                  <button
+                    className="btn-counter"
+                    onClick={() => setCounterOpen(prev => prev === booking._id ? null : booking._id)}
+                  >
+                    Contrapor
+                  </button>
+                )}
                 <button
                   className="btn-accept"
                   onClick={() => handleAccept(booking._id)}

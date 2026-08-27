@@ -51,6 +51,8 @@ export class BookingService {
     notes?: string;
     scheduledAt?: string;
     promoCode?: string;
+    proposedPrice?: number;
+    surgeAddon?: number;
   }) {
     const bookingNumber = `BK${Date.now()}${Math.floor(Math.random() * 1000)}`;
 
@@ -59,10 +61,9 @@ export class BookingService {
       data.dropoff.lat, data.dropoff.lng
     );
 
-    let estimatedPrice = this.calculatePrice(distance, data.serviceCategory);
-    if (data.vehicleType === 'moto') {
-      estimatedPrice = Math.round(estimatedPrice * 0.7 * 100) / 100;
-    }
+    const components = this.calculatePriceComponents(distance, data.serviceCategory, data.vehicleType, data.surgeAddon);
+    let estimatedPrice = components.baseFare + components.distanceFare + (components.surgeAddon || 0);
+
     const duration = this.calculateDuration(distance);
 
     let promoDiscount: number | undefined;
@@ -74,6 +75,13 @@ export class BookingService {
       promoDiscount = result.discount;
       estimatedPrice = Math.round((estimatedPrice - result.discount) * 100) / 100;
     }
+
+    // Client-initiated price (negotiation). Floor: 60% of the suggested (<=40% off).
+    const suggested = Math.round(components.baseFare + components.distanceFare * 100) / 100;
+    const minPrice = Math.round(suggested * 0.6 * 100) / 100;
+    let proposedPrice = data.proposedPrice
+      ? Math.max(minPrice, Math.round(data.proposedPrice * 100) / 100)
+      : estimatedPrice;
 
     const status = data.scheduledAt ? 'pending' : 'matching';
 
@@ -89,6 +97,14 @@ export class BookingService {
       distance,
       duration,
       estimatedPrice,
+      baseFare: components.baseFare,
+      perKmRate: components.perKmRate,
+      distanceFare: components.distanceFare,
+      surgeAddon: components.surgeAddon || 0,
+      suggestedPrice: suggested,
+      proposedPrice,
+      minPrice,
+      offers: [],
       promoCode: promoDiscount !== undefined ? data.promoCode?.toUpperCase().trim() : undefined,
       promoDiscount,
       paymentMethod: data.paymentMethod,
@@ -181,6 +197,81 @@ export class BookingService {
     return booking;
   }
 
+  async counterOffer(
+    bookingId: string,
+    driverId: string,
+    driverModel: string,
+    price: number
+  ) {
+    const booking = await BookingModel.findById(bookingId);
+    if (!booking) {
+      throw new AppError("Corrida não encontrada", 404);
+    }
+
+    if (booking.status !== 'matching') {
+      throw new AppError("Corrida não está mais disponível para negociação", 400);
+    }
+
+    if (booking.driver && booking.driver.toString() === driverId) {
+      throw new AppError("Você já foi selecionado para esta corrida", 400);
+    }
+
+    const offerPrice = Math.round(price * 100) / 100;
+
+    // Remove any previous offer from this driver before adding the new one
+    await BookingModel.updateOne(
+      { _id: bookingId },
+      {
+        $pull: { offers: { driver: driverId, driverModel } },
+        $addToSet: { rejectedDrivers: driverId },
+      }
+    );
+
+    await BookingModel.updateOne(
+      { _id: bookingId },
+      { $push: { offers: { driver: driverId, driverModel, price: offerPrice } } }
+    );
+
+    // Re-allow this driver to be notified with the new counter offer
+    await BookingModel.updateOne(
+      { _id: bookingId },
+      { $pull: { rejectedDrivers: driverId } }
+    );
+
+    const updated = await BookingModel.findById(bookingId);
+    return updated;
+  }
+
+  async selectDriver(bookingId: string, clientId: string, driverId: string, driverModel: string) {
+    const booking = await BookingModel.findOneAndUpdate(
+      { _id: bookingId, client: clientId, status: 'matching' },
+      { $set: { status: 'accepted', driver: driverId, driverModel } },
+      { new: true }
+    );
+
+    if (!booking) {
+      throw new AppError("Corrida não está mais disponível para seleção", 400);
+    }
+
+    // Negotiated price = chosen driver's offer (or client proposed price)
+    const chosenOffer = (booking.offers || []).find(
+      (o) => o.driver.toString() === driverId.toString() && o.driverModel === driverModel
+    );
+    const finalNegotiatedPrice = chosenOffer ? chosenOffer.price : (booking.proposedPrice || booking.estimatedPrice || 0);
+
+    await BookingModel.findByIdAndUpdate(bookingId, {
+      proposedPrice: finalNegotiatedPrice,
+    });
+
+    if (driverModel === 'Driver') {
+      await DriverModel.findByIdAndUpdate(driverId, { available: false });
+    } else {
+      await DeliverymanModel.findByIdAndUpdate(driverId, { driverAvailable: false });
+    }
+
+    return BookingModel.findById(bookingId);
+  }
+
   async start(bookingId: string, driverId: string) {
     const booking = await BookingModel.findOneAndUpdate(
       { _id: bookingId, status: 'accepted', driver: driverId },
@@ -206,7 +297,7 @@ export class BookingService {
       ? Math.round((completedAt.getTime() - booking.startedAt.getTime()) / 60000)
       : booking.duration || 0;
 
-    const finalPrice = booking.estimatedPrice || 0;
+    const finalPrice = booking.proposedPrice || booking.estimatedPrice || 0;
     const platformFee = Math.round(finalPrice * CANCEL_FEE_CONFIG.platformFeePercent / 100 * 100) / 100;
     const driverEarning = Math.round((finalPrice - platformFee) * 100) / 100;
 
@@ -369,6 +460,42 @@ export class BookingService {
     const perKm = perKmPrices[serviceCategory] || 2.50;
 
     return Math.round((base + distanceKm * perKm) * 100) / 100;
+  }
+
+  calculatePriceComponents(
+    distanceKm: number,
+    serviceCategory: string,
+    vehicleType?: 'car' | 'moto',
+    surgeInput?: number
+  ): { baseFare: number; perKmRate: number; distanceFare: number; surgeAddon: number } {
+    const basePrices: Record<string, number> = {
+      driver: 5.00,
+      delivery: 3.00,
+      package: 4.00,
+    };
+    const perKmPrices: Record<string, number> = {
+      driver: 2.50,
+      delivery: 1.50,
+      package: 2.00,
+    };
+
+    let baseFare = basePrices[serviceCategory] || 5.00;
+    let perKmRate = perKmPrices[serviceCategory] || 2.50;
+
+    if (vehicleType === 'moto') {
+      baseFare = Math.round(baseFare * 0.7 * 100) / 100;
+      perKmRate = Math.round(perKmRate * 0.7 * 100) / 100;
+    }
+
+    const distanceFare = Math.round(distanceKm * perKmRate * 100) / 100;
+    const surgeAddon = Math.round((surgeInput || 0) * 100) / 100;
+
+    return {
+      baseFare: Math.round(baseFare * 100) / 100,
+      perKmRate,
+      distanceFare,
+      surgeAddon,
+    };
   }
 
   async generateQRCode(bookingId: string) {
