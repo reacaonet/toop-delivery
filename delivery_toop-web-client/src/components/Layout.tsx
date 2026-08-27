@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useCart } from '../context/CartContext'
@@ -7,12 +8,30 @@ export default function Layout() {
   const { itemCount } = useCart()
   const navigate = useNavigate()
   const location = useLocation()
+  const [menuOpen, setMenuOpen] = useState(false)
 
   const initials = user?.name
     ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
     : '??'
 
   const isActive = (path: string) => location.pathname === path
+
+  const go = (path: string) => {
+    setMenuOpen(false)
+    navigate(path)
+  }
+
+  const menuItems = [
+    { label: 'Perfil', icon: '👤', path: '/profile' },
+    { label: 'Endereços', icon: '📍', path: '/addresses' },
+    { label: 'Histórico de Pedidos', icon: '📦', path: '/orders' },
+    { label: 'Histórico de Corridas', icon: '🚗', path: '/rides' },
+  ]
+
+  const handleLogout = () => {
+    setMenuOpen(false)
+    logout()
+  }
 
   return (
     <div className="app-layout">
@@ -22,28 +41,9 @@ export default function Layout() {
           <span className="navbar-logo-sub">Delivery</span>
         </div>
         <div className="navbar-actions">
-          <button className="nav-btn" onClick={() => navigate('/orders')}>
-            <span className="nav-btn-icon">📦</span>
-            Pedidos
+          <button className="btn-logout" onClick={handleLogout}>
+            Sair
           </button>
-          <button className="nav-btn" onClick={() => navigate('/addresses')}>
-            <span className="nav-btn-icon">📍</span>
-            Endereços
-          </button>
-          {user && (
-            <div className="user-menu">
-              <button
-                className="user-avatar-btn"
-                onClick={() => navigate('/profile')}
-              >
-                <div className="user-avatar">{initials}</div>
-              </button>
-              <span className="user-name">{user.name}</span>
-              <button className="btn-logout" onClick={logout}>
-                Sair
-              </button>
-            </div>
-          )}
         </div>
       </header>
       <main className="main-content">
@@ -56,8 +56,8 @@ export default function Layout() {
           className={`bottom-nav-item ${isActive('/') ? 'active' : ''}`}
           onClick={() => navigate('/')}
         >
-          <span className="bottom-nav-icon">🏠</span>
-          <span className="bottom-nav-label">Início</span>
+          <span className="bottom-nav-icon">🔍</span>
+          <span className="bottom-nav-label">Pesquisar</span>
         </button>
         <button
           className={`bottom-nav-item ${isActive('/orders') ? 'active' : ''}`}
@@ -82,13 +82,43 @@ export default function Layout() {
           {itemCount > 0 && <span className="bottom-nav-badge">{itemCount}</span>}
         </button>
         <button
-          className={`bottom-nav-item ${isActive('/profile') || isActive('/addresses') ? 'active' : ''}`}
-          onClick={() => navigate('/profile')}
+          className="bottom-nav-item"
+          onClick={() => setMenuOpen(true)}
         >
-          <span className="bottom-nav-icon">👤</span>
-          <span className="bottom-nav-label">Perfil</span>
+          <span className="bottom-nav-icon">☰</span>
+          <span className="bottom-nav-label">Menu</span>
         </button>
       </nav>
+
+      {/* Menu drawer */}
+      {menuOpen && (
+        <div className="menu-overlay" onClick={() => setMenuOpen(false)}>
+          <div className="menu-drawer" onClick={e => e.stopPropagation()}>
+            <div className="menu-drawer-header">
+              <div className="user-avatar">{initials}</div>
+              <div className="menu-drawer-user">
+                <strong>{user?.name || 'Usuário'}</strong>
+                <span>{user?.email || ''}</span>
+              </div>
+              <button className="menu-drawer-close" onClick={() => setMenuOpen(false)}>✕</button>
+            </div>
+            {menuItems.map(item => (
+              <button
+                key={item.path}
+                className="menu-drawer-item"
+                onClick={() => go(item.path)}
+              >
+                <span className="menu-drawer-icon">{item.icon}</span>
+                <span>{item.label}</span>
+              </button>
+            ))}
+            <button className="menu-drawer-item logout" onClick={handleLogout}>
+              <span className="menu-drawer-icon">🚪</span>
+              <span>Sair</span>
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

@@ -65,6 +65,7 @@ export default function RideTrackingPage() {
   const [chatInput, setChatInput] = useState('')
   const [unreadCount, setUnreadCount] = useState(0)
   const [notificationCount, setNotificationCount] = useState(0)
+  const [chatToast, setChatToast] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const chatInputRef = useRef<HTMLInputElement>(null)
 
@@ -182,10 +183,24 @@ export default function RideTrackingPage() {
     })
     L.marker([dropoff.lat, dropoff.lng], { icon: dropoffIcon }).addTo(map)
 
-    L.polyline(
-      [[pickup.lat, pickup.lng], [dropoff.lat, dropoff.lng]],
-      { color: '#6366f1', weight: 5, opacity: 0.9 }
-    ).addTo(map)
+    // Draw real road route via OSRM, fall back to straight line
+    const drawRoute = async () => {
+      const coords = `${pickup.lng},${pickup.lat};${dropoff.lng},${dropoff.lat}`
+      try {
+        const res = await fetch(`https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=geojson`)
+        const data = await res.json()
+        const points: [number, number][] = data?.routes?.[0]?.geometry?.coordinates?.map((c: any) => [c[1], c[0]]) || []
+        if (points.length > 1) {
+          L.polyline(points, { color: '#6366f1', weight: 5, opacity: 0.9 }).addTo(map)
+          return
+        }
+      } catch {}
+      L.polyline(
+        [[pickup.lat, pickup.lng], [dropoff.lat, dropoff.lng]],
+        { color: '#6366f1', weight: 5, opacity: 0.9 }
+      ).addTo(map)
+    }
+    drawRoute()
 
     const bounds = L.latLngBounds(
       [pickup.lat, pickup.lng],
@@ -236,11 +251,10 @@ export default function RideTrackingPage() {
     }
   }, [driverLocation, booking])
 
-  // Chat socket listener
+  // Chat socket listener — always active to receive messages and track unread
   useEffect(() => {
-    if (!showChat || !id || !socketRef.current) return
+    if (!id || !socketRef.current) return
     const socket = socketRef.current
-
     socket.emit('chat:join_booking', { bookingId: id })
 
     const handleMessage = (data: any) => {
@@ -249,6 +263,11 @@ export default function RideTrackingPage() {
           if (prev.some(m => m._id === data.message?._id)) return prev
           return [...prev, data.message]
         })
+        if (!showChat) {
+          setUnreadCount(u => u + 1)
+          setChatToast('💬 Nova mensagem do motorista')
+          setTimeout(() => setChatToast(null), 3500)
+        }
       }
     }
     socket.on('chat:new_message', handleMessage)
@@ -257,7 +276,7 @@ export default function RideTrackingPage() {
       socket.off('chat:new_message', handleMessage)
       socket.emit('chat:leave_booking', { bookingId: id })
     }
-  }, [showChat, id])
+  }, [id, socketRef.current, showChat])
 
   // Notification counter from socket events
   useEffect(() => {
@@ -335,6 +354,9 @@ export default function RideTrackingPage() {
   const openChat = () => {
     setShowChat(true)
     setUnreadCount(0)
+    setChatToast(null)
+    loadChatMessages()
+    messageService.markAsRead(id).catch(() => {})
   }
 
   const handleCancel = async () => {
@@ -650,11 +672,16 @@ export default function RideTrackingPage() {
       )}
 
       {/* Chat FAB */}
-      {showDriverTracking && (
+      {!loading && !error && (
         <button className="chat-fab" onClick={openChat}>
           💬
           {unreadCount > 0 && <span className="chat-badge">{unreadCount}</span>}
         </button>
+      )}
+
+      {/* Chat notification toast */}
+      {chatToast && (
+        <div className="chat-toast">{chatToast}</div>
       )}
 
       {/* Chat Modal */}

@@ -4,7 +4,7 @@ import { LogOut } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 
 const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, logout } = useAuth()
+  const { logout } = useAuth()
   const navigate = useNavigate()
 
   const handleLogout = () => {
@@ -22,7 +22,6 @@ const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           Gojá Entregador
         </div>
         <div className="topbar-right">
-          <span className="topbar-user">{user?.email}</span>
           <button className="topbar-logout" onClick={handleLogout}>
             <LogOut size={16} />
             Sair

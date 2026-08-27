@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import messageService from "../services/message.service";
-import { emitToUser } from "../socket";
+import { getIO, emitToUser } from "../socket";
 import { BookingModel } from "../models/Booking";
 
 export class MessageController {
@@ -22,15 +22,23 @@ export class MessageController {
 
       const booking = await BookingModel.findById(req.params.bookingId);
       if (booking) {
+        const payload = {
+          bookingId: booking._id,
+          message,
+        };
+
+        // Emit to the booking room (all participants joined via chat:join_booking)
+        try {
+          getIO().to(`booking:${booking._id}`).emit("chat:new_message", payload);
+        } catch {}
+
         const otherUserId = userRole === 'deliveryman'
           ? booking.client.toString()
           : booking.driver?.toString();
 
+        // Fallback: emit directly to the other participant's user socket
         if (otherUserId) {
-          emitToUser(otherUserId, "chat:new_message", {
-            bookingId: booking._id,
-            message,
-          });
+          emitToUser(otherUserId, "chat:new_message", payload);
         }
       }
 

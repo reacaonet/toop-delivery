@@ -7,6 +7,7 @@ export interface IBooking extends Document {
   driverModel?: 'Driver' | 'Deliveryman';
   company: mongoose.Types.ObjectId;
   serviceCategory: 'driver' | 'delivery' | 'package';
+  vehicleType?: 'car' | 'moto';
   status: 'pending' | 'matching' | 'accepted' | 'in_progress' | 'completed' | 'cancelled';
   pickup: {
     address: string;
@@ -57,6 +58,7 @@ const BookingSchema = new Schema<IBooking>(
     driverModel: { type: String, enum: ['Driver', 'Deliveryman'], default: 'Driver' },
     company: { type: Schema.Types.ObjectId, ref: 'Company' },
     serviceCategory: { type: String, enum: ['driver', 'delivery', 'package'], default: 'driver' },
+    vehicleType: { type: String, enum: ['car', 'moto'], default: 'car' },
     status: {
       type: String,
       enum: ['pending', 'matching', 'accepted', 'in_progress', 'completed', 'cancelled'],

@@ -133,6 +133,7 @@ img { max-width: 100%; display: block; }
   display: flex;
   flex-direction: column;
   background: var(--bg);
+  padding-top: var(--navbar-h);
 }
 
 /* ============================================
@@ -146,9 +147,13 @@ img { max-width: 100%; display: block; }
   height: var(--navbar-h);
   background: var(--primary);
   color: var(--text-inverse);
-  position: sticky;
+  position: fixed;
   top: 0;
-  z-index: 100;
+  left: 0;
+  right: 0;
+  width: 100%;
+  box-sizing: border-box;
+  z-index: 2000;
   box-shadow: 0 2px 12px rgba(234, 29, 44, 0.3);
 }
 
@@ -2294,6 +2299,107 @@ img { max-width: 100%; display: block; }
 }
 
 /* ============================================
+   MENU DRAWER
+   ============================================ */
+.menu-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 3000;
+  display: flex;
+  justify-content: flex-end;
+  animation: fadeIn 0.2s ease;
+}
+
+.menu-drawer {
+  width: 300px;
+  max-width: 85vw;
+  height: 100%;
+  background: var(--surface);
+  box-shadow: -4px 0 24px rgba(0,0,0,0.3);
+  display: flex;
+  flex-direction: column;
+  padding: 16px 0;
+  overflow-y: auto;
+  animation: slideInRight 0.25s ease;
+}
+
+.menu-drawer-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 20px 20px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+
+.menu-drawer-user {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-size: 0.85rem;
+}
+
+.menu-drawer-user strong {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.menu-drawer-user span {
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.menu-drawer-close {
+  background: transparent;
+  border: none;
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+}
+
+.menu-drawer-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: background var(--duration) var(--ease);
+}
+
+.menu-drawer-item:hover {
+  background: var(--surface-hover);
+}
+
+.menu-drawer-item.logout {
+  margin-top: 8px;
+  border-top: 1px solid var(--border);
+  color: var(--danger, #dc2626);
+}
+
+.menu-drawer-icon {
+  font-size: 1.2rem;
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+/* ============================================
    PROFILE PAGE
    ============================================ */
 .profile-header {
@@ -2891,6 +2997,18 @@ img { max-width: 100%; display: block; }
 .ride-req-service-icon { font-size: 1.5rem; }
 .ride-req-service-name { font-size: 0.8rem; font-weight: 600; color: #374151; }
 
+/* Vehicle */
+.ride-req-vehicle { display: flex; gap: 8px; }
+.ride-req-vehicle-opt {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 14px 8px; border: 2px solid #f0f0f0; border-radius: 12px;
+  background: #fff; cursor: pointer; transition: all 0.2s;
+}
+.ride-req-vehicle-opt:hover { border-color: #d1d5db; }
+.ride-req-vehicle-opt.active { border-color: #6366f1; background: #f5f3ff; }
+.ride-req-vehicle-opt span:last-child { font-size: 0.8rem; font-weight: 600; color: #374151; }
+.ride-req-vehicle-icon { font-size: 1.5rem; }
+
 /* Addresses */
 .ride-req-addresses { display: flex; flex-direction: column; }
 .ride-req-address-group { display: flex; align-items: flex-start; gap: 12px; position: relative; }
@@ -3018,9 +3136,9 @@ img { max-width: 100%; display: block; }
 }
 
 /* RIDE TRACKING - UBER STYLE */
-.track { display: flex; flex-direction: column; height: 100vh; }
-.track-map-wrap { position: relative; flex: 1; min-height: 45%; }
-.track-map { width: 100%; height: 100%; }
+.track { display: flex; flex-direction: column; height: calc(100vh - var(--navbar-h) - 48px); }
+.track-map-wrap { position: relative; flex: 1; min-height: 45%; overflow: hidden; }
+.track-map { width: 100%; height: 100%; position: absolute; inset: 0; }
 .track-back {
   position: absolute; top: 14px; left: 14px; z-index: 1000;
   width: 40px; height: 40px; border-radius: 50%; border: none;
@@ -3226,9 +3344,10 @@ img { max-width: 100%; display: block; }
   color: #fff;
   border: none;
   font-size: 1.5rem;
+  line-height: 1;
   cursor: pointer;
   box-shadow: 0 4px 16px rgba(99,102,241,0.4);
-  z-index: 98;
+  z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3254,6 +3373,27 @@ img { max-width: 100%; display: block; }
   justify-content: center;
   border: 2px solid #fff;
   padding: 0 4px;
+}
+.chat-toast {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1f2937;
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  z-index: 10000;
+  pointer-events: none;
+  white-space: nowrap;
+  animation: slideUp 0.3s ease;
+}
+@keyframes slideUp {
+  from { transform: translateX(-50%) translateY(20px); opacity: 0; }
+  to { transform: translateX(-50%) translateY(0); opacity: 1; }
 }
 .chat-overlay {
   position: fixed;

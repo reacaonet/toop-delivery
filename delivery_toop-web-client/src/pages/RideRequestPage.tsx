@@ -16,6 +16,11 @@ const PAYMENT_OPTIONS = [
   { value: 'pix', label: 'PIX', icon: '📱' },
 ]
 
+const VEHICLE_OPTIONS = [
+  { value: 'car', label: 'Carro', icon: '🚗', multiplier: 1.0 },
+  { value: 'moto', label: 'Moto', icon: '🏍️', multiplier: 0.7 },
+]
+
 interface AddressSuggestion {
   display_name: string
   lat: string
@@ -37,6 +42,7 @@ export default function RideRequestPage() {
   const { showToast } = useToast()
 
   const [serviceCategory, setServiceCategory] = useState('driver')
+  const [vehicleType, setVehicleType] = useState('car')
   const [pickupAddress, setPickupAddress] = useState('')
   const [pickupComplement, setPickupComplement] = useState('')
   const [dropoffAddress, setDropoffAddress] = useState('')
@@ -116,7 +122,8 @@ export default function RideRequestPage() {
       const dist = haversineDistance(pickupLat, pickupLng, dropoffLat, dropoffLng)
       setEstimatedDistance(Math.round(dist * 100) / 100)
       if (selectedService) {
-        setEstimatedPrice(Math.round((selectedService.basePrice + dist * selectedService.perKm) * 100) / 100)
+        const vehicle = VEHICLE_OPTIONS.find(v => v.value === vehicleType) || VEHICLE_OPTIONS[0]
+        setEstimatedPrice(Math.round((selectedService.basePrice + dist * selectedService.perKm * vehicle.multiplier) * 100) / 100)
       }
       const mins = Math.round(dist * 3)
       setEstimatedDuration(mins < 60 ? `${mins} min` : `${Math.floor(mins / 60)}h ${mins % 60}min`)
@@ -125,7 +132,7 @@ export default function RideRequestPage() {
       setEstimatedPrice(null)
       setEstimatedDuration(null)
     }
-  }, [pickupLat, pickupLng, dropoffLat, dropoffLng, selectedService])
+  }, [pickupLat, pickupLng, dropoffLat, dropoffLng, selectedService, vehicleType])
 
   const promoTotal = estimatedPrice !== null
     ? promoApplied ? Math.max(0, estimatedPrice - promoDiscount) : estimatedPrice
@@ -244,6 +251,7 @@ export default function RideRequestPage() {
     try {
       const payload: any = {
         serviceCategory,
+        vehicleType,
         pickup: { address: pickupAddress, lat: pickupLat, lng: pickupLng, complement: pickupComplement || undefined },
         dropoff: { address: dropoffAddress, lat: dropoffLat, lng: dropoffLng, complement: dropoffComplement || undefined },
         paymentMethod,
@@ -291,6 +299,24 @@ export default function RideRequestPage() {
               >
                 <span className="ride-req-service-icon">{opt.icon}</span>
                 <span className="ride-req-service-name">{opt.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Vehicle */}
+        <div className="ride-req-card">
+          <div className="ride-req-card-title">Veículo</div>
+          <div className="ride-req-vehicle">
+            {VEHICLE_OPTIONS.map(v => (
+              <button
+                key={v.value}
+                type="button"
+                className={`ride-req-vehicle-opt ${vehicleType === v.value ? 'active' : ''}`}
+                onClick={() => setVehicleType(v.value)}
+              >
+                <span className="ride-req-vehicle-icon">{v.icon}</span>
+                <span>{v.label}</span>
               </button>
             ))}
           </div>

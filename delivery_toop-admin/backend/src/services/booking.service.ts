@@ -44,6 +44,7 @@ export class BookingService {
     clientId: string;
     companyId?: string;
     serviceCategory: string;
+    vehicleType?: 'car' | 'moto';
     pickup: { address: string; lat: number; lng: number; complement?: string };
     dropoff: { address: string; lat: number; lng: number; complement?: string };
     paymentMethod: string;
@@ -59,6 +60,9 @@ export class BookingService {
     );
 
     let estimatedPrice = this.calculatePrice(distance, data.serviceCategory);
+    if (data.vehicleType === 'moto') {
+      estimatedPrice = Math.round(estimatedPrice * 0.7 * 100) / 100;
+    }
     const duration = this.calculateDuration(distance);
 
     let promoDiscount: number | undefined;
@@ -78,6 +82,7 @@ export class BookingService {
       client: data.clientId,
       company: data.companyId,
       serviceCategory: data.serviceCategory,
+      vehicleType: data.vehicleType || 'car',
       status,
       pickup: data.pickup,
       dropoff: data.dropoff,

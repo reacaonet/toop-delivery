@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, Wallet, TrendingUp, TrendingDown, Calendar, DollarSign, CreditCard } from 'lucide-react'
-import { walletService } from '../api'
+import { walletService, bookingService } from '../api'
 
 interface Transaction {
   _id: string
@@ -34,11 +34,14 @@ const EarningsPage: React.FC = () => {
   const [withdrawPixType, setWithdrawPixType] = useState<string>('cpf')
   const [withdrawLoading, setWithdrawLoading] = useState(false)
 
+  const [rides, setRides] = useState<any[]>([])
+
   const fetchData = useCallback(async () => {
     try {
-      const [walletData, txData] = await Promise.allSettled([
+      const [walletData, txData, rideData] = await Promise.allSettled([
         walletService.getBalance(),
-        walletService.getTransactions({ limit: 100 })
+        walletService.getTransactions({ limit: 100 }),
+        bookingService.getBookings({ status: 'completed' }),
       ])
 
       if (walletData.status === 'fulfilled') {
@@ -53,6 +56,11 @@ const EarningsPage: React.FC = () => {
       if (txData.status === 'fulfilled') {
         const t = txData.value as any
         setTransactions(Array.isArray(t) ? t : t.transactions || [])
+      }
+
+      if (rideData.status === 'fulfilled') {
+        const r = rideData.value as any
+        setRides(Array.isArray(r?.data) ? r.data : Array.isArray(r) ? r : [])
       }
     } catch {
     } finally {
@@ -83,6 +91,14 @@ const EarningsPage: React.FC = () => {
   const periodCredits = filtered.filter(t => t.type === 'credit').reduce((s, t) => s + t.amount, 0)
   const periodDebits = filtered.filter(t => t.type === 'debit').reduce((s, t) => s + t.amount, 0)
   const periodNet = periodCredits - periodDebits
+
+  // Ride earnings computed per completed booking (not accumulated)
+  const rideEarningsTotal = rides.reduce((s, r) => s + (r.finalPrice || r.estimatedPrice || 0), 0)
+  const ridesToday = rides.filter(r => {
+    const d = new Date(r.completedAt || r.updatedAt || r.createdAt)
+    return d.toDateString() === new Date().toDateString()
+  })
+  const rideEarningsToday = ridesToday.reduce((s, r) => s + (r.finalPrice || r.estimatedPrice || 0), 0)
 
   const handleTopUp = async () => {
     const amount = parseFloat(topUpAmount)
@@ -161,6 +177,24 @@ const EarningsPage: React.FC = () => {
           <div className="earnings-stat-info">
             <span>Retiradas</span>
             <strong>R$ {wallet.totalWithdrawals.toFixed(2)}</strong>
+          </div>
+        </div>
+      </div>
+
+      {/* Ride Earnings (per completed ride) */}
+      <div className="earnings-rides-card">
+        <div className="earnings-rides-header">
+          <strong>Ganhos com Corridas</strong>
+          <span>{ridesToday.length} corrida(s) hoje</span>
+        </div>
+        <div className="earnings-rides-grid">
+          <div className="earnings-rides-item">
+            <span className="earnings-rides-label">Hoje</span>
+            <strong className="green">R$ {rideEarningsToday.toFixed(2)}</strong>
+          </div>
+          <div className="earnings-rides-item">
+            <span className="earnings-rides-label">Total</span>
+            <strong className="green">R$ {rideEarningsTotal.toFixed(2)}</strong>
           </div>
         </div>
       </div>

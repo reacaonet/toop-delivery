@@ -42,6 +42,7 @@ export default function ActiveRidePage() {
   const [messages, setMessages] = useState<any[]>([])
   const [chatInput, setChatInput] = useState('')
   const [unreadCount, setUnreadCount] = useState(0)
+  const [chatToast, setChatToast] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -121,9 +122,9 @@ export default function ActiveRidePage() {
     }
   }, [booking?.status])
 
-  // Chat socket listener
+  // Chat socket listener — always active to receive messages
   useEffect(() => {
-    if (!showChat || !booking?._id || !socketRef.current) return
+    if (!booking?._id || !socketRef.current) return
     const socket = socketRef.current
 
     socket.emit('chat:join_booking', { bookingId: booking._id })
@@ -134,6 +135,11 @@ export default function ActiveRidePage() {
           if (prev.some(m => m._id === data.message?._id)) return prev
           return [...prev, data.message]
         })
+        if (!showChat) {
+          setUnreadCount(u => u + 1)
+          setChatToast('💬 Nova mensagem do passageiro')
+          setTimeout(() => setChatToast(null), 3500)
+        }
       }
     }
     socket.on('chat:new_message', handleMessage)
@@ -142,7 +148,7 @@ export default function ActiveRidePage() {
       socket.off('chat:new_message', handleMessage)
       socket.emit('chat:leave_booking', { bookingId: booking._id })
     }
-  }, [showChat, booking?._id])
+  }, [booking?._id, socketRef.current, showChat])
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -185,6 +191,9 @@ export default function ActiveRidePage() {
   const openChat = () => {
     setShowChat(true)
     setUnreadCount(0)
+    setChatToast(null)
+    loadChatMessages()
+    messageService.markAsRead(booking?._id).catch(() => {})
   }
 
   const loadActiveRide = async () => {
@@ -390,6 +399,11 @@ export default function ActiveRidePage() {
           )}
         </div>
       </div>
+
+      {/* Chat notification toast */}
+      {chatToast && (
+        <div className="chat-toast">{chatToast}</div>
+      )}
 
       {/* QR Code Modal */}
       {showQr && qrImage && (
