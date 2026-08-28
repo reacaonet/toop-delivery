@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Navigate, Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { Store, Mail, Lock } from 'lucide-react'
 
@@ -74,6 +74,10 @@ const LoginPage = () => {
             {loading ? <div className="spinner-sm" /> : 'Entrar'}
           </button>
         </form>
+
+        <p style={{ textAlign: 'center', marginTop: '1rem' }}>
+          Ainda não tem conta? <Link to="/register">Cadastrar loja</Link>
+        </p>
       </div>
     </div>
   )

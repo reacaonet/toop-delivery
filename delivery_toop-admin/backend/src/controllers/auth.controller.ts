@@ -34,6 +34,18 @@ export class AuthController {
     }
   }
 
+  async registerStore(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { name, email, phone, password, cnpj, category } = req.body;
+      const result = await authService.registerStore({
+        name, email, phone, password, cnpj, category,
+      });
+      return res.status(201).json({ success: true, data: result });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async refresh(req: Request, res: Response, next: NextFunction) {
     try {
       const { refreshToken } = req.body;

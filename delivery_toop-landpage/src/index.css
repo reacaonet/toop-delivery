@@ -205,6 +205,75 @@ body {
 .lp-footer-social a { color: var(--gray-500); transition: color 0.2s; }
 .lp-footer-social a:hover { color: var(--red); }
 
+/* ===================== NAV ACTIVE / CTAS ===================== */
+.lp-nav-links a.lp-nav-active { color: var(--red); font-weight: 700; }
+.lp-nav-ctas { display: inline-flex; gap: 8px; align-items: center; }
+.lp-nav-ctas { margin-left: 8px; }
+
+/* ===================== DRIVER CTA (section buttons) ===================== */
+.lp-driver-cta { text-align: center; margin-top: 40px; }
+
+/* ===================== STORE HERO CARD ===================== */
+.lp-hero-store {
+  background: linear-gradient(135deg, #EAF4FF 0%, var(--white) 50%, #F5F9FF 100%);
+}
+.lp-hero-card {
+  background: var(--white); border-radius: var(--radius-lg); padding: 24px;
+  box-shadow: var(--shadow-lg); max-width: 300px; margin: 0 auto;
+}
+.lp-hero-card-head { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.lp-hero-card-logo {
+  width: 44px; height: 44px; border-radius: 12px;
+  background: var(--red-light); color: var(--red);
+  display: flex; align-items: center; justify-content: center;
+}
+.lp-hero-card-title { font-weight: 800; font-size: 0.95rem; }
+.lp-hero-card-sub { font-size: 0.75rem; color: var(--gray-500); }
+.lp-hero-card-stat {
+  background: var(--gray-100); border-radius: 12px; padding: 16px; margin-bottom: 16px;
+}
+.lp-hero-card-value { display: block; font-size: 1.4rem; font-weight: 900; color: var(--red); }
+.lp-hero-card-label { font-size: 0.75rem; color: var(--gray-500); }
+.lp-hero-card-orders { display: flex; flex-direction: column; gap: 8px; }
+.lp-hero-card-pill {
+  background: var(--white); border: 1px solid var(--gray-300); border-radius: 8px;
+  padding: 8px 12px; font-size: 0.8rem; font-weight: 600;
+}
+
+/* ===================== DRIVER HERO ===================== */
+.lp-hero-driver {
+  background: linear-gradient(135deg, #FFF7E6 0%, var(--white) 50%, #FFFDF5 100%);
+}
+.lp-hero-driver-card {
+  background: var(--white); border-radius: var(--radius-lg); padding: 24px;
+  box-shadow: var(--shadow-lg); max-width: 300px; margin: 0 auto;
+}
+.lp-hero-driver-head { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.lp-hero-driver-avatar {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--gray-100); display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
+}
+.lp-hero-driver-title { font-weight: 800; font-size: 0.95rem; }
+.lp-hero-driver-sub { font-size: 0.75rem; color: var(--gray-500); }
+.lp-hero-driver-online {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #E6F9EE; color: #1B873F; font-weight: 700; font-size: 0.8rem;
+  padding: 4px 12px; border-radius: 20px; margin-bottom: 16px;
+}
+.lp-driver-dot { width: 8px; height: 8px; border-radius: 50%; background: #22C55E; display: inline-block; }
+.lp-hero-driver-action {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--red-light); border: 1px solid var(--red); border-radius: 12px; padding: 12px; margin-bottom: 16px;
+}
+.lp-hero-driver-action-logo { font-size: 1.4rem; }
+.lp-hero-driver-action-title { font-size: 0.8rem; font-weight: 700; }
+.lp-hero-driver-action-sub { font-size: 0.7rem; color: var(--gray-500); }
+.lp-hero-driver-accept {
+  background: var(--red); color: var(--white); font-size: 0.7rem; font-weight: 700;
+  padding: 8px 14px; border-radius: 20px; margin-left: auto; flex-shrink: 0;
+}
+
+
 /* ===================== RESPONSIVE ===================== */
 @media (max-width: 1024px) {
   .lp-hero h1 { font-size: 2.4rem; }
@@ -218,6 +287,8 @@ body {
     top: 72px; left: 0; right: 0; background: var(--white);
     padding: 24px; gap: 16px; box-shadow: var(--shadow-md);
   }
+  .lp-nav-ctas { display: flex; flex-direction: column; gap: 10px; width: 100%; margin: 8px 0 0; }
+  .lp-nav-ctas .lp-btn { width: 100%; }
   .lp-menu-toggle { display: block; }
   .lp-hero { padding: 120px 0 60px; }
   .lp-hero h1 { font-size: 2rem; }

@@ -1,24 +1,17 @@
-import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import {
   Store, Truck, ShoppingBag, ArrowRight, CheckCircle, Clock, Star,
-  MapPin, BarChart3, Bell, Shield, Zap, Users, TrendingUp, ChevronRight,
-  Menu, X, Phone, Mail, ExternalLink
+  MapPin, BarChart3, Bell, Shield, Zap, Users, TrendingUp,
+  Phone, Mail, ExternalLink, HandCoins, Target, Radio, Navigation
 } from 'lucide-react'
-
-const NAV_LINKS = [
-  { label: 'Para Lojas', href: '#lojas' },
-  { label: 'Para Entregadores', href: '#entregadores' },
-  { label: 'Para Clientes', href: '#clientes' },
-  { label: 'Como Funciona', href: '#como-funciona' },
-]
+import SiteFrame from '../components/SiteFrame'
+import { LINKS } from '../constants'
 
 const FEATURES_STORE = [
   { icon: <ShoppingBag size={24} />, title: 'Painel de Pedidos', desc: 'Gerencie todos os pedidos em tempo real com painel Kanban visual e intuitivo.' },
   { icon: <Store size={24} />, title: 'Cardápio Digital', desc: 'Cadastre categorias, produtos com fotos, preços e disponibilidade.' },
-  { icon: <BarChart3 size={24} />, title: 'Relatórios Financeiros', desc: 'Acompanhe faturamento, comissões, pedidos por período e ranking de produtos.' },
-  { icon: <Clock size={24} />, title: 'Horário de Funcionamento', desc: 'Configure horários por dia da semana. Loja automaticamente mostra aberto/fechado.' },
-  { icon: <Bell size={24} />, title: 'Notificações', desc: 'Receba alertas instantâneos quando novos pedidos chegarem.' },
-  { icon: <TrendingUp size={24} />, title: 'Comissão Dinâmica', desc: 'Configuração transparente de taxas de entrega e comissão da plataforma.' },
+  { icon: <BarChart3 size={24} />, title: 'Relatórios Financeiros', desc: 'Acompanhe faturamento, comissões e pedidos por período.' },
+  { icon: <TrendingUp size={24} />, title: 'Comissão Dinâmica', desc: 'Configuração transparente de taxas e comissões da plataforma.' },
 ]
 
 const FEATURES_DELIVERYMAN = [
@@ -28,17 +21,11 @@ const FEATURES_DELIVERYMAN = [
   { icon: <Star size={24} />, title: 'Avaliações', desc: 'Construa sua reputação com avaliações de clientes.' },
 ]
 
-const FEATURES_CLIENT = [
-  { icon: <Store size={24} />, title: 'Busca Inteligente', desc: 'Encontre lojas e produtos por nome, categoria ou favoritos.' },
-  { icon: <Clock size={24} />, title: 'Estimativa de Entrega', desc: 'Veja o tempo estimado antes de fazer seu pedido.' },
-  { icon: <MapPin size={24} />, title: 'Múltiplos Endereços', desc: 'Salve casa, trabalho e mais endereços para usar no checkout.' },
-  { icon: <Star size={24} />, title: 'Avaliar Loja e Entregador', desc: 'Deixe sua avaliação após cada entrega para ajudar a comunidade.' },
-]
-
-const HOW_STEPS = [
-  { num: '01', title: 'Cadastre sua Loja', desc: 'Crie sua conta gratuitamente em poucos minutos. Preencha dados básicos e comece.', icon: <Store size={32} /> },
-  { num: '02', title: 'Configure seu Cardápio', desc: 'Adicione categorias, produtos com fotos, preços e tempos de preparo.', icon: <ShoppingBag size={32} /> },
-  { num: '03', title: 'Receba Pedidos', desc: 'Pedidos chegam em tempo real. Acompanhe do início ao fim com o painel.', icon: <CheckCircle size={32} /> },
+const DRIVER_SYSTEM = [
+  { icon: <Target size={24} />, title: 'Transparência no Preço', desc: 'O cliente vê como o preço é formado: tarifa base, distância e alta demanda. Sem surpresas no fechamento.' },
+  { icon: <HandCoins size={24} />, title: 'Negociação em Tempo Real', desc: 'Estilo InDrive: o cliente propõe o valor e o motorista contrapropõe ou aceita. Você decide quando o preço vale a pena.' },
+  { icon: <Radio size={24} />, title: 'Motoristas Interessados', desc: 'Vários motoristas podem enviar propostas. O cliente escolhe quem atende, com nome, nota e veículo.' },
+  { icon: <Navigation size={24} />, title: 'Rastreio ao Vivo', desc: 'Acompanhe a corrida no mapa em tempo real do início ao fim da viagem.' },
 ]
 
 const STATS = [
@@ -49,30 +36,13 @@ const STATS = [
 ]
 
 export default function LandingPage() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const cta = [
+    { label: 'Entrar', href: LINKS.clientLogin, variant: 'outline' as const },
+    { label: 'Cadastrar', href: LINKS.clientRegister },
+  ]
 
   return (
-    <div className="lp">
-      {/* NAVBAR */}
-      <nav className="lp-nav">
-        <div className="lp-container lp-nav-inner">
-          <a href="#" className="lp-logo">
-            <span className="lp-logo-icon">🛵</span>
-            <span className="lp-logo-text">Gojá<span>Delivery</span></span>
-          </a>
-          <div className={`lp-nav-links ${mobileMenuOpen ? 'open' : ''}`}>
-            {NAV_LINKS.map(l => (
-              <a key={l.href} href={l.href} onClick={() => setMobileMenuOpen(false)}>{l.label}</a>
-            ))}
-            <a href="/login" className="lp-btn lp-btn-sm lp-btn-outline">Entrar</a>
-            <a href="/register" className="lp-btn lp-btn-sm">Cadastrar</a>
-          </div>
-          <button className="lp-menu-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-        </div>
-      </nav>
-
+    <SiteFrame active="home" cta={cta}>
       {/* HERO */}
       <section className="lp-hero">
         <div className="lp-container lp-hero-inner">
@@ -83,21 +53,24 @@ export default function LandingPage() {
               <span className="lp-hero-highlight">de forma simples e inteligente</span>
             </h1>
             <p className="lp-hero-sub">
-              Uma plataforma completa para lojas, entregadores e clientes.
-              Pedidos em tempo real, relatórios financeiros, rastreio de entrega e muito mais.
+              Uma plataforma completa para lojas, motoristas e clientes.
+              Pedidos em tempo real, corridas com negociação de preço, rastreio e muito mais.
             </p>
             <div className="lp-hero-ctas">
-              <a href="/register" className="lp-btn lp-btn-lg">
-                Comece Agora <ArrowRight size={18} />
+              <a href={LINKS.clientRegister} className="lp-btn lp-btn-lg" target="_blank" rel="noopener noreferrer">
+                Pedir Agora <ArrowRight size={18} />
               </a>
-              <a href="#como-funciona" className="lp-btn lp-btn-lg lp-btn-ghost">
-                Como Funciona
-              </a>
+              <Link to="/lojista" className="lp-btn lp-btn-lg lp-btn-ghost">
+                Ver para Lojas
+              </Link>
+              <Link to="/motorista" className="lp-btn lp-btn-lg lp-btn-ghost">
+                Ser Motorista
+              </Link>
             </div>
             <div className="lp-hero-trust">
               <span>✅ Sem cartão de crédito</span>
-              <span>✅ Cancellation anytime</span>
-              <span>✅ Setup em 5 minutos</span>
+              <span>✅ Setup em minutos</span>
+              <span>✅ Pagamento transparente</span>
             </div>
           </div>
           <div className="lp-hero-visual">
@@ -160,23 +133,27 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* COMO FUNCIONA */}
-      <section className="lp-section lp-how" id="como-funciona">
+      {/* SISTEMA DE DRIVER */}
+      <section className="lp-section" id="driver">
         <div className="lp-container">
           <div className="lp-section-header">
-            <span className="lp-section-tag">Simples assim</span>
-            <h2>Como Funciona</h2>
-            <p>Em 3 passos simples, sua loja já está recebendo pedidos</p>
+            <span className="lp-section-tag">Sistema de Motoristas</span>
+            <h2>Corridas com preço justo e negociável</h2>
+            <p>O cliente vê como o preço é formado e o motorista decide se aceita, contrapropõe ou recusa</p>
           </div>
-          <div className="lp-how-grid">
-            {HOW_STEPS.map(s => (
-              <div key={s.num} className="lp-how-card">
-                <div className="lp-how-num">{s.num}</div>
-                <div className="lp-how-icon">{s.icon}</div>
-                <h3>{s.title}</h3>
-                <p>{s.desc}</p>
+          <div className="lp-features-grid">
+            {DRIVER_SYSTEM.map(f => (
+              <div key={f.title} className="lp-feature-card">
+                <div className="lp-feature-icon">{f.icon}</div>
+                <h3>{f.title}</h3>
+                <p>{f.desc}</p>
               </div>
             ))}
+          </div>
+          <div className="lp-driver-cta">
+            <Link to="/motorista" className="lp-btn lp-btn-lg">
+              Conhecer o app de Motoristas <ArrowRight size={18} />
+            </Link>
           </div>
         </div>
       </section>
@@ -198,16 +175,21 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
+          <div className="lp-driver-cta">
+            <Link to="/lojista" className="lp-btn lp-btn-lg">
+              Abrir minha Loja <ArrowRight size={18} />
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* PARA ENTREGADORES */}
-      <section className="lp-section" id="entregadores">
+      {/* PARA MOTORISTAS */}
+      <section className="lp-section" id="motoristas">
         <div className="lp-container">
           <div className="lp-section-header">
-            <span className="lp-section-tag">Para Entregadores</span>
+            <span className="lp-section-tag">Para Motoristas</span>
             <h2>Ganhe dinheiro com flexibilidade</h2>
-            <p>Escolha seus horários, aceite pedidos e acompanhe seus ganhos</p>
+            <p>Escolha seus horários, negocie preços e acompanhe seus ganhos</p>
           </div>
           <div className="lp-features-grid lp-features-4">
             {FEATURES_DELIVERYMAN.map(f => (
@@ -218,25 +200,10 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* PARA CLIENTES */}
-      <section className="lp-section lp-section-alt" id="clientes">
-        <div className="lp-container">
-          <div className="lp-section-header">
-            <span className="lp-section-tag">Para Clientes</span>
-            <h2>A melhor experiência de pedido</h2>
-            <p>Busque, escolha, acompanhe e avalie — tudo com facilidade</p>
-          </div>
-          <div className="lp-features-grid">
-            {FEATURES_CLIENT.map(f => (
-              <div key={f.title} className="lp-feature-card">
-                <div className="lp-feature-icon">{f.icon}</div>
-                <h3>{f.title}</h3>
-                <p>{f.desc}</p>
-              </div>
-            ))}
+          <div className="lp-driver-cta">
+            <Link to="/motorista" className="lp-btn lp-btn-lg">
+              Começar a entregar <ArrowRight size={18} />
+            </Link>
           </div>
         </div>
       </section>
@@ -245,9 +212,9 @@ export default function LandingPage() {
       <section className="lp-cta">
         <div className="lp-container lp-cta-inner">
           <h2>Pronto para começar?</h2>
-          <p>Junte-se a lojas, entregadores e clientes que já usam o Gojá Delivery</p>
+          <p>Junte-se a lojas, motoristas e clientes que já usam o Gojá Delivery</p>
           <div className="lp-cta-buttons">
-            <a href="/register" className="lp-btn lp-btn-lg lp-btn-white">
+            <a href={LINKS.clientRegister} className="lp-btn lp-btn-lg lp-btn-white" target="_blank" rel="noopener noreferrer">
               Criar Conta Grátis <ArrowRight size={18} />
             </a>
             <a href="mailto:contato@toopdelivery.com.br" className="lp-btn lp-btn-lg lp-btn-ghost-white">
@@ -256,50 +223,6 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
-
-      {/* FOOTER */}
-      <footer className="lp-footer">
-        <div className="lp-container lp-footer-inner">
-          <div className="lp-footer-brand">
-            <span className="lp-logo">
-              <span className="lp-logo-icon">🛵</span>
-              <span className="lp-logo-text">Gojá<span>Delivery</span></span>
-            </span>
-            <p>A plataforma completa de delivery para o Brasil.</p>
-          </div>
-          <div className="lp-footer-links">
-            <div>
-              <h4>Produto</h4>
-              <a href="#lojas">Para Lojas</a>
-              <a href="#entregadores">Para Entregadores</a>
-              <a href="#clientes">Para Clientes</a>
-              <a href="#como-funciona">Como Funciona</a>
-            </div>
-            <div>
-              <h4>Empresa</h4>
-              <a href="#">Sobre Nós</a>
-              <a href="#">Blog</a>
-              <a href="#">Carreiras</a>
-              <a href="#">Contato</a>
-            </div>
-            <div>
-              <h4>Suporte</h4>
-              <a href="#">Central de Ajuda</a>
-              <a href="#">Termos de Uso</a>
-              <a href="#">Privacidade</a>
-              <a href="#">Status</a>
-            </div>
-          </div>
-        </div>
-        <div className="lp-container lp-footer-bottom">
-          <p>© 2026 Gojá Delivery. Todos os direitos reservados.</p>
-          <div className="lp-footer-social">
-            <a href="#"><ExternalLink size={18} /></a>
-            <a href="#"><Phone size={18} /></a>
-            <a href="#"><Mail size={18} /></a>
-          </div>
-        </div>
-      </footer>
-    </div>
+    </SiteFrame>
   )
 }

@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import { UserModel } from "../models/User";
 import { DeliverymanModel } from "../models/Deliveryman";
+import { CompanyModel } from "../models/Company";
 import {
   generateToken,
   generateRefreshToken,
@@ -134,6 +135,62 @@ export class AuthService {
 
     const userObj = user.toObject();
     const { password: _, ...userWithoutPassword } = userObj;
+
+    return { user: userWithoutPassword, token, refreshToken };
+  }
+
+  async registerStore(data: {
+    name: string;
+    email: string;
+    phone?: string;
+    password: string;
+    cnpj?: string;
+    category?: string;
+  }) {
+    const existingUser = await UserModel.findOne({ email: data.email });
+    if (existingUser) {
+      throw new AppError("Email já está em uso", 409);
+    }
+
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+
+    const company = await CompanyModel.create({
+      name: data.name,
+      cnpj: data.cnpj,
+      phone: data.phone,
+      email: data.email,
+      category: data.category,
+      active: true,
+    });
+
+    const user = await UserModel.create({
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+      password: hashedPassword,
+      role: "store",
+      active: true,
+      company: company._id,
+    });
+
+    company.owner = user._id as any;
+    await company.save();
+
+    const token = generateToken({
+      _id: user._id.toString(),
+      email: user.email,
+      role: user.role,
+    });
+
+    const refreshToken = generateRefreshToken({
+      _id: user._id.toString(),
+      email: user.email,
+      role: user.role,
+    });
+
+    const userObj = user.toObject();
+    const { password: _, ...userWithoutPassword } = userObj;
+    userWithoutPassword.company = company._id;
 
     return { user: userWithoutPassword, token, refreshToken };
   }

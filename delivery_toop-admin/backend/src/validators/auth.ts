@@ -35,7 +35,19 @@ export const registerDeliverymanSchema = z.object({
   }),
 });
 
+export const registerStoreSchema = z.object({
+  body: z.object({
+    name: z.string().min(2, "Nome deve ter no mínimo 2 caracteres"),
+    email: z.string().email("Email inválido"),
+    phone: z.string().optional(),
+    password: z.string().min(6, "Senha deve ter no mínimo 6 caracteres"),
+    cnpj: z.string().optional(),
+    category: z.string().optional(),
+  }),
+});
+
 export type LoginInput = z.infer<typeof loginSchema>["body"];
 export type RefreshInput = z.infer<typeof refreshSchema>["body"];
 export type RegisterInput = z.infer<typeof registerSchema>["body"];
 export type RegisterDeliverymanInput = z.infer<typeof registerDeliverymanSchema>["body"];
+export type RegisterStoreInput = z.infer<typeof registerStoreSchema>["body"];
