@@ -212,14 +212,14 @@ export default function LandingPage() {
       <section className="lp-cta">
         <div className="lp-container lp-cta-inner">
           <h2>Pronto para começar?</h2>
-          <p>Junte-se a lojas, motoristas e clientes que já usam o Gojá Delivery</p>
+          <p>Junte-se a lojas, motoristas e clientes que já usam o GoJá Delivery</p>
           <div className="lp-cta-buttons">
             <a href={LINKS.clientRegister} className="lp-btn lp-btn-lg lp-btn-white" target="_blank" rel="noopener noreferrer">
               Criar Conta Grátis <ArrowRight size={18} />
             </a>
-            <a href="mailto:contato@toopdelivery.com.br" className="lp-btn lp-btn-lg lp-btn-ghost-white">
+            <Link to="/contato" className="lp-btn lp-btn-lg lp-btn-ghost-white">
               <Mail size={18} /> Fale Conosco
-            </a>
+            </Link>
           </div>
         </div>
       </section>

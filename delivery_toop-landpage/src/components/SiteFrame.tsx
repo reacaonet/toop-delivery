@@ -9,7 +9,7 @@ export interface NavCta {
 }
 
 export interface FrameProps {
-  active: 'home' | 'store' | 'driver'
+  active: 'home' | 'store' | 'driver' | 'contact'
   cta: NavCta[]
   children: ReactNode
 }
@@ -18,6 +18,7 @@ const NAV = [
   { to: '/', label: 'Início' },
   { to: '/lojista', label: 'Para Lojas' },
   { to: '/motorista', label: 'Para Motoristas' },
+  { to: '/contato', label: 'Fale Conosco' },
 ]
 
 const FOOTER_LINKS = [
@@ -27,6 +28,7 @@ const FOOTER_LINKS = [
       { label: 'Início', to: '/' },
       { label: 'Para Lojas', to: '/lojista' },
       { label: 'Para Motoristas', to: '/motorista' },
+      { label: 'Fale Conosco', to: '/contato' },
     ],
   },
 ]
@@ -43,7 +45,7 @@ export default function SiteFrame({ active, cta, children }: FrameProps) {
         <div className="lp-container lp-nav-inner">
           <Link to="/" className="lp-logo" onClick={closeMenu}>
             <span className="lp-logo-icon">🛵</span>
-            <span className="lp-logo-text">Gojá<span>Delivery</span></span>
+            <span className="lp-logo-text">GoJá <span>Delivery</span></span>
           </Link>
           <div className={`lp-nav-links ${mobileMenuOpen ? 'open' : ''}`}>
             {NAV.map(n => (
@@ -83,7 +85,7 @@ export default function SiteFrame({ active, cta, children }: FrameProps) {
           <div className="lp-footer-brand">
             <span className="lp-logo">
               <span className="lp-logo-icon">🛵</span>
-              <span className="lp-logo-text">Gojá<span>Delivery</span></span>
+              <span className="lp-logo-text">GoJá <span>Delivery</span></span>
             </span>
             <p>A plataforma completa de delivery para o Brasil.</p>
           </div>
@@ -99,10 +101,7 @@ export default function SiteFrame({ active, cta, children }: FrameProps) {
           </div>
         </div>
         <div className="lp-container lp-footer-bottom">
-          <p>© 2026 Gojá Delivery. Todos os direitos reservados.</p>
-          <div className="lp-footer-social">
-            <a href="https://github.com/reacaonet/toop-delivery" target="_blank" rel="noopener noreferrer"><ExternalLink size={18} /></a>
-          </div>
+          <p>© 2026 GoJá Delivery. Todos os direitos reservados.</p>
         </div>
       </footer>
     </div>

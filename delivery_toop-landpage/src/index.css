@@ -213,6 +213,59 @@ body {
 /* ===================== DRIVER CTA (section buttons) ===================== */
 .lp-driver-cta { text-align: center; margin-top: 40px; }
 
+/* ===================== CONTACT ===================== */
+.lp-hero-contact {
+  background: linear-gradient(135deg, #EFF6FF 0%, var(--white) 50%, #F8FAFC 100%);
+}
+.lp-contact-hero-visual {
+  flex: 0 0 380px; display: flex; flex-direction: column; gap: 16px;
+}
+.lp-contact-channel {
+  display: flex; align-items: center; gap: 16px;
+  background: var(--white); border-radius: var(--radius); padding: 20px;
+  box-shadow: var(--shadow-sm); text-decoration: none; color: var(--dark);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.lp-contact-channel:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.lp-contact-channel-icon {
+  width: 52px; height: 52px; border-radius: 12px; flex-shrink: 0;
+  background: var(--red-light); color: var(--red);
+  display: flex; align-items: center; justify-content: center;
+}
+.lp-contact-channel-title { font-weight: 800; }
+.lp-contact-channel-desc { font-size: 0.85rem; color: var(--gray-500); }
+
+.lp-contact-form-wrap { max-width: 720px; }
+.lp-contact-form-card {
+  background: var(--white); border-radius: var(--radius-lg); padding: 40px;
+  box-shadow: var(--shadow-md);
+}
+.lp-contact-success {
+  display: flex; align-items: center; gap: 10px;
+  background: #E6F9EE; color: #1B873F; font-weight: 600;
+  border: 1px solid #B7E8C8; border-radius: 10px; padding: 12px 16px; margin-bottom: 24px;
+}
+.lp-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.lp-form-field { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+.lp-form-field label { font-weight: 700; font-size: 0.9rem; }
+.lp-form-field input,
+.lp-form-field select,
+.lp-form-field textarea {
+  padding: 12px 14px; border: 2px solid var(--gray-300); border-radius: 10px;
+  font-size: 0.95rem; font-family: inherit; color: var(--dark);
+  transition: border-color 0.2s; background: var(--white);
+}
+.lp-form-field input:focus,
+.lp-form-field select:focus,
+.lp-form-field textarea:focus {
+  outline: none; border-color: var(--red);
+}
+.lp-contact-form-card .lp-btn { justify-content: center; width: 100%; }
+
+@media (max-width: 1024px) {
+  .lp-contact-hero-visual { flex-basis: auto; width: 100%; margin-top: 32px; }
+}
+
 /* ===================== STORE HERO CARD ===================== */
 .lp-hero-store {
   background: linear-gradient(135deg, #EAF4FF 0%, var(--white) 50%, #F5F9FF 100%);
@@ -295,6 +348,8 @@ body {
   .lp-how-grid { grid-template-columns: 1fr; }
   .lp-features-grid { grid-template-columns: 1fr; }
   .lp-features-4 { grid-template-columns: 1fr; }
+  .lp-form-row { grid-template-columns: 1fr; }
+  .lp-contact-form-card { padding: 24px; }
   .lp-footer-links { flex-direction: column; gap: 32px; }
   .lp-footer-bottom { flex-direction: column; gap: 16px; text-align: center; }
   .lp-section-header h2 { font-size: 1.8rem; }

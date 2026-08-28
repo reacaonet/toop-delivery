@@ -80,7 +80,7 @@ function BottomNav() {
         <div className="menu-overlay" onClick={() => setMenuOpen(false)}>
           <div className="menu-drawer" onClick={e => e.stopPropagation()}>
             <div className="menu-drawer-header">
-              <div className="menu-drawer-brand">Gojá Entregador</div>
+              <div className="menu-drawer-brand">GoJá Entregador</div>
               <button className="menu-drawer-close" onClick={() => setMenuOpen(false)}>
                 <X size={20} />
               </button>

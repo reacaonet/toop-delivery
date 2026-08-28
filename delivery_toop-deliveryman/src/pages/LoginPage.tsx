@@ -30,7 +30,7 @@ const LoginPage: React.FC = () => {
     <div className="login-page">
       <div className="login-card">
         <div className="login-header">
-          <h1>Gojá Entregador</h1>
+          <h1>GoJá Entregador</h1>
           <p>Acesse sua conta para gerenciar entregas</p>
         </div>
         <div className="login-body">

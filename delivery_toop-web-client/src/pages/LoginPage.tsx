@@ -27,7 +27,7 @@ export default function LoginPage() {
     <div className="login-page">
       <div className="login-hero">
         <div className="login-hero-content">
-          <h1>Gojá</h1>
+          <h1>GoJá</h1>
           <p className="tagline">Delivery</p>
           <div className="login-hero-features">
             <div className="login-feature">
@@ -49,7 +49,7 @@ export default function LoginPage() {
       <div className="login-form-side">
         <div className="login-card">
           <div className="login-card-logo">
-            <h1>Gojá</h1>
+            <h1>GoJá</h1>
             <span>Delivery</span>
           </div>
           <h2>Entrar</h2>

@@ -29,7 +29,7 @@ const Layout = ({ children }: LayoutProps) => {
         <div className="sidebar-header">
           <div className="sidebar-logo">
             <Store size={24} />
-            <span>Gojá Loja</span>
+            <span>GoJá Loja</span>
           </div>
         </div>
 

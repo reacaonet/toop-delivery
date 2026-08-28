@@ -43,7 +43,7 @@ const RegisterPage: React.FC = () => {
     <div className="login-page">
       <div className="login-card">
         <div className="login-header">
-          <h1>Gojá Entregador</h1>
+          <h1>GoJá Entregador</h1>
           <p>Crie sua conta para começar a entregar</p>
         </div>
         <div className="login-body">

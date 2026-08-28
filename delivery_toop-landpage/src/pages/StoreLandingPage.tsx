@@ -1,6 +1,7 @@
+import { Link } from 'react-router-dom'
 import {
   Store, ShoppingBag, ArrowRight, Clock, Bell, BarChart3, TrendingUp,
-  CheckCircle, Users, CreditCard, Package, ShieldCheck, Building2, Mail
+  CheckCircle, Users, CreditCard, Package, Building2, Mail
 } from 'lucide-react'
 import SiteFrame from '../components/SiteFrame'
 import { LINKS } from '../constants'
@@ -152,9 +153,9 @@ export default function StoreLandingPage() {
             <a href={LINKS.storeRegister} className="lp-btn lp-btn-lg lp-btn-white" target="_blank" rel="noopener noreferrer">
               Cadastrar Loja <ArrowRight size={18} />
             </a>
-            <a href="mailto:contato@toopdelivery.com.br" className="lp-btn lp-btn-lg lp-btn-ghost-white">
+            <Link to="/contato" className="lp-btn lp-btn-lg lp-btn-ghost-white">
               <Mail size={18} /> Fale Conosco
-            </a>
+            </Link>
           </div>
         </div>
       </section>

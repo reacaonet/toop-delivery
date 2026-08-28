@@ -55,7 +55,7 @@ const RegisterPage = () => {
           <div className="login-logo-icon">
             <Store size={32} />
           </div>
-          <h1>Gojá Delivery</h1>
+          <h1>GoJá Delivery</h1>
           <p>Cadastro da Loja</p>
         </div>
 
