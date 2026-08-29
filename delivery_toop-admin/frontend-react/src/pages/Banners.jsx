@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Image } from 'lucide-react';
-import api from '../services/api';
+import { bannerService } from '../services/api';
 import DataTable from '../components/DataTable';
 import BannerModal from '../components/BannerModal';
 
@@ -14,8 +14,7 @@ const Banners = () => {
 
   const loadData = async () => {
     try {
-      const res = await api.get('/banners');
-      const data = res.data?.data ?? res.data;
+      const data = await bannerService.getBanners();
       setBanners(Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : []);
     } catch (e) { console.error('Erro ao carregar banners:', e);
     } finally { setLoading(false); }
@@ -25,7 +24,7 @@ const Banners = () => {
   const handleEdit = (item) => { setSelected(item); setModalOpen(true); };
   const handleDelete = async (item) => {
     if (!window.confirm(`Excluir banner "${item.title}"?`)) return;
-    try { await api.delete(`/banners/${item._id}`); loadData(); }
+    try { await bannerService.deleteBanner(item._id); loadData(); }
     catch (e) { alert('Erro ao excluir: ' + (e.response?.data?.error || e.message)); }
   };
 

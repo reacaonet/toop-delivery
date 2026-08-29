@@ -41,6 +41,10 @@ export const authService = {
     const response = await api.post('/auth', credentials);
     return response.data;
   },
+  me: async () => {
+    const response = await api.get('/auth/me');
+    return response.data?.data ?? response.data;
+  },
   logout: () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');

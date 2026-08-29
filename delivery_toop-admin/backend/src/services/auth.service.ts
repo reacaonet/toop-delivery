@@ -39,6 +39,9 @@ export class AuthService {
       role: user.role,
     });
 
+    user.lastLogin = new Date();
+    await user.save();
+
     const userObj = user.toObject();
     const { password: _, ...userWithoutPassword } = userObj;
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Package } from 'lucide-react';
-import api from '../services/api';
+import { productService } from '../services/api';
 import DataTable from '../components/DataTable';
 import ProductModal from '../components/ProductModal';
 
@@ -14,8 +14,7 @@ const Products = () => {
 
   const loadData = async () => {
     try {
-      const res = await api.get('/products');
-      const data = res.data?.data ?? res.data;
+      const data = await productService.getProducts();
       setProducts(Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : []);
     } catch (e) { console.error('Erro ao carregar produtos:', e);
     } finally { setLoading(false); }
@@ -25,7 +24,7 @@ const Products = () => {
   const handleEdit = (item) => { setSelected(item); setModalOpen(true); };
   const handleDelete = async (item) => {
     if (!window.confirm(`Excluir produto "${item.name}"?`)) return;
-    try { await api.delete(`/products/${item._id}`); loadData(); }
+    try { await productService.deleteProduct(item._id); loadData(); }
     catch (e) { alert('Erro ao excluir: ' + (e.response?.data?.error || e.message)); }
   };
 

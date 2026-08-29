@@ -61,6 +61,19 @@ export const AuthProvider = ({ children }) => {
     setUser(updatedUser);
   };
 
+  const refreshUser = async () => {
+    try {
+      const data = await authService.me();
+      if (data) {
+        localStorage.setItem('user', JSON.stringify(data));
+        setUser(data);
+      }
+      return data;
+    } catch (e) {
+      return null;
+    }
+  };
+
   return (
     <AuthContext.Provider value={{
       user,
@@ -68,6 +81,7 @@ export const AuthProvider = ({ children }) => {
       login,
       logout,
       updateUser,
+      refreshUser,
       isAuthenticated: !!token,
       loading
     }}>

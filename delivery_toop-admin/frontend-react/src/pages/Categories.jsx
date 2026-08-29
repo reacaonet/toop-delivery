@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Tag } from 'lucide-react';
-import api from '../services/api';
+import { categoryService } from '../services/api';
 import DataTable from '../components/DataTable';
 import CategoryModal from '../components/CategoryModal';
 
@@ -14,8 +14,7 @@ const Categories = () => {
 
   const loadData = async () => {
     try {
-      const res = await api.get('/categories');
-      const data = res.data?.data ?? res.data;
+      const data = await categoryService.getCategories();
       setCategories(Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : []);
     } catch (e) { console.error('Erro ao carregar categorias:', e);
     } finally { setLoading(false); }
@@ -25,7 +24,7 @@ const Categories = () => {
   const handleEdit = (item) => { setSelected(item); setModalOpen(true); };
   const handleDelete = async (item) => {
     if (!window.confirm(`Excluir categoria "${item.name}"?`)) return;
-    try { await api.delete(`/categories/${item._id}`); loadData(); }
+    try { await categoryService.deleteCategory(item._id); loadData(); }
     catch (e) { alert('Erro ao excluir: ' + (e.response?.data?.error || e.message)); }
   };
 

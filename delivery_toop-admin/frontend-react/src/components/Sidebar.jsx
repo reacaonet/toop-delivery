@@ -16,7 +16,9 @@ import {
   Car,
   CalendarCheck,
   Wallet,
-  Ticket
+  Ticket,
+  Package,
+  ClipboardList
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { deliverymanService } from '../services/api';
@@ -45,8 +47,10 @@ const Sidebar = () => {
 
   const menuItems = [
     { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
+    { path: '/painel', icon: ClipboardList, label: 'Painel de Pedidos' },
     { path: '/companies', icon: Building2, label: 'Empresas' },
     { path: '/categories', icon: Tag, label: 'Categorias' },
+    { path: '/products', icon: Package, label: 'Produtos' },
     { path: '/banners', icon: Image, label: 'Banners' },
     { path: '/orders', icon: ShoppingCart, label: 'Pedidos' },
     { path: '/users', icon: Users, label: 'Usuários' },

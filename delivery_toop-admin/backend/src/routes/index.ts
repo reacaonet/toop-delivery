@@ -22,6 +22,14 @@ import bookingRoutes from "./booking.routes";
 import walletRoutes from "./wallet.routes";
 import messageRoutes from "./message.routes";
 import promoRoutes from "./promo.routes";
+import financeRoutes from "./finance.routes";
+import helpdeskRoutes from "./helpdesk.routes";
+import faqRoutes from "./faq.routes";
+import appRoutes from "./app.routes";
+import marketingRoutes from "./marketing.routes";
+import emailRoutes from "./email.routes";
+import preRegisterRoutes from "./preRegister.routes";
+import toolsRoutes from "./tools.routes";
 
 const router = Router();
 
@@ -48,5 +56,13 @@ router.use("/bookings", bookingRoutes);
 router.use("/wallet", walletRoutes);
 router.use("/messages", messageRoutes);
 router.use("/promo", promoRoutes);
+router.use("/finance", financeRoutes);
+router.use("/helpdesk", helpdeskRoutes);
+router.use("/faq", faqRoutes);
+router.use("/application", appRoutes);
+router.use("/marketing", marketingRoutes);
+router.use("/emails", emailRoutes);
+router.use("/pre-register", preRegisterRoutes);
+router.use("/tools", toolsRoutes);
 
 export default router;

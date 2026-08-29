@@ -1,12 +1,21 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { User, Mail, Calendar, Shield } from 'lucide-react';
 
 const Profile = () => {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
+  const [freshUser, setFreshUser] = useState(null);
+
+  useEffect(() => {
+    refreshUser().then((data) => {
+      if (data) setFreshUser(data);
+    });
+  }, [refreshUser]);
+
+  const current = freshUser || user;
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return null;
     return new Date(dateString).toLocaleString('pt-BR', {
       day: '2-digit',
       month: '2-digit',
@@ -15,6 +24,8 @@ const Profile = () => {
       minute: '2-digit'
     });
   };
+
+  const lastLogin = formatDate(current?.lastLogin);
 
   return (
     <div className="card">
@@ -44,14 +55,14 @@ const Profile = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <div className="user-avatar" style={{ width: '60px', height: '60px', fontSize: '1.5rem' }}>
-                {user?.name?.charAt(0)?.toUpperCase() || 'A'}
+                {current?.name?.charAt(0)?.toUpperCase() || 'A'}
               </div>
               <div>
                 <div style={{ fontSize: '1.25rem', fontWeight: '600', color: '#1f2937' }}>
-                  {user?.name}
+                  {current?.name}
                 </div>
                 <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
-                  {user?.role === 'admin' ? 'Administrador' : 'Usuário'}
+                  {current?.role === 'admin' ? 'Administrador' : 'Usuário'}
                 </div>
               </div>
             </div>
@@ -62,7 +73,7 @@ const Profile = () => {
                 <span style={{ fontSize: '0.875rem', color: '#6b7280' }}>Email</span>
               </div>
               <div style={{ fontSize: '1rem', color: '#1f2937' }}>
-                {user?.email}
+                {current?.email}
               </div>
             </div>
 
@@ -72,7 +83,7 @@ const Profile = () => {
                 <span style={{ fontSize: '0.875rem', color: '#6b7280' }}>Último Acesso</span>
               </div>
               <div style={{ fontSize: '1rem', color: '#1f2937' }}>
-                {formatDate(new Date())}
+                {lastLogin || '—'}
               </div>
             </div>
           </div>
@@ -97,7 +108,7 @@ const Profile = () => {
                 Tipo de Usuário
               </div>
               <div style={{ fontSize: '1rem', color: '#1f2937', fontWeight: '500' }}>
-                {user?.role === 'admin' ? 'Administrador do Sistema' : 'Usuário Comum'}
+                {current?.role === 'admin' ? 'Administrador do Sistema' : 'Usuário Comum'}
               </div>
             </div>
 
@@ -106,7 +117,7 @@ const Profile = () => {
                 Permissões
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                {user?.role === 'admin' ? (
+                {current?.role === 'admin' ? (
                   <>
                     <span className="status-badge status-active">Usuários</span>
                     <span className="status-badge status-active">Empresas</span>

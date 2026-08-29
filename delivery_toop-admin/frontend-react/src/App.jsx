@@ -18,6 +18,8 @@ import Payments from './pages/Payments';
 import Settings from './pages/Settings';
 import Profile from './pages/Profile';
 import Reports from './pages/Reports';
+import Products from './pages/Products';
+import Painel from './pages/Painel';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 
@@ -39,6 +41,8 @@ function AdminLayout() {
             <Route path="/drivers" element={<Drivers />} />
             <Route path="/bookings" element={<Bookings />} />
             <Route path="/promos" element={<Promos />} />
+            <Route path="/products" element={<Products />} />
+            <Route path="/painel" element={<Painel />} />
             <Route path="/wallet" element={<WalletPage />} />
             <Route path="/payments" element={<Payments />} />
             <Route path="/settings" element={<Settings />} />
