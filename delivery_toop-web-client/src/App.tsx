@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { CartProvider } from './context/CartContext'
 import { ToastProvider } from './context/ToastContext'
@@ -20,7 +20,8 @@ import type { ReactNode } from 'react'
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
   const { token } = useAuth()
-  if (!token) return <Navigate to="/login" replace />
+  const location = useLocation()
+  if (!token) return <Navigate to="/login" replace state={{ from: location.pathname }} />
   return <>{children}</>
 }
 
@@ -30,18 +31,22 @@ function AppRoutes() {
     <Routes>
       <Route path="/login" element={token ? <Navigate to="/" replace /> : <LoginPage />} />
       <Route path="/register" element={token ? <Navigate to="/" replace /> : <RegisterPage />} />
-      <Route
-        element={
-          <ProtectedRoute>
-            <CartProvider>
-              <Layout />
-            </CartProvider>
-          </ProtectedRoute>
-        }
-      >
+
+      {/* Public routes - browse without login (like iFood) */}
+      <Route element={<Layout />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/company/:id" element={<CompanyPage />} />
         <Route path="/cart" element={<CartPage />} />
+      </Route>
+
+      {/* Protected routes - require login */}
+      <Route
+        element={
+          <ProtectedRoute>
+            <Layout />
+          </ProtectedRoute>
+        }
+      >
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/orders" element={<OrdersPage />} />
         <Route path="/orders/:id" element={<OrderDetailPage />} />
@@ -51,6 +56,7 @@ function AppRoutes() {
         <Route path="/rides/new" element={<RideRequestPage />} />
         <Route path="/rides/:id" element={<RideTrackingPage />} />
       </Route>
+
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
@@ -61,7 +67,9 @@ export default function App() {
     <BrowserRouter>
       <AuthProvider>
         <ToastProvider>
-          <AppRoutes />
+          <CartProvider>
+            <AppRoutes />
+          </CartProvider>
         </ToastProvider>
       </AuthProvider>
     </BrowserRouter>

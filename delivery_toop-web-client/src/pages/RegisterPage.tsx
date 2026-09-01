@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
 export default function RegisterPage() {
@@ -11,6 +11,8 @@ export default function RegisterPage() {
   const [error, setError] = useState('')
   const { register, loading } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+  const from = (location.state as { from?: string } | null)?.from || '/'
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -21,7 +23,7 @@ export default function RegisterPage() {
     }
     try {
       await register({ name, email, phone: phone || undefined, password })
-      navigate('/login', { replace: true })
+      navigate(from, { replace: true })
     } catch (err: unknown) {
       const msg =
         (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||

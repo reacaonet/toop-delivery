@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Navigate, Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { Store, Mail, Lock } from 'lucide-react'
+import { Store, Mail, Lock, LogIn, ShoppingBag, ArrowRight } from 'lucide-react'
 
 const LoginPage = () => {
   const [email, setEmail] = useState('')
@@ -29,55 +29,94 @@ const LoginPage = () => {
   }
 
   return (
-    <div className="login-page">
-      <div className="login-card">
-        <div className="login-logo">
-          <div className="login-logo-icon">
-            <Store size={32} />
+    <div className="auth-page">
+      <div className="auth-panel-left">
+        <div className="auth-brand">
+          <div className="auth-brand-icon">
+            <Store size={24} />
           </div>
-          <h1>GoJá Delivery</h1>
-          <p>Painel da Loja</p>
+          <span className="auth-brand-name">GoJá Delivery</span>
         </div>
 
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>Email</label>
-            <div className="input-icon-wrapper">
-              <Mail size={18} className="input-icon" />
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                placeholder="seu@email.com"
-              />
+        <div className="auth-panel-content">
+          <h2>Gerencie sua loja <br />em um só lugar</h2>
+          <p>
+            Acompanhe pedidos em tempo real, controle seu cardápio,
+            estoque e receba pagamentos com toda a praticidade que
+            o seu negócio merece.
+          </p>
+        </div>
+
+        <div className="auth-panel-footer">
+          <span />
+          Painel da Loja - Gestão completa para o seu delivery
+        </div>
+      </div>
+
+      <div className="auth-panel-right">
+        <div className="auth-card">
+          <div className="auth-card-header">
+            <div className="auth-mobile-logo">
+              <Store size={24} />
             </div>
+            <h1>Bem-vindo de volta</h1>
+            <p>
+              Acesse o <span className="auth-gojalink">GoJá Delivery</span> para
+              gerenciar sua loja
+            </p>
           </div>
 
-          <div className="form-group">
-            <label>Senha</label>
-            <div className="input-icon-wrapper">
-              <Lock size={18} className="input-icon" />
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                placeholder="Sua senha"
-              />
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label>Email</label>
+              <div className="input-icon-wrapper">
+                <Mail size={18} className="input-icon" />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  placeholder="seu@email.com"
+                />
+              </div>
             </div>
-          </div>
 
-          {error && <div className="form-error">{error}</div>}
+            <div className="form-group">
+              <label>Senha</label>
+              <div className="input-icon-wrapper">
+                <Lock size={18} className="input-icon" />
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  placeholder="Sua senha"
+                />
+              </div>
+            </div>
 
-          <button type="submit" className="btn btn-primary btn-full" disabled={loading}>
-            {loading ? <div className="spinner-sm" /> : 'Entrar'}
-          </button>
-        </form>
+            {error && <div className="form-error">{error}</div>}
 
-        <p style={{ textAlign: 'center', marginTop: '1rem' }}>
-          Ainda não tem conta? <Link to="/register">Cadastrar loja</Link>
-        </p>
+            <button
+              type="submit"
+              className="btn btn-primary auth-submit-btn"
+              disabled={loading}
+            >
+              {loading ? (
+                <div className="spinner-sm" />
+              ) : (
+                <span className="submit-with-icon">
+                  Entrar <LogIn size={18} />
+                </span>
+              )}
+            </button>
+          </form>
+
+          <p className="auth-switch">
+            Ainda não tem conta?
+            <Link to="/register">Cadastrar loja</Link>
+          </p>
+        </div>
       </div>
     </div>
   )

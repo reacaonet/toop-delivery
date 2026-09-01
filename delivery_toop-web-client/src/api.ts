@@ -34,7 +34,12 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Only attempt token refresh for authenticated sessions.
+    // An anonymous user hitting a 401-protected endpoint (e.g. browsing without
+    // login) must NOT be force-redirected to /login.
+    const hasToken = Boolean(localStorage.getItem('token'))
+
+    if (error.response?.status === 401 && !originalRequest._retry && hasToken) {
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject })
@@ -54,7 +59,6 @@ api.interceptors.response.use(
         localStorage.removeItem('token')
         localStorage.removeItem('refreshToken')
         localStorage.removeItem('user')
-        window.location.href = '/login'
         return Promise.reject(error)
       }
 
@@ -71,7 +75,6 @@ api.interceptors.response.use(
         localStorage.removeItem('token')
         localStorage.removeItem('refreshToken')
         localStorage.removeItem('user')
-        window.location.href = '/login'
         return Promise.reject(refreshError)
       } finally {
         isRefreshing = false

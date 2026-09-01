@@ -143,7 +143,12 @@ export default function CompanyPage() {
     setAddingLoading(true)
     try {
       setCompanyId(id)
-      await addItem(id, selectedProduct._id, quantity, notes || undefined)
+      await addItem(id, selectedProduct._id, quantity, notes || undefined, {
+        name: selectedProduct.name,
+        price: selectedProduct.promoPrice && selectedProduct.promoPrice < selectedProduct.price
+          ? selectedProduct.promoPrice
+          : selectedProduct.price,
+      })
       showToast(`${selectedProduct.name} adicionado ao carrinho!`)
       setSelectedProduct(null)
     } catch {

@@ -249,6 +249,24 @@ img { max-width: 100%; display: block; }
   border-color: rgba(255,255,255,0.5);
 }
 
+.btn-login-header {
+  color: var(--primary);
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 8px 18px;
+  border-radius: var(--radius-full);
+  background: white;
+  border: none;
+  cursor: pointer;
+  transition: all var(--duration) var(--ease);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.btn-login-header:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
 /* ============================================
    MAIN CONTENT
    ============================================ */

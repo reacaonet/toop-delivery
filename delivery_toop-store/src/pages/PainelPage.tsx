@@ -3,6 +3,19 @@ import { RefreshCw, Clock, CheckCircle, XCircle, Package, MapPin, Phone, User, L
 import { useAuth } from '../contexts/AuthContext'
 import api from '../api'
 
+const BOARD_COLUMNS: { status: string; label: string }[] = [
+  { status: 'pending', label: 'Novo Pedido' },
+  { status: 'confirmed', label: 'Aceito' },
+  { status: 'preparing', label: 'Em Preparação' },
+  { status: 'ready', label: 'Pronto' },
+  { status: 'delivering', label: 'A Caminho' },
+]
+
+const END_COLUMNS: { status: string; label: string }[] = [
+  { status: 'delivered', label: 'Entregue' },
+  { status: 'cancelled', label: 'Cancelado' },
+]
+
 const STATUS_LABELS: Record<string, string> = {
   pending: 'Novo Pedido',
   confirmed: 'Aceito',
@@ -55,7 +68,7 @@ interface Order {
   _id: string
   orderNumber: string
   status: string
-  customer?: { name?: string; email?: string }
+  customer?: { name?: string; email?: string; phone?: string }
   company?: { name?: string }
   deliveryman?: { name?: string }
   deliveryAddress?: {
@@ -90,7 +103,6 @@ interface Deliveryman {
 
 export default function PainelPage() {
   const [orders, setOrders] = useState<Order[]>([])
-  const [selectedId, setSelectedId] = useState<string | null>(null)
   const [selected, setSelected] = useState<Order | null>(null)
   const [loading, setLoading] = useState(true)
   const [loadingDetail, setLoadingDetail] = useState(false)
@@ -100,6 +112,8 @@ export default function PainelPage() {
   const [loadingDm, setLoadingDm] = useState(false)
   const [showDmModal, setShowDmModal] = useState(false)
   const [pendingOrderId, setPendingOrderId] = useState<string | null>(null)
+  const [dragId, setDragId] = useState<string | null>(null)
+  const [overColumn, setOverColumn] = useState<string | null>(null)
   const { user, companyId, logout } = useAuth()
 
   const loadOrders = useCallback(async () => {
@@ -116,7 +130,6 @@ export default function PainelPage() {
   }, [companyId])
 
   const loadDetail = useCallback(async (id: string) => {
-    if (!id) { setSelected(null); return }
     setLoadingDetail(true)
     try {
       const { data } = await api.get(`/orders/${id}`)
@@ -130,7 +143,12 @@ export default function PainelPage() {
 
   useEffect(() => { loadOrders() }, [loadOrders])
   useEffect(() => { const i = setInterval(loadOrders, 30000); return () => clearInterval(i) }, [loadOrders])
-  useEffect(() => { if (selectedId) loadDetail(selectedId) }, [selectedId, loadDetail])
+
+  const openDetail = useCallback(async (id: string) => {
+    if (!id) { setSelected(null); return }
+    if (selected?._id === id) return
+    await loadDetail(id)
+  }, [loadDetail, selected])
 
   const loadDeliverymen = useCallback(async () => {
     setLoadingDm(true)
@@ -150,9 +168,9 @@ export default function PainelPage() {
     try {
       await api.put(`/orders/${id}/status`, { status, deliverymanId })
       await loadOrders()
-      await loadDetail(id)
-    } catch {
-      alert('Erro ao atualizar status')
+      if (selected?._id === id) await loadDetail(id)
+    } catch (e: any) {
+      alert(e?.response?.data?.error || 'Erro ao atualizar status')
     } finally {
       setUpdating(false)
     }
@@ -164,7 +182,6 @@ export default function PainelPage() {
     try {
       await api.put(`/orders/${id}/status`, { status: 'cancelled' })
       await loadOrders()
-      setSelectedId(null)
       setSelected(null)
     } catch {
       alert('Erro ao cancelar')
@@ -184,15 +201,57 @@ export default function PainelPage() {
     setPendingOrderId(null)
   }
 
+  // ---- Kanban / drag & drop ----
+
+  const onDragStart = (e: React.DragEvent, order: Order) => {
+    setDragId(order._id)
+    e.dataTransfer.effectAllowed = 'move'
+    try { e.dataTransfer.setData('text/plain', order._id) } catch { /* ignore */ }
+  }
+
+  const onDragOver = (e: React.DragEvent, status: string) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+    if (overColumn !== status) setOverColumn(status)
+  }
+
+  const onDrop = (e: React.DragEvent, status: string) => {
+    e.preventDefault()
+    const id = dragId || e.dataTransfer.getData('text/plain')
+    setOverColumn(null)
+    setDragId(null)
+    if (!id) return
+    const order = orders.find(o => o._id === id)
+    if (!order) return
+    handleAdvance(order, status)
+  }
+
+  // Só permite avançar uma etapa por vez (regras do backend).
+  const handleAdvance = (order: Order, targetStatus: string) => {
+    const currentIdx = BOARD_COLUMNS.findIndex(c => c.status === order.status)
+    const targetIdx = BOARD_COLUMNS.findIndex(c => c.status === targetStatus)
+    // Ignorar drop na mesma coluna ou ao contrário
+    if (targetIdx <= currentIdx) return
+
+    // ready -> delivering exige atribuir entregador
+    if (targetStatus === 'delivering') {
+      handleEnviarEntrega(order._id)
+      return
+    }
+    changeStatus(order._id, targetStatus)
+  }
+
   const ongoing = orders.filter(o => o.status !== 'cancelled' && o.status !== 'delivered')
   const ended = orders.filter(o => o.status === 'cancelled' || o.status === 'delivered')
-  const list = tab === 'ongoing' ? ongoing : ended
+  const boardOrders = tab === 'ongoing' ? ongoing : ended
 
-  const renderActions = () => {
-    if (!selected || selected.status === 'cancelled' || selected.status === 'delivered') return null
-    const id = selected._id
+  const columnCount = (status: string) => boardOrders.filter(o => o.status === status).length
+
+  const renderDetails = () => {
+    if (!selected) return null
+    const isEnded = selected.status === 'cancelled' || selected.status === 'delivered'
     const s = selected.status
-    const btn = (cls: string, label: string, icon: JSX.Element, onClick: () => void) => (
+    const btn = (cls: string, label: string, icon: React.JSX.Element, onClick: () => void) => (
       <button key={label} className={`pm-btn ${cls}`} disabled={updating} onClick={onClick}>
         {icon} {label}
       </button>
@@ -202,92 +261,45 @@ export default function PainelPage() {
       package: <Package size={16} />,
       x: <XCircle size={16} />,
     }
-
-    const actions: JSX.Element[] = []
-    if (s === 'pending') actions.push(btn('pm-green', 'Aceitar', icons.check, () => changeStatus(id, 'confirmed')))
-    if (s === 'confirmed') actions.push(btn('pm-orange', 'Iniciar Preparação', icons.package, () => changeStatus(id, 'preparing')))
-    if (s === 'preparing') actions.push(btn('pm-yellow', 'Marcar Pronto', icons.check, () => changeStatus(id, 'ready')))
-    if (s === 'ready') {
-      actions.push(btn('pm-blue', 'Atribuir Entregador', icons.package, () => handleEnviarEntrega(id)))
+    const actions: React.JSX.Element[] = []
+    if (!isEnded) {
+      if (s === 'pending') actions.push(btn('pm-green', 'Aceitar', icons.check, () => changeStatus(selected._id, 'confirmed')))
+      if (s === 'confirmed') actions.push(btn('pm-orange', 'Iniciar Preparação', icons.package, () => changeStatus(selected._id, 'preparing')))
+      if (s === 'preparing') actions.push(btn('pm-yellow', 'Marcar Pronto', icons.check, () => changeStatus(selected._id, 'ready')))
+      if (s === 'ready') actions.push(btn('pm-blue', 'Atribuir Entregador', icons.package, () => handleEnviarEntrega(selected._id)))
+      if (s === 'delivering') actions.push(btn('pm-green', 'Finalizar', icons.check, () => changeStatus(selected._id, 'delivered')))
+      if (s !== 'pending') actions.push(btn('pm-red', 'Cancelar', icons.x, () => cancelOrder(selected._id)))
     }
-    if (s === 'delivering') actions.push(btn('pm-green', 'Finalizar', icons.check, () => changeStatus(id, 'delivered')))
-    if (s !== 'pending') actions.push(btn('pm-red', 'Cancelar', icons.x, () => cancelOrder(id)))
 
-    return <div className="pm-actions">{actions}</div>
-  }
-
-  if (loading) return <div className="pm-loading"><div className="spinner" /></div>
-
-  return (
-    <div className="pm-root">
-      <header className="pm-topbar">
-        <div className="pm-topbar-left">
-          <h1>GoJá Delivery</h1>
-          <span className="pm-topbar-sub">Painel de Pedidos</span>
-        </div>
-        <div className="pm-topbar-right">
-          <span className="pm-topbar-user">{user?.email}</span>
-          <button className="pm-topbar-logout" onClick={logout}><LogOut size={18} /></button>
-        </div>
-      </header>
-
-      <div className="pm-toolbar">
-        <div className="pm-tabs">
-          <button className={`pm-tab ${tab === 'ongoing' ? 'active' : ''}`}
-            onClick={() => { setTab('ongoing'); setSelectedId(null); setSelected(null) }}>
-            Em Andamento ({ongoing.length})
-          </button>
-          <button className={`pm-tab ${tab === 'ended' ? 'active' : ''}`}
-            onClick={() => { setTab('ended'); setSelectedId(null); setSelected(null) }}>
-            Finalizados ({ended.length})
-          </button>
-        </div>
-        <button className="pm-refresh" onClick={loadOrders}><RefreshCw size={16} /> Atualizar</button>
-      </div>
-
-      <div className="pm-body">
-        <div className="pm-cards">
-          {list.length === 0 && <div className="pm-empty">Nenhum pedido</div>}
-          {list.map(o => (
-            <div key={o._id} className={`pm-card ${selectedId === o._id ? 'sel' : ''}`}
-              onClick={() => setSelectedId(o._id)}>
-              <div className="pm-card-top">
-                <span className="pm-card-name">{o.customer?.name || 'Cliente'}</span>
-                <span className="pm-card-time"><Clock size={11} /> {formatTime(o.createdAt)}</span>
-              </div>
-              <div className="pm-card-bot">
-                <span className="pm-badge" style={{ background: STATUS_COLORS[o.status] }}>
-                  {STATUS_LABELS[o.status] || o.status}
-                </span>
-                {o.status === 'ready' && !o.deliveryman && (
-                  <span className="pm-badge" style={{ background: '#f59e0b', fontSize: 10, marginLeft: 4 }}>
-                    Aguardando Entregador
-                  </span>
-                )}
-                <span className="pm-card-total">{formatCurrency(o.total)}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="pm-detail">
-          {!selected ? (
-            <div className="pm-detail-empty"><Package size={48} color="#d1d5db" /><p>Selecione um pedido</p></div>
-          ) : loadingDetail ? (
+    return (
+      <div className="pm-modal-backdrop" onClick={() => setSelected(null)}>
+        <div className={`pm-modal ${loadingDetail ? 'loading' : ''}`} onClick={e => e.stopPropagation()}>
+          {loadingDetail && selected ? (
             <div className="pm-loading"><div className="spinner" /></div>
           ) : (
             <>
-              <div className="pm-detail-head">
-                <h2>Pedido #{selected.orderNumber}</h2>
-                <span className="pm-badge lg" style={{ background: STATUS_COLORS[selected.status] }}>
-                  {STATUS_LABELS[selected.status]}
-                </span>
+              <div className="pm-modal-head">
+                <div>
+                  <h2>Pedido #{selected.orderNumber}</h2>
+                  <span className="pm-sub">{selected.customer?.name || 'Cliente'} · {formatTime(selected.createdAt)}</span>
+                </div>
+                <div className="pm-modal-head-right">
+                  <span className="pm-badge lg" style={{ background: STATUS_COLORS[selected.status] }}>
+                    {STATUS_LABELS[selected.status]}
+                  </span>
+                  <button className="pm-btn pm-red" onClick={() => setSelected(null)}><XCircle size={16} /> Fechar</button>
+                </div>
               </div>
 
               <div className="pm-grid">
                 <div className="pm-section">
                   <h4><User size={13} /> Cliente</h4>
                   <p>{selected.customer?.name || 'N/A'}</p>
+                  <p className="pm-sub">{selected.customer?.email || ''}</p>
+                </div>
+                <div className="pm-section">
+                  <h4><Phone size={13} /> Contato</h4>
+                  <p className="pm-sub">{selected.customer?.phone ? `Fone: ${selected.customer.phone}` : ''}</p>
                 </div>
                 <div className="pm-section">
                   <h4><MapPin size={13} /> Endereço</h4>
@@ -302,7 +314,7 @@ export default function PainelPage() {
                 </div>
               </div>
 
-              <div className="pm-section" style={{ marginTop: '1rem' }}>
+              <div className="pm-section">
                 <h4>Itens</h4>
                 <div className="pm-items">
                   {selected.items?.map((it, i) => (
@@ -322,50 +334,129 @@ export default function PainelPage() {
                 <div className="pm-total-row tot"><span>Total</span><span>{formatCurrency(selected.total)}</span></div>
               </div>
 
-              {selected.notes && <div className="pm-section" style={{ marginTop: '0.75rem' }}><h4>Obs</h4><p>{selected.notes}</p></div>}
+              {selected.notes && <div className="pm-section"><h4>Obs</h4><p>{selected.notes}</p></div>}
 
-              {renderActions()}
+              {actions.length > 0 && <div className="pm-actions">{actions}</div>}
             </>
           )}
         </div>
       </div>
+    )
+  }
+
+  if (loading) return <div className="pm-loading"><div className="spinner" /></div>
+
+  return (
+    <div className="pm-root">
+      <header className="pm-topbar">
+        <div className="pm-topbar-left">
+          <h1>GoJá Delivery</h1>
+          <span className="pm-topbar-sub">Painel de Pedidos</span>
+        </div>
+        <div className="pm-topbar-right">
+          <span className="pm-topbar-user">{user?.email}</span>
+          <button className="pm-topbar-logout" onClick={logout}><LogOut size={18} /></button>
+        </div>
+      </header>
+
+      <div className="pm-toolbar">
+        <div className="pm-tabs">
+          <button className={`pm-tab ${tab === 'ongoing' ? 'active' : ''}`} onClick={() => { setTab('ongoing'); setSelected(null) }}>
+            Em Andamento ({ongoing.length})
+          </button>
+          <button className={`pm-tab ${tab === 'ended' ? 'active' : ''}`} onClick={() => { setTab('ended'); setSelected(null) }}>
+            Finalizados ({ended.length})
+          </button>
+        </div>
+        <button className="pm-refresh" onClick={loadOrders}><RefreshCw size={16} /> Atualizar</button>
+      </div>
+
+      <div className="pm-kanban">
+        {(tab === 'ongoing' ? BOARD_COLUMNS : END_COLUMNS).map(col => {
+          const colOrders = boardOrders.filter(o => o.status === col.status)
+          const isEndedTab = tab === 'ended'
+          return (
+            <div
+              key={col.status}
+              className={`pm-column ${overColumn === col.status ? 'drag-over' : ''}`}
+              onDragOver={e => { if (!isEndedTab) onDragOver(e, col.status) }}
+              onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setOverColumn(null) }}
+              onDrop={e => { if (!isEndedTab) onDrop(e, col.status) }}
+            >
+              <div className="pm-column-head">
+                <span className="pm-dot" style={{ background: STATUS_COLORS[col.status] }} />
+                <span className="pm-column-title">{col.label}</span>
+                <span className="pm-column-count">{columnCount(col.status)}</span>
+              </div>
+              <div className="pm-column-body">
+                {colOrders.length === 0 && <div className="pm-column-empty">Sem pedidos</div>}
+                {colOrders.map(o => (
+                  <div
+                    key={o._id}
+                    className={`pm-card ${isEndedTab ? 'readonly' : ''} ${dragId === o._id ? 'dragging' : ''}`}
+                    draggable={!isEndedTab}
+                    onDragStart={e => onDragStart(e, o)}
+                    onDragEnd={() => { setDragId(null); setOverColumn(null) }}
+                    onClick={() => openDetail(o._id)}
+                  >
+                    <div className="pm-card-top">
+                      <span className="pm-card-name">{o.customer?.name || 'Cliente'}</span>
+                      <span className="pm-card-time"><Clock size={11} /> {formatTime(o.createdAt)}</span>
+                    </div>
+                    <div className="pm-card-items">
+                      {o.items?.slice(0, 2).map((it, i) => (
+                        <span key={i} className="pm-card-item">{it.quantity}x {it.name}</span>
+                      ))}
+                      {(o.items?.length || 0) > 2 && <span className="pm-card-more">+{o.items!.length - 2} itens</span>}
+                    </div>
+                    <div className="pm-card-bot">
+                      <span className="pm-badge" style={{ background: STATUS_COLORS[o.status] }}>
+                        {STATUS_LABELS[o.status] || o.status}
+                      </span>
+                      {o.status === 'ready' && !o.deliveryman && (
+                        <span className="pm-badge" style={{ background: '#f59e0b', fontSize: 10, marginLeft: 4 }}>
+                          Aguardando Entregador
+                        </span>
+                      )}
+                      <span className="pm-card-total">{formatCurrency(o.total)}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
+      {renderDetails()}
 
       {showDmModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}
-          onClick={() => setShowDmModal(false)}>
-          <div style={{ background: '#fff', borderRadius: 12, padding: 24, width: '100%', maxWidth: 400, maxHeight: '80vh', overflow: 'auto' }}
-            onClick={e => e.stopPropagation()}>
-            <h3 style={{ margin: '0 0 1rem', display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Truck size={20} /> Selecionar Entregador
-            </h3>
+        <div className="pm-modal-backdrop" onClick={() => { setShowDmModal(false); setPendingOrderId(null) }}>
+          <div className={`pm-modal ${loadingDm ? 'loading' : ''}`} style={{ maxWidth: 400 }} onClick={e => e.stopPropagation()}>
+            <h3 className="pm-modal-title"><Truck size={20} /> Selecionar Entregador</h3>
             {loadingDm ? (
-              <p style={{ color: '#6b7280', textAlign: 'center', padding: 20 }}>Carregando...</p>
+              <div className="pm-loading"><div className="spinner" /></div>
             ) : deliverymen.length === 0 ? (
-              <p style={{ color: '#6b7280', textAlign: 'center', padding: 20 }}>Nenhum entregador disponível</p>
+              <p className="pm-empty">Nenhum entregador disponível</p>
             ) : (
               deliverymen.map(dm => (
-                <div key={dm._id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem', border: '1px solid #e5e7eb', borderRadius: 8, marginBottom: 8, cursor: 'pointer' }}
-                  onMouseEnter={e => e.currentTarget.style.background = '#f3f4f6'}
-                  onMouseLeave={e => e.currentTarget.style.background = '#fff'}
-                  onClick={() => handleConfirmarEntrega(dm._id)}>
+                <div key={dm._id} className="pm-dm-item" onClick={() => handleConfirmarEntrega(dm._id)}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     {dm.avatar ? (
                       <img src={dm.avatar} alt="" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover' }} />
                     ) : (
-                      <div style={{ width: 36, height: 36, borderRadius: '50%', background: '#e5e7eb', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <User size={16} color="#9ca3af" />
-                      </div>
+                      <div className="pm-dm-avatar"><User size={16} color="#9ca3af" /></div>
                     )}
                     <div>
-                      <div style={{ fontWeight: 600, fontSize: 14 }}>{dm.name}</div>
-                      <div style={{ fontSize: 12, color: '#6b7280' }}>{dm.vehicleType} {dm.vehiclePlate ? `- ${dm.vehiclePlate}` : ''}</div>
+                      <div className="pm-dm-name">{dm.name}</div>
+                      <div className="pm-dm-sub">{dm.vehicleType} {dm.vehiclePlate ? `- ${dm.vehiclePlate}` : ''}</div>
                     </div>
                   </div>
                   <CheckCircle size={20} color="#10b981" />
                 </div>
               ))
             )}
-            <button className="pm-btn pm-red" style={{ width: '100%', marginTop: 8 }} onClick={() => setShowDmModal(false)}>Cancelar</button>
+            <button className="pm-btn pm-red" style={{ width: '100%', marginTop: 8 }} onClick={() => { setShowDmModal(false); setPendingOrderId(null) }}>Cancelar</button>
           </div>
         </div>
       )}

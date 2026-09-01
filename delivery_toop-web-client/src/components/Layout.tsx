@@ -10,6 +10,8 @@ export default function Layout() {
   const location = useLocation()
   const [menuOpen, setMenuOpen] = useState(false)
 
+  const isAuthed = Boolean(user)
+
   const initials = user?.name
     ? user.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
     : '??'
@@ -21,12 +23,14 @@ export default function Layout() {
     navigate(path)
   }
 
-  const menuItems = [
-    { label: 'Perfil', icon: '👤', path: '/profile' },
-    { label: 'Endereços', icon: '📍', path: '/addresses' },
-    { label: 'Histórico de Pedidos', icon: '📦', path: '/orders' },
-    { label: 'Histórico de Corridas', icon: '🚗', path: '/rides' },
-  ]
+  const menuItems = isAuthed
+    ? [
+        { label: 'Perfil', icon: '👤', path: '/profile' },
+        { label: 'Endereços', icon: '📍', path: '/addresses' },
+        { label: 'Histórico de Pedidos', icon: '📦', path: '/orders' },
+        { label: 'Histórico de Corridas', icon: '🚗', path: '/rides' },
+      ]
+    : [{ label: 'Entrar', icon: '🔑', path: '/login' }]
 
   const handleLogout = () => {
     setMenuOpen(false)
@@ -41,9 +45,15 @@ export default function Layout() {
           <span className="navbar-logo-sub">Delivery</span>
         </div>
         <div className="navbar-actions">
-          <button className="btn-logout" onClick={handleLogout}>
-            Sair
-          </button>
+          {isAuthed ? (
+            <button className="btn-logout" onClick={handleLogout}>
+              Sair
+            </button>
+          ) : (
+            <button className="btn-login-header" onClick={() => navigate('/login')}>
+              Entrar
+            </button>
+          )}
         </div>
       </header>
       <main className="main-content">
@@ -61,14 +71,14 @@ export default function Layout() {
         </button>
         <button
           className={`bottom-nav-item ${isActive('/orders') ? 'active' : ''}`}
-          onClick={() => navigate('/orders')}
+          onClick={() => navigate(isAuthed ? '/orders' : '/login')}
         >
           <span className="bottom-nav-icon">📦</span>
           <span className="bottom-nav-label">Pedidos</span>
         </button>
         <button
           className={`bottom-nav-item ${isActive('/rides') || isActive('/rides/new') ? 'active' : ''}`}
-          onClick={() => navigate('/rides/new')}
+          onClick={() => navigate(isAuthed ? '/rides/new' : '/login')}
         >
           <span className="bottom-nav-icon">🚗</span>
           <span className="bottom-nav-label">Corridas</span>
@@ -95,10 +105,10 @@ export default function Layout() {
         <div className="menu-overlay" onClick={() => setMenuOpen(false)}>
           <div className="menu-drawer" onClick={e => e.stopPropagation()}>
             <div className="menu-drawer-header">
-              <div className="user-avatar">{initials}</div>
+              <div className="user-avatar">{isAuthed ? initials : '👤'}</div>
               <div className="menu-drawer-user">
-                <strong>{user?.name || 'Usuário'}</strong>
-                <span>{user?.email || ''}</span>
+                <strong>{isAuthed ? (user?.name || 'Usuário') : 'Bem-vindo!'}</strong>
+                <span>{isAuthed ? (user?.email || '') : 'Entre para ver seus pedidos'}</span>
               </div>
               <button className="menu-drawer-close" onClick={() => setMenuOpen(false)}>✕</button>
             </div>
@@ -112,10 +122,12 @@ export default function Layout() {
                 <span>{item.label}</span>
               </button>
             ))}
-            <button className="menu-drawer-item logout" onClick={handleLogout}>
-              <span className="menu-drawer-icon">🚪</span>
-              <span>Sair</span>
-            </button>
+            {isAuthed && (
+              <button className="menu-drawer-item logout" onClick={handleLogout}>
+                <span className="menu-drawer-icon">🚪</span>
+                <span>Sair</span>
+              </button>
+            )}
           </div>
         </div>
       )}
