@@ -28,6 +28,22 @@ const envSchema = z.object({
   NOTIFICATION_URL: z.string().url().default('http://localhost:8200'),
   DELIVERYMAN_URL: z.string().url().default('http://localhost:8300'),
   NOTIFICATION_API_KEY: z.string().default(''),
+
+  // Firebase (web SDK config)
+  FIREBASE_API_KEY: z.string().default(''),
+  FIREBASE_AUTH_DOMAIN: z.string().default(''),
+  FIREBASE_PROJECT_ID: z.string().default(''),
+  FIREBASE_STORAGE_BUCKET: z.string().default(''),
+  FIREBASE_MESSAGING_SENDER_ID: z.string().default(''),
+  FIREBASE_APP_ID: z.string().default(''),
+  FIREBASE_DATABASE_URL: z.string().default(''),
+
+  // Firebase Admin (service account) — optional, degraded when absent
+  FIREBASE_ADMIN_PROJECT_ID: z.string().default(''),
+  FIREBASE_ADMIN_CLIENT_EMAIL: z.string().default(''),
+  FIREBASE_ADMIN_PRIVATE_KEY: z.string().default(''),
+  FIREBASE_ADMIN_DATABASE_URL: z.string().default(''),
+  FIREBASE_ADMIN_ENABLED: z.string().default('false'),
 });
 
 const parsed = envSchema.safeParse(process.env);

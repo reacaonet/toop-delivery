@@ -187,6 +187,30 @@ export const notificationService = {
   getNotifications: async () => {
     const response = await api.get('/notifications');
     return response.data?.data ?? response.data;
+  },
+  createNotification: async (data) => {
+    const response = await api.post('/notifications', data);
+    return response.data?.data ?? response.data;
+  },
+  updateNotification: async (id, data) => {
+    const response = await api.put(`/notifications/${id}`, data);
+    return response.data?.data ?? response.data;
+  },
+  deleteNotification: async (id) => {
+    const response = await api.delete(`/notifications/${id}`);
+    return response.data?.data ?? response.data;
+  },
+  createAndSend: async (data) => {
+    const response = await api.post('/notifications/send', data);
+    return response.data?.data ?? response.data;
+  },
+  subscribeTopic: async (data) => {
+    const response = await api.post('/v2/notification-topic', data);
+    return response.data?.data ?? response.data;
+  },
+  sendToTopic: async (data) => {
+    const response = await api.post('/v2/notification-topic/send', data);
+    return response.data?.data ?? response.data;
   }
 };
 
@@ -314,6 +338,187 @@ export const walletService = {
   },
   debit: async (driverId, amount, description) => {
     const response = await api.post('/wallet/debit', { driverId, amount, description });
+    return response.data?.data ?? response.data;
+  },
+};
+
+export const cashbackService = {
+  getCampaigns: async (params = {}) => {
+    const response = await api.get('/cashback/campaigns', { params });
+    return response.data?.data ?? response.data;
+  },
+  createCampaign: async (data) => {
+    const response = await api.post('/cashback/campaigns', data);
+    return response.data?.data ?? response.data;
+  },
+  updateCampaign: async (id, data) => {
+    const response = await api.put(`/cashback/campaigns/${id}`, data);
+    return response.data?.data ?? response.data;
+  },
+  deleteCampaign: async (id) => {
+    const response = await api.delete(`/cashback/campaigns/${id}`);
+    return response.data?.data ?? response.data;
+  },
+  getUsed: async (params = {}) => {
+    const response = await api.get('/cashback/used/paginator', { params });
+    return response.data?.data ?? response.data;
+  },
+  getCustomerBalance: async (customerId) => {
+    const response = await api.get(`/cashback/customer/balance/${customerId}`);
+    return response.data?.data ?? response.data;
+  },
+};
+
+export const couponService = {
+  getCoupons: async (params = {}) => {
+    const response = await api.get('/coupon/paginator', { params });
+    return response.data?.data ?? response.data;
+  },
+  createCoupon: async (data) => {
+    const response = await api.post('/coupon', data);
+    return response.data?.data ?? response.data;
+  },
+  updateCoupon: async (id, data) => {
+    const response = await api.put(`/coupon/update/${id}`, data);
+    return response.data?.data ?? response.data;
+  },
+  deleteCoupon: async (id) => {
+    const response = await api.delete(`/coupon/delete/${id}`);
+    return response.data?.data ?? response.data;
+  },
+  getUsed: async (params = {}) => {
+    const response = await api.get('/coupon/coupon-customer-paginator', { params });
+    return response.data?.data ?? response.data;
+  },
+};
+
+export const packingService = {
+  getPackings: async (params = {}) => {
+    const response = await api.get('/packing', { params });
+    return response.data?.data ?? response.data;
+  },
+  createPacking: async (data) => {
+    const response = await api.post('/packing', data);
+    return response.data?.data ?? response.data;
+  },
+  updatePacking: async (id, data) => {
+    const response = await api.put(`/packing/${id}`, data);
+    return response.data?.data ?? response.data;
+  },
+  deletePacking: async (id) => {
+    const response = await api.delete(`/packing/${id}`);
+    return response.data?.data ?? response.data;
+  },
+};
+
+export const shopperService = {
+  getShoppers: async (params = {}) => {
+    const response = await api.get('/shopper/paginator', { params });
+    return response.data?.data ?? response.data;
+  },
+  createShopper: async (data) => {
+    const response = await api.post('/shopper', data);
+    return response.data?.data ?? response.data;
+  },
+  updateShopper: async (id, data) => {
+    const response = await api.put(`/shopper/${id}`, data);
+    return response.data?.data ?? response.data;
+  },
+  deleteShopper: async (id) => {
+    const response = await api.delete(`/shopper/${id}`);
+    return response.data?.data ?? response.data;
+  },
+};
+
+export const franchiseService = {
+  getFranchises: async (params = {}) => {
+    const response = await api.get('/franchises', { params });
+    return response.data?.data ?? response.data;
+  },
+  createFranchise: async (data) => {
+    const response = await api.post('/franchises', data);
+    return response.data?.data ?? response.data;
+  },
+  updateFranchise: async (id, data) => {
+    const response = await api.put(`/franchises/${id}`, data);
+    return response.data?.data ?? response.data;
+  },
+  deleteFranchise: async (id) => {
+    const response = await api.delete(`/franchises/${id}`);
+    return response.data?.data ?? response.data;
+  },
+};
+
+export const aclService = {
+  getRoles: async (params = {}) => {
+    const response = await api.get('/acl/roles', { params });
+    return response.data?.data ?? response.data;
+  },
+  paginatorRoles: async (params = {}) => {
+    const response = await api.get('/acl/roles/paginator', { params });
+    return response.data?.data ?? response.data;
+  },
+  createRole: async (data) => {
+    const response = await api.post('/acl/roles', data);
+    return response.data?.data ?? response.data;
+  },
+  updateRole: async (id, data) => {
+    const response = await api.put(`/acl/roles/${id}`, data);
+    return response.data?.data ?? response.data;
+  },
+  deleteRole: async (id) => {
+    const response = await api.delete(`/acl/roles/${id}`);
+    return response.data?.data ?? response.data;
+  },
+  getPermissions: async () => {
+    const response = await api.get('/acl/permissions');
+    return response.data?.data ?? response.data;
+  },
+  createPermission: async (data) => {
+    const response = await api.post('/acl/permissions', data);
+    return response.data?.data ?? response.data;
+  },
+  updatePermission: async (id, data) => {
+    const response = await api.put(`/acl/permissions/${id}`, data);
+    return response.data?.data ?? response.data;
+  },
+  deletePermission: async (id) => {
+    const response = await api.delete(`/acl/permissions/${id}`);
+    return response.data?.data ?? response.data;
+  },
+};
+
+export const accessGroupService = {
+  getTree: async () => {
+    const response = await api.get('/access-group/tree');
+    return response.data?.data ?? response.data;
+  },
+  create: async (data) => {
+    const response = await api.post('/access-group', data);
+    return response.data?.data ?? response.data;
+  },
+  update: async (id, data) => {
+    const response = await api.put(`/access-group/${id}`, data);
+    return response.data?.data ?? response.data;
+  },
+  remove: async (id) => {
+    const response = await api.delete(`/access-group/${id}`);
+    return response.data?.data ?? response.data;
+  },
+  listModules: async () => {
+    const response = await api.get('/settings/modules');
+    return response.data?.data ?? response.data;
+  },
+  createModule: async (data) => {
+    const response = await api.post('/settings/modules', data);
+    return response.data?.data ?? response.data;
+  },
+  updateModule: async (id, data) => {
+    const response = await api.put(`/settings/modules/${id}`, data);
+    return response.data?.data ?? response.data;
+  },
+  deleteModule: async (id) => {
+    const response = await api.delete(`/settings/modules/${id}`);
     return response.data?.data ?? response.data;
   },
 };

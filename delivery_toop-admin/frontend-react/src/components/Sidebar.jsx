@@ -18,7 +18,13 @@ import {
   Wallet,
   Ticket,
   Package,
-  ClipboardList
+  ClipboardList,
+  Percent,
+  BadgePercent,
+  ShoppingBag,
+  PackageOpen,
+  Store,
+  Shield
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { deliverymanService } from '../services/api';
@@ -58,11 +64,20 @@ const Sidebar = () => {
     { path: '/drivers', icon: Car, label: 'Motoristas' },
     { path: '/bookings', icon: CalendarCheck, label: 'Corridas' },
     { path: '/promos', icon: Ticket, label: 'Cupons' },
+    { path: '/coupons', icon: BadgePercent, label: 'Cupons Compráveis' },
+    { path: '/cashback', icon: Percent, label: 'Cashback' },
+    { path: '/packings', icon: PackageOpen, label: 'Embalagens' },
+    { path: '/shoppers', icon: ShoppingBag, label: 'Shoppers' },
+    { path: '/franchises', icon: Store, label: 'Franquias' },
     { path: '/wallet', icon: Wallet, label: 'Wallet Motoristas' },
     { path: '/payments', icon: CreditCard, label: 'Pagamentos' },
     { path: '/settings', icon: Settings, label: 'Configurações' },
     { path: '/reports', icon: FileText, label: 'Relatórios' },
+    { path: '/acl', icon: Shield, label: 'Controle de Acesso', adminOnly: true },
   ];
+
+  const isAdmin = !user || user.role === 'admin' || user.role === 'manager';
+  const visibleItems = menuItems.filter((item) => !item.adminOnly || isAdmin);
 
   return (
     <div className="sidebar">
@@ -74,7 +89,7 @@ const Sidebar = () => {
       </div>
       
       <nav className="sidebar-nav">
-        {menuItems.map((item) => {
+        {visibleItems.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path;
           

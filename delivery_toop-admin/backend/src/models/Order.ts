@@ -30,6 +30,7 @@ export interface IOrder extends Document {
     lng?: number;
   };
   notes?: string;
+  typeOfVehicle?: string;
   estimatedDelivery?: Date;
   deliveredAt?: Date;
   cancelledAt?: Date;
@@ -79,6 +80,7 @@ const OrderSchema = new Schema<IOrder>(
       lng: Number,
     },
     notes: { type: String },
+    typeOfVehicle: { type: String },
     estimatedDelivery: { type: Date },
     deliveredAt: { type: Date },
     cancelledAt: { type: Date },

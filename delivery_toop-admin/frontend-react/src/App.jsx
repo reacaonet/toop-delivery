@@ -13,13 +13,19 @@ import Deliverymen from './pages/Deliverymen';
 import Drivers from './pages/Drivers';
 import Bookings from './pages/Bookings';
 import Promos from './pages/Promos';
+import Coupons from './pages/Coupons';
 import WalletPage from './pages/Wallet';
 import Payments from './pages/Payments';
+import Cashback from './pages/Cashback';
+import Packings from './pages/Packings';
+import Shoppers from './pages/Shoppers';
+import Franchises from './pages/Franchises';
 import Settings from './pages/Settings';
 import Profile from './pages/Profile';
 import Reports from './pages/Reports';
 import Products from './pages/Products';
 import Painel from './pages/Painel';
+import AccessControl from './pages/AccessControl';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 
@@ -41,6 +47,12 @@ function AdminLayout() {
             <Route path="/drivers" element={<Drivers />} />
             <Route path="/bookings" element={<Bookings />} />
             <Route path="/promos" element={<Promos />} />
+            <Route path="/coupons" element={<Coupons />} />
+            <Route path="/cashback" element={<Cashback />} />
+            <Route path="/packings" element={<Packings />} />
+            <Route path="/shoppers" element={<Shoppers />} />
+            <Route path="/franchises" element={<Franchises />} />
+            <Route path="/acl" element={<AccessControl />} />
             <Route path="/products" element={<Products />} />
             <Route path="/painel" element={<Painel />} />
             <Route path="/wallet" element={<WalletPage />} />

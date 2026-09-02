@@ -235,6 +235,10 @@ body {
   overflow-y: auto;
 }
 
+.modal-lg {
+  max-width: 720px;
+}
+
 .modal-header {
   display: flex;
   justify-content: space-between;
