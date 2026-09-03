@@ -644,4 +644,345 @@ export const financeService = {
   },
 };
 
+export const domainService = {
+  listStates: async () => {
+    const r = await api.get('/setting/state');
+    return r.data?.data ?? r.data;
+  },
+  createState: async (d) => {
+    const r = await api.post('/setting/state', d);
+    return r.data?.data ?? r.data;
+  },
+  updateState: async (id, d) => {
+    const r = await api.put(`/setting/state/${id}`, d);
+    return r.data?.data ?? r.data;
+  },
+  deleteState: async (id) => {
+    const r = await api.delete(`/setting/state/${id}`);
+    return r.data?.data ?? r.data;
+  },
+  listCities: async (params = {}) => {
+    const { pageIn = 0, pageOut = 50, ...rest } = params;
+    const r = await api.get('/setting/city/paginator', { params: { pageIn, pageOut, ...rest } });
+    return r.data?.data ?? r.data;
+  },
+  createCity: async (d) => {
+    const r = await api.post('/setting/city', d);
+    return r.data?.data ?? r.data;
+  },
+  updateCity: async (id, d) => {
+    const r = await api.put(`/setting/city/${id}`, d);
+    return r.data?.data ?? r.data;
+  },
+  deleteCity: async (id) => {
+    const r = await api.delete(`/setting/city/${id}`);
+    return r.data?.data ?? r.data;
+  },
+  listTypesUsers: async (params = {}) => {
+    const { pageIn = 0, pageOut = 50, ...rest } = params;
+    const r = await api.get('/setting/types-users/paginator', { params: { pageIn, pageOut, ...rest } });
+    return r.data?.data ?? r.data;
+  },
+  createTypeUser: async (d) => {
+    const r = await api.post('/setting/types-users', d);
+    return r.data?.data ?? r.data;
+  },
+  updateTypeUser: async (id, d) => {
+    const r = await api.put(`/setting/types-users/${id}`, d);
+    return r.data?.data ?? r.data;
+  },
+  deleteTypeUser: async (id) => {
+    const r = await api.delete(`/setting/types-users/${id}`);
+    return r.data?.data ?? r.data;
+  },
+  listAppVersions: async () => {
+    const r = await api.get('/setting/app-versions');
+    return r.data?.data ?? r.data;
+  },
+  createAppVersion: async (d) => {
+    const r = await api.post('/setting/app-versions', d);
+    return r.data?.data ?? r.data;
+  },
+  listTimezones: async () => {
+    const r = await api.get('/setting/timezone');
+    return r.data?.data ?? r.data;
+  },
+  listBrazilianBanks: async (params = {}) => {
+    const r = await api.get('/v2/setting/brazilian-bank', { params });
+    return r.data?.data ?? r.data;
+  },
+  getGlobalSettings: async () => {
+    const r = await api.get('/global/settings/');
+    return r.data?.data ?? r.data;
+  },
+};
+
+export const helpdeskService = {
+  listTickets: async (params = {}) => {
+    const r = await api.get('/helpdesk/tickets', { params });
+    return r.data?.data ?? r.data;
+  },
+  createTicket: async (d) => {
+    const r = await api.post('/helpdesk/tickets', d);
+    return r.data?.data ?? r.data;
+  },
+  updateTicket: async (id, d) => {
+    const r = await api.put(`/helpdesk/tickets/${id}`, d);
+    return r.data?.data ?? r.data;
+  },
+  deleteTicket: async (id) => {
+    const r = await api.delete(`/helpdesk/tickets/${id}`);
+    return r.data?.data ?? r.data;
+  },
+  getByProtocol: async (protocol) => {
+    const r = await api.get(`/helpdesk/tickets/protocol/${protocol}`);
+    return r.data?.data ?? r.data;
+  },
+  listInteractions: async (ticketId) => {
+    const r = await api.get(`/helpdesk/tickets/${ticketId}/interactions`);
+    return r.data?.data ?? r.data;
+  },
+  createInteraction: async (ticketId, d) => {
+    const r = await api.post(`/helpdesk/tickets/${ticketId}/interactions`, d);
+    return r.data?.data ?? r.data;
+  },
+  deleteInteraction: async (id) => {
+    const r = await api.delete(`/helpdesk/ticketinterations/${id}`);
+    return r.data?.data ?? r.data;
+  },
+};
+
+export const faqService = {
+  list: async (params = {}) => {
+    const r = await api.get('/faq', { params });
+    return r.data?.data ?? r.data;
+  },
+  create: async (d) => {
+    const r = await api.post('/faq', d);
+    return r.data?.data ?? r.data;
+  },
+  update: async (id, d) => {
+    const r = await api.put(`/faq/${id}`, d);
+    return r.data?.data ?? r.data;
+  },
+  remove: async (id) => {
+    const r = await api.delete(`/faq/${id}`);
+    return r.data?.data ?? r.data;
+  },
+};
+
+export const emailService = {
+  listTypes: async (params = {}) => {
+    const r = await api.get('/emails/types', { params });
+    return r.data?.data ?? r.data;
+  },
+  createType: async (d) => {
+    const r = await api.post('/emails/types', d);
+    return r.data?.data ?? r.data;
+  },
+  updateType: async (id, d) => {
+    const r = await api.put(`/emails/types/${id}`, d);
+    return r.data?.data ?? r.data;
+  },
+  deleteType: async (id) => {
+    const r = await api.delete(`/emails/types/${id}`);
+    return r.data?.data ?? r.data;
+  },
+  listTemplates: async (params = {}) => {
+    const r = await api.get('/emails/templates', { params });
+    return r.data?.data ?? r.data;
+  },
+  createTemplate: async (d) => {
+    const r = await api.post('/emails/templates', d);
+    return r.data?.data ?? r.data;
+  },
+  updateTemplate: async (id, d) => {
+    const r = await api.put(`/emails/templates/${id}`, d);
+    return r.data?.data ?? r.data;
+  },
+  deleteTemplate: async (id) => {
+    const r = await api.delete(`/emails/templates/${id}`);
+    return r.data?.data ?? r.data;
+  },
+  listVariables: async () => {
+    const r = await api.get('/emails/variables');
+    return r.data?.data ?? r.data;
+  },
+};
+
+export const marketingService = {
+  listCampaigns: async (params = {}) => {
+    const r = await api.get('/marketing/campaign', { params });
+    return r.data?.data ?? r.data;
+  },
+  createCampaign: async (d) => {
+    const r = await api.post('/marketing/campaign', d);
+    return r.data?.data ?? r.data;
+  },
+  updateCampaign: async (id, d) => {
+    const r = await api.put(`/marketing/campaign/${id}`, d);
+    return r.data?.data ?? r.data;
+  },
+  deleteCampaign: async (id) => {
+    const r = await api.delete(`/marketing/campaign/${id}`);
+    return r.data?.data ?? r.data;
+  },
+};
+
+export const logService = {
+  paginator: async (params = {}) => {
+    const { pageIn = 0, pageOut = 50, ...rest } = params;
+    const r = await api.get('/log/paginator', { params: { pageIn, pageOut, ...rest } });
+    return r.data?.data ?? r.data;
+  },
+  listAll: async () => {
+    const r = await api.get('/log');
+    return r.data?.data ?? r.data;
+  },
+};
+
+export const voucherService = {
+  paginator: async (params = {}) => {
+    const { pageIn = 0, pageOut = 50, ...rest } = params;
+    const r = await api.get('/v2/vouchers/paginator', { params: { pageIn, pageOut, ...rest } });
+    return r.data?.data ?? r.data;
+  },
+  create: async (d) => {
+    const r = await api.post('/v2/vouchers', d);
+    return r.data?.data ?? r.data;
+  },
+  update: async (id, d) => {
+    const r = await api.put(`/v2/vouchers/${id}`, d);
+    return r.data?.data ?? r.data;
+  },
+  remove: async (id) => {
+    const r = await api.delete(`/v2/vouchers/${id}`);
+    return r.data?.data ?? r.data;
+  },
+  validate: async (d) => {
+    const r = await api.post('/v2/vouchers/validate', d);
+    return r.data?.data ?? r.data;
+  },
+};
+
+export const mobilityService = {
+  listDocumentTypes: async (params = {}) => {
+    const r = await api.get('/v1/mobility/documenttypes', { params });
+    return r.data?.data ?? r.data;
+  },
+  createDocumentType: async (d) => {
+    const r = await api.post('/v1/mobility/documenttypes', d);
+    return r.data?.data ?? r.data;
+  },
+  updateDocumentType: async (id, d) => {
+    const r = await api.put(`/v1/mobility/documenttypes/${id}`, d);
+    return r.data?.data ?? r.data;
+  },
+  deleteDocumentType: async (id) => {
+    const r = await api.delete(`/v1/mobility/documenttypes/${id}`);
+    return r.data?.data ?? r.data;
+  },
+  listPeakHours: async (params = {}) => {
+    const r = await api.get('/v1/mobility/peakhours', { params });
+    return r.data?.data ?? r.data;
+  },
+  createPeakHour: async (d) => {
+    const r = await api.post('/v1/mobility/peakhours', d);
+    return r.data?.data ?? r.data;
+  },
+  updatePeakHour: async (id, d) => {
+    const r = await api.put(`/v1/mobility/peakhours/${id}`, d);
+    return r.data?.data ?? r.data;
+  },
+  deletePeakHour: async (id) => {
+    const r = await api.delete(`/v1/mobility/peakhours/${id}`);
+    return r.data?.data ?? r.data;
+  },
+  listSupportSubjects: async (params = {}) => {
+    const r = await api.get('/v1/mobility/supportsubjects', { params });
+    return r.data?.data ?? r.data;
+  },
+  createSupportSubject: async (d) => {
+    const r = await api.post('/v1/mobility/supportsubjects', d);
+    return r.data?.data ?? r.data;
+  },
+  updateSupportSubject: async (id, d) => {
+    const r = await api.put(`/v1/mobility/supportsubjects/${id}`, d);
+    return r.data?.data ?? r.data;
+  },
+  deleteSupportSubject: async (id) => {
+    const r = await api.delete(`/v1/mobility/supportsubjects/${id}`);
+    return r.data?.data ?? r.data;
+  },
+};
+
+export const monitorService = {
+  listOrders: async (params = {}) => {
+    const r = await api.get('/monitor/order', { params });
+    return r.data?.data ?? r.data;
+  },
+  detailOrder: async (orderId) => {
+    const r = await api.get(`/monitor/order/${orderId}`);
+    return r.data?.data ?? r.data;
+  },
+  salesLastDay: async () => {
+    const r = await api.get('/monitor/sales');
+    return r.data?.data ?? r.data;
+  },
+};
+
+export const toolsService = {
+  listPopups: async (params = {}) => {
+    const r = await api.get('/tools/popup/paginator', { params });
+    return r.data?.data ?? r.data;
+  },
+  createPopup: async (d) => {
+    const r = await api.post('/tools/popup', d);
+    return r.data?.data ?? r.data;
+  },
+  updatePopup: async (id, d) => {
+    const r = await api.put(`/tools/popup/${id}`, d);
+    return r.data?.data ?? r.data;
+  },
+  removePopup: async (id) => {
+    const r = await api.delete(`/tools/popup/${id}`);
+    return r.data?.data ?? r.data;
+  },
+  listIntegrations: async (params = {}) => {
+    const r = await api.get('/tools/integrations/paginator', { params });
+    return r.data?.data ?? r.data;
+  },
+  createIntegration: async (d) => {
+    const r = await api.post('/tools/integrations', d);
+    return r.data?.data ?? r.data;
+  },
+  updateIntegration: async (id, d) => {
+    const r = await api.put(`/tools/integrations/${id}`, d);
+    return r.data?.data ?? r.data;
+  },
+  removeIntegration: async (id) => {
+    const r = await api.delete(`/tools/integrations/${id}`);
+    return r.data?.data ?? r.data;
+  },
+};
+
+export const chatService = {
+  listByCart: async (cartId) => {
+    const r = await api.get(`/v1/front/chat/${cartId}`);
+    return r.data?.data ?? r.data;
+  },
+  create: async (d) => {
+    const r = await api.post('/v1/front/chat', d);
+    return r.data?.data ?? r.data;
+  },
+  noRead: async (cartId) => {
+    const r = await api.get(`/chat/message/total/no-read/${cartId}`);
+    return r.data?.data ?? r.data;
+  },
+  setRead: async (d) => {
+    const r = await api.put('/chat/read', d);
+    return r.data?.data ?? r.data;
+  },
+};
+
 export default api;

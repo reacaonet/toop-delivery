@@ -25,7 +25,13 @@ import {
   PackageOpen,
   Store,
   Shield,
-  Landmark
+  Landmark,
+  Globe,
+  Headphones,
+  Mail,
+  Megaphone,
+  ScrollText,
+  Activity
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { deliverymanService } from '../services/api';
@@ -76,6 +82,14 @@ const Sidebar = () => {
     { path: '/settings', icon: Settings, label: 'Configurações' },
     { path: '/reports', icon: FileText, label: 'Relatórios' },
     { path: '/acl', icon: Shield, label: 'Controle de Acesso', adminOnly: true },
+    { path: '/domain-settings', icon: Globe, label: 'Config. Domínio' },
+    { path: '/helpdesk', icon: Headphones, label: 'HelpDesk / FAQ' },
+    { path: '/email', icon: Mail, label: 'E-mails' },
+    { path: '/marketing', icon: Megaphone, label: 'Marketing' },
+    { path: '/vouchers', icon: Ticket, label: 'Vouchers' },
+    { path: '/mobility', icon: Car, label: 'Mobility' },
+    { path: '/monitor', icon: Activity, label: 'Monitor / Tools' },
+    { path: '/log', icon: ScrollText, label: 'Log / Auditoria' },
   ];
 
   const isAdmin = !user || user.role === 'admin' || user.role === 'manager';

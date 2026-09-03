@@ -1,11 +1,12 @@
 import React from 'react';
-import { Edit2, Trash2 } from 'lucide-react';
+import { Edit2, Trash2, Eye } from 'lucide-react';
 
 const DataTable = ({ 
   data, 
   columns, 
   onEdit, 
   onDelete, 
+  onView,
   loading = false,
   emptyMessage = 'Nenhum registro encontrado'
 }) => {
@@ -34,7 +35,7 @@ const DataTable = ({
               {column.title}
             </th>
           ))}
-          {(onEdit || onDelete) && <th>Ações</th>}
+          {(onEdit || onDelete || onView) && <th>Ações</th>}
         </tr>
       </thead>
       <tbody>
@@ -45,9 +46,18 @@ const DataTable = ({
                 {column.render ? column.render(item[column.key], item) : item[column.key]}
               </td>
             ))}
-            {(onEdit || onDelete) && (
+            {(onEdit || onDelete || onView) && (
               <td>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  {onView && (
+                    <button
+                      className="btn btn-secondary"
+                      onClick={() => onView(item)}
+                      style={{ padding: '0.5rem' }}
+                    >
+                      <Eye size={16} />
+                    </button>
+                  )}
                   {onEdit && (
                     <button
                       className="btn btn-secondary"

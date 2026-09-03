@@ -27,6 +27,14 @@ import Reports from './pages/Reports';
 import Products from './pages/Products';
 import Painel from './pages/Painel';
 import AccessControl from './pages/AccessControl';
+import DomainSettings from './pages/DomainSettings';
+import HelpDesk from './pages/HelpDesk';
+import Email from './pages/Email';
+import Marketing from './pages/Marketing';
+import Log from './pages/Log';
+import Vouchers from './pages/Vouchers';
+import Mobility from './pages/Mobility';
+import Monitor from './pages/Monitor';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 
@@ -55,6 +63,14 @@ function AdminLayout() {
             <Route path="/franchises" element={<Franchises />} />
             <Route path="/finance" element={<Finance />} />
             <Route path="/acl" element={<AccessControl />} />
+            <Route path="/domain-settings" element={<DomainSettings />} />
+            <Route path="/helpdesk" element={<HelpDesk />} />
+            <Route path="/email" element={<Email />} />
+            <Route path="/marketing" element={<Marketing />} />
+            <Route path="/log" element={<Log />} />
+            <Route path="/vouchers" element={<Vouchers />} />
+            <Route path="/mobility" element={<Mobility />} />
+            <Route path="/monitor" element={<Monitor />} />
             <Route path="/products" element={<Products />} />
             <Route path="/painel" element={<Painel />} />
             <Route path="/wallet" element={<WalletPage />} />
