@@ -24,7 +24,8 @@ import {
   ShoppingBag,
   PackageOpen,
   Store,
-  Shield
+  Shield,
+  Landmark
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { deliverymanService } from '../services/api';
@@ -69,6 +70,7 @@ const Sidebar = () => {
     { path: '/packings', icon: PackageOpen, label: 'Embalagens' },
     { path: '/shoppers', icon: ShoppingBag, label: 'Shoppers' },
     { path: '/franchises', icon: Store, label: 'Franquias' },
+    { path: '/finance', icon: Landmark, label: 'Financeiro' },
     { path: '/wallet', icon: Wallet, label: 'Wallet Motoristas' },
     { path: '/payments', icon: CreditCard, label: 'Pagamentos' },
     { path: '/settings', icon: Settings, label: 'Configurações' },

@@ -20,6 +20,7 @@ import Cashback from './pages/Cashback';
 import Packings from './pages/Packings';
 import Shoppers from './pages/Shoppers';
 import Franchises from './pages/Franchises';
+import Finance from './pages/Finance';
 import Settings from './pages/Settings';
 import Profile from './pages/Profile';
 import Reports from './pages/Reports';
@@ -52,6 +53,7 @@ function AdminLayout() {
             <Route path="/packings" element={<Packings />} />
             <Route path="/shoppers" element={<Shoppers />} />
             <Route path="/franchises" element={<Franchises />} />
+            <Route path="/finance" element={<Finance />} />
             <Route path="/acl" element={<AccessControl />} />
             <Route path="/products" element={<Products />} />
             <Route path="/painel" element={<Painel />} />

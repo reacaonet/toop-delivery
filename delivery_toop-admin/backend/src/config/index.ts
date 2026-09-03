@@ -44,6 +44,14 @@ const envSchema = z.object({
   FIREBASE_ADMIN_PRIVATE_KEY: z.string().default(''),
   FIREBASE_ADMIN_DATABASE_URL: z.string().default(''),
   FIREBASE_ADMIN_ENABLED: z.string().default('false'),
+
+  // Google Maps (geocode/directions/matrix/autocomplete) — optional, degraded when absent
+  GOOGLE_MAPS: z.string().default(''),
+
+  // Twilio (chamadas de alerta + Verify OTP) — optional, degraded when absent
+  TWILIO_ACCOUNT_SID: z.string().default(''),
+  TWILIO_AUTH_TOKEN: z.string().default(''),
+  TWILIO_SERVICE_SID: z.string().default(''),
 });
 
 const parsed = envSchema.safeParse(process.env);

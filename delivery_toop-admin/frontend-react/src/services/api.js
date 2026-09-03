@@ -523,4 +523,125 @@ export const accessGroupService = {
   },
 };
 
+export const financeService = {
+  listBalances: async (params = {}) => {
+    const response = await api.get('/finance/balances', { params });
+    return response.data?.data ?? response.data;
+  },
+  getCompanyBalance: async (id, params = {}) => {
+    const response = await api.get(`/finance/balances/company/${id}`, { params });
+    return response.data?.data ?? response.data;
+  },
+
+  listCostCenters: async (params = {}) => {
+    const response = await api.get('/finance/cost-centers', { params });
+    return response.data?.data ?? response.data;
+  },
+  createCostCenter: async (data) => {
+    const response = await api.post('/finance/cost-centers', data);
+    return response.data?.data ?? response.data;
+  },
+  updateCostCenter: async (id, data) => {
+    const response = await api.put(`/finance/cost-centers/${id}`, data);
+    return response.data?.data ?? response.data;
+  },
+  deleteCostCenter: async (id) => {
+    const response = await api.delete(`/finance/cost-centers/${id}`);
+    return response.data?.data ?? response.data;
+  },
+
+  listTypePayments: async (params = {}) => {
+    const response = await api.get('/finance/type-payments', { params });
+    return response.data?.data ?? response.data;
+  },
+  createTypePayment: async (data) => {
+    const response = await api.post('/finance/type-payments', data);
+    return response.data?.data ?? response.data;
+  },
+  updateTypePayment: async (id, data) => {
+    const response = await api.put(`/finance/type-payments/${id}`, data);
+    return response.data?.data ?? response.data;
+  },
+  deleteTypePayment: async (id) => {
+    const response = await api.delete(`/finance/type-payments/${id}`);
+    return response.data?.data ?? response.data;
+  },
+
+  listBanks: async (params = {}) => {
+    const response = await api.get('/finance/banks', { params });
+    return response.data?.data ?? response.data;
+  },
+  createBank: async (data) => {
+    const response = await api.post('/finance/banks', data);
+    return response.data?.data ?? response.data;
+  },
+  updateBank: async (id, data) => {
+    const response = await api.put(`/finance/banks/${id}`, data);
+    return response.data?.data ?? response.data;
+  },
+  deleteBank: async (id) => {
+    const response = await api.delete(`/finance/banks/${id}`);
+    return response.data?.data ?? response.data;
+  },
+
+  listAgencies: async (params = {}) => {
+    const response = await api.get('/finance/agencies', { params });
+    return response.data?.data ?? response.data;
+  },
+  createAgency: async (data) => {
+    const response = await api.post('/finance/agencies', data);
+    return response.data?.data ?? response.data;
+  },
+  updateAgency: async (id, data) => {
+    const response = await api.put(`/finance/agencies/${id}`, data);
+    return response.data?.data ?? response.data;
+  },
+  deleteAgency: async (id) => {
+    const response = await api.delete(`/finance/agencies/${id}`);
+    return response.data?.data ?? response.data;
+  },
+
+  listDigitalAccounts: async (params = {}) => {
+    const response = await api.get('/finance/digital-accounts', { params });
+    return response.data?.data ?? response.data;
+  },
+  createDigitalAccount: async (data) => {
+    const response = await api.post('/finance/digital-accounts', data);
+    return response.data?.data ?? response.data;
+  },
+  updateDigitalAccount: async (id, data) => {
+    const response = await api.put(`/finance/digital-accounts/${id}`, data);
+    return response.data?.data ?? response.data;
+  },
+  deleteDigitalAccount: async (id) => {
+    const response = await api.delete(`/finance/digital-accounts/${id}`);
+    return response.data?.data ?? response.data;
+  },
+  getDigitalAccountBalance: async (id) => {
+    const response = await api.get(`/finance/digital-accounts/${id}/balance`);
+    return response.data?.data ?? response.data;
+  },
+  moveDigitalAccount: async (id, data) => {
+    const response = await api.post(`/finance/digital-accounts/${id}/move`, data);
+    return response.data?.data ?? response.data;
+  },
+
+  listChargebacks: async (params = {}) => {
+    const response = await api.get('/finance/chargebacks', { params });
+    return response.data?.data ?? response.data;
+  },
+  createChargeback: async (data) => {
+    const response = await api.post('/finance/chargebacks', data);
+    return response.data?.data ?? response.data;
+  },
+  updateChargeback: async (id, data) => {
+    const response = await api.put(`/finance/chargebacks/${id}`, data);
+    return response.data?.data ?? response.data;
+  },
+  deleteChargeback: async (id) => {
+    const response = await api.delete(`/finance/chargebacks/${id}`);
+    return response.data?.data ?? response.data;
+  },
+};
+
 export default api;
