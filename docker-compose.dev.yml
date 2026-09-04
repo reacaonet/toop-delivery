@@ -159,10 +159,7 @@ services:
       MONGO_ADMIN_USER: ${MONGO_ADMIN_USER}
       MONGO_ADMIN_PASSWORD: ${MONGO_ADMIN_PASSWORD}
       URL_MONGO: "mongodb://${MONGO_ADMIN_USER}:${MONGO_ADMIN_PASSWORD}@admin-mongodb:27017/ecbr?authSource=admin"
-      JWT_PRIVATE_KEY: |
-        -----BEGIN PRIVATE KEY-----
-        goAQiBWv419Vh/E17+dXYKNofTnyNyM+x61psS0Ck7kIEBY0kMy/rhB4+//Btyzo9nwCNstJudNfVfLElWx2AEHeJurGkwIXmJO9TtKBW87DgT7tsXp/k+utFPgLRc2inqHkFwJLxy0x3RTmQNnYOodduxbZarHyygzDw2pKnwdQxlf5s7gCJ6DB4qWUZo3yZ351VIvu8sW7mdf7D9QGl+p2UIQQeVVTYul+G9WipuPuSZ+21Au0YUsc0bcUkK4ZewH9qKOZgZn/usjUNfqWxbK2bz3QGQp+qo214AljN+mxSa7i5V8AyjK3Skia1GBq
-        -----END PRIVATE KEY-----
+      JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY_DELIVERYMAN_MICRO}
     healthcheck:
       test: ["CMD", "node", "healthcheck.js"]
       interval: 15s
@@ -260,10 +257,7 @@ services:
       CLOUD_FIREBASE_auth_provider_x509_cert_url: ${CLOUD_FIREBASE_AUTH_PROVIDER_X509_CERT_URL:-https://www.googleapis.com/oauth2/v1/certs}
       CLOUD_FIREBASE_client_x509_cert_url: ${CLOUD_FIREBASE_CLIENT_X509_CERT_URL}
       JWT_SECRET: dev-jwt-secret-key
-      JWT_PRIVATE_KEY: |
-        -----BEGIN PRIVATE KEY-----
-        dYV7JuX1Au7dVDDHffVZqSYys1Hr3nuuvImp4XIDU/3KLBpp5A7XvPW9f3BFQtBqGkVz8Wki3RUT7U2wAoy/PcbJ50x/+R6NPD0jLfIvHrSkAYuNTCCuzOBR+cwvJ1oinS0nvBPu+8HXTDe2qvN8nVM4FjKi/63jY/Z4AQ8C5RJ2dMPLIFG8ksarmFZiGludoSNmDOF1JbHmfvCxqT5KjXnO5BpAUnVyvl1B24FlTc3t/KWbJbla/fQOOiKoGveffthPeFuHctljQNgqIc4Njxf0ze+2lTnyinXKVMd9zkQaGQ8p3j5hY8hdNtIcHj38olRl6IGqfovXsA5N1IbqYA==
-        -----END PRIVATE KEY-----
+      JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY_PAYMENT_MICRO}
     healthcheck:
       test: ["CMD", "node", "healthcheck.js"]
       interval: 15s
