@@ -76,6 +76,10 @@ import imageBankRoutes from "./image-bank.routes";
 import addressRoutes from "./address.routes";
 import publicCompanyRoutes from "./public-company.routes";
 import twilioRoutes from "./twilio.routes";
+import shoppingDepartmentRoutes from "./shopping-department.routes";
+import shoppingDepartmentMobileRoutes from "./shopping-department-mobile.routes";
+import shoppingScheduleRoutes from "./shopping-schedule.routes";
+import shoppingPaymentMethodRoutes from "./shopping-payment-method.routes";
 import { authenticate } from "../middleware/auth";
 
 const router = Router();
@@ -158,5 +162,9 @@ router.use("/imageBank", imageBankRoutes);
 router.use("/v2/address", addressRoutes);
 router.use("/v2/company", publicCompanyRoutes);
 router.use("/twilio", twilioRoutes);
+router.use("/shopping/department", authenticate, shoppingDepartmentRoutes);
+router.use("/shopping/departmentmobile", authenticate, shoppingDepartmentMobileRoutes);
+router.use("/shopping/schedule", authenticate, shoppingScheduleRoutes);
+router.use("/shopping/payment-method", authenticate, shoppingPaymentMethodRoutes);
 
 export default router;
