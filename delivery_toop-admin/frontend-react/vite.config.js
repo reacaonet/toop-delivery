@@ -6,6 +6,7 @@ const apiTarget = process.env.VITE_API_PROXY || 'http://admin-api:8100'
 const isAsset = (url) =>
   url.startsWith('/src/') ||
   url.startsWith('/node_modules/') ||
+  url.startsWith('/@react-refresh') ||
   url.startsWith('/@vite/') ||
   url.startsWith('/@id/') ||
   url.startsWith('/vite/') ||
