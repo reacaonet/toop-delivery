@@ -35,6 +35,10 @@ import Log from './pages/Log';
 import Vouchers from './pages/Vouchers';
 import Mobility from './pages/Mobility';
 import Monitor from './pages/Monitor';
+import Supermarket from './pages/Supermarket';
+import PreRegister from './pages/PreRegister';
+import Accessories from './pages/Accessories';
+import SearchScreen from './pages/Search';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 
@@ -71,6 +75,10 @@ function AdminLayout() {
             <Route path="/vouchers" element={<Vouchers />} />
             <Route path="/mobility" element={<Mobility />} />
             <Route path="/monitor" element={<Monitor />} />
+            <Route path="/supermarket" element={<Supermarket />} />
+            <Route path="/pre-register" element={<PreRegister />} />
+            <Route path="/accessories" element={<Accessories />} />
+            <Route path="/search" element={<SearchScreen />} />
             <Route path="/products" element={<Products />} />
             <Route path="/painel" element={<Painel />} />
             <Route path="/wallet" element={<WalletPage />} />

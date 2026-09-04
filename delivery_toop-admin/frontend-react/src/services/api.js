@@ -985,4 +985,116 @@ export const chatService = {
   },
 };
 
+export const supermarketService = {
+  listTabloids: async () => {
+    const r = await api.get('/tabloid/list');
+    return r.data?.data ?? r.data;
+  },
+  createTabloid: async (d) => {
+    const r = await api.post('/tabloid/register', d);
+    return r.data?.data ?? r.data;
+  },
+  deleteTabloid: async (id) => {
+    const r = await api.delete(`/tabloid/delete/${id}`);
+    return r.data?.data ?? r.data;
+  },
+  ecbrList: async (params = {}) => {
+    const r = await api.get('/v2/ecbr-image-bank/', { params });
+    return r.data?.data ?? r.data;
+  },
+  ecbrCreate: async (d) => {
+    const r = await api.post('/v2/ecbr-image-bank/', d);
+    return r.data?.data ?? r.data;
+  },
+  ecbrUpdate: async (id, d) => {
+    const r = await api.put(`/v2/ecbr-image-bank/update/${id}`, d);
+    return r.data ?? r.data;
+  },
+  ecbrGenerateCode: async () => {
+    const r = await api.get('/v2/ecbr-image-bank/generate/code/ecbr');
+    return r.data?.data ?? r.data;
+  },
+  ecbrSync: async () => {
+    const r = await api.get('/v2/ecbr-image-bank/sync');
+    return r.data?.data ?? r.data;
+  },
+};
+
+export const preRegisterService = {
+  paginator: async (params = {}) => {
+    const r = await api.get('/pre-register/paginator', { params });
+    return r.data?.data ?? r.data;
+  },
+  update: async (id, d) => {
+    const r = await api.put(`/pre-register/${id}`, d);
+    return r.data?.data ?? r.data;
+  },
+  registerPaginator: async (params = {}) => {
+    const r = await api.get('/register-deliveryman/paginator', { params });
+    return r.data?.data ?? r.data;
+  },
+  updateRegisterStatus: async (id, d) => {
+    const r = await api.put(`/register-deliveryman/status/${id}`, d);
+    return r.data?.data ?? r.data;
+  },
+};
+
+export const accessoriesService = {
+  categoryByCompany: async (company) => {
+    const r = await api.get('/v2/accessories/category/by-company', { params: { company } });
+    return r.data?.data ?? r.data;
+  },
+  createCategory: async (d) => {
+    const r = await api.post('/v2/accessories/category', d);
+    return r.data?.data ?? r.data;
+  },
+  updateCategory: async (d) => {
+    const r = await api.put('/v2/accessories/category', d);
+    return r.data?.data ?? r.data;
+  },
+  deleteCategory: async (id) => {
+    const r = await api.delete(`/v2/accessories/category/${id}`);
+    return r.data?.data ?? r.data;
+  },
+  listProducts: async (params = {}) => {
+    const r = await api.get('/v2/accessories/product', { params });
+    return r.data?.data ?? r.data;
+  },
+  getProduct: async (id) => {
+    const r = await api.get(`/v2/accessories/product/${id}`);
+    return r.data?.data ?? r.data;
+  },
+  createProduct: async (d) => {
+    const r = await api.post('/v2/accessories/product', d);
+    return r.data?.data ?? r.data;
+  },
+  updateProduct: async (id, d) => {
+    const r = await api.put(`/v2/accessories/product/${id}`, d);
+    return r.data?.data ?? r.data;
+  },
+  deleteProduct: async (id) => {
+    const r = await api.delete(`/v2/accessories/product/${id}`);
+    return r.data?.data ?? r.data;
+  },
+  complementsByProduct: async (productId) => {
+    const r = await api.get(`/v2/accessories/product-complement/${productId}`);
+    return r.data?.data ?? r.data;
+  },
+  complementCreate: async (d) => {
+    const r = await api.post('/v2/accessories/product-complement', d);
+    return r.data?.data ?? r.data;
+  },
+};
+
+export const searchService = {
+  companyProducts: async (searchText, companyType) => {
+    const r = await api.get('/v1/search/company-products', { params: { searchText, companyType } });
+    return r.data?.data ?? r.data;
+  },
+  segmentCompanyProducts: async (searchText) => {
+    const r = await api.get('/v1/search/segment/company-products', { params: { searchText } });
+    return r.data?.data ?? r.data;
+  },
+};
+
 export default api;

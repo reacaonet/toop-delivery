@@ -31,7 +31,11 @@ import {
   Mail,
   Megaphone,
   ScrollText,
-  Activity
+  Activity,
+  ScanBarcode,
+  UserPlus,
+  Shirt,
+  Search
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { deliverymanService } from '../services/api';
@@ -89,6 +93,10 @@ const Sidebar = () => {
     { path: '/vouchers', icon: Ticket, label: 'Vouchers' },
     { path: '/mobility', icon: Car, label: 'Mobility' },
     { path: '/monitor', icon: Activity, label: 'Monitor / Tools' },
+    { path: '/supermarket', icon: ScanBarcode, label: 'Supermercado' },
+    { path: '/pre-register', icon: UserPlus, label: 'Pré-registro' },
+    { path: '/accessories', icon: Shirt, label: 'Acessórios' },
+    { path: '/search', icon: Search, label: 'Busca' },
     { path: '/log', icon: ScrollText, label: 'Log / Auditoria' },
   ];
 
