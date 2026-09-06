@@ -1074,6 +1074,17 @@ export const customerService = {
   },
 };
 
+export const indicationService = {
+  paginator: async (params = {}) => {
+    const r = await api.get('/v1/mobility/indication/paginator', { params });
+    return r.data?.data ?? r.data;
+  },
+  listByPerson: async (personReceive) => {
+    const r = await api.get('/v1/mobility/indication', { params: { personReceive } });
+    return r.data?.data ?? r.data;
+  },
+};
+
 export const preRegisterService = {
   paginator: async (params = {}) => {
     const r = await api.get('/pre-register/paginator', { params });

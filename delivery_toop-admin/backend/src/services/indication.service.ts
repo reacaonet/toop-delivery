@@ -37,6 +37,38 @@ export class IndicationService {
 
     return response;
   }
+
+  async paginator(query: any) {
+    const page = parseInt(String(query.page ?? 0), 10);
+    const limit = parseInt(String(query.limit ?? 20), 10);
+
+    const lookup = (field: string) => ({
+      $lookup: {
+        from: 'person',
+        let: { id: '$' + field },
+        as: field,
+        pipeline: [
+          { $match: { $expr: { $eq: ['$_id', '$$id'] } } },
+          { $limit: 1 },
+          { $project: { name: 1, email: 1, image: 1 } },
+        ],
+      },
+    });
+
+    const list = await IndicationModel.aggregate([
+      lookup('person'),
+      { $unwind: { path: '$person', preserveNullAndEmptyArrays: true } },
+      lookup('personReceive'),
+      { $unwind: { path: '$personReceive', preserveNullAndEmptyArrays: true } },
+      { $sort: { createdAt: -1 } },
+      { $skip: page * limit },
+      { $limit: limit },
+    ]);
+
+    const total = await IndicationModel.estimatedDocumentCount();
+
+    return { list, total };
+  }
 }
 
 export default new IndicationService();
