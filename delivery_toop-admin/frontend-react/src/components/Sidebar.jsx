@@ -35,7 +35,8 @@ import {
   ScanBarcode,
   UserPlus,
   Shirt,
-  Search
+  Search,
+  UserSquare
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { deliverymanService } from '../services/api';
@@ -95,6 +96,7 @@ const Sidebar = () => {
     { path: '/monitor', icon: Activity, label: 'Monitor / Tools' },
     { path: '/supermarket', icon: ScanBarcode, label: 'Supermercado' },
     { path: '/offers', icon: BadgePercent, label: 'Ofertas' },
+    { path: '/customers', icon: UserSquare, label: 'Clientes' },
     { path: '/pre-register', icon: UserPlus, label: 'Pré-registro' },
     { path: '/accessories', icon: Shirt, label: 'Acessórios' },
     { path: '/search', icon: Search, label: 'Busca' },

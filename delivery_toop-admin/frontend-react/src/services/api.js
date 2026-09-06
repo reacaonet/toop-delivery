@@ -1039,6 +1039,41 @@ export const supermarketService = {
   },
 };
 
+export const customerService = {
+  paginator: async (params = {}) => {
+    const r = await api.get('/customer/paginator', { params });
+    return r.data?.data ?? r.data;
+  },
+  list: async (id) => {
+    const r = await api.get(`/customer/list/${id}`);
+    return r.data?.data ?? r.data;
+  },
+  listPorNome: async (name) => {
+    const r = await api.get('/customer/listPorNome', { params: { listPorNome: name } });
+    return r.data?.data ?? r.data;
+  },
+  searchCustomer: async (params = {}) => {
+    const r = await api.get('/customer/search-customer', { params });
+    return r.data?.data ?? r.data;
+  },
+  searchPersonCustomer: async (params = {}) => {
+    const r = await api.get('/customer/search-person-customer', { params });
+    return r.data?.data ?? r.data;
+  },
+  create: async (d) => {
+    const r = await api.post('/customer/create', d);
+    return r.data?.data ?? r.data;
+  },
+  update: async (id, d) => {
+    const r = await api.put(`/customer/update/${id}`, d);
+    return r.data?.data ?? r.data;
+  },
+  remove: async (id) => {
+    const r = await api.delete(`/customer/delete/${id}`);
+    return r.data?.data ?? r.data;
+  },
+};
+
 export const preRegisterService = {
   paginator: async (params = {}) => {
     const r = await api.get('/pre-register/paginator', { params });
