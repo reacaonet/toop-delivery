@@ -36,6 +36,7 @@ import Vouchers from './pages/Vouchers';
 import Mobility from './pages/Mobility';
 import Monitor from './pages/Monitor';
 import Supermarket from './pages/Supermarket';
+import Offers from './pages/Offers';
 import PreRegister from './pages/PreRegister';
 import Accessories from './pages/Accessories';
 import SearchScreen from './pages/Search';
@@ -76,6 +77,7 @@ function AdminLayout() {
             <Route path="/mobility" element={<Mobility />} />
             <Route path="/monitor" element={<Monitor />} />
             <Route path="/supermarket" element={<Supermarket />} />
+            <Route path="/offers" element={<Offers />} />
             <Route path="/pre-register" element={<PreRegister />} />
             <Route path="/accessories" element={<Accessories />} />
             <Route path="/search" element={<SearchScreen />} />

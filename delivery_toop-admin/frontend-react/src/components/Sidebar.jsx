@@ -94,6 +94,7 @@ const Sidebar = () => {
     { path: '/mobility', icon: Car, label: 'Mobility' },
     { path: '/monitor', icon: Activity, label: 'Monitor / Tools' },
     { path: '/supermarket', icon: ScanBarcode, label: 'Supermercado' },
+    { path: '/offers', icon: BadgePercent, label: 'Ofertas' },
     { path: '/pre-register', icon: UserPlus, label: 'Pré-registro' },
     { path: '/accessories', icon: Shirt, label: 'Acessórios' },
     { path: '/search', icon: Search, label: 'Busca' },

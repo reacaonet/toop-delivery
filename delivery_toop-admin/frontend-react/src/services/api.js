@@ -985,6 +985,25 @@ export const chatService = {
   },
 };
 
+export const offerService = {
+  listOffers: async () => {
+    const r = await api.get('/offer/list');
+    return r.data?.data ?? r.data;
+  },
+  createOffer: async (d) => {
+    const r = await api.post('/offer/register', d);
+    return r.data?.data ?? r.data;
+  },
+  updateOffer: async (id, d) => {
+    const r = await api.put(`/offer/update/${id}`, d);
+    return r.data?.data ?? r.data;
+  },
+  deleteOffer: async (id) => {
+    const r = await api.delete(`/offer/delete/${id}`);
+    return r.data?.data ?? r.data;
+  },
+};
+
 export const supermarketService = {
   listTabloids: async () => {
     const r = await api.get('/tabloid/list');
