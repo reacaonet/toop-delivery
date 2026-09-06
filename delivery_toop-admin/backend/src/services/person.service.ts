@@ -1,5 +1,7 @@
 import mongoose from 'mongoose';
 import { PersonModel } from '../models/Person';
+import { CustomerModel } from '../models/Customer';
+import { IndicationModel } from '../models/Indication';
 import { AppError } from '../middleware/errorHandler';
 
 interface PersonQuery {
@@ -146,6 +148,12 @@ export class PersonService {
     if (query.type === 'person' && query.field === 'email') {
       return PersonModel.aggregate([{ $group: { _id: '$email', nmEmail: { $sum: 2 } } }]);
     }
+    if (query.type === 'customer' && query.field === 'phone') {
+      return CustomerModel.aggregate([{ $group: { _id: '$phone', nmPhone: { $sum: 2 } } }]);
+    }
+    if (query.type === 'customer' && query.field === 'email') {
+      return CustomerModel.aggregate([{ $group: { _id: '$email', nmEmail: { $sum: 2 } } }]);
+    }
     return {};
   }
 
@@ -181,8 +189,13 @@ export class PersonService {
     if (data.code) {
       const isCode = await PersonModel.findOne({ referralCode: data.code }).select({ _id: 1 }).lean();
       if (!isCode) throw new AppError('Código informado inválido', 400);
+      await IndicationModel.create({
+        person: id,
+        personReceive: isCode._id,
+        referralCode: data.code,
+        total: 20,
+      });
       delete data.code;
-      // Indicação (IndicationModel) não migrada — criação de vínculo registrada adiante.
     }
 
     const doc = await PersonModel.findOneAndUpdate({ _id: id }, data, { upsert: true, new: true })
