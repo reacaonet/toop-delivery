@@ -39,6 +39,7 @@ import Supermarket from './pages/Supermarket';
 import Offers from './pages/Offers';
 import Customers from './pages/Customers';
 import Indications from './pages/Indications';
+import Persons from './pages/Persons';
 import PreRegister from './pages/PreRegister';
 import Accessories from './pages/Accessories';
 import SearchScreen from './pages/Search';
@@ -82,6 +83,7 @@ function AdminLayout() {
             <Route path="/offers" element={<Offers />} />
             <Route path="/customers" element={<Customers />} />
             <Route path="/indications" element={<Indications />} />
+            <Route path="/persons" element={<Persons />} />
             <Route path="/pre-register" element={<PreRegister />} />
             <Route path="/accessories" element={<Accessories />} />
             <Route path="/search" element={<SearchScreen />} />

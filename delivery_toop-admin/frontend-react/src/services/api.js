@@ -52,6 +52,29 @@ export const authService = {
   }
 };
 
+export const personService = {
+  paginator: async (params = {}) => {
+    const r = await api.get('/person/paginator', { params });
+    return r.data?.data ?? r.data;
+  },
+  get: async (id) => {
+    const r = await api.get(`/person/${id}`);
+    return r.data?.data ?? r.data;
+  },
+  update: async (id, d) => {
+    const r = await api.put(`/person/${id}`, d);
+    return r.data?.data ?? r.data;
+  },
+  remove: async (id) => {
+    const r = await api.delete(`/person/${id}`);
+    return r.data?.data ?? r.data;
+  },
+  registerDuplicates: async (type, field) => {
+    const r = await api.get('/person/register-duplicates', { params: { type, field } });
+    return r.data?.data ?? r.data;
+  },
+};
+
 export const userService = {
   getUsers: async () => {
     const response = await api.get('/users');

@@ -37,7 +37,8 @@ import {
   Shirt,
   Search,
   UserSquare,
-  Gift
+  Gift,
+  UserRound
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { deliverymanService } from '../services/api';
@@ -98,6 +99,7 @@ const Sidebar = () => {
     { path: '/supermarket', icon: ScanBarcode, label: 'Supermercado' },
     { path: '/offers', icon: BadgePercent, label: 'Ofertas' },
     { path: '/customers', icon: UserSquare, label: 'Clientes' },
+    { path: '/persons', icon: UserRound, label: 'Pessoas' },
     { path: '/indications', icon: Gift, label: 'Indicações' },
     { path: '/pre-register', icon: UserPlus, label: 'Pré-registro' },
     { path: '/accessories', icon: Shirt, label: 'Acessórios' },
