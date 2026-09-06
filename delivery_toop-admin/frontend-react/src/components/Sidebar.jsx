@@ -38,7 +38,9 @@ import {
   Search,
   UserSquare,
   Gift,
-  UserRound
+  UserRound,
+  LayoutGrid,
+  BellRing
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { deliverymanService } from '../services/api';
@@ -101,6 +103,9 @@ const Sidebar = () => {
     { path: '/customers', icon: UserSquare, label: 'Clientes' },
     { path: '/persons', icon: UserRound, label: 'Pessoas' },
     { path: '/indications', icon: Gift, label: 'Indicações' },
+    { path: '/shopping-departments', icon: LayoutGrid, label: 'Departamentos' },
+    { path: '/sliders', icon: Image, label: 'Sliders' },
+    { path: '/alert-products', icon: BellRing, label: 'Alertas de Produto' },
     { path: '/pre-register', icon: UserPlus, label: 'Pré-registro' },
     { path: '/accessories', icon: Shirt, label: 'Acessórios' },
     { path: '/search', icon: Search, label: 'Busca' },

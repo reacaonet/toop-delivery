@@ -1185,4 +1185,73 @@ export const searchService = {
   },
 };
 
+export const shoppingDepartmentService = {
+  paginator: async (params = {}) => {
+    const r = await api.get('/shopping/department/paginator', { params });
+    return r.data?.data ?? r.data;
+  },
+  list: async () => {
+    const r = await api.get('/shopping/department/');
+    return r.data?.data ?? r.data;
+  },
+  create: async (d) => {
+    const r = await api.post('/shopping/department/', d);
+    return r.data?.data ?? r.data;
+  },
+  update: async (id, d) => {
+    const r = await api.put(`/shopping/department/${id}`, d);
+    return r.data?.data ?? r.data;
+  },
+  remove: async (id) => {
+    const r = await api.delete(`/shopping/department/${id}`);
+    return r.data?.data ?? r.data;
+  },
+};
+
+export const sliderService = {
+  paginator: async (params = {}) => {
+    const r = await api.get('/slider/paginator', { params });
+    return r.data?.data ?? r.data;
+  },
+  list: async (params = {}) => {
+    const r = await api.get('/slider/list', { params });
+    return r.data?.data ?? r.data;
+  },
+  register: async (d) => {
+    const r = await api.post('/slider/register', d);
+    return r.data?.data ?? r.data;
+  },
+  create: async (d) => {
+    const r = await api.post('/slider/create', d);
+    return r.data?.data ?? r.data;
+  },
+  update: async (id, d) => {
+    const r = await api.put(`/slider/update/${id}`, d);
+    return r.data?.data ?? r.data;
+  },
+  remove: async (id) => {
+    const r = await api.delete(`/slider/delete/${id}`);
+    return r.data?.data ?? r.data;
+  },
+};
+
+export const alertProductService = {
+  list: async () => {
+    const r = await api.get('/v2/customer-alert-product/alert-product/notification');
+    return r.data?.data ?? r.data;
+  },
+  create: async (d) => {
+    const r = await api.post('/v2/customer-alert-product/alert-product/notification', d);
+    return r.data?.data ?? r.data;
+  },
+  update: async (idAlert) => {
+    const r = await api.put(`/v2/customer-alert-product/alert-product/notification/${idAlert}`);
+    return r.data?.data ?? r.data;
+  },
+  report: async (params = {}) => {
+    const r = await api.get('/v2/customer-alert-product/alert-product/report', { params });
+    return r.data?.data ?? r.data;
+  },
+};
+
 export default api;
