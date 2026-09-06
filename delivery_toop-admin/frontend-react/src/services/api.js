@@ -1254,4 +1254,74 @@ export const alertProductService = {
   },
 };
 
+export const tipService = {
+  list: async () => {
+    const r = await api.get('/Tip/list');
+    return r.data?.data ?? r.data;
+  },
+  createTip: async (d) => {
+    const r = await api.post('/Tip/create', d);
+    return r.data?.data ?? r.data;
+  },
+  removeTip: async (id) => {
+    const r = await api.delete(`/Tip/delete/${id}`);
+    return r.data?.data ?? r.data;
+  },
+  search: async (params = {}) => {
+    const r = await api.get('/Tip/search', { params });
+    return r.data?.data ?? r.data;
+  },
+  listDeliveryMen: async () => {
+    const r = await api.get('/TipDeliveryMan/list');
+    return r.data?.data ?? r.data;
+  },
+  createDeliveryTip: async (d) => {
+    const r = await api.post('/TipDeliveryMan/create', d);
+    return r.data?.data ?? r.data;
+  },
+  removeDeliveryTip: async (id) => {
+    const r = await api.delete(`/TipDeliveryMan/delete/${id}`);
+    return r.data?.data ?? r.data;
+  },
+};
+
+export const siteService = {
+  paginator: (params) => api.get('/company/site/paginator', { params }).then((r) => r.data?.data ?? r.data),
+  list: () => api.get('/company/site').then((r) => r.data?.data ?? r.data),
+  create: (data) => api.post('/company/site', data).then((r) => r.data?.data ?? r.data),
+  update: (id, data) => api.put(`/company/site/${id}`, data).then((r) => r.data?.data ?? r.data),
+  remove: (id) => api.delete(`/company/site/${id}`).then((r) => r.data?.data ?? r.data),
+};
+
+export const scheduleService = {
+  all: async () => {
+    const r = await api.get('/shopping/schedule/all');
+    return r.data?.data ?? r.data;
+  },
+  have: async (company) => {
+    const r = await api.get(`/shopping/schedule/have/${company}`);
+    return r.data?.data ?? r.data;
+  },
+  list: async (company) => {
+    const r = await api.get(`/shopping/schedule/${company}`);
+    return r.data?.data ?? r.data;
+  },
+  create: async (company, d) => {
+    const r = await api.post(`/shopping/schedule/${company}`, d);
+    return r.data?.data ?? r.data;
+  },
+  updateType: async (d) => {
+    const r = await api.put('/shopping/schedule/type', d);
+    return r.data?.data ?? r.data;
+  },
+  update: async (id, d) => {
+    const r = await api.put(`/shopping/schedule/${id}`, d);
+    return r.data?.data ?? r.data;
+  },
+  remove: async (id) => {
+    const r = await api.delete(`/shopping/schedule/${id}`);
+    return r.data?.data ?? r.data;
+  },
+};
+
 export default api;

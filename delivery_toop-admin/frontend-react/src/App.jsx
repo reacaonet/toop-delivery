@@ -43,6 +43,9 @@ import Persons from './pages/Persons';
 import ShoppingDepartments from './pages/ShoppingDepartments';
 import Sliders from './pages/Sliders';
 import AlertProducts from './pages/AlertProducts';
+import Tips from './pages/Tips';
+import Sites from './pages/Sites';
+import Schedules from './pages/Schedules';
 import PreRegister from './pages/PreRegister';
 import Accessories from './pages/Accessories';
 import SearchScreen from './pages/Search';
@@ -90,6 +93,9 @@ function AdminLayout() {
             <Route path="/shopping-departments" element={<ShoppingDepartments />} />
             <Route path="/sliders" element={<Sliders />} />
             <Route path="/alert-products" element={<AlertProducts />} />
+            <Route path="/tips" element={<Tips />} />
+            <Route path="/company-sites" element={<Sites />} />
+            <Route path="/shopping-schedules" element={<Schedules />} />
             <Route path="/pre-register" element={<PreRegister />} />
             <Route path="/accessories" element={<Accessories />} />
             <Route path="/search" element={<SearchScreen />} />

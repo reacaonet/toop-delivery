@@ -22,6 +22,7 @@ interface ScheduleDaySlot {
 export class ShoppingScheduleService {
   async listAll() {
     const rows = await ShoppingScheduleModel.aggregate([
+      { $match: { deletedAt: { $exists: false } } },
       { $sort: { dayWeek: 1, startHour: 1 } },
       {
         $lookup: {

@@ -40,7 +40,10 @@ import {
   Gift,
   UserRound,
   LayoutGrid,
-  BellRing
+  BellRing,
+  Coins,
+  Globe2,
+  Clock
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { deliverymanService } from '../services/api';
@@ -106,6 +109,9 @@ const Sidebar = () => {
     { path: '/shopping-departments', icon: LayoutGrid, label: 'Departamentos' },
     { path: '/sliders', icon: Image, label: 'Sliders' },
     { path: '/alert-products', icon: BellRing, label: 'Alertas de Produto' },
+    { path: '/tips', icon: Coins, label: 'Gorjetas' },
+    { path: '/company-sites', icon: Globe2, label: 'Sites de Empresa' },
+    { path: '/shopping-schedules', icon: Clock, label: 'Horários' },
     { path: '/pre-register', icon: UserPlus, label: 'Pré-registro' },
     { path: '/accessories', icon: Shirt, label: 'Acessórios' },
     { path: '/search', icon: Search, label: 'Busca' },
