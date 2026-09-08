@@ -1,7 +1,8 @@
 export const APP_URLS = {
-  client: 'http://localhost:4200',
-  store: 'http://localhost:4203',
-  deliveryman: 'http://localhost:4204',
+  client: 'http://app.gojadelivery.app.br:4200',
+  store: 'http://loja.gojadelivery.app.br:4203',
+  deliveryman: 'http://entregador.gojadelivery.app.br:4204',
+  admin: 'http://admin.gojadelivery.app.br:4202',
 } as const
 
 export const LINKS = {

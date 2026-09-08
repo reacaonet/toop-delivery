@@ -34,13 +34,8 @@ const STATS = [
 ]
 
 export default function DriverLandingPage() {
-  const cta = [
-    { label: 'Entrar', href: LINKS.deliverymanLogin, variant: 'outline' as const },
-    { label: 'Cadastrar', href: LINKS.deliverymanRegister },
-  ]
-
   return (
-    <SiteFrame active="driver" cta={cta}>
+    <SiteFrame active="driver">
       {/* HERO */}
       <section className="lp-hero lp-hero-driver">
         <div className="lp-container lp-hero-inner">

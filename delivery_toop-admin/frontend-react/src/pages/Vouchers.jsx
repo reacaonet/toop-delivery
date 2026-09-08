@@ -22,7 +22,7 @@ const Vouchers = () => {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    franchiseService.getFranchises().then((res) => {
+    franchiseService.listAll().then((res) => {
       const list = extractList(res);
       setFranchises(list);
       if (list.length > 0) setFranchise(list[0]._id);

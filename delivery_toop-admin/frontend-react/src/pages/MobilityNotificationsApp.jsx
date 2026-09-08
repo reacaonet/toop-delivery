@@ -87,7 +87,7 @@ const NotificationsTab = () => {
   useEffect(() => { load(0); setPage(0); }, [filterType, filterFranchise]);
   useEffect(() => { load(0); }, []);
   useEffect(() => {
-    franchiseService.getFranchises().then((r) => setFranchises(extractList(r))).catch(() => {});
+    franchiseService.listAll().then((r) => setFranchises(extractList(r))).catch(() => {});
   }, []);
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -236,7 +236,7 @@ const NewTab = ({ onCreated }) => {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    franchiseService.getFranchises().then((r) => setFranchises(extractList(r))).catch(() => {});
+    franchiseService.listAll().then((r) => setFranchises(extractList(r))).catch(() => {});
   }, []);
 
   const change = (e) => setForm((p) => ({ ...p, [e.target.name]: e.target.value }));

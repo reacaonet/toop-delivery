@@ -49,7 +49,10 @@ import {
   BarChart3,
   Map,
   MessageCircle,
-  Radio
+  Radio,
+  QrCode,
+  Send,
+  AppWindow
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { deliverymanService } from '../services/api';
@@ -118,6 +121,19 @@ const Sidebar = () => {
     { path: '/mobility/topics', icon: Radio, label: 'Mobility Tópicos' },
     { path: '/mobility/documents', icon: FileText, label: 'Mobility Documentos' },
     { path: '/mobility/app-notifications', icon: Megaphone, label: 'Mobility Notificações App' },
+    { path: '/groups', icon: LayoutGrid, label: 'Grupos' },
+    { path: '/shopping-payment-methods', icon: CreditCard, label: 'Met. Pagamento Super' },
+    { path: '/company-config', icon: Settings, label: 'Config. Empresa' },
+    { path: '/access-flow', icon: Activity, label: 'Access Flow' },
+    { path: '/mobility/document-types', icon: FileText, label: 'Mobility Tipos Doc.' },
+    { path: '/mobility/peak-hours', icon: Clock, label: 'Mobility Pico Horário' },
+    { path: '/mobility/support-subjects', icon: Headphones, label: 'Mobility Assuntos' },
+    { path: '/stock', icon: Package, label: 'Estoque' },
+    { path: '/reviews', icon: Star, label: 'Avaliações' },
+    { path: '/dispatch', icon: Radio, label: 'Despacho' },
+    { path: '/image-bank', icon: Image, label: 'Banco de Imagens' },
+    { path: '/notification-topic', icon: Send, label: 'Notif. Tópico' },
+    { path: '/mobility/qr-codes', icon: QrCode, label: 'QR Codes' },
     { path: '/monitor', icon: Activity, label: 'Monitor / Tools' },
     { path: '/supermarket', icon: ScanBarcode, label: 'Supermercado' },
     { path: '/offers', icon: BadgePercent, label: 'Ofertas' },
@@ -125,6 +141,7 @@ const Sidebar = () => {
     { path: '/persons', icon: UserRound, label: 'Pessoas' },
     { path: '/indications', icon: Gift, label: 'Indicações' },
     { path: '/shopping-departments', icon: LayoutGrid, label: 'Departamentos' },
+    { path: '/app-categories', icon: AppWindow, label: 'Categorias App' },
     { path: '/sliders', icon: Image, label: 'Sliders' },
     { path: '/alert-products', icon: BellRing, label: 'Alertas de Produto' },
     { path: '/tips', icon: Coins, label: 'Gorjetas' },

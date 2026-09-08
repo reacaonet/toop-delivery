@@ -35,10 +35,8 @@ export default function ContactPage() {
     }, 400)
   }
 
-  const cta = [] as { label: string; href: string }[]
-
   return (
-    <SiteFrame active="contact" cta={cta}>
+    <SiteFrame active="contact">
       {/* HERO */}
       <section className="lp-hero lp-hero-contact">
         <div className="lp-container lp-hero-inner">

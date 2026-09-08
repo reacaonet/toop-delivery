@@ -18,6 +18,7 @@ export default defineConfig({
   server: {
     port: 4202,
     host: '0.0.0.0',
+    allowedHosts: ['.gojadelivery.app.br'],
     proxy: {
       '/': {
         target: apiTarget,

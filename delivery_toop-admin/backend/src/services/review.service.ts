@@ -2,6 +2,7 @@ import { ReviewModel } from "../models/Review";
 import { OrderModel } from "../models/Order";
 import { CompanyModel } from "../models/Company";
 import { DeliverymanModel } from "../models/Deliveryman";
+import mongoose from "mongoose";
 import { AppError } from "../middleware/errorHandler";
 
 export class ReviewService {
@@ -74,6 +75,9 @@ export class ReviewService {
   }
 
   async listByCompany(companyId: string, page = 1, limit = 20) {
+    if (!mongoose.isValidObjectId(companyId)) {
+      throw new AppError("Informe uma empresa válida", 400);
+    }
     const skip = (page - 1) * limit;
     const [data, total] = await Promise.all([
       ReviewModel.find({ company: companyId, type: 'store' })
@@ -87,6 +91,9 @@ export class ReviewService {
   }
 
   async listByOrder(orderId: string) {
+    if (!mongoose.isValidObjectId(orderId)) {
+      throw new AppError("Informe um pedido válido", 400);
+    }
     return ReviewModel.find({ order: orderId }).populate('customer', 'name');
   }
 

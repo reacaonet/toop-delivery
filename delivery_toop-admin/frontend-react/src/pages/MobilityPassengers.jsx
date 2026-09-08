@@ -54,7 +54,7 @@ const MobilityPassengers = () => {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    franchiseService.getFranchises().then((res) => setFranchises(extractList(res))).catch(console.error);
+    franchiseService.listAll().then((res) => setFranchises(extractList(res))).catch(console.error);
     personService.paginator({ pageIn: 0, pageOut: 1000 }).then((res) => {
       const list = extractList(res);
       setPersons(list);

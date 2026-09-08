@@ -326,6 +326,11 @@ body {
   padding: 8px 14px; border-radius: 20px; margin-left: auto; flex-shrink: 0;
 }
 
+/* ===================== FRANCHISE HERO ===================== */
+.lp-hero-franchise {
+  background: linear-gradient(135deg, #E6F9EE 0%, var(--white) 50%, #F2FBF5 100%);
+}
+
 
 /* ===================== RESPONSIVE ===================== */
 @media (max-width: 1024px) {

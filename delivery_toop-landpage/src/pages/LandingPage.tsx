@@ -2,7 +2,8 @@ import { Link } from 'react-router-dom'
 import {
   Store, Truck, ShoppingBag, ArrowRight, CheckCircle, Clock, Star,
   MapPin, BarChart3, Bell, Shield, Zap, Users, TrendingUp,
-  Phone, Mail, ExternalLink, HandCoins, Target, Radio, Navigation
+  Phone, Mail, ExternalLink, HandCoins, Target, Radio, Navigation,
+  ShoppingBasket, Building2, Network
 } from 'lucide-react'
 import SiteFrame from '../components/SiteFrame'
 import { LINKS } from '../constants'
@@ -35,14 +36,16 @@ const STATS = [
   { value: '∞', label: 'Pedidos sem limite' },
 ]
 
-export default function LandingPage() {
-  const cta = [
-    { label: 'Entrar', href: LINKS.clientLogin, variant: 'outline' as const },
-    { label: 'Cadastrar', href: LINKS.clientRegister },
-  ]
+const FEATURES_EXPAND = [
+  { icon: <ShoppingBasket size={24} />, title: 'Supermercado Online', desc: 'Departamentos, catálogo por código de barras, agendamento de entrega e pagamento no app.' },
+  { icon: <Building2 size={24} />, title: 'Gestão Multi-Loja', desc: 'Administre todas as unidades de uma rede em um único painel, com métricas separadas.' },
+  { icon: <Network size={24} />, title: 'Franquia de Delivery', desc: 'Expanda sua marca com padronização de cardápio e relatórios por operação.' },
+  { icon: <TrendingUp size={24} />, title: 'Repasses da Rede', desc: 'Comissões e repasses centralizados com transparência total para cada unidade.' },
+]
 
+export default function LandingPage() {
   return (
-    <SiteFrame active="home" cta={cta}>
+    <SiteFrame active="home">
       {/* HERO */}
       <section className="lp-hero">
         <div className="lp-container lp-hero-inner">
@@ -90,6 +93,7 @@ export default function LandingPage() {
                   <span className="lp-phone-cat active">🔥 Todos</span>
                   <span className="lp-phone-cat">🍕 Pizzas</span>
                   <span className="lp-phone-cat">🍔 Lanches</span>
+                  <span className="lp-phone-cat">🛒 Mercado</span>
                   <span className="lp-phone-cat">🍣 Japonesa</span>
                 </div>
                 <div className="lp-phone-stores">
@@ -203,6 +207,34 @@ export default function LandingPage() {
           <div className="lp-driver-cta">
             <Link to="/motorista" className="lp-btn lp-btn-lg">
               Começar a entregar <ArrowRight size={18} />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* SUPERMERCADOS E FRANQUIAS */}
+      <section className="lp-section lp-section-alt" id="supermercados-franquias">
+        <div className="lp-container">
+          <div className="lp-section-header">
+            <span className="lp-section-tag">Supermercados e Franquias</span>
+            <h2>Cresça com Supermercados e Franquias</h2>
+            <p>E-commerce completo para mercados e ferramentas para gerenciar redes de delivery</p>
+          </div>
+          <div className="lp-features-grid lp-features-4">
+            {FEATURES_EXPAND.map(f => (
+              <div key={f.title} className="lp-feature-card">
+                <div className="lp-feature-icon">{f.icon}</div>
+                <h3>{f.title}</h3>
+                <p>{f.desc}</p>
+              </div>
+            ))}
+          </div>
+          <div className="lp-driver-cta" style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+            <Link to="/supermercados" className="lp-btn lp-btn-lg">
+              Para Supermercados <ArrowRight size={18} />
+            </Link>
+            <Link to="/franquias" className="lp-btn lp-btn-lg lp-btn-ghost">
+              Para Franquias <ArrowRight size={18} />
             </Link>
           </div>
         </div>

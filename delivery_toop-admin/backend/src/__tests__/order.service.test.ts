@@ -56,9 +56,17 @@ describe('OrderService', () => {
   });
 
   describe('getById', () => {
+    function mockFindByIdChain(value: any) {
+      const chain = {
+        populate: jest.fn().mockReturnThis(),
+        then: (resolve: (v: any) => void) => resolve(value),
+      };
+      MockOrderModel.findById.mockReturnValue(chain as any);
+    }
+
     it('should return an order by id', async () => {
       const mockOrder = { _id: 'order123', status: 'pending', company: { name: 'Test Co' } };
-      MockOrderModel.findById.mockReturnValue({ populate: jest.fn().mockResolvedValue(mockOrder) } as any);
+      mockFindByIdChain(mockOrder);
 
       const result = await orderService.getById('order123');
 
@@ -67,7 +75,7 @@ describe('OrderService', () => {
     });
 
     it('should throw AppError if order not found', async () => {
-      MockOrderModel.findById.mockReturnValue({ populate: jest.fn().mockResolvedValue(null) } as any);
+      mockFindByIdChain(null);
 
       await expect(orderService.getById('nonexistent')).rejects.toThrow(AppError);
       await expect(orderService.getById('nonexistent')).rejects.toThrow('Pedido não encontrado');

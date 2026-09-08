@@ -293,6 +293,7 @@ export class DeliveryDispatchService {
   }
 
   async deliveryPrice(orderId: string) {
+    if (!isValidId(orderId)) throw new AppError('Informe um pedido válido', 400);
     const order = await OrderModel.findById(orderId).lean();
     if (!order) throw new AppError('Pedido não encontrado', 404);
 

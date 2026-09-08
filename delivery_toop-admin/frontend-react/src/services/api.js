@@ -470,6 +470,48 @@ export const franchiseService = {
     const response = await api.delete(`/franchises/${id}`);
     return response.data?.data ?? response.data;
   },
+  getConfig: async (companyId) => {
+    const r = await api.get(`/franchises/config/${companyId}`);
+    return r.data?.data ?? r.data;
+  },
+  listAll: async () => {
+    const r = await api.get('/franchises/list-all');
+    return r.data?.data ?? r.data;
+  },
+};
+
+export const accessFlowService = {
+  list: async () => {
+    const r = await api.get('/report/access-flow/list');
+    return r.data?.data ?? r.data;
+  },
+  statistic: async (timeInterval = 0) => {
+    const r = await api.get('/report/access-flow/statistic', { params: { timeInterval } });
+    return r.data?.data ?? r.data;
+  },
+};
+
+export const appCategoryService = {
+  paginator: async (params = {}) => {
+    const r = await api.get('/application/category', { params });
+    return r.data?.data ?? r.data;
+  },
+  get: async (id) => {
+    const r = await api.get(`/application/category/${id}`);
+    return r.data?.data ?? r.data;
+  },
+  create: async (d) => {
+    const r = await api.post('/application/category', d);
+    return r.data?.data ?? r.data;
+  },
+  update: async (id, d) => {
+    const r = await api.put(`/application/category/${id}`, d);
+    return r.data?.data ?? r.data;
+  },
+  remove: async (id) => {
+    const r = await api.delete(`/application/category/${id}`);
+    return r.data?.data ?? r.data;
+  },
 };
 
 export const aclService = {
@@ -1609,6 +1651,319 @@ export const mobilityNotificationAppService = {
   },
   remove: async (id) => {
     const r = await api.delete(`/v1/mobility/notifications/${id}`);
+    return r.data?.data ?? r.data;
+  },
+};
+
+export const groupService = {
+  paginator: async (params = {}) => {
+    const { pageIn = 0, pageOut = 20, ...rest } = params;
+    const r = await api.get('/group/paginator', { params: { pageIn, pageOut, ...rest } });
+    return r.data?.data ?? r.data;
+  },
+  list: async (params = {}) => {
+    const r = await api.get('/group/list', { params });
+    return r.data?.data ?? r.data;
+  },
+  listPorNome: async (name) => {
+    const r = await api.get('/group/listPorNome', { params: { listPorNome: name } });
+    return r.data?.data ?? r.data;
+  },
+  get: async (id) => {
+    const r = await api.get(`/group/${id}`);
+    return r.data?.data ?? r.data;
+  },
+  create: async (d) => {
+    const r = await api.post('/group', d);
+    return r.data?.data ?? r.data;
+  },
+  update: async (id, d) => {
+    const r = await api.put(`/group/${id}`, d);
+    return r.data?.data ?? r.data;
+  },
+  remove: async (id) => {
+    const r = await api.delete(`/group/${id}`);
+    return r.data?.data ?? r.data;
+  },
+};
+
+export const shoppingPaymentMethodService = {
+  list: async (customer, params = {}) => {
+    const r = await api.get(`/shopping/payment-method/${customer}`, { params });
+    return r.data?.data ?? r.data;
+  },
+  create: async (customer, d) => {
+    const r = await api.post(`/shopping/payment-method/${customer}`, d);
+    return r.data?.data ?? r.data;
+  },
+  update: async (id, d) => {
+    const r = await api.put(`/shopping/payment-method/${id}`, d);
+    return r.data?.data ?? r.data;
+  },
+  remove: async (id) => {
+    const r = await api.delete(`/shopping/payment-method/${id}`);
+    return r.data?.data ?? r.data;
+  },
+};
+
+export const mobilityDocumentTypeService = {
+  paginator: async (params = {}) => {
+    const r = await api.get('/v1/mobility/documenttypes/paginator', { params });
+    return r.data?.data ?? r.data;
+  },
+  search: async (params = {}) => {
+    const r = await api.get('/v1/mobility/documenttypes/search', { params });
+    return r.data?.data ?? r.data;
+  },
+  listAll: async () => {
+    const r = await api.get('/v1/mobility/documenttypes/listAll');
+    return r.data?.data ?? r.data;
+  },
+  get: async (id) => {
+    const r = await api.get(`/v1/mobility/documenttypes/${id}`);
+    return r.data?.data ?? r.data;
+  },
+  create: async (d) => {
+    const r = await api.post('/v1/mobility/documenttypes', d);
+    return r.data?.data ?? r.data;
+  },
+  update: async (id, d) => {
+    const r = await api.put(`/v1/mobility/documenttypes/${id}`, d);
+    return r.data?.data ?? r.data;
+  },
+  remove: async (id) => {
+    const r = await api.delete(`/v1/mobility/documenttypes/${id}`);
+    return r.data?.data ?? r.data;
+  },
+};
+
+export const mobilitySupportSubjectService = {
+  paginator: async (params = {}) => {
+    const r = await api.get('/v1/mobility/supportsubjects/paginator', { params });
+    return r.data?.data ?? r.data;
+  },
+  listAll: async () => {
+    const r = await api.get('/v1/mobility/supportsubjects/listAll');
+    return r.data?.data ?? r.data;
+  },
+  graphic: async () => {
+    const r = await api.get('/v1/mobility/supportsubjects/graphic');
+    return r.data?.data ?? r.data;
+  },
+  search: async (params = {}) => {
+    const r = await api.get('/v1/mobility/supportsubjects/search', { params });
+    return r.data?.data ?? r.data;
+  },
+  list: async (id, params = {}) => {
+    const r = id
+      ? await api.get(`/v1/mobility/supportsubjects/${id}`)
+      : await api.get('/v1/mobility/supportsubjects', { params });
+    return r.data?.data ?? r.data;
+  },
+  create: async (d) => {
+    const r = await api.post('/v1/mobility/supportsubjects', d);
+    return r.data?.data ?? r.data;
+  },
+  update: async (id, d) => {
+    const r = await api.put(`/v1/mobility/supportsubjects/${id}`, d);
+    return r.data?.data ?? r.data;
+  },
+  remove: async (id) => {
+    const r = await api.delete(`/v1/mobility/supportsubjects/${id}`);
+    return r.data?.data ?? r.data;
+  },
+};
+
+export const stockService = {
+  listItems: async (companyId, params = {}) => {
+    const r = await api.get(`/stock-items/company/${companyId}`, { params });
+    return r.data?.data ?? r.data;
+  },
+  getItem: async (id) => {
+    const r = await api.get(`/stock-items/${id}`);
+    return r.data?.data ?? r.data;
+  },
+  createItem: async (d) => {
+    const r = await api.post('/stock-items', d);
+    return r.data?.data ?? r.data;
+  },
+  updateItem: async (id, d) => {
+    const r = await api.put(`/stock-items/${id}`, d);
+    return r.data?.data ?? r.data;
+  },
+  removeItem: async (id) => {
+    const r = await api.delete(`/stock-items/${id}`);
+    return r.data?.data ?? r.data;
+  },
+  listBatchesByCompany: async (companyId) => {
+    const r = await api.get(`/stock-batches/company/${companyId}`);
+    return r.data?.data ?? r.data;
+  },
+  listBatchesByBranch: async (branchId, params = {}) => {
+    const r = await api.get(`/stock-batches/branch/${branchId}`, { params });
+    return r.data?.data ?? r.data;
+  },
+  listBatchAlerts: async (companyId) => {
+    const r = await api.get(`/stock-batches/alerts/${companyId}`);
+    return r.data?.data ?? r.data;
+  },
+  getBatch: async (id) => {
+    const r = await api.get(`/stock-batches/${id}`);
+    return r.data?.data ?? r.data;
+  },
+  createBatch: async (d) => {
+    const r = await api.post('/stock-batches', d);
+    return r.data?.data ?? r.data;
+  },
+  updateBatch: async (id, d) => {
+    const r = await api.put(`/stock-batches/${id}`, d);
+    return r.data?.data ?? r.data;
+  },
+  listMovementsByCompany: async (companyId, params = {}) => {
+    const r = await api.get(`/stock-movements/company/${companyId}`, { params });
+    return r.data?.data ?? r.data;
+  },
+  listMovementsByBranch: async (branchId, params = {}) => {
+    const r = await api.get(`/stock-movements/branch/${branchId}`, { params });
+    return r.data?.data ?? r.data;
+  },
+  getSummaryByBranch: async (branchId) => {
+    const r = await api.get(`/stock-movements/summary/${branchId}`);
+    return r.data?.data ?? r.data;
+  },
+  getMovement: async (id) => {
+    const r = await api.get(`/stock-movements/${id}`);
+    return r.data?.data ?? r.data;
+  },
+  registerEntry: async (d) => {
+    const r = await api.post('/stock-movements/entry', d);
+    return r.data?.data ?? r.data;
+  },
+  registerExit: async (d) => {
+    const r = await api.post('/stock-movements/exit', d);
+    return r.data?.data ?? r.data;
+  },
+  listBranches: async (companyId) => {
+    const r = await api.get(`/branches/company/${companyId}`);
+    return r.data?.data ?? r.data;
+  },
+};
+
+export const reviewService = {
+  listByCompany: async (companyId, params = {}) => {
+    const r = await api.get(`/reviews/company/${companyId}`, { params });
+    return r.data;
+  },
+};
+
+export const dispatchService = {
+  queueList: async (params = {}) => {
+    const r = await api.get('/deliveryMan/queue', { params });
+    return r.data?.data ?? r.data;
+  },
+  queueStatusOne: async (status, initial) => {
+    const r = await api.get(`/deliveryMan/queue/status/${status}`, { params: initial != null ? { initial } : {} });
+    return r.data?.data ?? r.data;
+  },
+  queueHaveActive: async (orderId) => {
+    const r = await api.get(`/deliveryMan/queue/have-queue-active/${orderId}`);
+    return r.data?.data ?? r.data;
+  },
+  queueUpdate: async (queueId, data) => {
+    const r = await api.put(`/deliveryMan/queue/${queueId}`, data);
+    return r.data?.data ?? r.data;
+  },
+  queueUpdateStatus: async (queueId, status) => {
+    const r = await api.put(`/deliveryMan/queue/${queueId}/status`, { status });
+    return r.data?.data ?? r.data;
+  },
+  queueUpdateReceived: async (orderId, deliveryMan) => {
+    const r = await api.put(`/deliveryMan/queue-notification-received/${orderId}`, { deliveryMan });
+    return r.data?.data ?? r.data;
+  },
+  backToQueue: async (data) => {
+    const r = await api.put('/deliveryMan/back-to-queue', data);
+    return r.data?.data ?? r.data;
+  },
+  onlineCreate: async (data) => {
+    const r = await api.post('/deliveryMan/online', data);
+    return r.data?.data ?? r.data;
+  },
+  onlineOffline: async (deliveryMan) => {
+    const r = await api.put(`/deliveryMan/offline/${deliveryMan}`);
+    return r.data?.data ?? r.data;
+  },
+  onlineLastWeek: async (deliveryMan, params = {}) => {
+    const r = await api.get(`/deliveryMan/online-last-week/${deliveryMan}`, { params });
+    return r.data?.data ?? r.data;
+  },
+  raceCanceled: async (data) => {
+    const r = await api.post('/deliveryMan/race/canceled', data);
+    return r.data?.data ?? r.data;
+  },
+  raceList: async (params = {}) => {
+    const r = await api.get('/deliveryMan/race/list', { params });
+    return r.data?.data ?? r.data;
+  },
+  raceHistory: async (data) => {
+    const r = await api.post('/deliveryMan/race-history', data);
+    return r.data?.data ?? r.data;
+  },
+  deliveryPrice: async (orderId) => {
+    const r = await api.get(`/deliveryMan/delivery-price/${orderId}`);
+    return r.data?.data ?? r.data;
+  },
+};
+
+export const imageBankService = {
+  listByBarcode: async (barcode = 'null', pageIn = 0, size = 10) => {
+    const r = await api.get(`/imageBank/list/${barcode}/${pageIn}/${size}`);
+    return r.data?.data ?? r.data;
+  },
+  listByNome: async (nome = 'null', pageIn = 0, size = 10) => {
+    const r = await api.get(`/imageBank/listPorNome/${nome}/${pageIn}/${size}`);
+    return r.data?.data ?? r.data;
+  },
+  listByCategory: async (category = 'null', pageIn = 0, size = 10) => {
+    const r = await api.get(`/imageBank/listPorCategory/${category}/${pageIn}/${size}`);
+    return r.data?.data ?? r.data;
+  },
+  create: async (d) => {
+    const r = await api.post('/imageBank/create', d);
+    return r.data?.data ?? r.data;
+  },
+  register: async (d) => {
+    const r = await api.post('/imageBank/register', d);
+    return r.data?.data ?? r.data;
+  },
+  update: async (id, d) => {
+    const r = await api.put(`/imageBank/update/${id}`, d);
+    return r.data?.data ?? r.data;
+  },
+  remove: async (id) => {
+    const r = await api.delete(`/imageBank/delete/${id}`);
+    return r.data?.data ?? r.data;
+  },
+};
+
+export const notificationTopicService = {
+  create: async (d) => {
+    const r = await api.post('/v2/notification-topic', d);
+    return r.data?.data ?? r.data;
+  },
+  send: async (d) => {
+    const r = await api.post('/v2/notification-topic/send', d);
+    return r.data?.data ?? r.data;
+  },
+};
+
+export const mobileQrCodeService = {
+  generateDriver: async (driver) => {
+    const r = await api.get('/v1/mobility/qrcode/generate-driver', { params: { driver } });
+    return r.data?.data ?? r.data;
+  },
+  listDriverCode: async (code) => {
+    const r = await api.get('/v1/mobility/qrcode/list-driver-code', { params: { code } });
     return r.data?.data ?? r.data;
   },
 };

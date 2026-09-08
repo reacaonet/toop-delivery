@@ -1,21 +1,17 @@
 import { useState, type ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Menu, X, ExternalLink } from 'lucide-react'
-
-export interface NavCta {
-  label: string
-  href: string
-  variant?: 'outline' | 'solid'
-}
+import { LINKS } from '../constants'
 
 export interface FrameProps {
-  active: 'home' | 'store' | 'driver' | 'contact'
-  cta: NavCta[]
+  active: 'home' | 'store' | 'driver' | 'contact' | 'franchise' | 'supermarket'
   children: ReactNode
 }
 
 const NAV = [
   { to: '/', label: 'Início' },
+  { to: '/supermercados', label: 'Supermercados' },
+  { to: '/franquias', label: 'Franquias' },
   { to: '/lojista', label: 'Para Lojas' },
   { to: '/motorista', label: 'Para Motoristas' },
   { to: '/contato', label: 'Fale Conosco' },
@@ -26,6 +22,8 @@ const FOOTER_LINKS = [
     title: 'Plataforma',
     links: [
       { label: 'Início', to: '/' },
+      { label: 'Supermercados', to: '/supermercados' },
+      { label: 'Franquias', to: '/franquias' },
       { label: 'Para Lojas', to: '/lojista' },
       { label: 'Para Motoristas', to: '/motorista' },
       { label: 'Fale Conosco', to: '/contato' },
@@ -33,7 +31,12 @@ const FOOTER_LINKS = [
   },
 ]
 
-export default function SiteFrame({ active, cta, children }: FrameProps) {
+const NAV_CTA = [
+  { label: 'Entrar', href: LINKS.clientLogin, variant: 'outline' },
+  { label: 'Cadastrar', href: LINKS.clientRegister },
+]
+
+export default function SiteFrame({ active, children }: FrameProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { pathname } = useLocation()
 
@@ -59,7 +62,7 @@ export default function SiteFrame({ active, cta, children }: FrameProps) {
               </Link>
             ))}
             <span className="lp-nav-ctas">
-              {cta.map((c, i) => (
+              {NAV_CTA.map((c, i) => (
                 <a
                   key={i}
                   href={c.href}

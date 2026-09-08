@@ -74,7 +74,7 @@ const PushTab = () => {
 
   useEffect(() => { load(0); /* eslint-disable-next-line */ }, []);
   useEffect(() => {
-    franchiseService.getFranchises().then((r) => setFranchises(extractList(r))).catch(() => {});
+    franchiseService.listAll().then((r) => setFranchises(extractList(r))).catch(() => {});
   }, []);
 
   const change = (e) => setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
@@ -181,7 +181,7 @@ const DiscountTab = () => {
 
   useEffect(() => { load(0); /* eslint-disable-next-line */ }, []);
   useEffect(() => {
-    franchiseService.getFranchises().then((r) => setFranchises(extractList(r))).catch(() => {});
+    franchiseService.listAll().then((r) => setFranchises(extractList(r))).catch(() => {});
   }, []);
 
   const change = (e) => setForm((p) => ({ ...p, [e.target.name]: e.target.type === 'checkbox' ? e.target.checked : e.target.value }));

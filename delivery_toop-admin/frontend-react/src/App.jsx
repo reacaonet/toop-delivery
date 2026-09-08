@@ -41,6 +41,7 @@ import Customers from './pages/Customers';
 import Indications from './pages/Indications';
 import Persons from './pages/Persons';
 import ShoppingDepartments from './pages/ShoppingDepartments';
+import AppCategories from './pages/AppCategories';
 import Sliders from './pages/Sliders';
 import AlertProducts from './pages/AlertProducts';
 import Tips from './pages/Tips';
@@ -58,6 +59,19 @@ import MobilityMessages from './pages/MobilityMessages';
 import MobilityTopics from './pages/MobilityTopics';
 import MobilityDocuments from './pages/MobilityDocuments';
 import MobilityNotificationsApp from './pages/MobilityNotificationsApp';
+import Groups from './pages/Groups';
+import ShoppingPaymentMethods from './pages/ShoppingPaymentMethods';
+import CompanyConfig from './pages/CompanyConfig';
+import AccessFlow from './pages/AccessFlow';
+import MobilityDocumentTypes from './pages/MobilityDocumentTypes';
+import MobilityPeakHours from './pages/MobilityPeakHours';
+import MobilitySupportSubjects from './pages/MobilitySupportSubjects';
+import Stock from './pages/Stock';
+import Reviews from './pages/Reviews';
+import Dispatch from './pages/Dispatch';
+import ImageBank from './pages/ImageBank';
+import NotificationTopic from './pages/NotificationTopic';
+import MobilityQrCodes from './pages/MobilityQrCodes';
 import PreRegister from './pages/PreRegister';
 import Accessories from './pages/Accessories';
 import SearchScreen from './pages/Search';
@@ -103,6 +117,7 @@ function AdminLayout() {
             <Route path="/indications" element={<Indications />} />
             <Route path="/persons" element={<Persons />} />
             <Route path="/shopping-departments" element={<ShoppingDepartments />} />
+            <Route path="/app-categories" element={<AppCategories />} />
             <Route path="/sliders" element={<Sliders />} />
             <Route path="/alert-products" element={<AlertProducts />} />
             <Route path="/tips" element={<Tips />} />
@@ -120,6 +135,19 @@ function AdminLayout() {
             <Route path="/mobility/topics" element={<MobilityTopics />} />
             <Route path="/mobility/documents" element={<MobilityDocuments />} />
             <Route path="/mobility/app-notifications" element={<MobilityNotificationsApp />} />
+            <Route path="/groups" element={<Groups />} />
+            <Route path="/shopping-payment-methods" element={<ShoppingPaymentMethods />} />
+            <Route path="/company-config" element={<CompanyConfig />} />
+            <Route path="/access-flow" element={<AccessFlow />} />
+            <Route path="/mobility/document-types" element={<MobilityDocumentTypes />} />
+            <Route path="/mobility/peak-hours" element={<MobilityPeakHours />} />
+            <Route path="/mobility/support-subjects" element={<MobilitySupportSubjects />} />
+            <Route path="/stock" element={<Stock />} />
+            <Route path="/reviews" element={<Reviews />} />
+            <Route path="/dispatch" element={<Dispatch />} />
+            <Route path="/image-bank" element={<ImageBank />} />
+            <Route path="/notification-topic" element={<NotificationTopic />} />
+            <Route path="/mobility/qr-codes" element={<MobilityQrCodes />} />
             <Route path="/pre-register" element={<PreRegister />} />
             <Route path="/accessories" element={<Accessories />} />
             <Route path="/search" element={<SearchScreen />} />
