@@ -55,6 +55,9 @@ import MobilityReports from './pages/MobilityReports';
 import MobilityMonitor from './pages/MobilityMonitor';
 import MobilityExtract from './pages/MobilityExtract';
 import MobilityMessages from './pages/MobilityMessages';
+import MobilityTopics from './pages/MobilityTopics';
+import MobilityDocuments from './pages/MobilityDocuments';
+import MobilityNotificationsApp from './pages/MobilityNotificationsApp';
 import PreRegister from './pages/PreRegister';
 import Accessories from './pages/Accessories';
 import SearchScreen from './pages/Search';
@@ -114,6 +117,9 @@ function AdminLayout() {
             <Route path="/mobility/monitoring" element={<MobilityMonitor />} />
             <Route path="/mobility/extract" element={<MobilityExtract />} />
             <Route path="/mobility/messages" element={<MobilityMessages />} />
+            <Route path="/mobility/topics" element={<MobilityTopics />} />
+            <Route path="/mobility/documents" element={<MobilityDocuments />} />
+            <Route path="/mobility/app-notifications" element={<MobilityNotificationsApp />} />
             <Route path="/pre-register" element={<PreRegister />} />
             <Route path="/accessories" element={<Accessories />} />
             <Route path="/search" element={<SearchScreen />} />

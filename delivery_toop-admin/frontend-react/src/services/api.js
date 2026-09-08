@@ -1536,4 +1536,81 @@ export const mobilityMessageService = {
   },
 };
 
+export const mobilityTopicService = {
+  subscribe: async (d) => {
+    const r = await api.post('/v1/mobility/topic', d);
+    return r.data?.data ?? r.data;
+  },
+  send: async (d) => {
+    const r = await api.post('/v1/mobility/topic/send', d);
+    return r.data?.data ?? r.data;
+  },
+  linkUserTopics: async () => {
+    const r = await api.get('/v1/mobility/topic/link-user-topics');
+    return r.data?.data ?? r.data;
+  },
+};
+
+export const mobilityDocumentService = {
+  paginator: async (params = {}) => {
+    const r = await api.get('/v1/mobility/vehicle-documents/paginator', { params });
+    return r.data?.data ?? r.data;
+  },
+  listByDriver: async (driver, params = {}) => {
+    const r = await api.get(`/v1/mobility/vehicle-documents/${driver}`, { params });
+    return r.data?.data ?? r.data;
+  },
+  create: async (d) => {
+    const r = await api.post('/v1/mobility/vehicle-documents', d);
+    return r.data?.data ?? r.data;
+  },
+  update: async (id, d) => {
+    const r = await api.put(`/v1/mobility/vehicle-documents/${id}`, d);
+    return r.data?.data ?? r.data;
+  },
+  listTypePayments: async (params = {}) => {
+    const r = await api.get('/v1/mobility/type-payment-service', { params });
+    return r.data?.data ?? r.data;
+  },
+  travelInfo: async (booking) => {
+    const r = await api.get(`/v1/mobility/booking/travel-info/${booking}`);
+    return r.data?.data ?? r.data;
+  },
+};
+
+export const mobilityNotificationAppService = {
+  listAll: async () => {
+    const r = await api.get('/v1/mobility/notifications/listAll');
+    return r.data?.data ?? r.data;
+  },
+  graphic: async () => {
+    const r = await api.get('/v1/mobility/notifications/graphic');
+    return r.data?.data ?? r.data;
+  },
+  paginator: async (params = {}) => {
+    const r = await api.get('/v1/mobility/notifications/paginator', { params });
+    return r.data?.data ?? r.data;
+  },
+  search: async (params = {}) => {
+    const r = await api.get('/v1/mobility/notifications/search', { params });
+    return r.data?.data ?? r.data;
+  },
+  get: async (id) => {
+    const r = await api.get(`/v1/mobility/notifications/list/${id}`);
+    return r.data?.data ?? r.data;
+  },
+  create: async (d) => {
+    const r = await api.post('/v1/mobility/notifications', d);
+    return r.data?.data ?? r.data;
+  },
+  update: async (id, d) => {
+    const r = await api.put(`/v1/mobility/notifications/${id}`, d);
+    return r.data?.data ?? r.data;
+  },
+  remove: async (id) => {
+    const r = await api.delete(`/v1/mobility/notifications/${id}`);
+    return r.data?.data ?? r.data;
+  },
+};
+
 export default api;
