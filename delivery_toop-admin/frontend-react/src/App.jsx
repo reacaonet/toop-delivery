@@ -46,6 +46,9 @@ import AlertProducts from './pages/AlertProducts';
 import Tips from './pages/Tips';
 import Sites from './pages/Sites';
 import Schedules from './pages/Schedules';
+import MobilityPassengers from './pages/MobilityPassengers';
+import MobilityServices from './pages/MobilityServices';
+import MobilitySliders from './pages/MobilitySliders';
 import PreRegister from './pages/PreRegister';
 import Accessories from './pages/Accessories';
 import SearchScreen from './pages/Search';
@@ -96,6 +99,9 @@ function AdminLayout() {
             <Route path="/tips" element={<Tips />} />
             <Route path="/company-sites" element={<Sites />} />
             <Route path="/shopping-schedules" element={<Schedules />} />
+            <Route path="/mobility/passengers" element={<MobilityPassengers />} />
+            <Route path="/mobility/services" element={<MobilityServices />} />
+            <Route path="/mobility/sliders" element={<MobilitySliders />} />
             <Route path="/pre-register" element={<PreRegister />} />
             <Route path="/accessories" element={<Accessories />} />
             <Route path="/search" element={<SearchScreen />} />

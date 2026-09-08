@@ -1324,4 +1324,106 @@ export const scheduleService = {
   },
 };
 
+export const passengerService = {
+  paginator: async (params = {}) => {
+    const r = await api.get('/v1/mobility/passengers/paginator', { params });
+    return r.data?.data ?? r.data;
+  },
+  listAll: async () => {
+    const r = await api.get('/v1/mobility/passengers/listAll');
+    return r.data?.data ?? r.data;
+  },
+  list: async (params = {}) => {
+    const r = await api.get('/v1/mobility/passengers/list', { params });
+    return r.data?.data ?? r.data;
+  },
+  search: async (params = {}) => {
+    const r = await api.get('/v1/mobility/passengers/search', { params });
+    return r.data?.data ?? r.data;
+  },
+  filter: async (params = {}) => {
+    const r = await api.get('/v1/mobility/passengers/filter', { params });
+    return r.data?.data ?? r.data;
+  },
+  get: async (id) => {
+    const r = await api.get(`/v1/mobility/passengers/${id}`);
+    return r.data?.data ?? r.data;
+  },
+  create: async (d) => {
+    const r = await api.post('/v1/mobility/passengers', d);
+    return r.data?.data ?? r.data;
+  },
+  update: async (id, d) => {
+    const r = await api.put(`/v1/mobility/passengers/${id}`, d);
+    return r.data?.data ?? r.data;
+  },
+  remove: async (id) => {
+    const r = await api.delete(`/v1/mobility/passengers/${id}`);
+    return r.data?.data ?? r.data;
+  },
+  linkToFranchise: async (d) => {
+    const r = await api.post('/v1/mobility/passengers/link-frachise', d);
+    return r.data?.data ?? r.data;
+  },
+};
+
+export const serviceService = {
+  paginator: async (params = {}) => {
+    const { pageIn = 0, pageOut = 20, ...rest } = params;
+    const r = await api.get('/v1/mobility/services/paginator', { params: { pageIn, pageOut, ...rest } });
+    return r.data?.data ?? r.data;
+  },
+  listAll: async () => {
+    const r = await api.get('/v1/mobility/services/listAll');
+    return r.data?.data ?? r.data;
+  },
+  get: async (id) => {
+    const r = await api.get(`/v1/mobility/services/${id}`);
+    return r.data?.data ?? r.data;
+  },
+  search: async (params = {}) => {
+    const r = await api.get('/v1/mobility/services/search', { params });
+    return r.data?.data ?? r.data;
+  },
+  create: async (data) => {
+    const r = await api.post('/v1/mobility/services', data);
+    return r.data?.data ?? r.data;
+  },
+  update: async (id, data) => {
+    const r = await api.put(`/v1/mobility/services/${id}`, data);
+    return r.data?.data ?? r.data;
+  },
+  remove: async (id) => {
+    const r = await api.delete(`/v1/mobility/services/${id}`);
+    return r.data?.data ?? r.data;
+  },
+};
+
+export const mobilitySliderService = {
+  paginator: async (params = {}) => {
+    const r = await api.get('/v1/mobility/slider/paginator', { params });
+    return r.data?.data ?? r.data;
+  },
+  list: async (params = {}) => {
+    const r = await api.get('/v1/mobility/slider', { params });
+    return r.data?.data ?? r.data;
+  },
+  get: async (id) => {
+    const r = await api.get(`/v1/mobility/slider/${id}`);
+    return r.data?.data ?? r.data;
+  },
+  create: async (d) => {
+    const r = await api.post('/v1/mobility/slider', d);
+    return r.data?.data ?? r.data;
+  },
+  update: async (id, d) => {
+    const r = await api.put(`/v1/mobility/slider/${id}`, d);
+    return r.data?.data ?? r.data;
+  },
+  remove: async (id) => {
+    const r = await api.delete(`/v1/mobility/slider/${id}`);
+    return r.data?.data ?? r.data;
+  },
+};
+
 export default api;

@@ -291,6 +291,10 @@ export class MobilityServiceService {
       throw new AppError('Informe um Nome válido', 400);
     }
 
+    if (!body.franchise || !isObjectId(body.franchise)) {
+      throw new AppError('Informe uma franquia válida', 400);
+    }
+
     return ServiceModel.create(body);
   }
 
