@@ -46,7 +46,9 @@ import {
   Clock,
   Bell,
   Star,
-  BarChart3
+  BarChart3,
+  Map,
+  MessageCircle
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { deliverymanService } from '../services/api';
@@ -109,6 +111,9 @@ const Sidebar = () => {
     { path: '/mobility/notifications', icon: Bell, label: 'Mobility Push / Fatos' },
     { path: '/mobility/evaluations', icon: Star, label: 'Mobility Avaliações' },
     { path: '/mobility/reports', icon: BarChart3, label: 'Mobility Relatórios' },
+    { path: '/mobility/monitoring', icon: Map, label: 'Mobility Monitor' },
+    { path: '/mobility/extract', icon: Wallet, label: 'Mobility Extrato' },
+    { path: '/mobility/messages', icon: MessageCircle, label: 'Mobility Mensagens' },
     { path: '/monitor', icon: Activity, label: 'Monitor / Tools' },
     { path: '/supermarket', icon: ScanBarcode, label: 'Supermercado' },
     { path: '/offers', icon: BadgePercent, label: 'Ofertas' },

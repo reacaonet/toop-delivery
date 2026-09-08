@@ -1503,4 +1503,37 @@ export const mobilityReportService = {
   },
 };
 
+export const mobilityMonitorService = {
+  mapMonitoring: async (params = {}) => {
+    const r = await api.get('/v1/mobility/report/map/monitoring', { params });
+    return r.data?.data ?? r.data;
+  },
+  activeMonitoring: async (params = {}) => {
+    const r = await api.get('/v1/mobility/report/active/monitoring', { params });
+    return r.data?.data ?? r.data;
+  },
+};
+
+export const mobilityExtractService = {
+  getDriverBalance: async (driverId, params = {}) => {
+    const r = await api.get(`/v1/mobility/extract/${driverId}`, { params });
+    return r.data?.data ?? r.data;
+  },
+};
+
+export const mobilityMessageService = {
+  list: async (booking) => {
+    const r = await api.get('/v1/mobility/message', { params: { booking } });
+    return r.data?.data ?? r.data;
+  },
+  conversations: async (params = {}) => {
+    const r = await api.get('/v1/mobility/message/conversations', { params });
+    return r.data?.data ?? r.data;
+  },
+  create: async (d) => {
+    const r = await api.post('/v1/mobility/message', d);
+    return r.data?.data ?? r.data;
+  },
+};
+
 export default api;
