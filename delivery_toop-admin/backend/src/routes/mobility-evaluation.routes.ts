@@ -5,8 +5,8 @@ import { authenticate } from '../middleware/auth';
 const router = Router();
 
 router.get('/', mobilityEvaluationController.list);
-router.get('/:rated', mobilityEvaluationController.getAverageRating);
 router.get('/driver/paginator', mobilityEvaluationController.paginateByDriver);
+router.get('/:rated', mobilityEvaluationController.getAverageRating);
 router.post('/', mobilityEvaluationController.create);
 
 export default router;

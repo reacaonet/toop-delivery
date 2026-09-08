@@ -43,7 +43,10 @@ import {
   BellRing,
   Coins,
   Globe2,
-  Clock
+  Clock,
+  Bell,
+  Star,
+  BarChart3
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { deliverymanService } from '../services/api';
@@ -103,6 +106,9 @@ const Sidebar = () => {
     { path: '/mobility/passengers', icon: UserRound, label: 'Mobility Passageiros' },
     { path: '/mobility/services', icon: Car, label: 'Mobility Serviços' },
     { path: '/mobility/sliders', icon: Image, label: 'Mobility Sliders' },
+    { path: '/mobility/notifications', icon: Bell, label: 'Mobility Push / Fatos' },
+    { path: '/mobility/evaluations', icon: Star, label: 'Mobility Avaliações' },
+    { path: '/mobility/reports', icon: BarChart3, label: 'Mobility Relatórios' },
     { path: '/monitor', icon: Activity, label: 'Monitor / Tools' },
     { path: '/supermarket', icon: ScanBarcode, label: 'Supermercado' },
     { path: '/offers', icon: BadgePercent, label: 'Ofertas' },

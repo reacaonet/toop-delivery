@@ -49,6 +49,9 @@ import Schedules from './pages/Schedules';
 import MobilityPassengers from './pages/MobilityPassengers';
 import MobilityServices from './pages/MobilityServices';
 import MobilitySliders from './pages/MobilitySliders';
+import MobilityNotifications from './pages/MobilityNotifications';
+import MobilityEvaluations from './pages/MobilityEvaluations';
+import MobilityReports from './pages/MobilityReports';
 import PreRegister from './pages/PreRegister';
 import Accessories from './pages/Accessories';
 import SearchScreen from './pages/Search';
@@ -102,6 +105,9 @@ function AdminLayout() {
             <Route path="/mobility/passengers" element={<MobilityPassengers />} />
             <Route path="/mobility/services" element={<MobilityServices />} />
             <Route path="/mobility/sliders" element={<MobilitySliders />} />
+            <Route path="/mobility/notifications" element={<MobilityNotifications />} />
+            <Route path="/mobility/evaluations" element={<MobilityEvaluations />} />
+            <Route path="/mobility/reports" element={<MobilityReports />} />
             <Route path="/pre-register" element={<PreRegister />} />
             <Route path="/accessories" element={<Accessories />} />
             <Route path="/search" element={<SearchScreen />} />

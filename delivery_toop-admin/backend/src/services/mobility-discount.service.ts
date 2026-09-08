@@ -79,6 +79,14 @@ export class MobilityDiscountService {
       payload.active = `${data.active}` === 'true';
     }
 
+    if (!payload.name) {
+      throw new AppError('Informe um nome válido', 400);
+    }
+
+    if (!payload.franchise || !isObjectId(payload.franchise)) {
+      throw new AppError('Informe uma franquia válida', 400);
+    }
+
     return VoucherDiscountModel.create(payload);
   }
 

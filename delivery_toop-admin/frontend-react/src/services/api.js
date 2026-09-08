@@ -1426,4 +1426,81 @@ export const mobilitySliderService = {
   },
 };
 
+export const mobilityNotificationService = {
+  pushPaginator: async (params = {}) => {
+    const r = await api.get('/v1/mobility/push-notification/paginator', { params });
+    return r.data?.data ?? r.data;
+  },
+  createPush: async (d) => {
+    const r = await api.post('/v1/mobility/push-notification', d);
+    return r.data?.data ?? r.data;
+  },
+  discountPaginator: async (params = {}) => {
+    const r = await api.get('/v1/mobility/discount/paginator', { params });
+    return r.data?.data ?? r.data;
+  },
+  createDiscount: async (d) => {
+    const r = await api.post('/v1/mobility/discount', d);
+    return r.data?.data ?? r.data;
+  },
+  updateDiscount: async (id, d) => {
+    const r = await api.put(`/v1/mobility/discount/${id}`, d);
+    return r.data?.data ?? r.data;
+  },
+};
+
+export const mobilityEvaluationService = {
+  list: async (params = {}) => {
+    const r = await api.get('/v1/mobility/evaluation', { params });
+    return r.data?.data ?? r.data;
+  },
+  getAverageRating: async (rated) => {
+    const r = await api.get(`/v1/mobility/evaluation/${rated}`);
+    return r.data?.data ?? r.data;
+  },
+  paginateByDriver: async (params = {}) => {
+    const r = await api.get('/v1/mobility/evaluation/driver/paginator', { params });
+    return r.data?.data ?? r.data;
+  },
+  create: async (d) => {
+    const r = await api.post('/v1/mobility/evaluation', d);
+    return r.data?.data ?? r.data;
+  },
+};
+
+export const mobilityReportService = {
+  admDriverReport: async (params = {}) => {
+    const r = await api.get('/v1/mobility/report/adm/driver', { params });
+    return r.data?.data ?? r.data;
+  },
+  admDriverBalance: async (params = {}) => {
+    const r = await api.get('/v1/mobility/report/adm/driver/balance', { params });
+    return r.data?.data ?? r.data;
+  },
+  admPassengerReport: async (params = {}) => {
+    const r = await api.get('/v1/mobility/report/adm/passenger', { params });
+    return r.data?.data ?? r.data;
+  },
+  admPassengerBalance: async (params = {}) => {
+    const r = await api.get('/v1/mobility/report/adm/passenger/balance', { params });
+    return r.data?.data ?? r.data;
+  },
+  admRacesReport: async (params = {}) => {
+    const r = await api.get('/v1/mobility/report/adm/races', { params });
+    return r.data?.data ?? r.data;
+  },
+  admRacesBalance: async (params = {}) => {
+    const r = await api.get('/v1/mobility/report/adm/races/balance', { params });
+    return r.data?.data ?? r.data;
+  },
+  mapMonitoring: async (params = {}) => {
+    const r = await api.get('/v1/mobility/report/map/monitoring', { params });
+    return r.data?.data ?? r.data;
+  },
+  activeMonitoring: async (params = {}) => {
+    const r = await api.get('/v1/mobility/report/active/monitoring', { params });
+    return r.data?.data ?? r.data;
+  },
+};
+
 export default api;
