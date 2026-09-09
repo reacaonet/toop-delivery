@@ -25,6 +25,8 @@ export interface IBooking extends Document {
   duration?: number;
   estimatedPrice?: number;
   finalPrice?: number;
+  platformFee?: number;
+  driverEarning?: number;
   // Price components for transparency
   baseFare?: number;
   perKmRate?: number;
@@ -96,6 +98,8 @@ const BookingSchema = new Schema<IBooking>(
     duration: Number,
     estimatedPrice: Number,
     finalPrice: Number,
+    platformFee: Number,
+    driverEarning: Number,
     baseFare: Number,
     perKmRate: Number,
     distanceFare: Number,

@@ -29,6 +29,7 @@ interface Booking {
   distance?: number
   estimatedPrice?: number
   finalPrice?: number
+  driverEarning?: number
   createdAt: string
   rating?: { driver?: number; client?: number; driverComment?: string }
 }
@@ -41,6 +42,7 @@ const HistoryPage: React.FC = () => {
   const [rides, setRides] = useState<Booking[]>([])
   const [loading, setLoading] = useState(true)
   const [dmFeePct, setDmFeePct] = useState(2)
+  const [pfFeePct, setPfFeePct] = useState(20)
   const [walletBalance, setWalletBalance] = useState({ balance: 0, totalEarnings: 0, totalWithdrawals: 0 })
   const [ratingFor, setRatingFor] = useState<string | null>(null)
   const [ratingStars, setRatingStars] = useState(0)
@@ -88,7 +90,10 @@ const HistoryPage: React.FC = () => {
 
   useEffect(() => {
     fetchHistory()
-    settingsService.getSettings().then(s => { if (s?.deliverymanFeePercentage != null) setDmFeePct(s.deliverymanFeePercentage) }).catch(() => {})
+    settingsService.getSettings().then(s => {
+      if (s?.deliverymanFeePercentage != null) setDmFeePct(s.deliverymanFeePercentage)
+      if (s?.platformFeePercentage != null) setPfFeePct(s.platformFeePercentage)
+    }).catch(() => {})
   }, [fetchHistory])
 
   const totalDeliveries = orders.filter(o => o.status === 'delivered').length
@@ -97,7 +102,12 @@ const HistoryPage: React.FC = () => {
     .reduce((sum, o) => sum + (o.deliveryFee || 0) * (1 - dmFeePct / 100), 0)
 
   const totalRides = rides.length
-  const totalRideEarnings = rides.reduce((sum, r) => sum + (r.finalPrice || r.estimatedPrice || 0), 0)
+  const rideNet = (r: Booking) => {
+    const gross = r.finalPrice || r.estimatedPrice || 0
+    if (r.driverEarning != null) return r.driverEarning
+    return Math.round(gross * (1 - pfFeePct / 100) * 100) / 100
+  }
+  const totalRideEarnings = rides.reduce((sum, r) => sum + rideNet(r), 0)
 
   const formatDate = (dateStr: string) => {
     const d = new Date(dateStr)
@@ -207,7 +217,7 @@ const HistoryPage: React.FC = () => {
                 <div className="order-date">{formatDate(ride.createdAt)} · {ride.distance?.toFixed(1) || '-'} km</div>
               </div>
               <div className="history-card-right">
-                <span className="order-value">R$ {(ride.finalPrice || ride.estimatedPrice || 0).toFixed(2)}</span>
+                <span className="order-value">R$ {rideNet(ride).toFixed(2)}</span>
                 <span className={`status-badge ${ride.status}`}>
                   {ride.status === 'completed' ? <CheckCircle size={12} style={{ marginRight: 4 }} /> : <XCircle size={12} style={{ marginRight: 4 }} />}
                   {getStatusLabel(ride.status)}

@@ -2,57 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
-  Users, 
   Building2, 
   ShoppingCart, 
   Truck, 
-  CreditCard, 
   Settings,
   User,
   LogOut,
-  Tag,
-  Image,
-  FileText,
   Car,
-  CalendarCheck,
-  Wallet,
-  Ticket,
-  Package,
-  ClipboardList,
-  Percent,
-  BadgePercent,
-  ShoppingBag,
-  PackageOpen,
-  Store,
-  Shield,
   Landmark,
-  Globe,
-  Headphones,
-  Mail,
   Megaphone,
-  ScrollText,
-  Activity,
-  ScanBarcode,
-  UserPlus,
-  Shirt,
-  Search,
-  UserSquare,
-  Gift,
   UserRound,
-  LayoutGrid,
-  BellRing,
-  Coins,
-  Globe2,
-  Clock,
-  Bell,
-  Star,
-  BarChart3,
-  Map,
-  MessageCircle,
-  Radio,
-  QrCode,
-  Send,
-  AppWindow
+  ChevronDown
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { deliverymanService } from '../services/api';
@@ -79,82 +39,160 @@ const Sidebar = () => {
     fetchPendingDocs();
   }, []);
 
-  const menuItems = [
-    { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
-    { path: '/painel', icon: ClipboardList, label: 'Painel de Pedidos' },
-    { path: '/companies', icon: Building2, label: 'Empresas' },
-    { path: '/categories', icon: Tag, label: 'Categorias' },
-    { path: '/products', icon: Package, label: 'Produtos' },
-    { path: '/banners', icon: Image, label: 'Banners' },
-    { path: '/orders', icon: ShoppingCart, label: 'Pedidos' },
-    { path: '/users', icon: Users, label: 'Usuários' },
-    { path: '/deliverymen', icon: Truck, label: 'Entregadores' },
-    { path: '/drivers', icon: Car, label: 'Motoristas' },
-    { path: '/bookings', icon: CalendarCheck, label: 'Corridas' },
-    { path: '/promos', icon: Ticket, label: 'Cupons' },
-    { path: '/coupons', icon: BadgePercent, label: 'Cupons Compráveis' },
-    { path: '/cashback', icon: Percent, label: 'Cashback' },
-    { path: '/packings', icon: PackageOpen, label: 'Embalagens' },
-    { path: '/shoppers', icon: ShoppingBag, label: 'Shoppers' },
-    { path: '/franchises', icon: Store, label: 'Franquias' },
-    { path: '/finance', icon: Landmark, label: 'Financeiro' },
-    { path: '/wallet', icon: Wallet, label: 'Wallet Motoristas' },
-    { path: '/payments', icon: CreditCard, label: 'Pagamentos' },
-    { path: '/settings', icon: Settings, label: 'Configurações' },
-    { path: '/reports', icon: FileText, label: 'Relatórios' },
-    { path: '/acl', icon: Shield, label: 'Controle de Acesso', adminOnly: true },
-    { path: '/domain-settings', icon: Globe, label: 'Config. Domínio' },
-    { path: '/helpdesk', icon: Headphones, label: 'HelpDesk / FAQ' },
-    { path: '/email', icon: Mail, label: 'E-mails' },
-    { path: '/marketing', icon: Megaphone, label: 'Marketing' },
-    { path: '/vouchers', icon: Ticket, label: 'Vouchers' },
-    { path: '/mobility', icon: Car, label: 'Mobility' },
-    { path: '/mobility/passengers', icon: UserRound, label: 'Mobility Passageiros' },
-    { path: '/mobility/services', icon: Car, label: 'Mobility Serviços' },
-    { path: '/mobility/sliders', icon: Image, label: 'Mobility Sliders' },
-    { path: '/mobility/notifications', icon: Bell, label: 'Mobility Push / Fatos' },
-    { path: '/mobility/evaluations', icon: Star, label: 'Mobility Avaliações' },
-    { path: '/mobility/reports', icon: BarChart3, label: 'Mobility Relatórios' },
-    { path: '/mobility/monitoring', icon: Map, label: 'Mobility Monitor' },
-    { path: '/mobility/extract', icon: Wallet, label: 'Mobility Extrato' },
-    { path: '/mobility/messages', icon: MessageCircle, label: 'Mobility Mensagens' },
-    { path: '/mobility/topics', icon: Radio, label: 'Mobility Tópicos' },
-    { path: '/mobility/documents', icon: FileText, label: 'Mobility Documentos' },
-    { path: '/mobility/app-notifications', icon: Megaphone, label: 'Mobility Notificações App' },
-    { path: '/groups', icon: LayoutGrid, label: 'Grupos' },
-    { path: '/shopping-payment-methods', icon: CreditCard, label: 'Met. Pagamento Super' },
-    { path: '/company-config', icon: Settings, label: 'Config. Empresa' },
-    { path: '/access-flow', icon: Activity, label: 'Access Flow' },
-    { path: '/mobility/document-types', icon: FileText, label: 'Mobility Tipos Doc.' },
-    { path: '/mobility/peak-hours', icon: Clock, label: 'Mobility Pico Horário' },
-    { path: '/mobility/support-subjects', icon: Headphones, label: 'Mobility Assuntos' },
-    { path: '/stock', icon: Package, label: 'Estoque' },
-    { path: '/reviews', icon: Star, label: 'Avaliações' },
-    { path: '/dispatch', icon: Radio, label: 'Despacho' },
-    { path: '/image-bank', icon: Image, label: 'Banco de Imagens' },
-    { path: '/notification-topic', icon: Send, label: 'Notif. Tópico' },
-    { path: '/mobility/qr-codes', icon: QrCode, label: 'QR Codes' },
-    { path: '/monitor', icon: Activity, label: 'Monitor / Tools' },
-    { path: '/supermarket', icon: ScanBarcode, label: 'Supermercado' },
-    { path: '/offers', icon: BadgePercent, label: 'Ofertas' },
-    { path: '/customers', icon: UserSquare, label: 'Clientes' },
-    { path: '/persons', icon: UserRound, label: 'Pessoas' },
-    { path: '/indications', icon: Gift, label: 'Indicações' },
-    { path: '/shopping-departments', icon: LayoutGrid, label: 'Departamentos' },
-    { path: '/app-categories', icon: AppWindow, label: 'Categorias App' },
-    { path: '/sliders', icon: Image, label: 'Sliders' },
-    { path: '/alert-products', icon: BellRing, label: 'Alertas de Produto' },
-    { path: '/tips', icon: Coins, label: 'Gorjetas' },
-    { path: '/company-sites', icon: Globe2, label: 'Sites de Empresa' },
-    { path: '/shopping-schedules', icon: Clock, label: 'Horários' },
-    { path: '/pre-register', icon: UserPlus, label: 'Pré-registro' },
-    { path: '/accessories', icon: Shirt, label: 'Acessórios' },
-    { path: '/search', icon: Search, label: 'Busca' },
-    { path: '/log', icon: ScrollText, label: 'Log / Auditoria' },
+  const groups = [
+    {
+      label: 'Negócios',
+      icon: Building2,
+      children: [
+        { path: '/companies', label: 'Empresas / Lojas' },
+        { path: '/franchises', label: 'Franquias' },
+        { path: '/groups', label: 'Grupos de Empresas' },
+      ],
+    },
+    {
+      label: 'Clientes',
+      icon: UserRound,
+      children: [
+        { path: '/customers', label: 'Clientes' },
+        { path: '/pre-register', label: 'Pré-registro' },
+        { path: '/indications', label: 'Indicações' },
+      ],
+    },
+    {
+      label: 'Mobilidade',
+      icon: Car,
+      children: [
+        { type: 'header', label: 'Cadastros' },
+        { path: '/mobility/passengers', label: 'Passageiros' },
+        { path: '/mobility/services', label: 'Serviços' },
+        { path: '/mobility/document-types', label: 'Tipos de Documento' },
+        { path: '/mobility/documents', label: 'Documentos' },
+        { path: '/mobility/peak-hours', label: 'Pico Horário' },
+        { path: '/mobility/support-subjects', label: 'Assuntos de Suporte' },
+        { type: 'header', label: 'Operação' },
+        { path: '/bookings', label: 'Corridas' },
+        { path: '/mobility/monitoring', label: 'Monitor em Tempo Real' },
+        { path: '/mobility/extract', label: 'Extrato do Motorista' },
+        { path: '/mobility/evaluations', label: 'Avaliações' },
+        { path: '/mobility/qr-codes', label: 'QR Codes' },
+        { type: 'header', label: 'Conteúdo & Notificação' },
+        { path: '/mobility/sliders', label: 'Sliders' },
+        { path: '/mobility/notifications', label: 'Notificações Push' },
+        { path: '/mobility/app-notifications', label: 'Notificações no App' },
+        { path: '/mobility/topics', label: 'Tópicos' },
+        { path: '/mobility/messages', label: 'Mensagens' },
+        { type: 'header', label: 'Relatórios' },
+        { path: '/mobility/reports', label: 'Relatórios Mobility' },
+      ],
+    },
+    {
+      label: 'Financeiro',
+      icon: Landmark,
+      children: [
+        { path: '/wallet', label: 'Wallet Motoristas' },
+        { path: '/wallet/withdrawals', label: 'Solicitações de Saque' },
+        { path: '/payments', label: 'Pagamentos' },
+        { path: '/finance', label: 'Financeiro' },
+        { path: '/cashback', label: 'Cashback' },
+        { path: '/vouchers', label: 'Vouchers' },
+        { path: '/reports', label: 'Relatórios' },
+      ],
+    },
+    {
+      label: 'Marketing',
+      icon: Megaphone,
+      children: [
+        { path: '/marketing', label: 'Campanhas' },
+      ],
+    },
+    {
+      label: 'Sistema',
+      icon: Settings,
+      children: [
+        { path: '/settings', label: 'Configurações' },
+        { path: '/domain-settings', label: 'Config. Domínio' },
+        { path: '/email', label: 'E-mails' },
+        { path: '/users', label: 'Usuários Admin' },
+        { path: '/helpdesk', label: 'HelpDesk / FAQ' },
+        { path: '/reviews', label: 'Avaliações de Lojas / Entregadores' },
+        { path: '/access-flow', label: 'Access Flow' },
+        { path: '/log', label: 'Log / Auditoria' },
+        { path: '/monitor', label: 'Monitor / Tools' },
+        { path: '/tips', label: 'Gorjetas' },
+        { path: '/acl', label: 'Controle de Acesso', adminOnly: true },
+      ],
+    },
+    {
+      label: 'Loja (Operação)',
+      icon: ShoppingCart,
+      children: [
+        { path: '/painel', label: 'Painel da Loja' },
+        { path: '/orders', label: 'Pedidos' },
+        { path: '/dispatch', label: 'Despacho' },
+        { path: '/products', label: 'Produtos' },
+        { path: '/categories', label: 'Categorias' },
+        { path: '/app-categories', label: 'Categorias App' },
+        { path: '/supermarket', label: 'Supermercado' },
+        { path: '/shopping-departments', label: 'Departamentos' },
+        { path: '/banners', label: 'Banners / Promoções' },
+        { path: '/sliders', label: 'Sliders' },
+        { path: '/offers', label: 'Ofertas' },
+        { path: '/promos', label: 'Cupons' },
+        { path: '/coupons', label: 'Cupons Compráveis' },
+        { path: '/packings', label: 'Embalagens' },
+        { path: '/stock', label: 'Estoque' },
+        { path: '/alert-products', label: 'Alertas de Produto' },
+        { path: '/shopping-schedules', label: 'Horários' },
+        { path: '/shopping-payment-methods', label: 'Met. Pagamento Super' },
+        { path: '/shoppers', label: 'Shoppers' },
+        { path: '/company-sites', label: 'Sites de Empresa' },
+        { path: '/accessories', label: 'Acessórios' },
+        { path: '/image-bank', label: 'Banco de Imagens' },
+        { path: '/search', label: 'Busca' },
+        { path: '/company-config', label: 'Config. Empresa' },
+      ],
+    },
   ];
 
   const isAdmin = !user || user.role === 'admin' || user.role === 'manager';
-  const visibleItems = menuItems.filter((item) => !item.adminOnly || isAdmin);
+  const isActivePath = (path) => location.pathname === path || location.pathname.startsWith(path + '/');
+  const [openGroups, setOpenGroups] = useState(() => {
+    const active = groups
+      .filter(g => g.children.some(c => c.path && isActivePath(c.path)))
+      .map(g => g.label);
+    return new Set(active);
+  });
+
+  const toggleGroup = (label) => {
+    setOpenGroups(prev => {
+      const next = new Set(prev);
+      if (next.has(label)) next.delete(label);
+      else next.add(label);
+      return next;
+    });
+  };
+
+  const renderBadge = () => (
+    <span style={{
+      position: 'absolute',
+      top: '4px',
+      right: '8px',
+      backgroundColor: '#ef4444',
+      color: '#fff',
+      borderRadius: '50%',
+      minWidth: '18px',
+      height: '18px',
+      fontSize: '0.7rem',
+      fontWeight: 700,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '0 4px',
+      lineHeight: 1,
+    }}>
+      {pendingDocsCount}
+    </span>
+  );
 
   return (
     <div className="sidebar">
@@ -164,46 +202,74 @@ const Sidebar = () => {
           Gojá Delivery
         </h1>
       </div>
-      
+
       <nav className="sidebar-nav">
-        {visibleItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = location.pathname === item.path;
-          
+        <Link
+          to="/"
+          className={`nav-item ${location.pathname === '/' ? 'active' : ''}`}
+          style={{ position: 'relative' }}
+        >
+          <LayoutDashboard size={20} />
+          Dashboard
+        </Link>
+
+        <Link
+          to="/deliverymen"
+          className={`nav-item ${location.pathname === '/deliverymen' ? 'active' : ''}`}
+          style={{ position: 'relative' }}
+        >
+          <Truck size={20} />
+          Motoristas & Entregadores
+          {pendingDocsCount > 0 && renderBadge()}
+        </Link>
+
+        {groups.map(group => {
+          const GroupIcon = group.icon;
+          const isOpen = openGroups.has(group.label);
+          const activeGroup = group.children.some(c => c.path && isActivePath(c.path));
+          const children = group.children.filter(c => !c.adminOnly || isAdmin);
+
           return (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`nav-item ${isActive ? 'active' : ''}`}
-              style={{ position: 'relative' }}
-            >
-              <Icon size={20} />
-              {item.label}
-              {item.path === '/deliverymen' && pendingDocsCount > 0 && (
-                <span style={{
-                  position: 'absolute',
-                  top: '4px',
-                  right: '8px',
-                  backgroundColor: '#ef4444',
-                  color: '#fff',
-                  borderRadius: '50%',
-                  minWidth: '18px',
-                  height: '18px',
-                  fontSize: '0.7rem',
-                  fontWeight: 700,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: '0 4px',
-                  lineHeight: 1,
-                }}>
-                  {pendingDocsCount}
+            <div key={group.label}>
+              <button
+                type="button"
+                className={`nav-section ${isOpen ? 'open' : ''} ${activeGroup ? 'active' : ''}`}
+                onClick={() => toggleGroup(group.label)}
+              >
+                <span className="nav-section-title">
+                  <GroupIcon size={20} />
+                  {group.label}
                 </span>
+                <ChevronDown size={16} className="nav-section-chevron" />
+              </button>
+
+              {isOpen && (
+                <div className="nav-submenu">
+                  {children.map(child => {
+                    if (child.type === 'header') {
+                      return (
+                        <div key={child.label} className="nav-subheader">
+                          {child.label}
+                        </div>
+                      );
+                    }
+                    const isSubActive = location.pathname === child.path;
+                    return (
+                      <Link
+                        key={child.path}
+                        to={child.path}
+                        className={`nav-subitem ${isSubActive ? 'active' : ''}`}
+                      >
+                        {child.label}
+                      </Link>
+                    );
+                  })}
+                </div>
               )}
-            </Link>
+            </div>
           );
         })}
-        
+
         <Link
           to="/profile"
           className={`nav-item ${location.pathname === '/profile' ? 'active' : ''}`}
@@ -212,13 +278,13 @@ const Sidebar = () => {
           <User size={20} />
           Meu Perfil
         </Link>
-        
-        <button 
-          className="nav-item" 
+
+        <button
+          className="nav-item"
           onClick={logout}
-          style={{ 
-            background: 'none', 
-            border: 'none', 
+          style={{
+            background: 'none',
+            border: 'none',
             color: 'rgba(255, 255, 255, 0.8)',
             cursor: 'pointer',
             marginTop: 'auto'

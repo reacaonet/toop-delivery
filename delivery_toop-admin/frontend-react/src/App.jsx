@@ -9,12 +9,13 @@ import Companies from './pages/Companies';
 import Categories from './pages/Categories';
 import Banners from './pages/Banners';
 import Orders from './pages/Orders';
-import Deliverymen from './pages/Deliverymen';
+import Deliverymen from './pages/Fleet';
 import Drivers from './pages/Drivers';
 import Bookings from './pages/Bookings';
 import Promos from './pages/Promos';
 import Coupons from './pages/Coupons';
 import WalletPage from './pages/Wallet';
+import Withdrawals from './pages/Withdrawals';
 import Payments from './pages/Payments';
 import Cashback from './pages/Cashback';
 import Packings from './pages/Packings';
@@ -154,6 +155,7 @@ function AdminLayout() {
             <Route path="/products" element={<Products />} />
             <Route path="/painel" element={<Painel />} />
             <Route path="/wallet" element={<WalletPage />} />
+            <Route path="/wallet/withdrawals" element={<Withdrawals />} />
             <Route path="/payments" element={<Payments />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/profile" element={<Profile />} />

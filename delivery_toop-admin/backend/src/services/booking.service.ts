@@ -4,6 +4,7 @@ import { DeliverymanModel } from "../models/Deliveryman";
 import { AppError } from "../middleware/errorHandler";
 import walletService from "./wallet.service";
 import promoService from "./promo.service";
+import { getPlatformFeePercent } from "./settings.service";
 import QRCode from "qrcode";
 import crypto from "crypto";
 
@@ -36,7 +37,6 @@ const CANCEL_FEE_CONFIG = {
     afterAccepted: 3.00,
     afterStarted: 8.00,
   },
-  platformFeePercent: 20,
 };
 
 export class BookingService {
@@ -298,7 +298,8 @@ export class BookingService {
       : booking.duration || 0;
 
     const finalPrice = booking.proposedPrice || booking.estimatedPrice || 0;
-    const platformFee = Math.round(finalPrice * CANCEL_FEE_CONFIG.platformFeePercent / 100 * 100) / 100;
+    const platformFeePct = await getPlatformFeePercent();
+    const platformFee = Math.round(finalPrice * platformFeePct / 100 * 100) / 100;
     const driverEarning = Math.round((finalPrice - platformFee) * 100) / 100;
 
     const updated = await BookingModel.findByIdAndUpdate(
@@ -308,6 +309,8 @@ export class BookingService {
         completedAt,
         duration,
         finalPrice,
+        platformFee,
+        driverEarning,
         paymentStatus: 'paid',
       },
       { new: true }

@@ -377,7 +377,7 @@ export default function RideTrackingPage() {
     setUnreadCount(0)
     setChatToast(null)
     loadChatMessages()
-    messageService.markAsRead(id).catch(() => {})
+    if (id) messageService.markAsRead(id).catch(() => {})
   }
 
   const handleCancel = async () => {
@@ -614,7 +614,7 @@ export default function RideTrackingPage() {
             )}
             <div className="track-receipt-row">
               <span>Taxa plataforma (20%)</span>
-              <span>- R$ {((booking.finalPrice || booking.estimatedPrice || 0) * 0.20).toFixed(2)}</span>
+              <span>- R$ {((booking.platformFee != null ? booking.platformFee : (booking.finalPrice || booking.estimatedPrice || 0) * 0.20)).toFixed(2)}</span>
             </div>
             <div className="track-receipt-row total">
               <span>Total</span>

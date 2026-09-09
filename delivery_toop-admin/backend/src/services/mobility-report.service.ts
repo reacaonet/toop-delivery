@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import { BookingModel } from '../models/Booking';
 import { DriverModel } from '../models/Driver';
 import { AppError } from '../middleware/errorHandler';
+import { getPlatformFeePercent } from './settings.service';
 
 function isObjectId(id: string): boolean {
   return mongoose.Types.ObjectId.isValid(id);
@@ -89,6 +90,8 @@ export class MobilityReportService {
       filter.status = status;
     }
 
+    const driverRate = (100 - await getPlatformFeePercent()) / 100;
+
     const pipeline: any[] = [
       { $match: filter },
       {
@@ -109,7 +112,7 @@ export class MobilityReportService {
             $sum: {
               $cond: {
                 if: { $eq: ['$status', 'completed'] },
-                then: { $multiply: [{ $ifNull: ['$finalPrice', '$estimatedPrice', 0] }, 0.8] },
+                then: { $multiply: [{ $ifNull: ['$finalPrice', '$estimatedPrice', 0] }, driverRate] },
                 else: 0,
               },
             },

@@ -24,6 +24,12 @@ body {
   color: white;
   padding: 2rem 0;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  overflow: hidden;
 }
 
 .sidebar-header {
@@ -44,6 +50,8 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  flex: 1;
+  overflow-y: auto;
 }
 
 .nav-item {
@@ -64,6 +72,89 @@ body {
 
 .nav-item.active {
   background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border-left-color: white;
+}
+
+.nav-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.875rem 1.5rem;
+  color: rgba(255, 255, 255, 0.8);
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+.nav-section:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.nav-section.active {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  border-left-color: white;
+}
+
+.nav-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.nav-section-chevron {
+  transition: transform 0.2s ease;
+}
+
+.nav-section.open .nav-section-chevron {
+  transform: rotate(180deg);
+}
+
+.nav-submenu {
+  display: flex;
+  flex-direction: column;
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.nav-subheader {
+  padding: 0.5rem 1.5rem 0.25rem 3rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 0.25rem;
+}
+
+.nav-subitem {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 1.5rem 0.55rem 3rem;
+  color: rgba(255, 255, 255, 0.75);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+}
+
+.nav-subitem:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+}
+
+.nav-subitem.active {
+  background: rgba(255, 255, 255, 0.12);
   color: white;
   border-left-color: white;
 }

@@ -70,6 +70,33 @@ export class WalletController {
       next(error);
     }
   }
+
+  async listWithdrawals(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await walletService.listWithdrawals(req.query as any);
+      return res.status(200).json({ success: true, data: result });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async approveWithdrawal(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await walletService.approveWithdrawal(req.params.id);
+      return res.status(200).json({ success: true, data: result });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async rejectWithdrawal(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await walletService.rejectWithdrawal(req.params.id);
+      return res.status(200).json({ success: true, data: result });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export default new WalletController();

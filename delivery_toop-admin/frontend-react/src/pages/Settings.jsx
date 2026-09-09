@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, Settings as SettingsIcon, User, Building2, Mail, CheckCircle, XCircle, Clock, Percent, Save } from 'lucide-react';
+import { Bell, Settings as SettingsIcon, User, Building2, Mail, CheckCircle, XCircle, Clock, Percent, Save, Car } from 'lucide-react';
 import { notificationService, settingsService } from '../services/api';
 
 const Settings = () => {
@@ -12,7 +12,8 @@ const Settings = () => {
     autoBackup: false,
     emailAlerts: true,
     companyFeePercentage: 15,
-    deliverymanFeePercentage: 10
+    deliverymanFeePercentage: 10,
+    platformFeePercentage: 20
   });
 
   useEffect(() => {
@@ -273,6 +274,39 @@ const Settings = () => {
               </p>
             </div>
 
+            <div className="form-group">
+              <label htmlFor="platformFeePercentage">
+                <Car size={16} style={{ marginRight: '0.5rem' }} />
+                % Taxa da Plataforma (Corridas)
+              </label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <input
+                  type="number"
+                  id="platformFeePercentage"
+                  name="platformFeePercentage"
+                  value={settings.platformFeePercentage}
+                  onChange={(e) => handleSettingChange('platformFeePercentage', parseFloat(e.target.value) || 0)}
+                  min="0"
+                  max="100"
+                  step="0.1"
+                  style={{
+                    width: '100px',
+                    padding: '0.625rem',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '6px',
+                    fontSize: '1rem',
+                    textAlign: 'center'
+                  }}
+                />
+                <span style={{ fontSize: '1.25rem', fontWeight: '600', color: '#f59e0b' }}>
+                  %
+                </span>
+              </div>
+              <p style={{ fontSize: '0.875rem', color: '#6b7280', marginTop: '0.5rem' }}>
+                Percentual retido pela plataforma sobre as corridas (o motorista recebe o restante)
+              </p>
+            </div>
+
             <div style={{ 
               padding: '1rem', 
               background: '#f0f9ff', 
@@ -288,7 +322,7 @@ const Settings = () => {
                   Exemplo de Cálculo
                 </div>
                 <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
-                  Pedido de R$100,00: Empresa paga R${settings.companyFeePercentage},00 e Entregador recebe R${(100 - settings.deliverymanFeePercentage).toFixed(2)}
+                  Pedido de R$100,00: Empresa paga R${settings.companyFeePercentage},00 e Entregador recebe R${(100 - settings.deliverymanFeePercentage).toFixed(2)}. Corrida de R$100,00: Motorista recebe R${(100 - settings.platformFeePercentage).toFixed(2)}
                 </div>
               </div>
             </div>

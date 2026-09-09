@@ -363,6 +363,18 @@ export const walletService = {
     const response = await api.post('/wallet/debit', { driverId, amount, description });
     return response.data?.data ?? response.data;
   },
+  listWithdrawals: async (params = {}) => {
+    const response = await api.get('/wallet/withdrawals', { params });
+    return response.data?.data ?? response.data;
+  },
+  approveWithdrawal: async (id) => {
+    const response = await api.post(`/wallet/withdrawals/${id}/approve`);
+    return response.data?.data ?? response.data;
+  },
+  rejectWithdrawal: async (id) => {
+    const response = await api.post(`/wallet/withdrawals/${id}/reject`);
+    return response.data?.data ?? response.data;
+  },
 };
 
 export const cashbackService = {
