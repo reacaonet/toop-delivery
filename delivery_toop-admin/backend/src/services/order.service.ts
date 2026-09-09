@@ -2,6 +2,7 @@ import { OrderModel } from "../models/Order";
 import { SettingsModel } from "../models/Settings";
 import { AppError } from "../middleware/errorHandler";
 import walletService from "./wallet.service";
+import repasseService from "./repasse.service";
 import crypto from "crypto";
 
 interface PaginationQuery {
@@ -158,6 +159,7 @@ export class OrderService {
 
     if (status === "delivered" && wasDelivering && updated) {
       await this.creditDeliverymanWallet(updated);
+      await repasseService.recordRepasse(updated);
     }
 
     return updated;
