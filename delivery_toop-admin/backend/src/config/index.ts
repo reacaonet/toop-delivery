@@ -28,6 +28,13 @@ const envSchema = z.object({
   NOTIFICATION_URL: z.string().url().default('http://localhost:8200'),
   DELIVERYMAN_URL: z.string().url().default('http://localhost:8300'),
   NOTIFICATION_API_KEY: z.string().default(''),
+  INTEGRATION_URL: z.string().url().default('http://localhost:8300'),
+  PRODUCT_IMAGE_API: z.union([z.string().url(), z.literal('')]).default(''),
+
+  // Payment microservice (8400) — prefixo LTS e credenciais de app (proxy)
+  LTS: z.string().default('v1'),
+  PAYMENT_APP_TOKEN: z.string().default(''),
+  PAYMENT_APP_SECRET: z.string().default(''),
 
   // Firebase (web SDK config)
   FIREBASE_API_KEY: z.string().default(''),

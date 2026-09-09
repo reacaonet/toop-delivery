@@ -1,6 +1,7 @@
 import { Router } from "express";
 import toolsController from "../controllers/tools.controller";
 import { authenticate } from "../middleware/auth";
+import { uploadSingle } from "../middleware/upload";
 
 const router = Router();
 
@@ -20,5 +21,9 @@ router.get("/integrations", authenticate, toolsController.listIntegrations);
 router.post("/integrations", authenticate, toolsController.createIntegration);
 router.put("/integrations/:id", authenticate, toolsController.updateIntegration);
 router.delete("/integrations/:id", authenticate, toolsController.removeIntegration);
+
+// ---------- 1.16 Compressão / sincronização de imagem ----------
+router.post("/compress", authenticate, uploadSingle("file"), toolsController.compressImage);
+router.post("/sync-image", authenticate, toolsController.syncImage);
 
 export default router;

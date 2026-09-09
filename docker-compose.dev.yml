@@ -393,6 +393,42 @@ services:
     networks:
       - toop-network
 
+  # ─── Monitoring (5.4) ────────────────────────────────
+  prometheus:
+    container_name: "toop-prometheus-dev"
+    image: prom/prometheus:latest
+    restart: unless-stopped
+    volumes:
+      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.retention.time=15d"
+      - "--web.enable-lifecycle"
+    ports:
+      - "9090:9090"
+    networks:
+      - toop-network
+
+  grafana:
+    container_name: "toop-grafana-dev"
+    image: grafana/grafana:latest
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /etc/grafana/provisioning/dashboards/json/toopdelivery-overview.json
+    volumes:
+      - ./config/grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana_data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    networks:
+      - toop-network
+
 volumes:
   mongo_data:
   postgres_data:
@@ -403,6 +439,8 @@ volumes:
   deliveryman_app_node_modules:
   landpage_node_modules:
   ota_storage:
+  prometheus_data:
+  grafana_data:
 
 networks:
   toop-network:

@@ -1,5 +1,6 @@
 import { Types } from 'mongoose';
 import { ShoppingPaymentMethodModel } from '../models/ShoppingPaymentMethod';
+import paymentGatewayService from './payment-gateway.service';
 import { AppError } from '../middleware/errorHandler';
 
 export class ShoppingPaymentMethodService {
@@ -32,11 +33,63 @@ export class ShoppingPaymentMethodService {
     return ShoppingPaymentMethodModel.find(data);
   }
 
-  async create(_customer: string, _data: any) {
-    throw new AppError(
-      'Criação de método de pagamento depende do gateway de pagamentos (Braspag/PagarMe/Iugu) - Passo 1.9 da migração',
-      501
-    );
+  async create(customer: string, data: any = {}) {
+    if (!customer || !Types.ObjectId.isValid(customer)) {
+      throw new AppError('Id do cliente inválido', 400);
+    }
+
+    const { nameOnCard, cardNumber, valid, verifierCode, documentType, document, flag, gateway } = data;
+
+    if (!nameOnCard || !cardNumber || !valid || !verifierCode || !document) {
+      throw new AppError(
+        'Informe os dados do cartão (nameOnCard, cardNumber, valid, verifierCode, documentType, document)',
+        400
+      );
+    }
+
+    const tokenizeResult = await paymentGatewayService.tokenizeCard({
+      CustomerName: nameOnCard,
+      CardNumber: String(cardNumber).replace(/\s/g, ''),
+      Holder: nameOnCard,
+      ExpirationDate: valid,
+      Brand: flag,
+      SecurityCode: verifierCode,
+    });
+
+    const unwrapped: any =
+      (tokenizeResult as any)?.data && typeof (tokenizeResult as any).data === 'object'
+        ? (tokenizeResult as any).data
+        : tokenizeResult;
+
+    const cardToken = unwrapped?.token || unwrapped?.cardToken || (tokenizeResult as any)?.token;
+    if (!cardToken) {
+      throw new AppError('Não foi possível obter o token do cartão no gateway de pagamentos', 400);
+    }
+
+    const payload: Record<string, any> = {
+      customer,
+      isMain: data.isMain === true || data.isMain === 'true' || false,
+      flag: flag || 'VISA',
+      cartNumber: String(cardNumber).slice(-4),
+      nameOnCard,
+      valid,
+      verifierCode,
+      documentType: documentType === 'PASSPORT' ? 'PASSPORT' : 'CPF',
+      document,
+      gateway: gateway || 'PAGARME',
+      cardToken,
+    };
+
+    const created = await ShoppingPaymentMethodModel.create(payload);
+
+    if (created.isMain) {
+      await ShoppingPaymentMethodModel.updateMany(
+        { customer, _id: { $ne: created._id } },
+        { isMain: false }
+      );
+    }
+
+    return created;
   }
 
   async update(id: string, data: any) {

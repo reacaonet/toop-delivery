@@ -82,6 +82,10 @@ import shoppingDepartmentRoutes from "./shopping-department.routes";
 import shoppingDepartmentMobileRoutes from "./shopping-department-mobile.routes";
 import shoppingScheduleRoutes from "./shopping-schedule.routes";
 import shoppingPaymentMethodRoutes from "./shopping-payment-method.routes";
+import shoppingCartRoutes from "./shopping-cart.routes";
+import shoppingOrderRoutes from "./shopping-order.routes";
+import pixRoutes from "./pix.routes";
+import braspagRoutes from "./braspag.routes";
 import { authenticate } from "../middleware/auth";
 
 const router = Router();
@@ -170,5 +174,9 @@ router.use("/shopping/department", authenticate, shoppingDepartmentRoutes);
 router.use("/shopping/departmentmobile", authenticate, shoppingDepartmentMobileRoutes);
 router.use("/shopping/schedule", authenticate, shoppingScheduleRoutes);
 router.use("/shopping/payment-method", authenticate, shoppingPaymentMethodRoutes);
+router.use("/shopping/cart", authenticate, shoppingCartRoutes);
+router.use("/shopping/order", authenticate, shoppingOrderRoutes);
+router.use("/pix", authenticate, pixRoutes);
+router.use("/braspag", braspagRoutes);
 
 export default router;
