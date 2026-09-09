@@ -4,6 +4,13 @@ import { Truck, MapPin, ArrowLeft, CheckCircle } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { orderService } from '../api'
 
+interface Address {
+  street?: string
+  number?: string
+  neighborhood?: string
+  city?: string
+}
+
 interface Order {
   _id: string
   orderNumber: string | number
@@ -12,10 +19,11 @@ interface Order {
   storeName?: string
   store?: { name: string }
   customerName?: string
+  customerPhone?: string
   customer?: { name: string; phone?: string }
   deliveryman?: string | { _id: string; name?: string }
-  deliveryAddress?: string
-  address?: string
+  deliveryAddress?: string | Address
+  address?: string | Address
   items?: Array<{ name: string; quantity: number; price: number }>
   [key: string]: unknown
 }
@@ -82,11 +90,12 @@ const ActiveDeliveryPage: React.FC = () => {
     return o.customerName || o.customer?.name || 'Cliente'
   }
 
-  const getCustomerPhone = (o: Order) => {
+  const getCustomerPhone = (o: Order): string => {
     return o.customerPhone || o.customer?.phone || ''
   }
 
   const openInMaps = () => {
+    if (!order) return
     const addr = order?.deliveryAddress || order?.address
     if (!addr || typeof addr === 'string') {
       const query = encodeURIComponent(getAddress(order))

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Package, Truck, History, Car, Navigation, Clock, X, Check, ToggleLeft, ToggleRight } from 'lucide-react'
 import { io, Socket } from 'socket.io-client'
 import { useAuth } from '../contexts/AuthContext'
-import { orderService, settingsService, deliverymanService, bookingService } from '../api'
+import { orderService, settingsService, deliverymanService, bookingService, walletService } from '../api'
 
 interface Order {
   _id: string
@@ -14,6 +14,8 @@ interface Order {
   store?: { name: string }
   deliveryman?: string | { _id: string }
   createdAt: string
+  updatedAt?: string
+  deliveredAt?: string
 }
 
 interface RideRequest {
@@ -40,6 +42,8 @@ const DashboardPage: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [dmFeePct, setDmFeePct] = useState(2)
+  const [wallet, setWallet] = useState({ balance: 0, totalEarnings: 0, totalWithdrawals: 0 })
+  const [ridesTodayCount, setRidesTodayCount] = useState(0)
 
   // Driver mode state
   const [isDriver, setIsDriver] = useState(false)
@@ -100,6 +104,31 @@ const DashboardPage: React.FC = () => {
         setDriverOnline(profile.driverOnline || false)
         setDriverAvailable(profile.driverAvailable || false)
         setIsOnline(profile.available ?? true)
+      }
+    } catch {}
+  }, [])
+
+  const fetchWallet = useCallback(async () => {
+    try {
+      const [walletResult, rides] = await Promise.allSettled([
+        walletService.getBalance(),
+        bookingService.getBookings({ status: 'completed' }),
+      ])
+      if (walletResult.status === 'fulfilled') {
+        const w = walletResult.value as any
+        setWallet({
+          balance: w.balance || 0,
+          totalEarnings: w.totalEarnings || 0,
+          totalWithdrawals: w.totalWithdrawals || 0,
+        })
+      }
+      if (rides.status === 'fulfilled') {
+        const r = rides.value as any
+        const list = Array.isArray(r?.data) ? r.data : Array.isArray(r) ? r : r?.list || []
+        const todayStr = new Date().toDateString()
+        setRidesTodayCount(
+          list.filter((b: any) => b.completedAt && new Date(b.completedAt).toDateString() === todayStr).length
+        )
       }
     } catch {}
   }, [])
@@ -204,16 +233,19 @@ const DashboardPage: React.FC = () => {
     loadProfile()
     fetchOrders()
     fetchPendingRides()
+    fetchWallet()
     const orderInterval = setInterval(fetchOrders, 15000)
     const rideInterval = setInterval(fetchPendingRides, 4000)
+    const walletInterval = setInterval(fetchWallet, 30000)
     settingsService.getSettings().then(s => {
       if (s?.deliverymanFeePercentage != null) setDmFeePct(s.deliverymanFeePercentage)
     }).catch(() => {})
     return () => {
       clearInterval(orderInterval)
       clearInterval(rideInterval)
+      clearInterval(walletInterval)
     }
-  }, [fetchOrders, fetchPendingRides, loadProfile])
+  }, [fetchOrders, fetchPendingRides, loadProfile, fetchWallet])
 
   // Countdown timer for accept
   useEffect(() => {
@@ -336,9 +368,11 @@ const DashboardPage: React.FC = () => {
 
   const availableCount = orders.filter(o => o.status === 'ready').length
   const activeDelivery = orders.find(o => o.status === 'delivering')
-  const todayDeliveries = orders.filter(o => o.status === 'delivered').length
-  const todayEarnings = orders
-    .filter(o => o.status === 'delivered')
+
+  const isToday = (date?: string) => date && new Date(date).toDateString() === new Date().toDateString()
+  const deliveredToday = orders.filter(o => o.status === 'delivered' && isToday(o.deliveredAt || o.updatedAt))
+  const todayDeliveries = deliveredToday.length
+  const todayEarnings = deliveredToday
     .reduce((sum, o) => sum + (o.deliveryFee || 0) * (1 - dmFeePct / 100), 0)
 
   const timerPercent = (acceptTimer / ACCEPT_TIMEOUT) * 100
@@ -506,8 +540,12 @@ const DashboardPage: React.FC = () => {
           <span className="stat-label">Ganhos Hoje</span>
         </div>
         <div className="stat-card">
-          <span className="stat-value">{rideQueue.length}</span>
-          <span className="stat-label">Corridas na Fila</span>
+          <span className="stat-value">{ridesTodayCount}</span>
+          <span className="stat-label">Corridas Hoje</span>
+        </div>
+        <div className="stat-card">
+          <span className="stat-value">R$ {wallet.balance.toFixed(2)}</span>
+          <span className="stat-label">Saldo</span>
         </div>
       </div>
 

@@ -32,9 +32,9 @@ const DocumentsPage: React.FC = () => {
 
   const [dirty, setDirty] = useState(false)
 
-  const cnhInputRef = useRef<HTMLInputElement>(null)
-  const vehicleDocInputRef = useRef<HTMLInputElement>(null)
-  const photoDocInputRef = useRef<HTMLInputElement>(null)
+  const cnhInputRef = useRef<HTMLInputElement | null>(null)
+  const vehicleDocInputRef = useRef<HTMLInputElement | null>(null)
+  const photoDocInputRef = useRef<HTMLInputElement | null>(null)
 
   useEffect(() => {
     loadProfile()
@@ -139,7 +139,7 @@ const DocumentsPage: React.FC = () => {
       <input
         type="file"
         accept={accept}
-        ref={inputRef}
+        ref={inputRef as React.RefObject<HTMLInputElement>}
         onChange={(e) => handleUpload(e, docField)}
         style={{ display: 'none' }}
       />

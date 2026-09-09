@@ -1,3 +1,4 @@
+import { Fragment } from 'react'
 import { NavLink } from 'react-router-dom'
 import { LayoutDashboard, Package, ShoppingCart, Settings, LogOut, Store, Monitor, FileText, Warehouse, GitBranch, Boxes, ArrowLeftRight } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
@@ -11,6 +12,7 @@ const Layout = ({ children }: LayoutProps) => {
 
   const navItems = [
     { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
+    { path: '/painel', icon: Monitor, label: 'Painel de Pedidos' },
     { path: '/products', icon: Package, label: 'Produtos' },
     { path: '/orders', icon: ShoppingCart, label: 'Pedidos' },
     { path: '/stock', icon: Warehouse, label: 'Estoque' },
@@ -18,9 +20,8 @@ const Layout = ({ children }: LayoutProps) => {
     { path: '/stock/batches', icon: GitBranch, label: 'Lotes' },
     { path: '/stock/movements', icon: ArrowLeftRight, label: 'Movimentacoes' },
     { path: '/stock/branches', icon: Store, label: 'Filiais' },
-    { path: '/settings', icon: Settings, label: 'Configuracoes' },
     { path: '/reports', icon: FileText, label: 'Relatorios' },
-    { path: '/painel', icon: Monitor, label: 'Painel de Pedidos' },
+    { path: '/settings', icon: Settings, label: 'Configuracoes', divider: true },
   ]
 
   return (
@@ -37,15 +38,17 @@ const Layout = ({ children }: LayoutProps) => {
           {navItems.map((item) => {
             const Icon = item.icon
             return (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                end={item.path === '/'}
-                className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-              >
-                <Icon size={20} />
-                <span>{item.label}</span>
-              </NavLink>
+              <Fragment key={item.path}>
+                {item.divider && <div className="nav-divider" />}
+                <NavLink
+                  to={item.path}
+                  end={item.path === '/'}
+                  className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+                >
+                  <Icon size={20} />
+                  <span>{item.label}</span>
+                </NavLink>
+              </Fragment>
             )
           })}
         </nav>

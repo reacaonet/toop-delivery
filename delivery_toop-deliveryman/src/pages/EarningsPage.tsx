@@ -55,12 +55,12 @@ const EarningsPage: React.FC = () => {
 
       if (txData.status === 'fulfilled') {
         const t = txData.value as any
-        setTransactions(Array.isArray(t) ? t : t.transactions || [])
+        setTransactions(Array.isArray(t) ? t : t.data || t.transactions || [])
       }
 
       if (rideData.status === 'fulfilled') {
         const r = rideData.value as any
-        setRides(Array.isArray(r?.data) ? r.data : Array.isArray(r) ? r : [])
+        setRides(Array.isArray(r?.data) ? r.data : Array.isArray(r) ? r : r?.list || [])
       }
     } catch {
     } finally {

@@ -10,10 +10,10 @@ const ProfilePage: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [uploadingField, setUploadingField] = useState<string | null>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const cnhInputRef = useRef<HTMLInputElement>(null)
-  const vehicleDocInputRef = useRef<HTMLInputElement>(null)
-  const photoDocInputRef = useRef<HTMLInputElement>(null)
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
+  const cnhInputRef = useRef<HTMLInputElement | null>(null)
+  const vehicleDocInputRef = useRef<HTMLInputElement | null>(null)
+  const photoDocInputRef = useRef<HTMLInputElement | null>(null)
 
   const dm = user?.deliveryman
 
@@ -246,7 +246,7 @@ const ProfilePage: React.FC = () => {
           <input
             type="file"
             accept="image/*"
-            ref={fileInputRef}
+            ref={fileInputRef as React.RefObject<HTMLInputElement>}
             onChange={handleAvatarUpload}
             style={{ display: 'none' }}
           />
@@ -397,21 +397,21 @@ const ProfilePage: React.FC = () => {
           <input
             type="file"
             accept="image/*,.pdf"
-            ref={cnhInputRef}
+            ref={cnhInputRef as React.RefObject<HTMLInputElement>}
             onChange={(e) => handleDocumentUpload(e, 'cnh')}
             style={{ display: 'none' }}
           />
           <input
             type="file"
             accept="image/*,.pdf"
-            ref={vehicleDocInputRef}
+            ref={vehicleDocInputRef as React.RefObject<HTMLInputElement>}
             onChange={(e) => handleDocumentUpload(e, 'vehicleDocument')}
             style={{ display: 'none' }}
           />
           <input
             type="file"
             accept="image/*"
-            ref={photoDocInputRef}
+            ref={photoDocInputRef as React.RefObject<HTMLInputElement>}
             onChange={(e) => handleDocumentUpload(e, 'photo')}
             style={{ display: 'none' }}
           />

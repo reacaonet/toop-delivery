@@ -1,5 +1,7 @@
 import { OrderModel } from "../models/Order";
+import { SettingsModel } from "../models/Settings";
 import { AppError } from "../middleware/errorHandler";
+import walletService from "./wallet.service";
 import crypto from "crypto";
 
 interface PaginationQuery {
@@ -116,6 +118,8 @@ export class OrderService {
       throw new AppError("Pedido não encontrado", 404);
     }
 
+    const wasDelivering = order.status === "delivering";
+
     const allowedTransitions: Record<string, string[]> = {
       pending: ["confirmed", "cancelled"],
       confirmed: ["preparing", "cancelled"],
@@ -143,12 +147,41 @@ export class OrderService {
       updateData.deliveryman = deliverymanId;
     }
 
+    if (status === "delivered") {
+      updateData.deliveredAt = new Date();
+    }
+
     const updated = await OrderModel.findByIdAndUpdate(id, updateData, {
       new: true,
       runValidators: true,
     });
 
+    if (status === "delivered" && wasDelivering && updated) {
+      await this.creditDeliverymanWallet(updated);
+    }
+
     return updated;
+  }
+
+  private async creditDeliverymanWallet(order: InstanceType<typeof OrderModel>) {
+    const deliverymanId = order.deliveryman;
+    const fee = Number(order.deliveryFee || 0);
+    if (!deliverymanId || fee <= 0) return;
+
+    try {
+      const settings = await SettingsModel.findOne().lean();
+      const feePct = settings?.deliverymanFeePercentage ?? 2;
+      const earning = Math.round(fee * (1 - feePct / 100) * 100) / 100;
+      if (earning > 0) {
+        await walletService.credit(
+          deliverymanId.toString(),
+          earning,
+          `Entrega #${order.orderNumber} - taxa de entrega`
+        );
+      }
+    } catch (err) {
+      console.error("[Order] Erro ao creditar carteira do entregador:", err);
+    }
   }
 
   async acceptOrder(orderId: string, deliverymanId: string) {

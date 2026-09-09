@@ -127,7 +127,7 @@ const DashboardPage = () => {
 
   const recentOrders = useMemo(() => {
     return [...filteredOrders]
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       .slice(0, 10)
   }, [filteredOrders])
 

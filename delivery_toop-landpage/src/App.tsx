@@ -5,6 +5,7 @@ import DriverLandingPage from './pages/DriverLandingPage'
 import SupermarketLandingPage from './pages/SupermarketLandingPage'
 import FranchiseLandingPage from './pages/FranchiseLandingPage'
 import ContactPage from './pages/ContactPage'
+import LegalPage from './pages/LegalPage'
 
 export default function App() {
   return (
@@ -16,6 +17,9 @@ export default function App() {
         <Route path="/lojista" element={<StoreLandingPage />} />
         <Route path="/motorista" element={<DriverLandingPage />} />
         <Route path="/contato" element={<ContactPage />} />
+        <Route path="/termos" element={<LegalPage />} />
+        <Route path="/privacidade" element={<LegalPage />} />
+        <Route path="/cookies" element={<LegalPage />} />
         <Route path="*" element={<LandingPage />} />
       </Routes>
     </BrowserRouter>

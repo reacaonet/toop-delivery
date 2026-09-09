@@ -14,7 +14,7 @@ interface Order {
   customerName?: string
   customer?: { name: string }
   deliveryman?: string | { _id: string; name?: string }
-  deliveryAddress?: string
+  deliveryAddress?: string | { street?: string; number?: string; neighborhood?: string; city?: string }
   address?: string
   items?: Array<{ name: string; quantity: number; price: number }>
   [key: string]: unknown

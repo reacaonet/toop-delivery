@@ -19,11 +19,20 @@ interface User {
     rating?: number
     totalDeliveries?: number
     active?: boolean
+    available?: boolean
+    isDriver?: boolean
+    driverOnline?: boolean
+    driverAvailable?: boolean
+    totalTrips?: number
+    address?: string
+    addressLat?: number
+    addressLng?: number
     documents?: {
       cnh?: string
       vehicleDocument?: string
       photo?: string
     }
+    [key: string]: any
   }
   [key: string]: unknown
 }

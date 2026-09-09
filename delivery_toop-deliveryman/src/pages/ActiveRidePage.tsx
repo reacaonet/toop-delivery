@@ -43,7 +43,7 @@ export default function ActiveRidePage() {
   const [chatInput, setChatInput] = useState('')
   const [unreadCount, setUnreadCount] = useState(0)
   const [chatToast, setChatToast] = useState<string | null>(null)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const messagesEndRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     loadActiveRide()

@@ -192,6 +192,9 @@ body {
 .lp-footer-brand .lp-logo { margin-bottom: 16px; }
 .lp-footer-brand .lp-logo-text { color: var(--white); }
 .lp-footer-brand p { font-size: 0.9rem; color: var(--gray-500); }
+.lp-footer-contact { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+.lp-footer-contact a, .lp-footer-contact span { display: flex; align-items: center; gap: 8px; color: var(--gray-500); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
+.lp-footer-contact a:hover { color: var(--red); }
 .lp-footer-links { display: flex; gap: 60px; }
 .lp-footer-links h4 { color: var(--white); font-size: 0.9rem; font-weight: 700; margin-bottom: 16px; }
 .lp-footer-links a { display: block; color: var(--gray-500); text-decoration: none; font-size: 0.85rem; margin-bottom: 8px; transition: color 0.2s; }
@@ -204,6 +207,11 @@ body {
 .lp-footer-social { display: flex; gap: 16px; }
 .lp-footer-social a { color: var(--gray-500); transition: color 0.2s; }
 .lp-footer-social a:hover { color: var(--red); }
+
+/* ===================== LEGAL ===================== */
+.lp-legal-content { max-width: 720px; }
+.lp-legal-content h3 { color: var(--white); font-size: 1.05rem; margin: 28px 0 8px; }
+.lp-legal-content p { font-size: 0.95rem; line-height: 1.7; color: var(--gray-400); }
 
 /* ===================== NAV ACTIVE / CTAS ===================== */
 .lp-nav-links a.lp-nav-active { color: var(--red); font-weight: 700; }
