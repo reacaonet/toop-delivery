@@ -68,8 +68,8 @@ const categoryIcons: Record<string, string> = {
   'Café': '☕',
 }
 
-function getCompanyId(c: Company | Order): string {
-  return typeof c === 'object' && '_id' in c ? c._id : ''
+function getCompanyId(c: string | { _id: string; name?: string; logo?: string }): string {
+  return typeof c === 'object' && c && '_id' in c ? c._id : ''
 }
 
 function getCompanyName(c: Company | { name: string } | string): string {

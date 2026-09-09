@@ -44,7 +44,7 @@ export default function RideRequestPage() {
   const [serviceCategory, setServiceCategory] = useState('driver')
   const [vehicleType, setVehicleType] = useState('car')
   const [pickupAddress, setPickupAddress] = useState('')
-  const [pickupComplement, setPickupComplement] = useState('')
+  const [pickupComplement] = useState('')
   const [dropoffAddress, setDropoffAddress] = useState('')
   const [dropoffComplement, setDropoffComplement] = useState('')
   const [paymentMethod, setPaymentMethod] = useState('credit_card')
