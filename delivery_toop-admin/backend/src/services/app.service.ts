@@ -17,6 +17,12 @@ function parsePagination(query: PaginationQuery) {
 }
 
 export class AppService {
+  async listPublic() {
+    return AppCategoryModel.find({ status: true, showInApp: true, deletedAt: { $exists: false } })
+      .sort({ order: 1, name: 1 })
+      .select('name type icon keyword segment order showHome showInApp images');
+  }
+
   async listCategories(query: PaginationQuery) {
     const filter: any = { deletedAt: { $exists: false } };
     if (query.type) filter.type = query.type;

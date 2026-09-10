@@ -3,7 +3,6 @@ import { Link, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Building2, 
-  ShoppingCart, 
   Truck, 
   Settings,
   User,
@@ -12,7 +11,8 @@ import {
   Landmark,
   Megaphone,
   UserRound,
-  ChevronDown
+  ChevronDown,
+  LayoutGrid
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { deliverymanService } from '../services/api';
@@ -50,12 +50,10 @@ const Sidebar = () => {
       ],
     },
     {
-      label: 'Clientes',
-      icon: UserRound,
+      label: 'Catálogo',
+      icon: LayoutGrid,
       children: [
-        { path: '/customers', label: 'Clientes' },
-        { path: '/pre-register', label: 'Pré-registro' },
-        { path: '/indications', label: 'Indicações' },
+        { path: '/app-categories', label: 'Categorias do App' },
       ],
     },
     {
@@ -63,7 +61,6 @@ const Sidebar = () => {
       icon: Car,
       children: [
         { type: 'header', label: 'Cadastros' },
-        { path: '/mobility/passengers', label: 'Passageiros' },
         { path: '/mobility/services', label: 'Serviços' },
         { path: '/mobility/document-types', label: 'Tipos de Documento' },
         { path: '/mobility/documents', label: 'Documentos' },
@@ -75,12 +72,6 @@ const Sidebar = () => {
         { path: '/mobility/extract', label: 'Extrato do Motorista' },
         { path: '/mobility/evaluations', label: 'Avaliações' },
         { path: '/mobility/qr-codes', label: 'QR Codes' },
-        { type: 'header', label: 'Conteúdo & Notificação' },
-        { path: '/mobility/sliders', label: 'Sliders' },
-        { path: '/mobility/notifications', label: 'Notificações Push' },
-        { path: '/mobility/app-notifications', label: 'Notificações no App' },
-        { path: '/mobility/topics', label: 'Tópicos' },
-        { path: '/mobility/messages', label: 'Mensagens' },
         { type: 'header', label: 'Relatórios' },
         { path: '/mobility/reports', label: 'Relatórios Mobility' },
       ],
@@ -92,9 +83,6 @@ const Sidebar = () => {
         { path: '/wallet', label: 'Wallet Motoristas' },
         { path: '/wallet/withdrawals', label: 'Solicitações de Saque' },
         { path: '/payments', label: 'Pagamentos' },
-        { path: '/finance', label: 'Financeiro' },
-        { path: '/cashback', label: 'Cashback' },
-        { path: '/vouchers', label: 'Vouchers' },
         { path: '/reports', label: 'Relatórios' },
       ],
     },
@@ -102,7 +90,8 @@ const Sidebar = () => {
       label: 'Marketing',
       icon: Megaphone,
       children: [
-        { path: '/marketing', label: 'Campanhas' },
+        { path: '/banners', label: 'Banners / Promoções' },
+        { path: '/promos', label: 'Cupons' },
       ],
     },
     {
@@ -110,45 +99,12 @@ const Sidebar = () => {
       icon: Settings,
       children: [
         { path: '/settings', label: 'Configurações' },
-        { path: '/domain-settings', label: 'Config. Domínio' },
-        { path: '/email', label: 'E-mails' },
-        { path: '/users', label: 'Usuários Admin' },
         { path: '/helpdesk', label: 'HelpDesk / FAQ' },
         { path: '/reviews', label: 'Avaliações de Lojas / Entregadores' },
         { path: '/access-flow', label: 'Access Flow' },
         { path: '/log', label: 'Log / Auditoria' },
         { path: '/monitor', label: 'Monitor / Tools' },
-        { path: '/tips', label: 'Gorjetas' },
         { path: '/acl', label: 'Controle de Acesso', adminOnly: true },
-      ],
-    },
-    {
-      label: 'Loja (Operação)',
-      icon: ShoppingCart,
-      children: [
-        { path: '/painel', label: 'Painel da Loja' },
-        { path: '/orders', label: 'Pedidos' },
-        { path: '/dispatch', label: 'Despacho' },
-        { path: '/products', label: 'Produtos' },
-        { path: '/app-categories', label: 'Categorias App' },
-        { path: '/supermarket', label: 'Supermercado' },
-        { path: '/shopping-departments', label: 'Departamentos' },
-        { path: '/banners', label: 'Banners / Promoções' },
-        { path: '/sliders', label: 'Sliders' },
-        { path: '/offers', label: 'Ofertas' },
-        { path: '/promos', label: 'Cupons' },
-        { path: '/coupons', label: 'Cupons Compráveis' },
-        { path: '/packings', label: 'Embalagens' },
-        { path: '/stock', label: 'Estoque' },
-        { path: '/alert-products', label: 'Alertas de Produto' },
-        { path: '/shopping-schedules', label: 'Horários' },
-        { path: '/shopping-payment-methods', label: 'Met. Pagamento Super' },
-        { path: '/shoppers', label: 'Shoppers' },
-        { path: '/company-sites', label: 'Sites de Empresa' },
-        { path: '/accessories', label: 'Acessórios' },
-        { path: '/image-bank', label: 'Banco de Imagens' },
-        { path: '/search', label: 'Busca' },
-        { path: '/company-config', label: 'Config. Empresa' },
       ],
     },
   ];
@@ -220,6 +176,15 @@ const Sidebar = () => {
           <Truck size={20} />
           Motoristas & Entregadores
           {pendingDocsCount > 0 && renderBadge()}
+        </Link>
+
+        <Link
+          to="/users"
+          className={`nav-item ${location.pathname === '/users' ? 'active' : ''}`}
+          style={{ position: 'relative' }}
+        >
+          <UserRound size={20} />
+          Usuários / Clientes
         </Link>
 
         {groups.map(group => {

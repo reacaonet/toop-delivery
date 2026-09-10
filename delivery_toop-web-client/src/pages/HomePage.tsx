@@ -52,12 +52,27 @@ interface Category {
   name: string
   description?: string
   icon?: string
+  images?: string[]
   order: number
+}
+
+const isUrl = (s: string) => /^https?:\/\//i.test(s)
+
+const CategoryIcon = ({ cat }: { cat: Category }) => {
+  const value = cat.icon || cat.images?.[0] || categoryIcons[cat.name] || '📁'
+  if (isUrl(value)) {
+    return <img src={value} alt={cat.name} style={{ width: 18, height: 18, borderRadius: 6, objectFit: 'cover' }} />
+  }
+  return <>{value}</>
 }
 
 const categoryIcons: Record<string, string> = {
   'Lanches': '🍔',
   'Pizzas': '🍕',
+  'Pizzaria': '🍕',
+  'Pizzarias': '🍕',
+  'Restaurantes': '🍽️',
+  'Restaurante': '🍽️',
   'Bebidas': '🥤',
   'Doces': '🍰',
   'Combos': '🎉',
@@ -66,6 +81,17 @@ const categoryIcons: Record<string, string> = {
   'Marmita': '🍱',
   'Açaí': '💜',
   'Café': '☕',
+  'Supermercados': '🛒',
+  'Supermercado': '🛒',
+  'Água e Gás': '🛢️',
+  'Padaria': '🥐',
+  'Padarias': '🥐',
+  'Farmácia': '💊',
+  'Farmácias': '💊',
+  'Mercado': '🏪',
+  'Conveniência': '🏪',
+  'Açougue': '🥩',
+  'Acessórios': '🎧',
 }
 
 function getCompanyId(c: string | { _id: string; name?: string; logo?: string }): string {
@@ -129,7 +155,7 @@ export default function HomePage() {
           api.get('/companies', { params: { page: 1, limit: 50 } }),
           api.get('/products', { params: { page: 1, limit: 200 } }),
           api.get('/banners/active').catch(() => ({ data: { data: [] } })),
-          api.get('/categories/public').catch(() => ({ data: { data: [] } })),
+          api.get('/application/category/public').catch(() => ({ data: { data: [] } })),
         ])
         const cData = companiesRes.data.data
         setCompanies(Array.isArray(cData) ? cData : cData?.data ?? [])
@@ -262,7 +288,7 @@ export default function HomePage() {
             onClick={() => setSelectedCategory(cat.name)}
           >
             <span className="category-chip-icon">
-              {cat.icon || categoryIcons[cat.name] || '📁'}
+              <CategoryIcon cat={cat} />
             </span>
             <span className="category-chip-label">{cat.name}</span>
           </button>

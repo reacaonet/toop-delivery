@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import api from '../api'
 import { Store, Mail, Lock, Phone, Building2, Tag, ArrowRight, UserRound } from 'lucide-react'
@@ -7,6 +7,7 @@ const RegisterPage = () => {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [categories, setCategories] = useState<{ _id: string; name: string; icon?: string }[]>([])
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -16,6 +17,16 @@ const RegisterPage = () => {
     password: '',
     confirmPassword: '',
   })
+
+  useEffect(() => {
+    api
+      .get('/application/category/public')
+      .then((res) => {
+        const data = res.data?.data ?? res.data
+        setCategories(Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [])
+      })
+      .catch(() => setCategories([]))
+  }, [])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -106,13 +117,18 @@ const RegisterPage = () => {
                 <label>Categoria</label>
                 <div className="input-icon-wrapper">
                   <Tag size={18} className="input-icon" />
-                  <input
+                  <select
                     name="category"
-                    type="text"
                     value={form.category}
                     onChange={handleChange}
-                    placeholder="Hamburgueria"
-                  />
+                  >
+                    <option value="">Selecione uma categoria</option>
+                    {categories.map((c) => (
+                      <option key={c._id} value={c.name}>
+                        {c.icon ? `${c.icon} ` : ''}{c.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </div>
             </div>

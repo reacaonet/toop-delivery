@@ -58,7 +58,7 @@ export default function CheckoutPage() {
     api
       .get(`/shopping/payment-method/${user._id}`)
       .then(({ data }) => {
-        const list = Array.isArray(data.data) ? data.data : []
+        const list: Array<{ _id: string; flag: string; cartNumber: string; nameOnCard: string; isMain: boolean }> = Array.isArray(data.data) ? data.data : []
         setSavedCards(list)
         if (list.length > 0) {
           const current = list.find((c) => c._id === selectedCardId) ? selectedCardId : ''

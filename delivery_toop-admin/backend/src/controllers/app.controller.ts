@@ -6,6 +6,10 @@ export class AppController {
     return res.status(status).json({ success: true, data });
   }
 
+  listPublic = async (req: Request, res: Response, next: NextFunction) => {
+    try { this.ok(res, await appService.listPublic()); } catch (e) { next(e); }
+  };
+
   listCategories = async (req: Request, res: Response, next: NextFunction) => {
     try { this.ok(res, await appService.listCategories(req.query as any)); } catch (e) { next(e); }
   };

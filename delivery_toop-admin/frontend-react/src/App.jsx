@@ -6,75 +6,35 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Users from './pages/Users';
 import Companies from './pages/Companies';
+import AppCategories from './pages/AppCategories';
 import Banners from './pages/Banners';
-import Orders from './pages/Orders';
 import Deliverymen from './pages/Fleet';
-import Drivers from './pages/Drivers';
 import Bookings from './pages/Bookings';
 import Promos from './pages/Promos';
-import Coupons from './pages/Coupons';
 import WalletPage from './pages/Wallet';
 import Withdrawals from './pages/Withdrawals';
 import Payments from './pages/Payments';
-import Cashback from './pages/Cashback';
-import Packings from './pages/Packings';
-import Shoppers from './pages/Shoppers';
 import Franchises from './pages/Franchises';
-import Finance from './pages/Finance';
 import Settings from './pages/Settings';
 import Profile from './pages/Profile';
 import Reports from './pages/Reports';
-import Products from './pages/Products';
-import Painel from './pages/Painel';
 import AccessControl from './pages/AccessControl';
-import DomainSettings from './pages/DomainSettings';
 import HelpDesk from './pages/HelpDesk';
-import Email from './pages/Email';
-import Marketing from './pages/Marketing';
 import Log from './pages/Log';
-import Vouchers from './pages/Vouchers';
-import Mobility from './pages/Mobility';
 import Monitor from './pages/Monitor';
-import Supermarket from './pages/Supermarket';
-import Offers from './pages/Offers';
-import Customers from './pages/Customers';
-import Indications from './pages/Indications';
-import Persons from './pages/Persons';
-import ShoppingDepartments from './pages/ShoppingDepartments';
-import AppCategories from './pages/AppCategories';
-import Sliders from './pages/Sliders';
-import AlertProducts from './pages/AlertProducts';
-import Tips from './pages/Tips';
-import Sites from './pages/Sites';
-import Schedules from './pages/Schedules';
-import MobilityPassengers from './pages/MobilityPassengers';
 import MobilityServices from './pages/MobilityServices';
-import MobilitySliders from './pages/MobilitySliders';
-import MobilityNotifications from './pages/MobilityNotifications';
 import MobilityEvaluations from './pages/MobilityEvaluations';
 import MobilityReports from './pages/MobilityReports';
 import MobilityMonitor from './pages/MobilityMonitor';
 import MobilityExtract from './pages/MobilityExtract';
-import MobilityMessages from './pages/MobilityMessages';
-import MobilityTopics from './pages/MobilityTopics';
 import MobilityDocuments from './pages/MobilityDocuments';
-import MobilityNotificationsApp from './pages/MobilityNotificationsApp';
 import Groups from './pages/Groups';
-import ShoppingPaymentMethods from './pages/ShoppingPaymentMethods';
-import CompanyConfig from './pages/CompanyConfig';
 import AccessFlow from './pages/AccessFlow';
 import MobilityDocumentTypes from './pages/MobilityDocumentTypes';
 import MobilityPeakHours from './pages/MobilityPeakHours';
 import MobilitySupportSubjects from './pages/MobilitySupportSubjects';
-import Stock from './pages/Stock';
 import Reviews from './pages/Reviews';
-import Dispatch from './pages/Dispatch';
-import ImageBank from './pages/ImageBank';
-import NotificationTopic from './pages/NotificationTopic';
 import MobilityQrCodes from './pages/MobilityQrCodes';
-import PreRegister from './pages/PreRegister';
-import Accessories from './pages/Accessories';
-import SearchScreen from './pages/Search';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 
@@ -88,70 +48,30 @@ function AdminLayout() {
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/companies" element={<Companies />} />
+            <Route path="/app-categories" element={<AppCategories />} />
             <Route path="/banners" element={<Banners />} />
-            <Route path="/orders" element={<Orders />} />
             <Route path="/users" element={<Users />} />
             <Route path="/deliverymen" element={<Deliverymen />} />
-            <Route path="/drivers" element={<Drivers />} />
             <Route path="/bookings" element={<Bookings />} />
             <Route path="/promos" element={<Promos />} />
-            <Route path="/coupons" element={<Coupons />} />
-            <Route path="/cashback" element={<Cashback />} />
-            <Route path="/packings" element={<Packings />} />
-            <Route path="/shoppers" element={<Shoppers />} />
             <Route path="/franchises" element={<Franchises />} />
-            <Route path="/finance" element={<Finance />} />
             <Route path="/acl" element={<AccessControl />} />
-            <Route path="/domain-settings" element={<DomainSettings />} />
             <Route path="/helpdesk" element={<HelpDesk />} />
-            <Route path="/email" element={<Email />} />
-            <Route path="/marketing" element={<Marketing />} />
             <Route path="/log" element={<Log />} />
-            <Route path="/vouchers" element={<Vouchers />} />
-            <Route path="/mobility" element={<Mobility />} />
             <Route path="/monitor" element={<Monitor />} />
-            <Route path="/supermarket" element={<Supermarket />} />
-            <Route path="/offers" element={<Offers />} />
-            <Route path="/customers" element={<Customers />} />
-            <Route path="/indications" element={<Indications />} />
-            <Route path="/persons" element={<Persons />} />
-            <Route path="/shopping-departments" element={<ShoppingDepartments />} />
-            <Route path="/app-categories" element={<AppCategories />} />
-            <Route path="/sliders" element={<Sliders />} />
-            <Route path="/alert-products" element={<AlertProducts />} />
-            <Route path="/tips" element={<Tips />} />
-            <Route path="/company-sites" element={<Sites />} />
-            <Route path="/shopping-schedules" element={<Schedules />} />
-            <Route path="/mobility/passengers" element={<MobilityPassengers />} />
             <Route path="/mobility/services" element={<MobilityServices />} />
-            <Route path="/mobility/sliders" element={<MobilitySliders />} />
-            <Route path="/mobility/notifications" element={<MobilityNotifications />} />
             <Route path="/mobility/evaluations" element={<MobilityEvaluations />} />
             <Route path="/mobility/reports" element={<MobilityReports />} />
             <Route path="/mobility/monitoring" element={<MobilityMonitor />} />
             <Route path="/mobility/extract" element={<MobilityExtract />} />
-            <Route path="/mobility/messages" element={<MobilityMessages />} />
-            <Route path="/mobility/topics" element={<MobilityTopics />} />
             <Route path="/mobility/documents" element={<MobilityDocuments />} />
-            <Route path="/mobility/app-notifications" element={<MobilityNotificationsApp />} />
             <Route path="/groups" element={<Groups />} />
-            <Route path="/shopping-payment-methods" element={<ShoppingPaymentMethods />} />
-            <Route path="/company-config" element={<CompanyConfig />} />
             <Route path="/access-flow" element={<AccessFlow />} />
             <Route path="/mobility/document-types" element={<MobilityDocumentTypes />} />
             <Route path="/mobility/peak-hours" element={<MobilityPeakHours />} />
             <Route path="/mobility/support-subjects" element={<MobilitySupportSubjects />} />
-            <Route path="/stock" element={<Stock />} />
             <Route path="/reviews" element={<Reviews />} />
-            <Route path="/dispatch" element={<Dispatch />} />
-            <Route path="/image-bank" element={<ImageBank />} />
-            <Route path="/notification-topic" element={<NotificationTopic />} />
             <Route path="/mobility/qr-codes" element={<MobilityQrCodes />} />
-            <Route path="/pre-register" element={<PreRegister />} />
-            <Route path="/accessories" element={<Accessories />} />
-            <Route path="/search" element={<SearchScreen />} />
-            <Route path="/products" element={<Products />} />
-            <Route path="/painel" element={<Painel />} />
             <Route path="/wallet" element={<WalletPage />} />
             <Route path="/wallet/withdrawals" element={<Withdrawals />} />
             <Route path="/payments" element={<Payments />} />

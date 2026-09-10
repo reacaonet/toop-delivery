@@ -12,7 +12,32 @@ const extractList = (res) => {
   return [];
 };
 
-const TYPE_LABEL = { supermarket: 'Supermercado', restaurant: 'Restaurante', accessories: 'Acessórios' };
+const TYPE_LABEL = {
+  supermarket: 'Supermercado',
+  market: 'Mercado e Atacarejo',
+  restaurant: 'Restaurante',
+  pizza: 'Pizzaria',
+  hamburger: 'Hamburgueria',
+  japanese: 'Japonesa',
+  arabic: 'Árabe',
+  meal: 'Marmita',
+  acai: 'Açaí',
+  bakery: 'Padaria',
+  coffee: 'Cafeteria',
+  icecream: 'Sorveteria',
+  candy: 'Doces e Sobremesas',
+  drinks: 'Bebidas',
+  hortifruti: 'Hortifrúti',
+  gas_water: 'Gás e Água',
+  pharmacy: 'Farmácia',
+  convenience: 'Conveniência',
+  pet: 'Pet Shop',
+  technology: 'Tecnologia',
+  fashion: 'Moda e Vestuário',
+  accessories: 'Acessórios',
+};
+
+const TYPE_OPTIONS = Object.entries(TYPE_LABEL).map(([value, label]) => ({ value, label }));
 
 const AppCategories = () => {
   const [items, setItems] = useState([]);
@@ -27,6 +52,7 @@ const AppCategories = () => {
   const [form, setForm] = useState({
     name: '',
     type: 'supermarket',
+    icon: '',
     keyword: '',
     segment: '',
     order: 0,
@@ -69,7 +95,7 @@ const AppCategories = () => {
 
   const openNew = () => {
     setSelected(null);
-    setForm({ name: '', type: 'supermarket', keyword: '', segment: '', order: 0, showInApp: true, showHome: true, status: true, images: '' });
+    setForm({ name: '', type: 'supermarket', icon: '', keyword: '', segment: '', order: 0, showInApp: true, showHome: true, status: true, images: '' });
     setOpen(true);
   };
 
@@ -78,6 +104,7 @@ const AppCategories = () => {
     setForm({
       name: it.name || '',
       type: it.type || 'supermarket',
+      icon: it.icon || '',
       keyword: it.keyword || '',
       segment: it.segment || '',
       order: it.order || 0,
@@ -96,6 +123,7 @@ const AppCategories = () => {
       const payload = {
         name: form.name,
         type: form.type,
+        icon: form.icon || undefined,
         keyword: form.keyword || undefined,
         segment: form.segment || undefined,
         order: Number(form.order) || 0,
@@ -129,6 +157,11 @@ const AppCategories = () => {
   };
 
   const columns = [
+    {
+      key: 'icon',
+      title: 'Ícone',
+      render: (v) => (v ? <span style={{ fontSize: '1.15rem' }}>{v}</span> : '-'),
+    },
     { key: 'name', title: 'Nome', render: (v) => <b>{v}</b> },
     {
       key: 'type',
@@ -191,9 +224,9 @@ const AppCategories = () => {
               style={{ padding: '0.4rem 0.6rem', border: '1px solid #d1d5db', borderRadius: '6px' }}
             >
               <option value="">Tipo (todos)</option>
-              <option value="supermarket">Supermercado</option>
-              <option value="restaurant">Restaurante</option>
-              <option value="accessories">Acessórios</option>
+              {TYPE_OPTIONS.map((t) => (
+                <option key={t.value} value={t.value}>{t.label}</option>
+              ))}
             </select>
             <select
               value={statusFilter}
@@ -251,11 +284,22 @@ const AppCategories = () => {
               </div>
               <div className="form-group">
                 <label>Tipo *</label>
-                <select name="type" value={form.type} onChange={change}>
-                  <option value="supermarket">Supermercado</option>
-                  <option value="restaurant">Restaurante</option>
-                  <option value="accessories">Acessórios</option>
+                <select name="type" value={form.type} onChange={change} required>
+                  {TYPE_OPTIONS.map((t) => (
+                    <option key={t.value} value={t.value}>{t.label}</option>
+                  ))}
                 </select>
+              </div>
+              <div className="form-group">
+                <label>Ícone (emoji)</label>
+                <input
+                  type="text"
+                  name="icon"
+                  value={form.icon}
+                  onChange={change}
+                  placeholder="Ex: 🍕 ou 🛒"
+                  maxLength={16}
+                />
               </div>
               <div className="form-row">
                 <div className="form-group">

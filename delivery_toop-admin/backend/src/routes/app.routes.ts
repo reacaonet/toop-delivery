@@ -4,6 +4,7 @@ import { authenticate } from "../middleware/auth";
 
 const router = Router();
 
+router.get("/category/public", appController.listPublic);
 router.get("/category", authenticate, appController.listCategories);
 router.get("/category/:id", authenticate, appController.getCategory);
 router.post("/category", authenticate, appController.createCategory);

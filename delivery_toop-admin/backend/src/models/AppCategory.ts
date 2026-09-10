@@ -1,8 +1,33 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
+export type AppCategoryType =
+  | 'supermarket'
+  | 'market'
+  | 'restaurant'
+  | 'pizza'
+  | 'hamburger'
+  | 'japanese'
+  | 'arabic'
+  | 'meal'
+  | 'acai'
+  | 'bakery'
+  | 'coffee'
+  | 'icecream'
+  | 'candy'
+  | 'drinks'
+  | 'hortifruti'
+  | 'gas_water'
+  | 'pharmacy'
+  | 'convenience'
+  | 'pet'
+  | 'technology'
+  | 'fashion'
+  | 'accessories';
+
 export interface IAppCategory extends Document {
   name: string;
-  type: 'supermarket' | 'restaurant' | 'accessories';
+  type: AppCategoryType;
+  icon?: string;
   showInApp: boolean;
   keyword?: string;
   segment?: string;
@@ -20,10 +45,34 @@ const AppCategorySchema = new Schema<IAppCategory>(
     name: { type: String, required: true, trim: true },
     type: {
       type: String,
-      enum: ['supermarket', 'restaurant', 'accessories'],
+      enum: [
+        'supermarket',
+        'market',
+        'restaurant',
+        'pizza',
+        'hamburger',
+        'japanese',
+        'arabic',
+        'meal',
+        'acai',
+        'bakery',
+        'coffee',
+        'icecream',
+        'candy',
+        'drinks',
+        'hortifruti',
+        'gas_water',
+        'pharmacy',
+        'convenience',
+        'pet',
+        'technology',
+        'fashion',
+        'accessories',
+      ],
       default: 'supermarket',
       required: true,
     },
+    icon: { type: String, trim: true },
     showInApp: { type: Boolean, required: true, default: true },
     keyword: { type: String },
     segment: { type: String },

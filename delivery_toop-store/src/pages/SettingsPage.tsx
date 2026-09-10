@@ -86,7 +86,7 @@ const SettingsPage = () => {
 
   const loadCategories = async () => {
     try {
-      const res = await api.get('/categories/public')
+      const res = await api.get('/application/category/public')
       const data = res.data?.data ?? res.data
       setCategories(Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [])
     } catch (e) {
