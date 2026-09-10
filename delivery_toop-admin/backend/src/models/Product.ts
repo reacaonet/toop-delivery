@@ -7,6 +7,7 @@ export interface IProduct extends Document {
   promoPrice?: number;
   company: mongoose.Types.ObjectId;
   category: mongoose.Types.ObjectId;
+  addons?: Array<mongoose.Types.ObjectId>;
   image?: string;
   images?: string[];
   preparationTime?: number;
@@ -28,6 +29,7 @@ const ProductSchema = new Schema<IProduct>(
     promoPrice: { type: Number },
     company: { type: Schema.Types.ObjectId, ref: 'Company', required: true },
     category: { type: Schema.Types.ObjectId, ref: 'Category', required: true },
+    addons: [{ type: Schema.Types.ObjectId, ref: 'Addon' }],
     image: { type: String },
     images: [{ type: String }],
     preparationTime: { type: Number },

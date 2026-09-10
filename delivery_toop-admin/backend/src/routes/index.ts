@@ -86,6 +86,7 @@ import shoppingCartRoutes from "./shopping-cart.routes";
 import shoppingOrderRoutes from "./shopping-order.routes";
 import pixRoutes from "./pix.routes";
 import braspagRoutes from "./braspag.routes";
+import addonRoutes from "./addon.routes";
 import { authenticate } from "../middleware/auth";
 
 const router = Router();
@@ -99,6 +100,7 @@ router.use("/payments", paymentRoutes);
 router.use("/notifications", notificationRoutes);
 router.use("/categories", categoryRoutes);
 router.use("/products", productRoutes);
+router.use("/addons", addonRoutes);
 router.use("/cart", cartRoutes);
 router.use("/banners", bannerRoutes);
 router.use("/upload", uploadRoutes);

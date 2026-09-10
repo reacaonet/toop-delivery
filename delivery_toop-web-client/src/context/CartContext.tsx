@@ -3,6 +3,12 @@ import type { ReactNode } from 'react'
 import api from '../api'
 import { useAuth } from './AuthContext'
 
+interface AddonLine {
+  addonId: string
+  name: string
+  price: number
+}
+
 interface CartItem {
   _id: string
   product: string
@@ -11,6 +17,7 @@ interface CartItem {
   quantity: number
   total: number
   notes?: string
+  addons?: AddonLine[]
 }
 
 interface Cart {
@@ -35,6 +42,7 @@ interface CartContextType {
     quantity: number,
     notes?: string,
     meta?: { name?: string; price?: number },
+    addons?: AddonLine[],
   ) => Promise<void>
   removeItem: (itemId: string) => Promise<void>
   updateQuantity: (itemId: string, quantity: number) => Promise<void>
@@ -56,12 +64,17 @@ interface LocalLine {
   quantity: number
   total: number
   notes?: string
+  addons?: AddonLine[]
 }
 
 interface LocalCartPayload {
   companyId: string
   items: LocalLine[]
 }
+
+const addonKey = (addons?: AddonLine[]) => (addons || []).map((a) => a.addonId).sort().join(',')
+
+const addonSum = (addons?: AddonLine[]) => (addons || []).reduce((s, a) => s + (Number(a.price) || 0), 0)
 
 function loadLocalCart(): LocalCartPayload | null {
   try {
@@ -148,6 +161,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           productId: line.product,
           quantity: line.quantity,
           notes: line.notes,
+          addons: (line.addons || []).map((a) => a.addonId),
         })
       }
       localStorage.removeItem(LOCAL_CART_KEY)
@@ -187,19 +201,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [companyId, refreshCart, isAuthed])
 
   const addItem = useCallback(
-    async (compId: string, productId: string, quantity: number, notes?: string, meta?: { name?: string; price?: number }) => {
+    async (compId: string, productId: string, quantity: number, notes?: string, meta?: { name?: string; price?: number }, addons?: AddonLine[]) => {
       if (!isAuthed) {
         setCompanyId(compId)
-        const price = meta?.price ?? 0
+        const basePrice = meta?.price ?? 0
+        const price = Math.round((basePrice + addonSum(addons)) * 100) / 100
         const name = meta?.name || 'Item'
         const notesKey = notes || ''
         setLocalCart((prev) => {
           const current = prev?.companyId === compId ? prev : { companyId: compId, items: [] }
-          const id = `${productId}__${notesKey}`
+          const id = `${productId}__${notesKey}__${addonKey(addons)}`
           const existing = current.items.find((i) => i._id === id)
           if (existing) {
             existing.quantity += quantity
-            existing.total = existing.quantity * existing.price
+            existing.total = Math.round(existing.quantity * existing.price * 100) / 100
           } else {
             current.items.push({
               _id: id,
@@ -207,15 +222,21 @@ export function CartProvider({ children }: { children: ReactNode }) {
               name,
               price,
               quantity,
-              total: quantity * price,
+              total: Math.round(quantity * price * 100) / 100,
               notes: notes || undefined,
+              addons,
             })
           }
           return { ...current, items: [...current.items] }
         })
         return
       }
-      const { data } = await api.post(`/cart/${compId}/items`, { productId, quantity, notes })
+      const { data } = await api.post(`/cart/${compId}/items`, {
+        productId,
+        quantity,
+        notes,
+        addons: (addons || []).map((a) => a.addonId),
+      })
       setCart(data.data)
       setCompanyId(compId)
     },

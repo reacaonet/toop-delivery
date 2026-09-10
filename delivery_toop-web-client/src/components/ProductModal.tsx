@@ -1,5 +1,12 @@
 import { useState } from 'react'
 
+interface Addon {
+  _id: string
+  name: string
+  price: number
+  active?: boolean
+}
+
 interface Product {
   _id: string
   name: string
@@ -8,11 +15,16 @@ interface Product {
   promoPrice: number
   image: string
   preparationTime: string
+  addons?: Addon[]
 }
 
 interface ProductModalProps {
   product: Product
-  onConfirm: (quantity: number, notes: string) => void
+  onConfirm: (
+    quantity: number,
+    notes: string,
+    addons: Array<{ addonId: string; name: string; price: number }>,
+  ) => void
   onClose: () => void
   loading?: boolean
 }
@@ -20,10 +32,21 @@ interface ProductModalProps {
 export default function ProductModal({ product, onConfirm, onClose, loading }: ProductModalProps) {
   const [quantity, setQuantity] = useState(1)
   const [notes, setNotes] = useState('')
+  const [selectedAddons, setSelectedAddons] = useState<string[]>([])
 
   const hasPromo = product.promoPrice && product.promoPrice < product.price
   const unitPrice = hasPromo ? product.promoPrice : product.price
-  const total = unitPrice * quantity
+  const activeAddons = (product.addons || []).filter((a) => a.active !== false)
+  const addonTotal = activeAddons
+    .filter((a) => selectedAddons.includes(a._id))
+    .reduce((sum, a) => sum + (Number(a.price) || 0), 0)
+  const total = Math.round((unitPrice + addonTotal) * quantity * 100) / 100
+
+  const toggleAddon = (id: string) => {
+    setSelectedAddons((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    )
+  }
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -53,6 +76,29 @@ export default function ProductModal({ product, onConfirm, onClose, loading }: P
             </span>
           </div>
         </div>
+
+        {activeAddons.length > 0 && (
+          <div className="modal-addons-section">
+            <p className="modal-section-label">Acompanhamentos</p>
+            <div className="modal-addons-list">
+              {activeAddons.map((addon) => (
+                <label key={addon._id} className="modal-addon-item">
+                  <span className="modal-addon-name">
+                    <input
+                      type="checkbox"
+                      checked={selectedAddons.includes(addon._id)}
+                      onChange={() => toggleAddon(addon._id)}
+                    />
+                    {addon.name}
+                  </span>
+                  <span className="modal-addon-price">
+                    + R$ {Number(addon.price || 0).toFixed(2)}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="modal-quantity-section">
           <p className="modal-section-label">Quantidade</p>
@@ -87,7 +133,15 @@ export default function ProductModal({ product, onConfirm, onClose, loading }: P
 
         <button
           className="modal-confirm-btn"
-          onClick={() => onConfirm(quantity, notes)}
+          onClick={() =>
+            onConfirm(
+              quantity,
+              notes,
+              activeAddons
+                .filter((a) => selectedAddons.includes(a._id))
+                .map((a) => ({ addonId: a._id, name: a.name, price: Number(a.price) || 0 })),
+            )
+          }
           disabled={loading}
         >
           {loading ? 'Adicionando...' : `Adicionar · R$ ${total.toFixed(2)}`}

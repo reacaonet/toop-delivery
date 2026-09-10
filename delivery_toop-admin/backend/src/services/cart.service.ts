@@ -1,7 +1,14 @@
 import { CartModel } from "../models/Cart";
 import { ProductModel } from "../models/Product";
 import { CompanyModel } from "../models/Company";
+import { AddonModel } from "../models/Addon";
 import { AppError } from "../middleware/errorHandler";
+
+const addonKey = (addons: Array<{ addonId: string }>) =>
+  (addons || []).map((a) => a.addonId).sort().join(',');
+
+const addonSum = (addons: Array<{ price: number }>) =>
+  (addons || []).reduce((sum, a) => sum + Number(a.price || 0), 0);
 
 export class CartService {
   async getOrCreate(customerId: string, companyId: string) {
@@ -20,9 +27,38 @@ export class CartService {
     return cart;
   }
 
-  async addItem(customerId: string, companyId: string, productId: string, quantity: number, notes?: string) {
-    const product = await ProductModel.findById(productId);
+  async addItem(customerId: string, companyId: string, productId: string, quantity: number, notes?: string, addons?: string[]) {
+    const product = await ProductModel.findById(productId).populate<{ addons: any[] }>('addons');
     if (!product || !product.active) throw new AppError("Produto não encontrado", 404);
+    if (product.company.toString() !== companyId) {
+      throw new AppError("Produto não pertence a esta empresa", 400);
+    }
+
+    const requested = [...new Set((addons || []).map((a) => String(a)))];
+    const available = new Set((product.addons || []).map((a: any) => a._id.toString()));
+    for (const id of requested) {
+      if (!available.has(id)) throw new AppError("Acompanhamento inválido para este produto", 400);
+    }
+
+    let addonSnapshots: Array<{ addonId: string; name: string; price: number }> = [];
+    if (requested.length > 0) {
+      const docs = await AddonModel.find({
+        _id: { $in: requested },
+        company: companyId,
+        active: true,
+        deletedAt: { $exists: false },
+      });
+      const byId = new Map(docs.map((d) => [d._id.toString(), d]));
+      for (const id of requested) {
+        const d = byId.get(id);
+        if (!d) throw new AppError("Acompanhamento não encontrado ou inativo", 400);
+        addonSnapshots.push({ addonId: id, name: d.name, price: Math.round(Number(d.price || 0) * 100) / 100 });
+      }
+    }
+
+    const basePrice = Number(product.promoPrice || product.price) || 0;
+    const unitTotal = Math.round((basePrice + addonSum(addonSnapshots)) * 100) / 100;
+    const key = `${productId}|${notes || ''}|${addonKey(addonSnapshots)}`;
 
     const cart = await this.getOrCreate(customerId, companyId);
 
@@ -31,21 +67,24 @@ export class CartService {
     }
 
     const existingIndex = cart.items.findIndex(
-      (item) => item.product.toString() === productId && item.notes === (notes || undefined)
+      (item: any) =>
+        `${item.product.toString()}|${item.notes || ''}|${addonKey(item.addons || [])}` === key
     );
 
     if (existingIndex >= 0) {
       cart.items[existingIndex].quantity += quantity;
-      cart.items[existingIndex].total = cart.items[existingIndex].quantity * cart.items[existingIndex].price;
+      cart.items[existingIndex].total =
+        Math.round(cart.items[existingIndex].quantity * unitTotal * 100) / 100;
     } else {
       cart.items.push({
         product: product._id,
         name: product.name,
-        price: product.promoPrice || product.price,
+        price: basePrice,
         quantity,
-        total: (product.promoPrice || product.price) * quantity,
+        total: Math.round(unitTotal * quantity * 100) / 100,
         notes,
-      });
+        addons: addonSnapshots,
+      } as any);
     }
 
     this.recalculateTotals(cart);
@@ -64,7 +103,9 @@ export class CartService {
       cart.items.splice(itemIndex, 1);
     } else {
       cart.items[itemIndex].quantity = quantity;
-      cart.items[itemIndex].total = cart.items[itemIndex].price * quantity;
+      const unitTotal =
+        Math.round((Number(cart.items[itemIndex].price || 0) + addonSum(cart.items[itemIndex].addons || [])) * 100) / 100;
+      cart.items[itemIndex].total = Math.round(unitTotal * quantity * 100) / 100;
     }
 
     this.recalculateTotals(cart);

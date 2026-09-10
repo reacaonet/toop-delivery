@@ -46,6 +46,33 @@ export class CompanyController {
       next(error);
     }
   }
+
+  async getAdmins(req: Request, res: Response, next: NextFunction) {
+    try {
+      const admins = await companyService.getAdmins(req.params.id);
+      return res.status(200).json({ success: true, data: admins });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async addAdmin(req: Request, res: Response, next: NextFunction) {
+    try {
+      const admin = await companyService.addAdmin(req.params.id, req.body);
+      return res.status(201).json({ success: true, data: admin });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async removeAdmin(req: Request, res: Response, next: NextFunction) {
+    try {
+      const admin = await companyService.removeAdmin(req.params.id, req.params.userId);
+      return res.status(200).json({ success: true, data: admin });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export default new CompanyController();

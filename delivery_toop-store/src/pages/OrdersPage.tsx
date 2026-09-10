@@ -27,6 +27,8 @@ interface OrderItem {
   name: string
   quantity: number
   price: number
+  total?: number
+  addons?: Array<{ addonId: string; name: string; price: number }>
 }
 
 interface Order {
@@ -175,8 +177,21 @@ const OrdersPage = () => {
                           <span className="detail-label">Itens:</span>
                           {order.items.map((item, i) => (
                             <div key={i} className="order-item-row">
-                              <span>{item.quantity}x {item.name}</span>
-                              <span>R$ {Number(item.price * item.quantity).toFixed(2)}</span>
+                              <div>
+                                <span>{item.quantity}x {item.name}</span>
+                                {(item.addons || []).length > 0 && (
+                                  <div className="order-item-addons">
+                                    {(item.addons || []).map((a) => (
+                                      <span key={a.addonId}>
+                                        {a.name} + R$ {Number(a.price || 0).toFixed(2)}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                              <span>
+                                R$ {Number(item.total != null ? item.total : item.price * item.quantity).toFixed(2)}
+                              </span>
                             </div>
                           ))}
                         </div>

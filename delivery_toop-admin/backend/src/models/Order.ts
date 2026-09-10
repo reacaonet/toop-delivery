@@ -10,6 +10,7 @@ export interface IOrder extends Document {
     quantity: number;
     price: number;
     total: number;
+    addons?: Array<{ addonId: string; name: string; price: number }>;
   }>;
   subtotal: number;
   deliveryFee: number;
@@ -58,6 +59,13 @@ const OrderSchema = new Schema<IOrder>(
         quantity: { type: Number, required: true, min: 1 },
         price: { type: Number, required: true },
         total: { type: Number, required: true },
+        addons: [
+          {
+            addonId: { type: String },
+            name: { type: String },
+            price: { type: Number },
+          },
+        ],
       },
     ],
     subtotal: { type: Number, required: true },

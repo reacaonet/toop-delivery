@@ -62,6 +62,7 @@ interface OrderItem {
   quantity: number
   price: number
   total: number
+  addons?: Array<{ addonId: string; name: string; price: number }>
 }
 
 interface Order {
@@ -319,9 +320,20 @@ export default function PainelPage() {
                 <div className="pm-items">
                   {selected.items?.map((it, i) => (
                     <div key={i} className="pm-item">
-                      <span className="pm-item-name">{it.name}</span>
-                      <span className="pm-item-qty">x{it.quantity}</span>
-                      <span className="pm-item-price">{formatCurrency(it.total || it.price * it.quantity)}</span>
+                      <div className="pm-item-info">
+                        <span className="pm-item-name">{it.name}</span>
+                        <span className="pm-item-qty">x{it.quantity}</span>
+                        {(it.addons || []).length > 0 && (
+                          <div className="order-item-addons">
+                            {(it.addons || []).map((a) => (
+                              <span key={a.addonId}>
+                                {a.name} + R$ {Number(a.price || 0).toFixed(2)}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <span className="pm-item-price">{formatCurrency(it.total != null ? it.total : it.price * it.quantity)}</span>
                     </div>
                   ))}
                 </div>

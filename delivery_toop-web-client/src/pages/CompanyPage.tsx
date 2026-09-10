@@ -38,6 +38,7 @@ interface Product {
   preparationTime: string
   active: boolean
   available: boolean
+  addons?: Array<{ _id: string; name: string; price: number; active?: boolean }>
 }
 
 export default function CompanyPage() {
@@ -137,7 +138,11 @@ export default function CompanyPage() {
     setSelectedProduct(product)
   }
 
-  const handleConfirmAdd = async (quantity: number, notes: string) => {
+  const handleConfirmAdd = async (
+    quantity: number,
+    notes: string,
+    addons: Array<{ addonId: string; name: string; price: number }>,
+  ) => {
     if (!id || !selectedProduct) return
     setAddingLoading(true)
     try {
@@ -147,7 +152,7 @@ export default function CompanyPage() {
         price: selectedProduct.promoPrice && selectedProduct.promoPrice < selectedProduct.price
           ? selectedProduct.promoPrice
           : selectedProduct.price,
-      })
+      }, addons)
       showToast(`${selectedProduct.name} adicionado ao carrinho!`)
       setSelectedProduct(null)
     } catch {

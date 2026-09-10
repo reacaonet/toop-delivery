@@ -16,7 +16,7 @@ interface Order {
   pixTxid?: string
   pixQrcode?: string
   notes: string
-  items: Array<{ name: string; quantity: number; price: number; total: number }>
+  items: Array<{ name: string; quantity: number; price: number; total: number; addons?: Array<{ addonId: string; name: string; price: number }> }>
   deliveryAddress: {
     street: string
     number: string
@@ -165,7 +165,18 @@ export default function OrderDetailPage() {
           <div className="order-items">
             {order.items.map((item, i) => (
               <div key={i} className="order-item">
-                <span>{item.quantity}x {item.name}</span>
+                <div>
+                  <span>{item.quantity}x {item.name}</span>
+                  {(item.addons || []).length > 0 && (
+                    <div className="order-item-addons">
+                      {(item.addons || []).map((a) => (
+                        <span key={a.addonId}>
+                          {a.name} + R$ {Number(a.price || 0).toFixed(2)}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 <span>R$ {item.total.toFixed(2)}</span>
               </div>
             ))}

@@ -31,6 +31,15 @@ export default function CartPage() {
               <div className="cart-item-info">
                 <h3>{item.name}</h3>
                 <p className="cart-item-price">R$ {item.price.toFixed(2)}</p>
+                {(item.addons || []).length > 0 && (
+                  <div className="cart-item-addons">
+                    {(item.addons || []).map((a) => (
+                      <span key={a.addonId}>
+                        {a.name} + R$ {Number(a.price || 0).toFixed(2)}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
               <div className="cart-item-actions">
                 <div className="quantity-controls">

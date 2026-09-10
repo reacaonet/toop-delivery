@@ -115,6 +115,7 @@ export default function CheckoutPage() {
           quantity: item.quantity,
           price: item.price,
           total: item.total,
+          addons: item.addons || [],
         })),
         subtotal: cart.subtotal,
         deliveryFee: cart.deliveryFee,
@@ -310,9 +311,20 @@ export default function CheckoutPage() {
           <div className="checkout-items">
             {cart.items.map((item) => (
               <div key={item._id} className="checkout-item">
-                <span>
-                  {item.quantity}x {item.name}
-                </span>
+                <div>
+                  <span>
+                    {item.quantity}x {item.name}
+                  </span>
+                  {(item.addons || []).length > 0 && (
+                    <div className="checkout-item-addons">
+                      {(item.addons || []).map((a) => (
+                        <span key={a.addonId}>
+                          {a.name} + R$ {Number(a.price || 0).toFixed(2)}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 <span>R$ {item.total.toFixed(2)}</span>
               </div>
             ))}

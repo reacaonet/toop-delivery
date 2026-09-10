@@ -23,6 +23,8 @@ const ProductModal = ({ isOpen, onClose, product, onSave }: ProductModalProps) =
     available: true,
   })
   const [categories, setCategories] = useState<any[]>([])
+  const [addons, setAddons] = useState<any[]>([])
+  const [selectedAddons, setSelectedAddons] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [imagePreview, setImagePreview] = useState('')
@@ -44,6 +46,11 @@ const ProductModal = ({ isOpen, onClose, product, onSave }: ProductModalProps) =
           available: product.available !== false,
         })
         setImagePreview(product.image || '')
+        setSelectedAddons(
+          (product.addons || [])
+            .map((a: any) => (typeof a === 'string' ? a : a?._id))
+            .filter(Boolean)
+        )
       } else {
         setFormData({
           name: '',
@@ -56,8 +63,10 @@ const ProductModal = ({ isOpen, onClose, product, onSave }: ProductModalProps) =
           available: true,
         })
         setImagePreview('')
+        setSelectedAddons([])
       }
       loadCategories()
+      loadAddons()
     }
   }, [isOpen, product])
 
@@ -69,6 +78,26 @@ const ProductModal = ({ isOpen, onClose, product, onSave }: ProductModalProps) =
     } catch (e) {
       console.error(e)
     }
+  }
+
+  const loadAddons = async () => {
+    try {
+      const res = await api.get('/addons', { params: { company: companyId } })
+      const data = res.data?.data ?? res.data
+      setAddons(
+        (Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : []).filter(
+          (a: any) => a.active !== false
+        )
+      )
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  const toggleAddon = (id: string) => {
+    setSelectedAddons((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    )
   }
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -100,6 +129,7 @@ const ProductModal = ({ isOpen, onClose, product, onSave }: ProductModalProps) =
       const payload = {
         ...formData,
         company: companyId,
+        addons: selectedAddons,
         price: Number(formData.price),
         promoPrice: formData.promoPrice ? Number(formData.promoPrice) : undefined,
         preparationTime: formData.preparationTime ? Number(formData.preparationTime) : undefined,
@@ -212,6 +242,31 @@ const ProductModal = ({ isOpen, onClose, product, onSave }: ProductModalProps) =
                 min={0}
               />
             </div>
+          </div>
+
+          <div className="form-group">
+            <label className="section-label">Acompanhamentos</label>
+            {addons.length === 0 ? (
+              <small style={{ color: '#d97706', display: 'block' }}>
+                Nenhum acompanhamento criado. Cadastre no menu Acompanhamentos.
+              </small>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', border: '1px solid #e5e7eb', borderRadius: 8, padding: '0.6rem' }}>
+                {addons.map((a) => (
+                  <label key={a._id} className="checkbox-label" style={{ justifyContent: 'space-between' }}>
+                    <span>
+                      <input
+                        type="checkbox"
+                        checked={selectedAddons.includes(a._id)}
+                        onChange={() => toggleAddon(a._id)}
+                      />
+                      {a.name}
+                    </span>
+                    <span style={{ color: '#6b7280' }}>+ R$ {Number(a.price || 0).toFixed(2)}</span>
+                  </label>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="form-group">

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Save, Building2, Phone, MapPin } from 'lucide-react';
+import { X, Save, Building2, Phone, MapPin, UserCog, Trash2, Plus } from 'lucide-react';
 import { companyService } from '../services/api';
 
 const CompanyModal = ({ isOpen, onClose, company, onSave }) => {
@@ -9,9 +9,15 @@ const CompanyModal = ({ isOpen, onClose, company, onSave }) => {
     phone: '',
     status: true
   });
+  const [adminData, setAdminData] = useState({ name: '', email: '', password: '' });
+  const [admins, setAdmins] = useState([]);
+  const [adminsLoading, setAdminsLoading] = useState(false);
+  const [addingAdmin, setAddingAdmin] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const isEdit = !!company;
+
+  const emptyForm = { name: '', address: { street: '', number: '', neighborhood: '', city: '', state: '', zipCode: '' }, phone: '', status: true };
 
   useEffect(() => {
     if (isOpen) {
@@ -21,18 +27,29 @@ const CompanyModal = ({ isOpen, onClose, company, onSave }) => {
           name: company.name || '',
           address: { street: addr.street || '', number: addr.number || '', neighborhood: addr.neighborhood || '', city: addr.city || '', state: addr.state || '', zipCode: addr.zipCode || '' },
           phone: company.phone || '',
-          status: company.status || false
+          status: company.active ?? company.status ?? true
         });
+        loadAdmins(company._id);
       } else {
-        setFormData({
-          name: '',
-          address: { street: '', number: '', neighborhood: '', city: '', state: '', zipCode: '' },
-          phone: '',
-          status: true
-        });
+        setFormData(emptyForm);
+        setAdmins([]);
       }
+      setAdminData({ name: '', email: '', password: '' });
     }
   }, [isOpen, company]);
+
+  const loadAdmins = async (id) => {
+    setAdminsLoading(true);
+    try {
+      const data = await companyService.getCompanyAdmins(id);
+      setAdmins(Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : []);
+    } catch (error) {
+      console.error('Erro ao carregar admins:', error);
+      setAdmins([]);
+    } finally {
+      setAdminsLoading(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -48,12 +65,48 @@ const CompanyModal = ({ isOpen, onClose, company, onSave }) => {
 
       onSave(response);
       onClose();
-      setFormData({ name: '', address: { street: '', number: '', neighborhood: '', city: '', state: '', zipCode: '' }, phone: '', status: true });
+      setFormData(emptyForm);
     } catch (error) {
       console.error('Erro ao salvar empresa:', error);
       alert('Erro ao salvar empresa: ' + (error.response?.data?.error || error.message));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleAdminSubmit = async () => {
+    if (!adminData.name.trim() || !adminData.email.trim()) {
+      alert('Preencha nome e email do admin');
+      return;
+    }
+    if (adminData.password.length < 6) {
+      alert('Senha deve ter pelo menos 6 caracteres');
+      return;
+    }
+    setAddingAdmin(true);
+    try {
+      await companyService.addCompanyAdmin(company._id, adminData);
+      await loadAdmins(company._id);
+      setAdminData({ name: '', email: '', password: '' });
+    } catch (error) {
+      console.error('Erro ao adicionar admin:', error);
+      alert('Erro ao adicionar admin: ' + (error.response?.data?.error || error.message));
+    } finally {
+      setAddingAdmin(false);
+    }
+  };
+
+  const handleRemoveAdmin = async (admin) => {
+    if (!window.confirm(`Remover o acesso do admin "${admin.name}" a esta empresa?`)) {
+      return;
+    }
+    try {
+      await companyService.removeCompanyAdmin(company._id, admin._id);
+      await loadAdmins(company._id);
+      onSave && onSave();
+    } catch (error) {
+      console.error('Erro ao remover admin:', error);
+      alert('Erro ao remover admin: ' + (error.response?.data?.error || error.message));
     }
   };
 
@@ -170,6 +223,91 @@ const CompanyModal = ({ isOpen, onClose, company, onSave }) => {
               Status Ativo
             </label>
           </div>
+
+          {isEdit && (
+            <div className="form-group" style={{ marginTop: '0.5rem' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <UserCog size={16} />
+                Usuário Admin
+              </label>
+
+              <div className="admin-list" style={{ marginBottom: '0.75rem' }}>
+                {adminsLoading ? (
+                  <div className="spinner" style={{ width: '16px', height: '16px' }} />
+                ) : admins.length === 0 ? (
+                  <p style={{ color: '#9ca3af', fontSize: '0.85rem' }}>Nenhum admin vinculado a esta empresa.</p>
+                ) : (
+                  admins.map((admin) => (
+                    <div
+                      key={admin._id}
+                      style={{
+                        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                        padding: '0.4rem 0.5rem', border: '1px solid var(--border, #e5e7eb)', borderRadius: '0.5rem', marginBottom: '0.375rem'
+                      }}
+                    >
+                      <div>
+                        <div style={{ fontSize: '0.9rem' }}>{admin.name}</div>
+                        <div style={{ fontSize: '0.8rem', color: '#9ca3af' }}>{admin.email}</div>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        {!admin.active && (
+                          <span className="status-badge status-inactive">Inativo</span>
+                        )}
+                        <button
+                          type="button"
+                          className="btn btn-danger"
+                          onClick={() => handleRemoveAdmin(admin)}
+                          style={{ padding: '0.4rem' }}
+                          title="Remover admin"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              <div className="admin-add-form">
+                <div style={{ display: 'grid', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                  <input
+                    type="text"
+                    value={adminData.name}
+                    onChange={(e) => setAdminData(prev => ({ ...prev, name: e.target.value }))}
+                    placeholder="Nome do admin"
+                  />
+                  <input
+                    type="email"
+                    value={adminData.email}
+                    onChange={(e) => setAdminData(prev => ({ ...prev, email: e.target.value }))}
+                    placeholder="Email do admin"
+                  />
+                  <input
+                    type="password"
+                    value={adminData.password}
+                    onChange={(e) => setAdminData(prev => ({ ...prev, password: e.target.value }))}
+                    placeholder="Senha (mín. 6 caracteres)"
+                  />
+                </div>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  disabled={addingAdmin}
+                  onClick={handleAdminSubmit}
+                  style={{ width: '100%' }}
+                >
+                  {addingAdmin ? (
+                    <div className="spinner" style={{ width: '16px', height: '16px' }} />
+                  ) : (
+                    <>
+                      <Plus size={16} style={{ marginRight: '0.5rem' }} />
+                      Adicionar Admin
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
 
           <div className="form-actions">
             <button type="button" className="btn btn-secondary" onClick={onClose}>

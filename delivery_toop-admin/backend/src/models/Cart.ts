@@ -10,6 +10,7 @@ export interface ICart extends Document {
     quantity: number;
     total: number;
     notes?: string;
+    addons?: Array<{ addonId: string; name: string; price: number }>;
   }>;
   subtotal: number;
   deliveryFee: number;
@@ -33,6 +34,13 @@ const CartSchema = new Schema<ICart>(
         quantity: { type: Number, required: true, min: 1 },
         total: { type: Number, required: true },
         notes: { type: String },
+        addons: [
+          {
+            addonId: { type: String },
+            name: { type: String },
+            price: { type: Number },
+          },
+        ],
       },
     ],
     subtotal: { type: Number, default: 0 },

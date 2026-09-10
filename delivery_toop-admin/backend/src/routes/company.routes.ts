@@ -5,6 +5,7 @@ import { validate } from "../middleware/validate";
 import {
   createCompanySchema,
   updateCompanySchema,
+  addCompanyAdminSchema,
 } from "../validators/company";
 
 const router = Router();
@@ -24,5 +25,13 @@ router.put(
   companyController.update
 );
 router.delete("/:id", authenticate, companyController.delete);
+router.get("/:id/admins", authenticate, companyController.getAdmins);
+router.post(
+  "/:id/admins",
+  authenticate,
+  validate(addCompanyAdminSchema),
+  companyController.addAdmin
+);
+router.delete("/:id/admins/:userId", authenticate, companyController.removeAdmin);
 
 export default router;

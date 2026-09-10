@@ -110,6 +110,18 @@ export const companyService = {
   deleteCompany: async (id) => {
     const response = await api.delete(`/companies/${id}`);
     return response.data;
+  },
+  getCompanyAdmins: async (id) => {
+    const response = await api.get(`/companies/${id}/admins`);
+    return response.data?.data ?? response.data;
+  },
+  addCompanyAdmin: async (id, adminData) => {
+    const response = await api.post(`/companies/${id}/admins`, adminData);
+    return response.data?.data ?? response.data;
+  },
+  removeCompanyAdmin: async (id, userId) => {
+    const response = await api.delete(`/companies/${id}/admins/${userId}`);
+    return response.data?.data ?? response.data;
   }
 };
 

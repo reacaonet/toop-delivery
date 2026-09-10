@@ -14,9 +14,9 @@ export class CartController {
   async addItem(req: Request, res: Response, next: NextFunction) {
     try {
       const { companyId } = req.params;
-      const { productId, quantity, notes } = req.body;
+      const { productId, quantity, notes, addons } = req.body;
       const customerId = req.user!._id;
-      const cart = await cartService.addItem(customerId, companyId, productId, quantity, notes);
+      const cart = await cartService.addItem(customerId, companyId, productId, quantity, notes, addons);
       return res.status(200).json({ success: true, data: cart });
     } catch (error) { next(error); }
   }

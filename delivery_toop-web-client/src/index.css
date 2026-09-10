@@ -1814,7 +1814,7 @@ img { max-width: 100%; display: block; }
 .banner-slide {
   display: none;
   border-radius: var(--radius-lg);
-  padding: 28px 32px;
+  height: 240px;
   color: white;
   position: relative;
   overflow: hidden;
@@ -1823,42 +1823,6 @@ img { max-width: 100%; display: block; }
 .banner-slide.active {
   display: block;
   animation: fadeIn 0.5s var(--ease);
-}
-
-.banner-slide::after {
-  content: '';
-  position: absolute;
-  top: -30%;
-  right: -10%;
-  width: 200px;
-  height: 200px;
-  background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
-  border-radius: 50%;
-}
-
-.banner-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  position: relative;
-  z-index: 1;
-}
-
-.banner-title {
-  font-size: 1.8rem;
-  font-weight: 900;
-  margin-bottom: 4px;
-  letter-spacing: -0.5px;
-}
-
-.banner-subtitle {
-  font-size: 1rem;
-  opacity: 0.9;
-  font-weight: 400;
-}
-
-.banner-icon {
-  font-size: 3rem;
 }
 
 .banner-dots {
@@ -2160,8 +2124,71 @@ img { max-width: 100%; display: block; }
 }
 
 .modal-quantity-section,
-.modal-notes-section {
+.modal-notes-section,
+.modal-addons-section {
   padding: 16px 20px;
+}
+
+.modal-addons-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.modal-addon-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  cursor: pointer;
+}
+
+.modal-addon-item:has(input:checked) {
+  border-color: var(--primary);
+  background: var(--primary-soft, #eef2ff);
+}
+
+.modal-addon-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.modal-addon-name input {
+  accent-color: var(--primary);
+}
+
+.modal-addon-price {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.cart-item-addons,
+.checkout-item-addons,
+.order-item-addons {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 4px;
+}
+
+.cart-item-addons span,
+.checkout-item-addons span,
+.order-item-addons span {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+.order-item-addons {
+  margin-top: 2px;
 }
 
 .modal-section-label {
@@ -2942,18 +2969,6 @@ img { max-width: 100%; display: block; }
 
   .toast-container {
     bottom: 70px;
-  }
-
-  .banner-title {
-    font-size: 1.4rem;
-  }
-
-  .banner-subtitle {
-    font-size: 0.85rem;
-  }
-
-  .banner-icon {
-    font-size: 2.2rem;
   }
 }
 

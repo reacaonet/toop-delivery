@@ -30,6 +30,7 @@ export interface ICompany extends Document {
   totalOrders?: number;
   images?: string[];
   tags?: string[];
+  deletedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -65,6 +66,7 @@ const CompanySchema = new Schema<ICompany>(
     totalOrders: { type: Number, default: 0 },
     images: [{ type: String }],
     tags: [{ type: String }],
+    deletedAt: { type: Date },
   },
   { timestamps: true, toJSON: { transform(_doc, ret) { const { __v: _v, ...rest } = ret; return rest; } } }
 );

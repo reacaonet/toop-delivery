@@ -30,7 +30,7 @@ export class OrderService {
   async create(data: {
     company: string;
     customer: string;
-    items: Array<{ name: string; quantity: number; price: number; total: number }>;
+    items: Array<{ name: string; quantity: number; price: number; total: number; addons?: Array<{ addonId: string; name: string; price: number }> }>;
     subtotal: number;
     deliveryFee?: number;
     discount?: number;

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Building2, Phone, MapPin } from 'lucide-react';
+import { Plus, Building2, Phone, MapPin, UserCog, Mail } from 'lucide-react';
 import { companyService } from '../services/api';
 import DataTable from '../components/DataTable';
 import CompanyModal from '../components/CompanyModal';
@@ -87,13 +87,35 @@ const Companies = () => {
       )
     },
     {
+      key: 'owner',
+      title: 'Admin',
+      render: (owner) => (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <UserCog size={14} color="#9ca3af" />
+          {owner ? (
+            <div>
+              <div>{owner.name}</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: '#9ca3af', fontSize: '0.8rem' }}>
+                <Mail size={11} /> {owner.email}
+              </div>
+            </div>
+          ) : (
+            <span className="status-badge status-inactive">Sem admin</span>
+          )}
+        </div>
+      )
+    },
+    {
       key: 'status',
       title: 'Status',
-      render: (status) => (
-        <span className={`status-badge ${status ? 'status-active' : 'status-inactive'}`}>
-          {status ? 'Ativo' : 'Inativo'}
-        </span>
-      )
+      render: (_status, item) => {
+        const active = item.active ?? item.status;
+        return (
+          <span className={`status-badge ${active ? 'status-active' : 'status-inactive'}`}>
+            {active ? 'Ativo' : 'Inativo'}
+          </span>
+        );
+      }
     }
   ];
 

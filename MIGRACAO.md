@@ -414,3 +414,49 @@ Rotas orfas removidas; App.jsx e Sidebar reescritos (grupos: Dashboard | Motoris
 - vitest 7/7 (DataTable 4 + AppCategories 3).
 - Runtime (token admin): criar categoria type=hortifruti + icon emoji -> aparece no /public com icon; POST/PUT type=technology aceitos (enum ampliado); PUT icon=URL persistido; soft-delete remove do /public. Containers reiniciados (admin-api, frontend-react, web-client, store).
 - Nenhum commit feito ainda (conforme combinado).
+
+## 10/09/2026 - Banner: altura maior e sem titulo
+### Mudancas
+1. Web-client HomePage: carrossel do topo agora exibe somente a imagem (removido titulo/subtitulo sobreposto).
+2. Web-client index.css: .banner-slide com height 240px; blocos CSS mortos de banner removidos.
+
+### Validacoes
+- Build web-client tsc+vite OK; container toop-web-client-dev reiniciado.
+- Nenhum commit feito ainda (conforme combinado).
+
+## 10/09/2026 - Acompanhamentos (adicionais por produto)
+### Mudancas
+1. Backend: novo modelo Addon (escopo por empresa): `company, name, price, active, deletedAt`. Service `addon.service.ts`, controller `addon.controller.ts`, rotas `addon.routes.ts` montadas em `routes/index.ts` sob `/addons` (list por `?company=`, POST, PUT, DELETE soft).
+2. Backend: Product ganhou `addons: [ObjectId ref 'Addon']`; `product.service` popula `addons` (list, listByCompany, getById) via `populate({ path: 'addons', match: { deletedAt: null }, select })`.
+3. Backend: Cart.items agora aceita `addons: Array<{ addonId, name, price }>` (snapshot). `cart.service.addItem(customerId, companyId, productId, quantity, notes?, addons?: string[])`: valida que cada addon pertence ao produto (populate) e esta ativo; `basePrice = promoPrice||price`; `total = (basePrice + somaAddons) * qty`; dedup por `productId|notes|addonKey` (ids ordenados). `updateItemQuantity` recalcula total com addons.
+4. Backend: Order.items ganhou `addons` (mesmo snapshot); `order.service.create` aceita e persist; subtotal continua validado server-side pela soma dos `item.total`.
+5. Store (painel loja): nova pagina Acompanhamentos (`AddonsPage.tsx` + `AddonModal.tsx`), rota `/addons` e item de menu "Acompanhamentos" (icone Pizza) no Layout. ProductModal permite marcar quais acompanhamentos ficam vinculados ao produto (checkboxes carregados dos ativos da loja, valor por item) e envia `addons: [ids]` no payload de criar/editar.
+6. Web-client: CartContext suporta `addons` no item (local e servidor — preco unitario local inclui a soma dos adicionais; dedup local por `productId|notes|addonIds`; body do servidor manda `addons: [ids]`). ProductModal do cliente exibe checkbox de acompanhamentos com preco, recalcula o total e o onConfirm retorna `(quantity, notes, addons)`.
+7. Web-client/store: CartPage, CheckoutPage, OrderDetailPage (cliente) e OrdersPage/PainelPage (loja) exibem os acompanhamentos de cada item e usam `item.total` no fechamento.
+
+8. Backend (hardening): `product.service` valida no create/update que os `addons` vinculados pertencem à MESMA empresa do produto (retorno 400 "Acompanhamento inválido ou de outra loja") — defesa contra requisição adulterada.
+
+### Notas
+- Acompanhamentos sao **EXCLUSIVOS por loja** (escopo `company`): a loja so lista/cria/vincula os dela (AddonsPage, ProductModal com `?company=` da loja logada); o cliente ve apenas `product.addons` do produto da loja; o carrinho revalida o documento com `company` + `active`. Uma loja de acai so ve leite em po/morangos e a hamburgueria so ve borda de catupiry/cheddar.
+- Legado `/food/product-complement` (accessories) permanece sem uso.
+- Addons sao globais por empresa; o vinculo por produto decide o que aparece no cardapio ao cliente.
+
+### Validacoes
+- Builds OK: backend npx tsc --noEmit, web-client tsc+vite, store tsc+vite.
+- Runtime (token admin, empresa 6aa06d35b69d5e179d6f19e3): criar addons "Borda de Catupiry" (+12) e "Cheddar Extra" (+8); vincular ao produto "Duplo" (PUT /products/:id addons) -> GET /products?company retorna addons populados; POST /cart/:company/items qty=2 com addons -> item total (17+12+8)*2=74 e subtotal 74; re-post dedup: mesmo item passa a qty 3 / total 111; addon de outro produto -> 400 "Acompanhamento invalido para este produto"; POST /orders com items{addons} -> pedido criado e itens com snapshot de addons (pedido de teste removido). Containers reiniciados (admin-api, store, web-client).
+- Nenhum commit feito ainda (conforme combinado).
+
+## 10/09/2026 - Admin Empresas: editar/excluir corrigidos + vincular usuário admin à empresa
+### Mudancas
+1. Backend (bugfix editar): validators de Company (`createCompanySchema`/`updateCompanySchema`) agora aceitam `address` e `status` — antes o zod descartava e endereço/status não eram persistidos ao editar/criar pelo painel.
+2. Backend: CompanyService normaliza `status` -> `active` no create/update (schema usa `active`); list/getById populam `owner` (name/email).
+3. Backend (novo): endpoints de admin da empresa em `/companies/:id/admins` (GET listar, POST criar usuário admin, DELETE /:userId remover). `addAdmin` cria User com role `store`, `company` = empresa (senha bcrypt) e seta `company.owner` se vazio; `removeAdmin` desativa o usuário, desvincula da empresa e repassa o owner para outro admin ativo se havia.
+4. Admin painel: Companies.jsx ganhou coluna "Admin" (nome/email do owner) e corrigida a coluna Status para ler `active`; CompanyModal corrige o checkbox "Status Ativo" (antes lia `status` inexistente) e ganhou a seção "Usuário Admin" (lista admins do vínculo, formulário nome/email/senha p/ adicionar e botão para remover).
+5. Backend (bugfix excluir): Company ganhou `deletedAt` (soft-delete); DELETE /companies/:id agora seta `active:false` + `deletedAt` e a listagem do admin filtra `deletedAt: {$exists:false}`, então a empresa excluída some da lista (antes o botão "excluir" deixava a linha visível).
+
+### Validacoes
+- Builds OK: backend npx tsc --noEmit, admin vite (1538 modules).
+- vitest 7/7.
+- Runtime (token admin): criar empresa com address+status=false persistiu; PUT com address+status=true persistiu; POST /companies/:id/admins criou user role=store vinculado e setou owner; GET lista o admin; login do admin da loja retorna token role=store; DELETE desativa e bloqueia login ("Conta desativada"); DELETE da empresa (soft) OK. Containers reiniciados (admin-api, frontend-react).
+- Runtime (exclusao): criar empresa -> aparece na lista; DELETE -> active=false + deletedAt e some da listagem (total 6 -> 5). Container admin-api reiniciado.
+- Nenhum commit feito ainda (conforme combinado).

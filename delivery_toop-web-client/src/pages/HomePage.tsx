@@ -304,12 +304,6 @@ export default function HomePage() {
               className={`banner-slide ${i === currentBanner ? 'active' : ''}`}
               style={{ background: banner.image ? `url(${banner.image}) center/cover` : 'linear-gradient(135deg, #667eea, #764ba2)' }}
             >
-              <div className="banner-content">
-                <div>
-                  <h3 className="banner-title">{banner.title}</h3>
-                  {banner.subtitle && <p className="banner-subtitle">{banner.subtitle}</p>}
-                </div>
-              </div>
             </div>
           ))}
           <div className="banner-dots">
