@@ -1,0 +1,144 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "title": "Orders",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 8, "x": 0, "y": 0 },
+      "targets": [
+        { "expr": "toop_orders_total{status=\"created\"}", "legendFormat": "Created" }
+      ],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "blue" } } }
+    },
+    {
+      "title": "Orders Delivered",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 8, "x": 8, "y": 0 },
+      "targets": [
+        { "expr": "toop_orders_total{status=\"completed\"}", "legendFormat": "Delivered" }
+      ],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "green" } } }
+    },
+    {
+      "title": "Orders Cancelled",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 8, "x": 16, "y": 0 },
+      "targets": [
+        { "expr": "toop_orders_total{status=\"cancelled\"}", "legendFormat": "Cancelled" }
+      ],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "red" } } }
+    },
+    {
+      "title": "Orders by Status (over time)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "targets": [
+        { "expr": "rate(toop_orders_total[5m])", "legendFormat": "{{status}}/s" }
+      ]
+    },
+    {
+      "title": "Order Completion Rate %",
+      "type": "gauge",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "targets": [
+        { "expr": "toop_orders_total{status=\"completed\"} / (toop_orders_total{status=\"created\"} > 0) * 100", "legendFormat": "%" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "max": 100,
+          "thresholds": { "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 70 }, { "color": "green", "value": 90 }] }
+        }
+      }
+    },
+    {
+      "title": "Deliveries",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 8, "x": 0, "y": 12 },
+      "targets": [
+        { "expr": "toop_deliveries_total{status=\"completed\"}", "legendFormat": "Completed" }
+      ],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "green" } } }
+    },
+    {
+      "title": "Deliveries Cancelled",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 8, "x": 8, "y": 12 },
+      "targets": [
+        { "expr": "toop_deliveries_total{status=\"cancelled\"}", "legendFormat": "Cancelled" }
+      ],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "red" } } }
+    },
+    {
+      "title": "Drivers Online",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 8, "x": 16, "y": 12 },
+      "targets": [
+        { "expr": "toop_drivers_online", "legendFormat": "Online" }
+      ],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "green" } } }
+    },
+    {
+      "title": "Payments Completed",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 8, "x": 0, "y": 16 },
+      "targets": [
+        { "expr": "toop_payments_total{status=\"completed\"}", "legendFormat": "Completed" }
+      ],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "blue" } } }
+    },
+    {
+      "title": "Payments Refunded",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 8, "x": 8, "y": 16 },
+      "targets": [
+        { "expr": "toop_payments_total{status=\"refunded\"}", "legendFormat": "Refunded" }
+      ],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "orange" } } }
+    },
+    {
+      "title": "Payments vs Refunds (over time)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+      "targets": [
+        { "expr": "rate(toop_payments_total[5m])", "legendFormat": "{{status}}/s" }
+      ]
+    },
+    {
+      "title": "Delivery Completion Rate %",
+      "type": "gauge",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 20 },
+      "targets": [
+        { "expr": "toop_deliveries_total{status=\"completed\"} / (toop_deliveries_total{status=\"completed\"} + toop_deliveries_total{status=\"cancelled\"} > 0) * 100", "legendFormat": "%" }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "max": 100,
+          "thresholds": { "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 70 }, { "color": "green", "value": 90 }] }
+        }
+      }
+    },
+    {
+      "title": "Deliveries vs Cancellations (over time)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 20 },
+      "targets": [
+        { "expr": "rate(toop_deliveries_total[5m])", "legendFormat": "{{status}}/s" }
+      ]
+    }
+  ],
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["toopdelivery", "business"],
+  "templating": { "list": [] },
+  "time": { "from": "now-1h", "to": "now" },
+  "title": "GojáDelivery - Business Metrics",
+  "uid": "toopdelivery-business",
+  "version": 1
+}

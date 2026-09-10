@@ -16,7 +16,7 @@ const Users = () => {
 
   const loadUsers = async () => {
     try {
-      const data = await userService.getUsers();
+      const data = await userService.getUsers({ limit: '100' });
       setUsers(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Erro ao carregar usuários:', error);
@@ -65,11 +65,11 @@ const Users = () => {
       render: (email) => email || 'N/A'
     },
     {
-      key: 'status',
+      key: 'active',
       title: 'Status',
-      render: (status) => (
-        <span className={`status-badge ${status ? 'status-active' : 'status-inactive'}`}>
-          {status ? 'Ativo' : 'Inativo'}
+      render: (active, user) => (
+        <span className={`status-badge ${active ? 'status-active' : 'status-inactive'}`}>
+          {active ? 'Ativo' : 'Inativo'}
         </span>
       )
     }

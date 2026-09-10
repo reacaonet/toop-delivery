@@ -1,6 +1,7 @@
 import { DriverModel, IDriver } from "../models/Driver";
 import { UserModel } from "../models/User";
 import { AppError } from "../middleware/errorHandler";
+import { setDriversOnline } from "../middleware/metrics";
 import bcrypt from "bcrypt";
 
 interface PaginationQuery {
@@ -224,6 +225,9 @@ export class DriverService {
       driver.available = false;
     }
     await driver.save();
+
+    const onlineCount = await DriverModel.countDocuments({ online: true });
+    setDriversOnline(onlineCount);
 
     return { online: driver.online, available: driver.available };
   }

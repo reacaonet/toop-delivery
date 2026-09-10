@@ -12,7 +12,8 @@ import {
   Megaphone,
   UserRound,
   ChevronDown,
-  LayoutGrid
+  LayoutGrid,
+  BarChart3
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { deliverymanService } from '../services/api';
@@ -69,11 +70,8 @@ const Sidebar = () => {
         { type: 'header', label: 'Operação' },
         { path: '/bookings', label: 'Corridas' },
         { path: '/mobility/monitoring', label: 'Monitor em Tempo Real' },
-        { path: '/mobility/extract', label: 'Extrato do Motorista' },
         { path: '/mobility/evaluations', label: 'Avaliações' },
         { path: '/mobility/qr-codes', label: 'QR Codes' },
-        { type: 'header', label: 'Relatórios' },
-        { path: '/mobility/reports', label: 'Relatórios Mobility' },
       ],
     },
     {
@@ -83,7 +81,15 @@ const Sidebar = () => {
         { path: '/wallet', label: 'Wallet Motoristas' },
         { path: '/wallet/withdrawals', label: 'Solicitações de Saque' },
         { path: '/payments', label: 'Pagamentos' },
-        { path: '/reports', label: 'Relatórios' },
+      ],
+    },
+    {
+      label: 'Relatórios',
+      icon: BarChart3,
+      children: [
+        { path: '/reports', label: 'Financeiros' },
+        { path: '/mobility/reports', label: 'Mobilidade' },
+        { path: '/mobility/extract', label: 'Extrato do Motorista' },
       ],
     },
     {

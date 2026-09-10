@@ -3,6 +3,7 @@ import { UserModel } from "../models/User";
 import { ShoppingPaymentMethodModel } from "../models/ShoppingPaymentMethod";
 import { SettingsModel } from "../models/Settings";
 import { AppError } from "../middleware/errorHandler";
+import { incOrder } from "../middleware/metrics";
 import walletService from "./wallet.service";
 import repasseService from "./repasse.service";
 import paymentGatewayService from "./payment-gateway.service";
@@ -169,6 +170,8 @@ export class OrderService {
       status: "pending",
     });
 
+    incOrder("created");
+
     if (gatewayResult) {
       const unwrapped: any =
         gatewayResult?.data && typeof gatewayResult.data === "object" ? gatewayResult.data : gatewayResult;
@@ -298,6 +301,9 @@ export class OrderService {
       await repasseService.recordRepasse(updated);
     }
 
+    if (status === "delivered") incOrder("completed");
+    else if (status === "cancelled") incOrder("cancelled");
+
     return updated;
   }
 
@@ -353,6 +359,8 @@ export class OrderService {
 
     order.status = "cancelled";
     await order.save();
+
+    incOrder("cancelled");
 
     return order;
   }

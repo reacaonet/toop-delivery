@@ -12,6 +12,7 @@ export interface IUser extends Document {
   driver?: mongoose.Types.ObjectId;
   avatar?: string;
   lastLogin?: Date;
+  deletedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -29,6 +30,7 @@ const UserSchema = new Schema<IUser>(
     driver: { type: Schema.Types.ObjectId, ref: 'Driver' },
     avatar: { type: String },
     lastLogin: { type: Date },
+    deletedAt: { type: Date },
   },
   {
     timestamps: true,

@@ -2,6 +2,7 @@ import { BookingModel } from "../models/Booking";
 import { DriverModel } from "../models/Driver";
 import { DeliverymanModel } from "../models/Deliveryman";
 import { AppError } from "../middleware/errorHandler";
+import { incDelivery } from "../middleware/metrics";
 import walletService from "./wallet.service";
 import promoService from "./promo.service";
 import { getPlatformFeePercent } from "./settings.service";
@@ -320,6 +321,8 @@ export class BookingService {
       throw new AppError("Erro ao concluir corrida", 500);
     }
 
+    incDelivery("completed");
+
     if (booking.driverModel === 'Driver') {
       await DriverModel.findByIdAndUpdate(driverId, { available: true, $inc: { totalTrips: 1 } });
     } else {
@@ -377,6 +380,8 @@ export class BookingService {
       },
       { new: true }
     );
+
+    incDelivery("cancelled");
 
     if (booking.driver) {
       if (booking.driverModel === 'Driver') {

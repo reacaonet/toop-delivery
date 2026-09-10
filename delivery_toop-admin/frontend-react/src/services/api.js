@@ -76,8 +76,8 @@ export const personService = {
 };
 
 export const userService = {
-  getUsers: async () => {
-    const response = await api.get('/users');
+  getUsers: async (params = {}) => {
+    const response = await api.get('/users', { params });
     return response.data?.data ?? response.data;
   },
   createUser: async (userData) => {

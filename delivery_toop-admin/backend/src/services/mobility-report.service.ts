@@ -39,9 +39,9 @@ export class MobilityReportService {
       { $project: { rejectedDrivers: 0, __v: 0 } },
       {
         $lookup: {
-          from: 'driver',
+          from: 'drivers',
           let: { id: '$driver' },
-          as: 'driver',
+          as: 'driverInfo',
           pipeline: [
             { $match: { $expr: { $eq: ['$_id', '$$id'] } } },
             { $limit: 1 },
@@ -49,14 +49,27 @@ export class MobilityReportService {
           ],
         },
       },
-      { $unwind: { path: '$driver', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'deliverymen',
+          let: { id: '$driver' },
+          as: 'deliverymanInfo',
+          pipeline: [
+            { $match: { $expr: { $eq: ['$_id', '$$id'] } } },
+            { $limit: 1 },
+            { $project: { name: 1, phone: 1, email: 1 } },
+          ],
+        },
+      },
       {
         $addFields: {
+          driver: { $arrayElemAt: [{ $concatArrays: ['$driverInfo', '$deliverymanInfo'] }, 0] },
           date: {
             $dateToString: { format: '%d/%m/%Y %H:%M', date: '$createdAt', timezone: 'America/Sao_Paulo' },
           },
         },
       },
+      { $unset: ['driverInfo', 'deliverymanInfo'] },
       { $sort: { createdAt: -1 } },
       { $skip: from * size },
       { $limit: size },
@@ -269,9 +282,9 @@ export class MobilityReportService {
       { $unwind: { path: '$client', preserveNullAndEmptyArrays: true } },
       {
         $lookup: {
-          from: 'driver',
+          from: 'drivers',
           let: { id: '$driver' },
-          as: 'driver',
+          as: 'driverInfo',
           pipeline: [
             { $match: { $expr: { $eq: ['$_id', '$$id'] } } },
             { $limit: 1 },
@@ -279,14 +292,27 @@ export class MobilityReportService {
           ],
         },
       },
-      { $unwind: { path: '$driver', preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: 'deliverymen',
+          let: { id: '$driver' },
+          as: 'deliverymanInfo',
+          pipeline: [
+            { $match: { $expr: { $eq: ['$_id', '$$id'] } } },
+            { $limit: 1 },
+            { $project: { name: 1, email: 1, phone: 1 } },
+          ],
+        },
+      },
       {
         $addFields: {
+          driver: { $arrayElemAt: [{ $concatArrays: ['$driverInfo', '$deliverymanInfo'] }, 0] },
           date: {
             $dateToString: { format: '%d/%m/%Y %H:%M', date: '$createdAt', timezone: 'America/Sao_Paulo' },
           },
         },
       },
+      { $unset: ['driverInfo', 'deliverymanInfo'] },
       { $sort: { createdAt: -1 } },
       { $skip: from * size },
       { $limit: size },
@@ -445,9 +471,21 @@ export class MobilityReportService {
       },
       {
         $lookup: {
-          from: 'driver',
+          from: 'drivers',
           let: { id: '$driver' },
-          as: 'driver',
+          as: 'driverInfo',
+          pipeline: [
+            { $match: { $expr: { $eq: ['$_id', '$$id'] } } },
+            { $limit: 1 },
+            { $project: { name: 1, phone: 1, email: 1, currentLocation: 1, active: 1, updatedAt: 1 } },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: 'deliverymen',
+          let: { id: '$driver' },
+          as: 'deliverymanInfo',
           pipeline: [
             { $match: { $expr: { $eq: ['$_id', '$$id'] } } },
             { $limit: 1 },
@@ -456,7 +494,12 @@ export class MobilityReportService {
         },
       },
       { $unwind: { path: '$client', preserveNullAndEmptyArrays: true } },
-      { $unwind: { path: '$driver', preserveNullAndEmptyArrays: true } },
+      {
+        $addFields: {
+          driver: { $arrayElemAt: [{ $concatArrays: ['$driverInfo', '$deliverymanInfo'] }, 0] },
+        },
+      },
+      { $unset: ['driverInfo', 'deliverymanInfo'] },
     ];
 
     const list = await BookingModel.aggregate(pipeline);

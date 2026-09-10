@@ -1,0 +1,103 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "title": "Requests per Second (by status)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
+      "targets": [
+        { "expr": "sum(rate(toop_http_requests_total[5m])) by (status)", "legendFormat": "{{status}}" }
+      ]
+    },
+    {
+      "title": "Latency Distribution (p50/p95/p99)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "targets": [
+        { "expr": "histogram_quantile(0.50, sum(rate(toop_http_request_duration_seconds_bucket[5m])) by (le))", "legendFormat": "p50" },
+        { "expr": "histogram_quantile(0.95, sum(rate(toop_http_request_duration_seconds_bucket[5m])) by (le))", "legendFormat": "p95" },
+        { "expr": "histogram_quantile(0.99, sum(rate(toop_http_request_duration_seconds_bucket[5m])) by (le))", "legendFormat": "p99" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "s" } }
+    },
+    {
+      "title": "Average Duration (s)",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 8 },
+      "targets": [
+        { "expr": "sum(rate(toop_http_request_duration_seconds_sum[5m])) / sum(rate(toop_http_request_duration_seconds_count[5m]))", "legendFormat": "avg" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "s" } }
+    },
+    {
+      "title": "Error Rate %",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 8 },
+      "targets": [
+        { "expr": "sum(rate(toop_http_requests_total{status=~\"5..\"}[5m])) / sum(rate(toop_http_requests_total[5m])) * 100", "legendFormat": "%" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "percent", "thresholds": { "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 1 }, { "color": "red", "value": 5 }] } } }
+    },
+    {
+      "title": "Requests by Route",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "targets": [
+        { "expr": "sum(rate(toop_http_requests_by_route_total[5m])) by (method, route)", "legendFormat": "{{method}} {{route}}" }
+      ]
+    },
+    {
+      "title": "Error Rate by Status",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "targets": [
+        { "expr": "sum(rate(toop_http_requests_total{status=~\"4..\"}[5m]))", "legendFormat": "4xx errors/s" },
+        { "expr": "sum(rate(toop_http_requests_total{status=~\"5..\"}[5m]))", "legendFormat": "5xx errors/s" }
+      ],
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } } }
+    },
+    {
+      "title": "Top 5 Slowest Routes (p95)",
+      "type": "bargauge",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 20 },
+      "targets": [
+        { "expr": "topk(5, histogram_quantile(0.95, sum(rate(toop_http_request_duration_seconds_bucket[5m])) by (le, route)))", "legendFormat": "{{route}}" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "s" } }
+    },
+    {
+      "title": "Top 5 Busiest Routes",
+      "type": "bargauge",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 20 },
+      "targets": [
+        { "expr": "topk(5, sum(rate(toop_http_requests_by_route_total[5m])) by (route))", "legendFormat": "{{route}}" }
+      ]
+    },
+    {
+      "title": "Response Time Heatmap",
+      "type": "heatmap",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 28 },
+      "targets": [
+        { "expr": "sum(rate(toop_http_request_duration_seconds_bucket[5m])) by (le)", "legendFormat": "{{le}}" }
+      ],
+      "options": {
+        "calculate": false,
+        "yAxis": { "unit": "s" },
+        "color": { "mode": "scheme", "scheme": "Oranges" }
+      }
+    }
+  ],
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["toopdelivery", "api-performance"],
+  "templating": { "list": [] },
+  "time": { "from": "now-1h", "to": "now" },
+  "title": "GojáDelivery - API Performance",
+  "uid": "toopdelivery-api-performance",
+  "version": 1
+}

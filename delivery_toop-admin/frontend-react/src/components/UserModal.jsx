@@ -7,7 +7,7 @@ const UserModal = ({ isOpen, onClose, user, onSave }) => {
     name: '',
     email: '',
     password: '',
-    status: true
+    active: true
   });
   const [loading, setLoading] = useState(false);
 
@@ -20,14 +20,14 @@ const UserModal = ({ isOpen, onClose, user, onSave }) => {
           name: user.person?.name || user.name || '',
           email: user.email || '',
           password: '',
-          status: user.status || false
+          active: user.active ?? false
         });
       } else {
         setFormData({
           name: '',
           email: '',
           password: '',
-          status: true
+          active: true
         });
       }
     }
@@ -62,7 +62,7 @@ const UserModal = ({ isOpen, onClose, user, onSave }) => {
 
       onSave(response);
       onClose();
-      setFormData({ name: '', email: '', password: '', status: true });
+      setFormData({ name: '', email: '', password: '', active: true });
     } catch (error) {
       console.error('Erro ao salvar usuário:', error);
       alert('Erro ao salvar usuário: ' + (error.response?.data?.error || error.message));
@@ -134,8 +134,8 @@ const UserModal = ({ isOpen, onClose, user, onSave }) => {
             <label>
               <input
                 type="checkbox"
-                name="status"
-                checked={formData.status}
+                name="active"
+                checked={formData.active}
                 onChange={handleChange}
               />
               Status Ativo

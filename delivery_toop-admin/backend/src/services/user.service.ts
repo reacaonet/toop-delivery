@@ -51,9 +51,11 @@ export class UserService {
     const limit = Math.min(100, Math.max(1, parseInt(query.limit || "10", 10)));
     const skip = (page - 1) * limit;
 
+    const filter: any = { deletedAt: { $exists: false } };
+
     const [data, total] = await Promise.all([
-      UserModel.find().skip(skip).limit(limit).sort({ createdAt: -1 }),
-      UserModel.countDocuments(),
+      UserModel.find(filter).skip(skip).limit(limit).sort({ createdAt: -1 }),
+      UserModel.countDocuments(filter),
     ]);
 
     return {
@@ -105,7 +107,7 @@ export class UserService {
   async delete(id: string) {
     const user = await UserModel.findByIdAndUpdate(
       id,
-      { active: false },
+      { active: false, deletedAt: new Date() },
       { new: true }
     );
 

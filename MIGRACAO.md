@@ -460,3 +460,47 @@ Rotas orfas removidas; App.jsx e Sidebar reescritos (grupos: Dashboard | Motoris
 - Runtime (token admin): criar empresa com address+status=false persistiu; PUT com address+status=true persistiu; POST /companies/:id/admins criou user role=store vinculado e setou owner; GET lista o admin; login do admin da loja retorna token role=store; DELETE desativa e bloqueia login ("Conta desativada"); DELETE da empresa (soft) OK. Containers reiniciados (admin-api, frontend-react).
 - Runtime (exclusao): criar empresa -> aparece na lista; DELETE -> active=false + deletedAt e some da listagem (total 6 -> 5). Container admin-api reiniciado.
 - Nenhum commit feito ainda (conforme combinado).
+
+## 10/09/2026 - Admin: Wallet com motoristas + relatorios agrupados em submenu
+### Mudancas
+1. Admin Wallet (/wallet): a pagina listava somente a colecao Driver (mobilidade), que estava vazia, e mostrava "Nenhum motorista encontrado". A carteira na verdade ja e unificada: o WalletController resolve o id pelo usuario (driver OU deliveryman) e o Wallet doc e chaveado por esse id. Agora o Wallet.jsx carrega em paralelo `/drivers` + `/deliverymen` e une as duas listas, com badge "motorista"/"entregador" em cada item; saldo/transacoes/credito/debito continuam funcionando para ambos (mesma rota, id passado como driverId).
+2. Admin menu lateral (Sidebar.jsx): relatorios espalhados foram agrupados num menu proprio "Relatorios" (icone BarChart3) com submenus: Financeiros (/reports), Mobilidade (/mobility/reports), Extrato do Motorista (/mobility/extract). Removidas as entradas duplicadas de /reports (Financeiro), /mobility/reports e /mobility/extract (Mobilidade).
+
+### Validacoes
+- Build admin vite OK (1538 modules). Container toop-frontend-react-dev reiniciado: o vite em dev com bind mount WSL nao propaga eventos de file-watch, entao sem o restart ele seguia servindo o modulo antigo (motivo do "nenhum motorista" persistir na pagina).
+- Runtime: /drivers vazio (0 docs) x /deliverymen 1 doc; pagina /wallet passa a exibir o entregador cadastrado com saldo 0 (wallet criado sob demanda).
+- Nenhum commit feito (conforme combinado).
+
+## 10/09/2026 - Admin Wallet residuo: saques com filtros e lista de motoristas
+### Mudancas
+1. backend wallet.service.listWithdrawals: quando o filtro era "all" o codigo caia no else e forcava status=pending, entao o botao "Todos" da pagina nunca mostrava aprovados/rejeitados. Removido o else: "all" agora nao aplica filtro de status (continua filtrando type=debit).
+2. Admin Wallet (/wallet) ja carrega drivers + deliverymen (sessao anterior) - confirmado servindo apos restart do container (vite em bind mount WSL nao detecta mudanca sem restart).
+
+### Validacoes
+- Backend npx tsc --noEmit OK; container toop-admin-api-dev reiniciado.
+- Runtime: GET /wallet/withdrawals?status=all total=2 (R$1 e R$334, Entregador Teste, pix 123456/random); pending=0; completed=2; failed=0. Campos populados (driver.nome, wallet.pixKey/pixType).
+- Nenhum commit feito (conforme combinado).
+
+## 10/09/2026 - Admin /users: pagina de usuarios/clientes corrigida
+### Mudancas
+1. Backend User ganhou `deletedAt` (soft-delete). user.service.delete seta `active:false` + `deletedAt`; user.service.list filtra `deletedAt: {$exists:false}` - excluir agora remove da listagem.
+2. Frontend Users.jsx: coluna Status passou a ler `active` (antes lia `status` inexistente e mostrava todo mundo "Inativo"); getUsers com limit=100 (antes so trazia 10).
+3. Frontend UserModal.jsx: formulario e payload usam `active` em vez de `status` (o checkbox de status funcionava e o backend ignorava).
+
+### Validacoes
+- Backend npx tsc --noEmit OK; builds admin vite OK; containers admin-api e frontend-react reiniciados (vite WSL precisa de restart).
+- Runtime: GET /users?limit=100 total=16; POST /users cria role=operator active; PUT /:id active=false aparece como Inativo; DELETE seta deletedAt e some da lista (total volta de 17 para 16). Usuario de teste 6aa2f385e3c7855569a60017 criado e excluido (soft).
+- Nenhum commit feito (conforme combinado).
+
+## 10/09/2026 - Relatorios mobilidade (driver name) + Extrato de mobilidade
+### Mudancas
+1. backend mobility-report.service.ts: `$lookup` para nome do motorista agora busca em `drivers` E `deliverymen` (antes so buscava em `driver` - colecao inexistente; a real e `drivers`). Tambem corrigido para `admDriverReport`, `admRacesReport` e `mapMonitoring`.
+2. backend mobility-report-extra.routes.ts: rota `/extract` (mobility-extract.routes.ts) nunca foi montada no index.ts; agora esta em `router.use('/extract', authenticate, extractRoutes)`.
+3. Frontend MobilityExtract.jsx: unifica drivers + deliverymen (como no /wallet), para que entregadores com corridas aparecam na lista lateral.
+
+### Validacoes
+- Backend tsc --noEmit OK; admin-api reiniciado (stop/start) e frontend-react-dev reiniciado.
+- Runtime: GET /v1/mobility/report/adm/driver total=2; primeira linha driver=Entregador Teste status=completed final=418.11 - nome aparece corretamente.
+- Runtime extract: GET /v1/mobility/extract/6a95eb5d3a016b0799194771 success=true data.2026-09 items=1 price=418.11 - extrato do entregador carrega com os bookings.
+- Nota: client nas corridas continua vazio (booking.client aponta para user que nao existe no banco - dado legado).
+- Nenhum commit feito (conforme combinado).

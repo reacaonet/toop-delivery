@@ -27,7 +27,10 @@
       "type": "timeseries",
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
       "targets": [
-        { "expr": "rate(http_requests_total{job=~\"admin-api|payment|notification|deliveryman\"}[5m])", "legendFormat": "{{job}} {{method}} {{status}}" }
+        { "expr": "sum(rate(toop_http_requests_total[5m]))", "legendFormat": "Total req/s" },
+        { "expr": "sum(rate(toop_http_requests_total{status=~\"2..\"}[5m]))", "legendFormat": "2xx" },
+        { "expr": "sum(rate(toop_http_requests_total{status=~\"4..\"}[5m]))", "legendFormat": "4xx" },
+        { "expr": "sum(rate(toop_http_requests_total{status=~\"5..\"}[5m]))", "legendFormat": "5xx" }
       ]
     },
     {
@@ -35,7 +38,9 @@
       "type": "timeseries",
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
       "targets": [
-        { "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=~\"admin-api|payment|notification|deliveryman\"}[5m]))", "legendFormat": "{{job}}" }
+        { "expr": "histogram_quantile(0.50, sum(rate(toop_http_request_duration_seconds_bucket[5m])) by (le))", "legendFormat": "p50" },
+        { "expr": "histogram_quantile(0.95, sum(rate(toop_http_request_duration_seconds_bucket[5m])) by (le))", "legendFormat": "p95" },
+        { "expr": "histogram_quantile(0.99, sum(rate(toop_http_request_duration_seconds_bucket[5m])) by (le))", "legendFormat": "p99" }
       ],
       "fieldConfig": { "defaults": { "unit": "s" } }
     },
@@ -44,16 +49,18 @@
       "type": "timeseries",
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
       "targets": [
-        { "expr": "rate(http_requests_total{status=~\"5..\"}[5m])", "legendFormat": "{{job}}" }
+        { "expr": "sum(rate(toop_http_requests_total{status=~\"5..\"}[5m]))", "legendFormat": "5xx errors/s" }
       ],
       "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "red" } } }
     },
     {
-      "title": "Active Connections",
-      "type": "timeseries",
+      "title": "Requests by Status",
+      "type": "piechart",
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
       "targets": [
-        { "expr": "nodejs_active_handles_total{job=~\"admin-api|payment|notification|deliveryman\"}", "legendFormat": "{{job}}" }
+        { "expr": "sum(toop_http_requests_total{status=~\"2..\"})", "legendFormat": "2xx Success" },
+        { "expr": "sum(toop_http_requests_total{status=~\"4..\"})", "legendFormat": "4xx Client Error" },
+        { "expr": "sum(toop_http_requests_total{status=~\"5..\"})", "legendFormat": "5xx Server Error" }
       ]
     },
     {
@@ -61,7 +68,9 @@
       "type": "timeseries",
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 20 },
       "targets": [
-        { "expr": "process_resident_memory_bytes{job=~\"admin-api|payment|notification|deliveryman\"} / 1024 / 1024", "legendFormat": "{{job}}" }
+        { "expr": "toop_process_resident_memory_bytes / 1024 / 1024", "legendFormat": "RSS" },
+        { "expr": "toop_process_heap_used_bytes / 1024 / 1024", "legendFormat": "Heap Used" },
+        { "expr": "toop_process_heap_total_bytes / 1024 / 1024", "legendFormat": "Heap Total" }
       ],
       "fieldConfig": { "defaults": { "unit": "decmbytes" } }
     },
@@ -70,14 +79,49 @@
       "type": "timeseries",
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 20 },
       "targets": [
-        { "expr": "rate(process_cpu_seconds_total{job=~\"admin-api|payment|notification|deliveryman\"}[5m]) * 100", "legendFormat": "{{job}}" }
+        { "expr": "rate(toop_process_cpu_seconds_total[5m]) * 100", "legendFormat": "CPU %" }
       ],
-      "fieldConfig": { "defaults": { "unit": "percent" } }
+      "fieldConfig": { "defaults": { "unit": "percent", "max": 100 } }
+    },
+    {
+      "title": "Process Uptime",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 28 },
+      "targets": [
+        { "expr": "toop_process_uptime_seconds", "legendFormat": "Uptime" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "s" } }
+    },
+    {
+      "title": "Total Requests",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 28 },
+      "targets": [
+        { "expr": "sum(toop_http_requests_total)", "legendFormat": "Total" }
+      ]
+    },
+    {
+      "title": "Orders Created",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 28 },
+      "targets": [
+        { "expr": "toop_orders_total{status=\"created\"}", "legendFormat": "Created" }
+      ],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "blue" } } }
+    },
+    {
+      "title": "Drivers Online",
+      "type": "stat",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 28 },
+      "targets": [
+        { "expr": "toop_drivers_online", "legendFormat": "Online" }
+      ],
+      "fieldConfig": { "defaults": { "color": { "mode": "fixed", "fixedColor": "green" } } }
     },
     {
       "title": "MongoDB Connections",
       "type": "timeseries",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 28 },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 32 },
       "targets": [
         { "expr": "mongodb_connections{state=~\"current|available\"}", "legendFormat": "{{state}}" }
       ]
@@ -85,7 +129,7 @@
     {
       "title": "Redis Memory",
       "type": "timeseries",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 28 },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 32 },
       "targets": [
         { "expr": "redis_memory_used_bytes / 1024 / 1024", "legendFormat": "Used (MB)" },
         { "expr": "redis_memory_max_bytes / 1024 / 1024", "legendFormat": "Max (MB)" }
@@ -95,10 +139,10 @@
   ],
   "schemaVersion": 38,
   "style": "dark",
-  "tags": ["toopdelivery", "production"],
+  "tags": ["toopdelivery", "overview"],
   "templating": { "list": [] },
   "time": { "from": "now-1h", "to": "now" },
-  "title": "GojáDelivery - Services Overview",
+  "title": "GojáDelivery - Overview",
   "uid": "toopdelivery-overview",
   "version": 1
 }

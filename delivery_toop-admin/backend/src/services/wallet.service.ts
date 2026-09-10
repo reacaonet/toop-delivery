@@ -239,8 +239,6 @@ export class WalletService {
     const filter: any = { type: "debit" };
     if (query.status && query.status !== "all") {
       filter.status = query.status;
-    } else {
-      filter.status = "pending";
     }
 
     const [data, total] = await Promise.all([

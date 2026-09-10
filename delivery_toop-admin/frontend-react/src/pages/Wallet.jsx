@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Wallet, ArrowUpCircle, ArrowDownCircle, Search, Car, DollarSign, TrendingUp, TrendingDown } from 'lucide-react';
-import { walletService, driverService } from '../services/api';
+import { walletService, driverService, deliverymanService } from '../services/api';
 
 const WalletPage = () => {
   const [drivers, setDrivers] = useState([]);
@@ -22,8 +22,15 @@ const WalletPage = () => {
   const loadDrivers = async () => {
     try {
       setLoading(true);
-      const result = await driverService.getDrivers();
-      const list = Array.isArray(result?.data) ? result.data : Array.isArray(result) ? result : [];
+      const [drvResult, dmResult] = await Promise.all([
+        driverService.getDrivers(),
+        deliverymanService.getDeliverymen(),
+      ]);
+      const toList = (r) => Array.isArray(r?.data) ? r.data : Array.isArray(r) ? r : [];
+      const list = [
+        ...toList(drvResult).map(d => ({ ...d, tipo: 'motorista' })),
+        ...toList(dmResult).map(d => ({ ...d, tipo: 'entregador' })),
+      ];
       setDrivers(list);
       if (list.length > 0 && !selectedDriver) {
         selectDriver(list[0]);
@@ -119,7 +126,7 @@ const WalletPage = () => {
           </div>
           <div className="stat-info">
             <h4>{drivers.length}</h4>
-            <p>Motoristas</p>
+            <p>Motoristas &amp; Entregadores</p>
           </div>
         </div>
       </div>
@@ -127,7 +134,7 @@ const WalletPage = () => {
       <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: '1rem' }}>
         <div className="card" style={{ height: 'fit-content' }}>
           <div className="card-header">
-            <h3>Motoristas</h3>
+            <h3>Motoristas &amp; Entregadores</h3>
           </div>
           <div style={{ padding: '0 1rem 1rem' }}>
             <div style={{ position: 'relative', marginBottom: '0.5rem' }}>
@@ -159,7 +166,17 @@ const WalletPage = () => {
                     transition: 'all 0.2s',
                   }}
                 >
-                  <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{driver.name}</div>
+                  <div style={{ fontWeight: 600, fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    {driver.name}
+                    <span style={{
+                      fontSize: '0.65rem', fontWeight: 600, padding: '1px 6px', borderRadius: '10px',
+                      backgroundColor: driver.tipo === 'motorista' ? '#ede9fe' : '#d1fae5',
+                      color: driver.tipo === 'motorista' ? '#5b21b6' : '#065f46',
+                      textTransform: 'capitalize',
+                    }}>
+                      {driver.tipo}
+                    </span>
+                  </div>
                   <div style={{ fontSize: '0.75rem', color: '#888' }}>{driver.email}</div>
                 </div>
               ))}

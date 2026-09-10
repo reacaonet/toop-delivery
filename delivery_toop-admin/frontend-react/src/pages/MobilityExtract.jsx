@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Wallet, RefreshCw, Search, Car } from 'lucide-react';
-import { mobilityExtractService, driverService } from '../services/api';
+import { mobilityExtractService, driverService, deliverymanService } from '../services/api';
 import DataTable from '../components/DataTable';
 
 const fmtBRL = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -27,8 +27,15 @@ const MobilityExtract = () => {
   const loadDrivers = useCallback(async () => {
     setLoading(true);
     try {
-      const result = await driverService.getDrivers();
-      const list = Array.isArray(result?.data) ? result.data : Array.isArray(result) ? result : [];
+      const [drvResult, dmResult] = await Promise.all([
+        driverService.getDrivers(),
+        deliverymanService.getDeliverymen(),
+      ]);
+      const toList = (r) => Array.isArray(r?.data) ? r.data : Array.isArray(r) ? r : [];
+      const list = [
+        ...toList(drvResult).map(d => ({ ...d, tipo: 'motorista' })),
+        ...toList(dmResult).map(d => ({ ...d, tipo: 'entregador' })),
+      ];
       setDrivers(list);
       if (list.length > 0 && !selectedDriver) {
         selectDriver(list[0]);
