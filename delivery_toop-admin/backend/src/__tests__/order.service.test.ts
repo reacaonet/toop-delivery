@@ -22,10 +22,42 @@ jest.mock('../models/User', () => ({
   },
 }));
 
+jest.mock('../models/ShoppingPaymentMethod', () => ({
+  ShoppingPaymentMethodModel: {
+    findOne: jest.fn(),
+  },
+}));
+
+jest.mock('../services/payment-gateway.service', () => ({
+  __esModule: true,
+  default: {
+    pagarmeTransaction: jest.fn(),
+    pixCharge: jest.fn(),
+    record: jest.fn(),
+  },
+}));
+
 import { OrderModel } from '../models/Order';
+import { ShoppingPaymentMethodModel } from '../models/ShoppingPaymentMethod';
+import { UserModel } from '../models/User';
+import paymentGatewayService from '../services/payment-gateway.service';
 import orderService from '../services/order.service';
 
 const MockOrderModel = OrderModel as jest.Mocked<typeof OrderModel>;
+const MockPaymentMethodModel = ShoppingPaymentMethodModel as jest.Mocked<typeof ShoppingPaymentMethodModel>;
+const MockUserModel = UserModel as jest.Mocked<typeof UserModel>;
+const MockPaymentGateway = paymentGatewayService as jest.Mocked<typeof paymentGatewayService>;
+
+const baseOrderData = {
+  company: 'company123',
+  customer: 'customer123',
+  items: [{ name: 'Pizza', quantity: 1, price: 45.0, total: 45.0 }],
+  subtotal: 45.0,
+  deliveryFee: 5.0,
+  total: 50.0,
+  paymentMethod: 'cash',
+  deliveryAddress: { street: 'Rua Teste', number: '123', city: 'Sao Paulo', state: 'SP', zipCode: '01000-000' },
+};
 
 describe('OrderService', () => {
   beforeEach(() => {
@@ -34,24 +66,95 @@ describe('OrderService', () => {
 
   describe('create', () => {
     it('should create an order with generated orderNumber', async () => {
-      const orderData = {
-        company: 'company123',
-        customer: 'customer123',
-        items: [{ name: 'Pizza', quantity: 1, price: 45.0, total: 45.0 }],
-        subtotal: 45.0,
-        total: 50.0,
-        paymentMethod: 'credit_card',
-        deliveryAddress: { street: 'Rua Teste', number: '123', city: 'Sao Paulo', state: 'SP' },
-      };
-
-      const mockOrder = { _id: 'order123', ...orderData, orderNumber: '123456001', status: 'pending' };
+      const mockOrder = { _id: 'order123', ...baseOrderData, orderNumber: '123456001', status: 'pending' };
       MockOrderModel.create.mockResolvedValue(mockOrder as any);
 
-      const result = await orderService.create(orderData);
+      const result = await orderService.create(baseOrderData);
 
       expect(MockOrderModel.create).toHaveBeenCalledTimes(1);
       expect(result.orderNumber).toBeDefined();
       expect(result.status).toBe('pending');
+    });
+
+    it('should reject inconsistent totals', async () => {
+      await expect(
+        orderService.create({ ...baseOrderData, total: 55.0 })
+      ).rejects.toThrow('Total inconsistente');
+      expect(MockOrderModel.create).not.toHaveBeenCalled();
+    });
+
+    it('should charge a saved card and mark payment as paid', async () => {
+      const card = {
+        _id: 'card123',
+        cardToken: 'tok_123',
+        verifierCode: '123',
+        documentType: 'CPF',
+        document: '11122233344',
+        nameOnCard: 'Fulano de Tal',
+      };
+      MockPaymentMethodModel.findOne.mockResolvedValue(card as any);
+      MockUserModel.findById.mockReturnValue({
+        lean: () => Promise.resolve({ name: 'Fulano de Tal', email: 'fulano@test.com', phone: '11999998888' }),
+      } as any);
+      MockPaymentGateway.pagarmeTransaction.mockResolvedValue({ id: 'tx_1' } as any);
+      MockPaymentGateway.record.mockResolvedValue({} as any);
+      MockOrderModel.create.mockResolvedValue({
+        _id: 'order123',
+        ...baseOrderData,
+        paymentStatus: 'paid',
+      } as any);
+
+      const result = await orderService.create({
+        ...baseOrderData,
+        paymentMethod: 'credit_card',
+        paymentMethodId: 'card123',
+      });
+
+      expect(MockPaymentMethodModel.findOne).toHaveBeenCalledWith({
+        _id: 'card123',
+        customer: 'customer123',
+        isDeleted: { $ne: true },
+      });
+      expect(MockPaymentGateway.pagarmeTransaction).toHaveBeenCalledWith(
+        expect.objectContaining({ amount: 5000, card_id: 'tok_123', card_cvv: '123' })
+      );
+      expect(MockOrderModel.create).toHaveBeenCalledWith(
+        expect.objectContaining({ paymentStatus: 'paid', paymentMethodId: 'card123' })
+      );
+      expect(MockPaymentGateway.record).toHaveBeenCalledWith(
+        expect.objectContaining({ operation: 'charge', order: 'order123', gatewayId: 'tx_1' })
+      );
+      expect(result.paymentStatus).toBe('paid');
+    });
+
+    it('should require a saved card for card payment', async () => {
+      await expect(
+        orderService.create({ ...baseOrderData, paymentMethod: 'debit_card' })
+      ).rejects.toThrow('Selecione um cartão salvo');
+      expect(MockOrderModel.create).not.toHaveBeenCalled();
+    });
+
+    it('should generate PIX charge and keep payment pending', async () => {
+      MockPaymentGateway.pixCharge.mockResolvedValue({ id: 'pix_1', pix_qr_code: '000201010212' } as any);
+      MockPaymentGateway.record.mockResolvedValue({} as any);
+      MockOrderModel.create.mockResolvedValue({
+        _id: 'order123',
+        ...baseOrderData,
+        paymentStatus: 'pending',
+        pixTxid: 'pix_1',
+        pixQrcode: '000201010212',
+      } as any);
+
+      const result = await orderService.create({ ...baseOrderData, paymentMethod: 'pix' });
+
+      expect(MockPaymentGateway.pixCharge).toHaveBeenCalledWith({ amount: 5000 });
+      expect(MockOrderModel.create).toHaveBeenCalledWith(
+        expect.objectContaining({ paymentStatus: 'pending', pixTxid: 'pix_1', pixQrcode: '000201010212' })
+      );
+      expect(MockPaymentGateway.record).toHaveBeenCalledWith(
+        expect.objectContaining({ operation: 'pix_charge', gateway: 'PIX' })
+      );
+      expect(result.pixQrcode).toBe('000201010212');
     });
   });
 

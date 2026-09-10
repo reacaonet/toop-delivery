@@ -26,8 +26,11 @@ export const createOrderSchema = z.object({
       .min(1, "Pelo menos um item é obrigatório"),
     subtotal: z.number().min(0),
     deliveryFee: z.number().min(0).default(0),
+    discount: z.number().min(0).default(0),
+    tip: z.number().min(0).optional(),
     total: z.number().positive("Total deve ser positivo"),
     paymentMethod: z.string().min(1, "Método de pagamento é obrigatório"),
+    paymentMethodId: z.string().optional(),
     deliveryAddress: z.object({
       street: z.string().optional(),
       number: z.string().optional(),

@@ -13,6 +13,7 @@ import OrdersPage from './pages/OrdersPage'
 import OrderDetailPage from './pages/OrderDetailPage'
 import ProfilePage from './pages/ProfilePage'
 import AddressesPage from './pages/AddressesPage'
+import PaymentMethodsPage from './pages/PaymentMethodsPage'
 import RideRequestPage from './pages/RideRequestPage'
 import RideTrackingPage from './pages/RideTrackingPage'
 import RideHistoryPage from './pages/RideHistoryPage'
@@ -52,6 +53,7 @@ function AppRoutes() {
         <Route path="/orders/:id" element={<OrderDetailPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/addresses" element={<AddressesPage />} />
+        <Route path="/payment-methods" element={<PaymentMethodsPage />} />
         <Route path="/rides" element={<RideHistoryPage />} />
         <Route path="/rides/new" element={<RideRequestPage />} />
         <Route path="/rides/:id" element={<RideTrackingPage />} />

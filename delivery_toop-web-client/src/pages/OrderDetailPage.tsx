@@ -12,6 +12,9 @@ interface Order {
   discount: number
   status: string
   paymentMethod: string
+  paymentStatus?: string
+  pixTxid?: string
+  pixQrcode?: string
   notes: string
   items: Array<{ name: string; quantity: number; price: number; total: number }>
   deliveryAddress: {
@@ -199,6 +202,52 @@ export default function OrderDetailPage() {
             <span style={{ marginRight: '8px' }}>{paymentIcons[order.paymentMethod] || '💰'}</span>
             {paymentLabels[order.paymentMethod] ?? order.paymentMethod}
           </p>
+
+          {order.paymentMethod === 'pix' && order.pixQrcode && (
+            <div
+              style={{
+                marginTop: 12,
+                padding: 16,
+                borderRadius: 12,
+                background: 'var(--bg-secondary, #f5f5f5)',
+                border: '1px dashed var(--border, #ddd)',
+                wordBreak: 'break-all',
+              }}
+            >
+              <strong style={{ display: 'block', marginBottom: 8 }}>Pagamento PIX</strong>
+              {order.paymentStatus === 'paid' ? (
+                <p style={{ color: 'var(--success, #16a34a)' }}>PIX confirmado!</p>
+              ) : (
+                <>
+                  <p style={{ fontSize: '0.85rem', opacity: 0.8, marginBottom: 8 }}>
+                    Pague copiando o código abaixo no app do seu banco:
+                  </p>
+                  <code
+                    style={{
+                      display: 'block',
+                      fontSize: '0.78rem',
+                      padding: 10,
+                      borderRadius: 8,
+                      background: '#fff',
+                      border: '1px solid var(--border, #ddd)',
+                      marginBottom: 10,
+                    }}
+                  >
+                    {order.pixQrcode}
+                  </code>
+                  <button
+                    className="btn btn-primary btn-sm"
+                    onClick={() => {
+                      navigator.clipboard?.writeText(order.pixQrcode || '')
+                      alert('Código PIX copiado para a área de transferência')
+                    }}
+                  >
+                    ⚡ Copiar código PIX
+                  </button>
+                </>
+              )}
+            </div>
+          )}
         </section>
 
         <section className="order-section">

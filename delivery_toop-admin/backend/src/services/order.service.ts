@@ -1,8 +1,12 @@
 import { OrderModel } from "../models/Order";
+import { UserModel } from "../models/User";
+import { ShoppingPaymentMethodModel } from "../models/ShoppingPaymentMethod";
 import { SettingsModel } from "../models/Settings";
 import { AppError } from "../middleware/errorHandler";
 import walletService from "./wallet.service";
 import repasseService from "./repasse.service";
+import paymentGatewayService from "./payment-gateway.service";
+import { env } from "../config";
 import crypto from "crypto";
 
 interface PaginationQuery {
@@ -28,8 +32,12 @@ export class OrderService {
     customer: string;
     items: Array<{ name: string; quantity: number; price: number; total: number }>;
     subtotal: number;
+    deliveryFee?: number;
+    discount?: number;
+    tip?: number;
     total: number;
     paymentMethod: string;
+    paymentMethodId?: string;
     deliveryAddress: {
       street?: string;
       number?: string;
@@ -43,13 +51,141 @@ export class OrderService {
     };
     notes?: string;
   }) {
+    const deliveryFee = Math.max(0, Number(data.deliveryFee || 0));
+    const discount = Math.max(0, Number(data.discount || 0));
+    const tip = Math.max(0, Number(data.tip || 0));
+
+    const computedSubtotal =
+      Math.round(data.items.reduce((sum, item) => sum + Number(item.total || 0), 0) * 100) / 100;
+    if (Math.abs(computedSubtotal - Number(data.subtotal || 0)) > 0.01) {
+      throw new AppError("Subtotal inconsistente com os itens do pedido", 400);
+    }
+
+    const computedTotal = Math.round((computedSubtotal + deliveryFee - discount) * 100) / 100;
+    if (Math.abs(computedTotal - Number(data.total || 0)) > 0.01) {
+      throw new AppError("Total inconsistente com o subtotal, frete e desconto", 400);
+    }
+
     const orderNumber = `${Date.now()}${crypto.randomInt(1000).toString().padStart(3, "0")}`;
+    const method = String(data.paymentMethod || "").toLowerCase();
+    const amountCents = Math.round(Number(data.total) * 100);
+
+    let paymentStatus: "pending" | "paid" | "failed" | "refunded" =
+      method === "cash" || method === "money" ? "paid" : "pending";
+    let pixTxid: string | undefined;
+    let pixQrcode: string | undefined;
+    let gatewayResult: any;
+
+    if (method === "credit_card" || method === "debit_card") {
+      if (!data.paymentMethodId) {
+        throw new AppError("Selecione um cartão salvo para pagar", 400);
+      }
+
+      const card = await ShoppingPaymentMethodModel.findOne({
+        _id: data.paymentMethodId,
+        customer: data.customer,
+        isDeleted: { $ne: true },
+      });
+      if (!card) {
+        throw new AppError("Cartão de pagamento não encontrado", 404);
+      }
+
+      const user = await UserModel.findById(data.customer).lean();
+      const name = user?.name || card.nameOnCard;
+      const email = user?.email || "";
+      const phone = user?.phone;
+      const phoneNumbers = phone
+        ? (() => {
+            const digits = String(phone).replace(/\D/g, "");
+            return [digits.length < 11 ? `+55${digits}` : `+${digits}`];
+          })()
+        : undefined;
+
+      gatewayResult = await paymentGatewayService.pagarmeTransaction({
+        reference_key: orderNumber,
+        amount: amountCents,
+        card_id: card.cardToken,
+        card_cvv: card.verifierCode,
+        payment_method: method,
+        postback_url: `${env.PAYMENT_URL.replace(/\/$/, "")}/pagar-me/driver/status`,
+        async: false,
+        installments: 1,
+        capture: true,
+        soft_descriptor: "GoJa",
+        customer: {
+          external_id: data.customer,
+          name,
+          email,
+          country: "br",
+          type: "individual",
+          documents: [
+            {
+              type: card.documentType.toLowerCase(),
+              number: card.document,
+            },
+          ],
+          ...(phoneNumbers ? { phone_numbers: phoneNumbers } : {}),
+        },
+        billing: {
+          name,
+          address: {
+            country: "br",
+            state: data.deliveryAddress?.state || "",
+            city: data.deliveryAddress?.city || "",
+            neighborhood: data.deliveryAddress?.neighborhood || "",
+            street: (data.deliveryAddress?.street || "").substring(0, 35),
+            street_number: data.deliveryAddress?.number || "1",
+            zipcode: (data.deliveryAddress?.zipCode || "").replace(/\D/g, ""),
+          },
+        },
+      });
+      paymentStatus = "paid";
+    }
+
+    if (method === "pix") {
+      gatewayResult = await paymentGatewayService.pixCharge({ amount: amountCents });
+      const unwrapped: any =
+        gatewayResult?.data && typeof gatewayResult.data === "object" ? gatewayResult.data : gatewayResult;
+      const txid = String(unwrapped?.txid || unwrapped?.id || unwrapped?.transaction_id || "");
+      const qrcode = String(
+        unwrapped?.pix_qr_code || unwrapped?.qrcode || unwrapped?.qr_code || unwrapped?.emv || ""
+      );
+      if (!txid && !qrcode) {
+        throw new AppError("O gateway não retornou txid/qrcode para o PIX", 400);
+      }
+      pixTxid = txid || undefined;
+      pixQrcode = qrcode || undefined;
+      paymentStatus = "pending";
+    }
 
     const order = await OrderModel.create({
       ...data,
+      paymentMethodId: data.paymentMethodId,
+      paymentStatus,
+      pixTxid,
+      pixQrcode,
+      tip,
       orderNumber,
       status: "pending",
     });
+
+    if (gatewayResult) {
+      const unwrapped: any =
+        gatewayResult?.data && typeof gatewayResult.data === "object" ? gatewayResult.data : gatewayResult;
+      await paymentGatewayService.record({
+        gateway: method === "pix" ? "PIX" : "PAGARME",
+        operation: method === "pix" ? "pix_charge" : "charge",
+        method: method === "pix" ? "pix" : method,
+        amount: Number(data.total),
+        fees: 0,
+        status: method === "pix" ? "processing" : "succeeded",
+        gatewayId: String(unwrapped?.id || (method === "pix" ? pixTxid : "") || ""),
+        gatewayResponse: gatewayResult,
+        order: order._id.toString(),
+        customer: data.customer,
+        company: data.company,
+      });
+    }
 
     return order;
   }

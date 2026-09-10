@@ -1,4 +1,5 @@
 import axios, { AxiosRequestConfig } from 'axios';
+import crypto from 'crypto';
 import { env } from '../config';
 import { AppError } from '../middleware/errorHandler';
 import { PaymentTransactionModel } from '../models/PaymentTransaction';
@@ -30,6 +31,14 @@ interface RecordInput {
 export class PaymentGatewayService {
   private baseUrl(): string {
     return env.PAYMENT_URL.replace(/\/$/, '');
+  }
+
+  private get sandbox(): boolean {
+    return env.PAYMENT_DEV_MODE === 'true';
+  }
+
+  private randomId(prefix: string): string {
+    return `${prefix}_${crypto.randomBytes(8).toString('hex')}`;
   }
 
   private async getToken(): Promise<string> {
@@ -111,6 +120,9 @@ export class PaymentGatewayService {
 
   // ---------- cards ----------
   async tokenizeCard(data: Record<string, unknown>): Promise<any> {
+    if (this.sandbox) {
+      return { success: true, data: { token: this.randomId('devtok') } };
+    }
     return this.request('/payment/card', { method: 'POST', data });
   }
 
@@ -128,14 +140,26 @@ export class PaymentGatewayService {
   }
 
   async pagarmeTransaction(data: Record<string, unknown>): Promise<any> {
+    if (this.sandbox) {
+      return {
+        success: true,
+        data: { id: this.randomId('devtrx'), status: 'paid', amount: data.amount },
+      };
+    }
     return this.request('/pagar-me/transactions', { method: 'POST', data });
   }
 
   async cancelTransaction(paymentId: string): Promise<any> {
+    if (this.sandbox) {
+      return { success: true, data: { id: paymentId, status: 'canceled' } };
+    }
     return this.request(`/cancellation/${encodeURIComponent(paymentId)}`, { method: 'POST' });
   }
 
   async cancelTransactionPartial(paymentId: string, data: Record<string, unknown>): Promise<any> {
+    if (this.sandbox) {
+      return { success: true, data: { id: paymentId, status: 'partial_canceled', ...data } };
+    }
     return this.request(`/cancellation-partial/${encodeURIComponent(paymentId)}`, {
       method: 'PUT',
       data,
@@ -144,6 +168,13 @@ export class PaymentGatewayService {
 
   // ---------- PIX ----------
   async pixCharge(data: Record<string, unknown>): Promise<any> {
+    if (this.sandbox) {
+      const id = this.randomId('devpix');
+      return {
+        success: true,
+        data: { id, txid: id, pix_qr_code: `0002010102122615br.gov.bcb.pix${id}520400005303986540${String(data.amount)}5802BR5913GoJa6009SAO PAULO` },
+      };
+    }
     return this.request('/pagar-me/pix', { method: 'POST', data });
   }
 

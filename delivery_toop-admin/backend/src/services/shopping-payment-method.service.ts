@@ -3,6 +3,34 @@ import { ShoppingPaymentMethodModel } from '../models/ShoppingPaymentMethod';
 import paymentGatewayService from './payment-gateway.service';
 import { AppError } from '../middleware/errorHandler';
 
+function normalizeExpiration(input: unknown): string {
+  const raw = String(input || '').trim();
+  const match = raw.match(/^(\d{2})[\/\-\.](\d{2,4})$/);
+  if (match) {
+    return `${match[1]}/${String(match[2]).slice(-2)}`;
+  }
+  const parsed = new Date(raw);
+  if (!isNaN(parsed.getTime())) {
+    const mm = String(parsed.getMonth() + 1).padStart(2, '0');
+    return `${mm}/${String(parsed.getFullYear()).slice(-2)}`;
+  }
+  return raw;
+}
+
+function expirationToDate(input: unknown): Date {
+  const raw = String(input || '').trim();
+  const match = raw.match(/^(\d{2})[\/\-\.](\d{2,4})$/);
+  if (match) {
+    let yy = Number(match[2]);
+    if (yy < 100) yy += yy < 70 ? 2000 : 1900;
+    const mm = Number(match[1]);
+    if (mm >= 1 && mm <= 12) {
+      return new Date(Date.UTC(yy, mm, 0, 23, 59, 59));
+    }
+  }
+  return new Date(raw);
+}
+
 export class ShoppingPaymentMethodService {
   async list(customer: string, query: Record<string, any> = {}) {
     if (!customer || !Types.ObjectId.isValid(customer)) {
@@ -51,7 +79,7 @@ export class ShoppingPaymentMethodService {
       CustomerName: nameOnCard,
       CardNumber: String(cardNumber).replace(/\s/g, ''),
       Holder: nameOnCard,
-      ExpirationDate: valid,
+      ExpirationDate: normalizeExpiration(valid),
       Brand: flag,
       SecurityCode: verifierCode,
     });
@@ -72,7 +100,7 @@ export class ShoppingPaymentMethodService {
       flag: flag || 'VISA',
       cartNumber: String(cardNumber).slice(-4),
       nameOnCard,
-      valid,
+      valid: expirationToDate(valid),
       verifierCode,
       documentType: documentType === 'PASSPORT' ? 'PASSPORT' : 'CPF',
       document,

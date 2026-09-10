@@ -17,6 +17,7 @@ export interface IOrder extends Document {
   total: number;
   status: 'pending' | 'confirmed' | 'preparing' | 'ready' | 'delivering' | 'delivered' | 'cancelled';
   paymentMethod: string;
+  paymentMethodId?: string;
   paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded';
   deliveryAddress?: {
     street?: string;
@@ -40,6 +41,7 @@ export interface IOrder extends Document {
   schedule?: Record<string, unknown>;
   tip?: number;
   pixTxid?: string;
+  pixQrcode?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -68,6 +70,7 @@ const OrderSchema = new Schema<IOrder>(
       default: 'pending',
     },
     paymentMethod: { type: String, required: true },
+    paymentMethodId: { type: String },
     paymentStatus: {
       type: String,
       enum: ['pending', 'paid', 'failed', 'refunded'],
@@ -95,6 +98,7 @@ const OrderSchema = new Schema<IOrder>(
     schedule: { type: Schema.Types.Mixed },
     tip: { type: Number },
     pixTxid: { type: String },
+    pixQrcode: { type: String },
   },
   { timestamps: true, toJSON: { transform(_doc, ret) { const { __v: _v, ...rest } = ret; return rest; } } }
 );

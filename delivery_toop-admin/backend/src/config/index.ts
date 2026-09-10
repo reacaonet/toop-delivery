@@ -35,6 +35,7 @@ const envSchema = z.object({
   LTS: z.string().default('v1'),
   PAYMENT_APP_TOKEN: z.string().default(''),
   PAYMENT_APP_SECRET: z.string().default(''),
+  PAYMENT_DEV_MODE: z.string().default('false'),
 
   // Firebase (web SDK config)
   FIREBASE_API_KEY: z.string().default(''),

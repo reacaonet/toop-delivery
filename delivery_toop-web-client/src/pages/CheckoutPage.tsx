@@ -43,6 +43,33 @@ export default function CheckoutPage() {
   const [notes, setNotes] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
+  const [savedCards, setSavedCards] = useState<
+    Array<{ _id: string; flag: string; cartNumber: string; nameOnCard: string; isMain: boolean }>
+  >([])
+  const [selectedCardId, setSelectedCardId] = useState('')
+
+  const isCard = paymentMethod === 'credit_card' || paymentMethod === 'debit_card'
+
+  useEffect(() => {
+    if (!isCard || !user) {
+      setSavedCards([])
+      return
+    }
+    api
+      .get(`/shopping/payment-method/${user._id}`)
+      .then(({ data }) => {
+        const list = Array.isArray(data.data) ? data.data : []
+        setSavedCards(list)
+        if (list.length > 0) {
+          const current = list.find((c) => c._id === selectedCardId) ? selectedCardId : ''
+          setSelectedCardId(current || list.find((c) => c.isMain)?._id || list[0]._id)
+        } else {
+          setSelectedCardId('')
+        }
+      })
+      .catch(() => setSavedCards([]))
+  }, [paymentMethod, user])
+
   const [addresses, setAddresses] = useState<SavedAddress[]>([])
   const [selectedAddressId, setSelectedAddressId] = useState<string>('')
   const [showAddressPicker, setShowAddressPicker] = useState(false)
@@ -68,6 +95,16 @@ export default function CheckoutPage() {
       return
     }
 
+    if (isCard && !selectedCardId) {
+      showToast(
+        savedCards.length === 0
+          ? 'Adicione um cartão antes de pagar'
+          : 'Selecione um cartão',
+        'error',
+      )
+      return
+    }
+
     setSubmitting(true)
     try {
       const orderData = {
@@ -83,6 +120,7 @@ export default function CheckoutPage() {
         deliveryFee: cart.deliveryFee,
         total: cart.total,
         paymentMethod,
+        paymentMethodId: isCard ? selectedCardId : undefined,
         deliveryAddress: {
           street: selectedAddress.street,
           number: selectedAddress.number,
@@ -97,8 +135,12 @@ export default function CheckoutPage() {
       const { data } = await api.post('/orders', orderData)
       clearCart()
       navigate(`/orders/${data.data._id}`)
-    } catch {
+    } catch (err: any) {
       setSubmitting(false)
+      showToast(
+        err?.response?.data?.error || err?.response?.data?.message || 'Não foi possível confirmar o pedido',
+        'error',
+      )
     }
   }
 
@@ -196,6 +238,52 @@ export default function CheckoutPage() {
                 </label>
               ))}
             </div>
+
+            {isCard && (
+              <div style={{ marginTop: 12 }}>
+                {savedCards.length === 0 ? (
+                  <div className="checkout-no-address">
+                    <p>Nenhum cartão salvo no sistema.</p>
+                    <button
+                      type="button"
+                      className="btn btn-primary btn-sm"
+                      onClick={() => navigate('/payment-methods')}
+                    >
+                      Adicionar cartão
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    {savedCards.map((card) => (
+                      <label
+                        key={card._id}
+                        className={`payment-option ${selectedCardId === card._id ? 'selected' : ''}`}
+                        style={{ width: '100%' }}
+                      >
+                        <input
+                          type="radio"
+                          name="savedCard"
+                          value={card._id}
+                          checked={selectedCardId === card._id}
+                          onChange={(e) => setSelectedCardId(e.target.value)}
+                        />
+                        <span className="payment-icon">💳</span>
+                        {card.flag} •••• {card.cartNumber}
+                        {card.isMain && <span style={{ opacity: 0.7, marginLeft: 6 }}>· Principal</span>}
+                      </label>
+                    ))}
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      style={{ marginTop: 8 }}
+                      onClick={() => navigate('/payment-methods')}
+                    >
+                      Gerenciar cartões
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
           </section>
 
           {/* Notes section */}

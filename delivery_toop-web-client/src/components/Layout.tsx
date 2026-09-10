@@ -27,6 +27,7 @@ export default function Layout() {
     ? [
         { label: 'Perfil', icon: '👤', path: '/profile' },
         { label: 'Endereços', icon: '📍', path: '/addresses' },
+        { label: 'Meus Cartões', icon: '💳', path: '/payment-methods' },
         { label: 'Histórico de Pedidos', icon: '📦', path: '/orders' },
         { label: 'Histórico de Corridas', icon: '🚗', path: '/rides' },
       ]
