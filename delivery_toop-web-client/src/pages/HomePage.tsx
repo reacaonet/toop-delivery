@@ -72,15 +72,15 @@ function getCompanyId(c: string | { _id: string; name?: string; logo?: string })
   return typeof c === 'object' && c && '_id' in c ? c._id : ''
 }
 
-function getCompanyName(c: Company | { name: string } | string): string {
+function getCompanyName(c: Company | { name: string } | string | null | undefined): string {
   if (typeof c === 'string') return c
-  if (typeof c === 'object' && 'name' in c) return c.name
+  if (c && typeof c === 'object' && 'name' in c) return (c as { name: string }).name
   return ''
 }
 
-function getCompanyLogo(c: { logo?: string } | string): string {
+function getCompanyLogo(c: { logo?: string } | string | null | undefined): string {
   if (typeof c === 'string') return ''
-  if (typeof c === 'object' && 'logo' in c) return (c as { logo?: string }).logo ?? ''
+  if (c && typeof c === 'object' && 'logo' in c) return (c as { logo?: string }).logo ?? ''
   return ''
 }
 

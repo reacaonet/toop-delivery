@@ -89,7 +89,6 @@ export default function CompanyPage() {
         else if (Array.isArray(raw?.data)) cats = raw.data
         else if (Array.isArray(raw?.data?.data)) cats = raw.data.data
         setCategories(cats)
-        if (cats.length > 0) setSelectedCategory(cats[0]._id)
       } catch {
         navigate('/')
       } finally {
@@ -201,6 +200,14 @@ export default function CompanyPage() {
       </div>
 
       <div className="category-tabs">
+        {categories.length > 0 && (
+          <button
+            className={`category-tab ${selectedCategory === '' ? 'active' : ''}`}
+            onClick={() => setSelectedCategory('')}
+          >
+            Todos
+          </button>
+        )}
         {categories.map((cat) => (
           <button
             key={cat._id}
@@ -216,7 +223,7 @@ export default function CompanyPage() {
         {products.length === 0 ? (
           <div className="empty-state">
             <div className="empty-icon">🍽️</div>
-            <h2>Nenhum produto nesta categoria</h2>
+            <h2>{selectedCategory ? 'Nenhum produto nesta categoria' : 'Nenhum produto disponível'}</h2>
           </div>
         ) : (
           products.map((product) => (
