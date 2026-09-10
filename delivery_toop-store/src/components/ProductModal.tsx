@@ -63,7 +63,7 @@ const ProductModal = ({ isOpen, onClose, product, onSave }: ProductModalProps) =
 
   const loadCategories = async () => {
     try {
-      const res = await api.get('/categories/public')
+      const res = await api.get('/categories', { params: { company: companyId } })
       const data = res.data?.data ?? res.data
       setCategories(Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [])
     } catch (e) {
@@ -170,6 +170,11 @@ const ProductModal = ({ isOpen, onClose, product, onSave }: ProductModalProps) =
                   </option>
                 ))}
               </select>
+              {categories.length === 0 && (
+                <small style={{ color: '#d97706', display: 'block', marginTop: '0.25rem' }}>
+                  Nenhuma categoria criada. Cadastre categorias no menu Categorias antes de criar produtos.
+                </small>
+              )}
             </div>
           </div>
 

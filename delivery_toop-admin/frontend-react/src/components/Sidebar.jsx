@@ -130,7 +130,6 @@ const Sidebar = () => {
         { path: '/orders', label: 'Pedidos' },
         { path: '/dispatch', label: 'Despacho' },
         { path: '/products', label: 'Produtos' },
-        { path: '/categories', label: 'Categorias' },
         { path: '/app-categories', label: 'Categorias App' },
         { path: '/supermarket', label: 'Supermercado' },
         { path: '/shopping-departments', label: 'Departamentos' },

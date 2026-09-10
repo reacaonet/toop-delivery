@@ -1,6 +1,6 @@
 import { Fragment } from 'react'
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, Package, ShoppingCart, Settings, LogOut, Store, Monitor, FileText, Warehouse, GitBranch, Boxes, ArrowLeftRight } from 'lucide-react'
+import { LayoutDashboard, Package, ShoppingCart, Settings, LogOut, Store, Monitor, FileText, Warehouse, GitBranch, Boxes, ArrowLeftRight, Tags } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 
 interface LayoutProps {
@@ -14,6 +14,7 @@ const Layout = ({ children }: LayoutProps) => {
     { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
     { path: '/painel', icon: Monitor, label: 'Painel de Pedidos' },
     { path: '/products', icon: Package, label: 'Produtos' },
+    { path: '/categories', icon: Tags, label: 'Categorias' },
     { path: '/orders', icon: ShoppingCart, label: 'Pedidos' },
     { path: '/stock', icon: Warehouse, label: 'Estoque' },
     { path: '/stock/items', icon: Boxes, label: 'Itens de Estoque' },

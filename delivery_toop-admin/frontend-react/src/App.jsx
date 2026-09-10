@@ -6,7 +6,6 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Users from './pages/Users';
 import Companies from './pages/Companies';
-import Categories from './pages/Categories';
 import Banners from './pages/Banners';
 import Orders from './pages/Orders';
 import Deliverymen from './pages/Fleet';
@@ -89,7 +88,6 @@ function AdminLayout() {
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/companies" element={<Companies />} />
-            <Route path="/categories" element={<Categories />} />
             <Route path="/banners" element={<Banners />} />
             <Route path="/orders" element={<Orders />} />
             <Route path="/users" element={<Users />} />
