@@ -1,11 +1,16 @@
 import { BookingModel } from "../models/Booking";
 import { DriverModel } from "../models/Driver";
 import { DeliverymanModel } from "../models/Deliveryman";
+import { RideCategoryModel } from "../models/RideCategory";
+import { BookingVehicleType } from "../models/RideCategory";
+import { ShoppingPaymentMethodModel } from "../models/ShoppingPaymentMethod";
+import { UserModel } from "../models/User";
 import { AppError } from "../middleware/errorHandler";
 import { incDelivery } from "../middleware/metrics";
 import walletService from "./wallet.service";
+import paymentGatewayService from "./payment-gateway.service";
 import promoService from "./promo.service";
-import { getPlatformFeePercent } from "./settings.service";
+import { getPlatformFeePercent, getEnabledPaymentMethods } from "./settings.service";
 import QRCode from "qrcode";
 import crypto from "crypto";
 
@@ -45,7 +50,7 @@ export class BookingService {
     clientId: string;
     companyId?: string;
     serviceCategory: string;
-    vehicleType?: 'car' | 'moto';
+    vehicleType?: BookingVehicleType;
     pickup: { address: string; lat: number; lng: number; complement?: string };
     dropoff: { address: string; lat: number; lng: number; complement?: string };
     paymentMethod: string;
@@ -62,7 +67,7 @@ export class BookingService {
       data.dropoff.lat, data.dropoff.lng
     );
 
-    const components = this.calculatePriceComponents(distance, data.serviceCategory, data.vehicleType, data.surgeAddon);
+    const components = await this.calculatePriceComponents(distance, data.serviceCategory, data.vehicleType, data.surgeAddon);
     let estimatedPrice = components.baseFare + components.distanceFare + (components.surgeAddon || 0);
 
     const duration = this.calculateDuration(distance);
@@ -121,7 +126,149 @@ export class BookingService {
       }
     }
 
+    try {
+      await this.processBookingPayment(booking);
+    } catch (err: any) {
+      console.error("[Booking] Erro ao processar pagamento:", err?.message || err);
+    }
+
     return booking;
+  }
+
+  private async processBookingPayment(booking: any) {
+    const method = String(booking.paymentMethod || "").toLowerCase();
+    if (["cash", "money"].includes(method)) {
+      booking.paymentStatus = "paid";
+      await booking.save();
+      return;
+    }
+
+    const enabled = await getEnabledPaymentMethods();
+    if (enabled.length > 0 && !(enabled as string[]).includes(method)) {
+      throw new AppError(`Forma de pagamento "${method}" desabilitada nas configurações`, 400);
+    }
+
+    const price = Math.max(
+      0,
+      Number(booking.proposedPrice || booking.estimatedPrice || 0)
+    );
+    const amountCents = Math.round(price * 100);
+    if (price <= 0) return;
+
+    const paymentMethod = method;
+    const postback = (await paymentGatewayService.webhookUrl()) as string | undefined;
+
+    if (method === "pix") {
+      const result: any = await paymentGatewayService.pixCharge({ amount: amountCents });
+      const unwrapped: any =
+        result?.data && typeof result.data === "object" ? result.data : result;
+      const txid = String(unwrapped?.txid || unwrapped?.id || unwrapped?.transaction_id || "");
+      const qrcode = String(
+        unwrapped?.pix_qr_code || unwrapped?.qrcode || unwrapped?.qr_code || unwrapped?.emv || ""
+      );
+      booking.pixTxid = txid || undefined;
+      booking.pixQrcode = qrcode || undefined;
+      const gid = String(unwrapped?.id || txid || "");
+      if (gid) booking.gatewayTransactionId = gid;
+
+      await paymentGatewayService.record({
+        gateway: await paymentGatewayService.provider(),
+        operation: "pix_charge",
+        method: "pix",
+        amount: price,
+        status: "pending",
+        gatewayId: gid || undefined,
+        gatewayResponse: unwrapped,
+        booking: booking._id,
+        customer: booking.client,
+        company: booking.company,
+      });
+      await booking.save();
+      return;
+    }
+
+    if (paymentMethod === "credit_card" || paymentMethod === "debit_card") {
+      const card = await ShoppingPaymentMethodModel.findOne({
+        customer: booking.client,
+        isDeleted: { $ne: true },
+      })
+        .sort({ isMain: -1 })
+        .lean();
+
+      if (!card?.cardToken) {
+        await paymentGatewayService.record({
+          gateway: await paymentGatewayService.provider(),
+          operation: "charge",
+          method: paymentMethod,
+          amount: price,
+          status: "pending",
+          booking: booking._id,
+          customer: booking.client,
+          company: booking.company,
+          metadata: { note: "Nenhum cartão salvo — aguardando cobrança" },
+        });
+        return;
+      }
+
+      const user = await UserModel.findById(booking.client).select("name email phone").lean();
+      const name = user?.name || card.nameOnCard;
+      const email = user?.email || "";
+      const phoneNumbers = user?.phone
+        ? (() => {
+            const digits = String(user.phone).replace(/\D/g, "");
+            return [digits.length < 11 ? `+55${digits}` : `+${digits}`];
+          })()
+        : undefined;
+
+      const result: any = await paymentGatewayService.pagarmeTransaction({
+        reference_key: booking.bookingNumber,
+        amount: amountCents,
+        card_id: card.cardToken,
+        card_cvv: card.verifierCode,
+        payment_method: paymentMethod,
+        ...(postback ? { postback_url: postback } : {}),
+        async: false,
+        installments: 1,
+        capture: true,
+        soft_descriptor: "GoJa",
+        customer: {
+          external_id: String(booking.client),
+          name,
+          email,
+          country: "br",
+          type: "individual",
+          documents: [
+            {
+              type: String(card.documentType || "cpf").toLowerCase(),
+              number: card.document,
+            },
+          ],
+          ...(phoneNumbers ? { phone_numbers: phoneNumbers } : {}),
+        },
+      });
+
+      const unwrapped: any =
+        result?.data && typeof result.data === "object" ? result.data : result;
+      const gid = String(unwrapped?.id || unwrapped?.transaction?.id || "");
+      if (gid) booking.gatewayTransactionId = gid;
+      booking.paymentStatus = "paid";
+
+      await paymentGatewayService.record({
+        gateway: await paymentGatewayService.provider(),
+        operation: "charge",
+        method: paymentMethod,
+        amount: price,
+        status: "succeeded",
+        gatewayId: gid || undefined,
+        gatewayResponse: unwrapped,
+        booking: booking._id,
+        customer: booking.client,
+        company: booking.company,
+        metadata: { card: card.cartNumber || "", flag: card.flag || "" },
+      });
+      await booking.save();
+      return;
+    }
   }
 
   async getById(id: string) {
@@ -470,12 +617,12 @@ export class BookingService {
     return Math.round((base + distanceKm * perKm) * 100) / 100;
   }
 
-  calculatePriceComponents(
+  async calculatePriceComponents(
     distanceKm: number,
     serviceCategory: string,
-    vehicleType?: 'car' | 'moto',
+    vehicleType?: BookingVehicleType,
     surgeInput?: number
-  ): { baseFare: number; perKmRate: number; distanceFare: number; surgeAddon: number } {
+  ): Promise<{ baseFare: number; perKmRate: number; distanceFare: number; surgeAddon: number }> {
     const basePrices: Record<string, number> = {
       driver: 5.00,
       delivery: 3.00,
@@ -490,9 +637,23 @@ export class BookingService {
     let baseFare = basePrices[serviceCategory] || 5.00;
     let perKmRate = perKmPrices[serviceCategory] || 2.50;
 
-    if (vehicleType === 'moto') {
-      baseFare = Math.round(baseFare * 0.7 * 100) / 100;
-      perKmRate = Math.round(perKmRate * 0.7 * 100) / 100;
+    let multiplier = 1;
+    if (vehicleType && vehicleType !== 'car' && vehicleType !== 'moto') {
+      const category = await RideCategoryModel.findOne({ code: vehicleType, active: true }).lean();
+      if (category) {
+        multiplier = Number(category.multiplier || 1);
+        if (category.basePrice) baseFare = Number(category.basePrice);
+        if (category.perKm) perKmRate = Number(category.perKm);
+      } else if (vehicleType.startsWith('moto')) {
+        multiplier = 0.7;
+      }
+    } else if (vehicleType === 'moto') {
+      multiplier = 0.7;
+    }
+
+    if (multiplier !== 1 && !vehicleType?.includes('_')) {
+      baseFare = Math.round(baseFare * multiplier * 100) / 100;
+      perKmRate = Math.round(perKmRate * multiplier * 100) / 100;
     }
 
     const distanceFare = Math.round(distanceKm * perKmRate * 100) / 100;

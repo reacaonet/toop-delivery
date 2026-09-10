@@ -1,5 +1,22 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
+export const GATEWAY_PROVIDERS = ['BRASPAG', 'PAGARME', 'IUGU', 'CIELO', 'PIX'] as const;
+export type GatewayProvider = (typeof GATEWAY_PROVIDERS)[number];
+
+export const PAYMENT_METHODS = ['credit_card', 'debit_card', 'pix', 'cash'] as const;
+export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
+
+export interface IPaymentGatewayConfig {
+  provider: GatewayProvider;
+  mode: 'sandbox' | 'production';
+  merchantId: string;
+  merchantKey: string;
+  apiKey: string;
+  token: string;
+  webhookUrl: string;
+  splitEnabled: boolean;
+}
+
 export interface ISettings extends Document {
   companyFeePercentage: number;
   deliverymanFeePercentage: number;
@@ -8,8 +25,24 @@ export interface ISettings extends Document {
   maintenanceMode: boolean;
   autoBackup: boolean;
   emailAlerts: boolean;
+  paymentGateway: IPaymentGatewayConfig;
+  enabledPaymentMethods: PaymentMethod[];
   updatedAt: Date;
 }
+
+const PaymentGatewaySchema = new Schema<IPaymentGatewayConfig>(
+  {
+    provider: { type: String, enum: GATEWAY_PROVIDERS, default: 'PAGARME' },
+    mode: { type: String, enum: ['sandbox', 'production'], default: 'sandbox' },
+    merchantId: { type: String, default: '' },
+    merchantKey: { type: String, default: '' },
+    apiKey: { type: String, default: '' },
+    token: { type: String, default: '' },
+    webhookUrl: { type: String, default: '' },
+    splitEnabled: { type: Boolean, default: false },
+  },
+  { _id: false }
+);
 
 const SettingsSchema = new Schema<ISettings>(
   {
@@ -20,6 +53,12 @@ const SettingsSchema = new Schema<ISettings>(
     maintenanceMode: { type: Boolean, default: false },
     autoBackup: { type: Boolean, default: false },
     emailAlerts: { type: Boolean, default: true },
+    paymentGateway: { type: PaymentGatewaySchema, default: () => ({}) },
+    enabledPaymentMethods: {
+      type: [String],
+      enum: PAYMENT_METHODS,
+      default: ['credit_card', 'debit_card', 'pix', 'cash'],
+    },
   },
   { timestamps: true }
 );

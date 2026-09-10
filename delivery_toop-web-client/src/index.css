@@ -3071,6 +3071,40 @@ img { max-width: 100%; display: block; }
 .ride-req-vehicle-opt span:last-child { font-size: 0.8rem; font-weight: 600; color: #374151; }
 .ride-req-vehicle-icon { font-size: 1.5rem; }
 
+/* Vehicle categories (Uber/99 style) */
+.ride-req-categories { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+.ride-req-category {
+  display: flex; align-items: center; gap: 12px; width: 100%;
+  padding: 12px 14px; border: 2px solid #f0f0f0; border-radius: 12px;
+  background: #fff; cursor: pointer; transition: all 0.2s; text-align: left;
+}
+.ride-req-category:hover { border-color: #d1d5db; }
+.ride-req-category.active { border-color: #6366f1; background: #f5f3ff; }
+.ride-req-category-icon { font-size: 1.4rem; }
+.ride-req-category-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.ride-req-category-name { font-size: 0.875rem; font-weight: 600; color: #1f2937; }
+.ride-req-category-desc { font-size: 0.72rem; color: #6b7280; }
+.ride-req-category-mult {
+  font-size: 0.75rem; font-weight: 700; color: #6366f1;
+  background: #eef2ff; padding: 3px 8px; border-radius: 999px;
+}
+.ride-req-category-price {
+  display: flex; flex-direction: column; align-items: flex-end; gap: 4px;
+  font-size: 0.9rem; font-weight: 700; color: #1f2937; white-space: nowrap;
+}
+.ride-req-vehicle-hint {
+  font-size: 0.85rem; color: #6b7280; background: #f9fafb;
+  border: 1px dashed #d1d5db; border-radius: 12px; padding: 14px; text-align: center;
+}
+.ride-req-locate-btn {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  width: 100%; margin-bottom: 8px; padding: 10px 12px;
+  border: 1px solid #e5e7eb; border-radius: 12px; background: #f9fafb;
+  color: #4f46e5; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s;
+}
+.ride-req-locate-btn:hover { border-color: #a5b4fc; background: #eef2ff; }
+.ride-req-locate-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
 /* Addresses */
 .ride-req-addresses { display: flex; flex-direction: column; }
 .ride-req-address-group { display: flex; align-items: flex-start; gap: 12px; position: relative; }

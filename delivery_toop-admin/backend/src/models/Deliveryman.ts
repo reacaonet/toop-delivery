@@ -6,14 +6,14 @@ export interface IDeliveryman extends Document {
   phone: string;
   cpf?: string;
   cnh?: string;
-  vehicleType: 'bike' | 'motorcycle' | 'car' | 'van';
+  vehicleType: 'bike' | 'motorcycle' | 'car' | 'van' | 'taxi';
   vehiclePlate?: string;
   active: boolean;
   available: boolean;
   isDriver: boolean;
   driverOnline: boolean;
   driverAvailable: boolean;
-  serviceCategories: ('driver' | 'delivery' | 'package')[];
+  serviceCategories: ('driver' | 'delivery' | 'package' | 'taxi')[];
   address?: string;
   addressLat?: number;
   addressLng?: number;
@@ -43,14 +43,14 @@ const DeliverymanSchema = new Schema<IDeliveryman>(
     phone: { type: String, required: true, trim: true },
     cpf: { type: String, trim: true },
     cnh: { type: String, trim: true },
-    vehicleType: { type: String, enum: ['bike', 'motorcycle', 'car', 'van'], default: 'motorcycle' },
+    vehicleType: { type: String, enum: ['bike', 'motorcycle', 'car', 'van', 'taxi'], default: 'motorcycle' },
     vehiclePlate: { type: String, trim: true },
     active: { type: Boolean, default: true },
     available: { type: Boolean, default: true },
     isDriver: { type: Boolean, default: false },
     driverOnline: { type: Boolean, default: false },
     driverAvailable: { type: Boolean, default: false },
-    serviceCategories: [{ type: String, enum: ['driver', 'delivery', 'package'], default: ['delivery'] }],
+    serviceCategories: [{ type: String, enum: ['driver', 'delivery', 'package', 'taxi'], default: ['delivery'] }],
     address: { type: String, trim: true },
     addressLat: { type: Number },
     addressLng: { type: Number },

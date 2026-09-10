@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useToast } from '../context/ToastContext'
 import api from '../api'
@@ -16,10 +16,17 @@ const PAYMENT_OPTIONS = [
   { value: 'pix', label: 'PIX', icon: '📱' },
 ]
 
-const VEHICLE_OPTIONS = [
-  { value: 'car', label: 'Carro', icon: '🚗', multiplier: 1.0 },
-  { value: 'moto', label: 'Moto', icon: '🏍️', multiplier: 0.7 },
-]
+interface RideCategory {
+  code: string
+  vehicleType: 'car' | 'moto' | 'taxi'
+  label: string
+  icon: string
+  description: string
+  multiplier: number
+  basePrice?: number
+  perKm?: number
+  active: boolean
+}
 
 interface AddressSuggestion {
   display_name: string
@@ -42,7 +49,8 @@ export default function RideRequestPage() {
   const { showToast } = useToast()
 
   const [serviceCategory, setServiceCategory] = useState('driver')
-  const [vehicleType, setVehicleType] = useState('car')
+  const [vehicleType, setVehicleType] = useState('car_basic')
+  const [rideCategories, setRideCategories] = useState<RideCategory[]>([])
   const [pickupAddress, setPickupAddress] = useState('')
   const [pickupComplement] = useState('')
   const [dropoffAddress, setDropoffAddress] = useState('')
@@ -92,38 +100,133 @@ export default function RideRequestPage() {
 
   const selectedService = SERVICE_OPTIONS.find(s => s.value === serviceCategory)
 
-  // Auto-detect current location for pickup
+  // Load active ride categories
   useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        async (pos) => {
-          const lat = pos.coords.latitude
-          const lng = pos.coords.longitude
-          setPickupLat(lat)
-          setPickupLng(lng)
-
-          try {
-            const res = await fetch(
-              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`,
-              { headers: { 'Accept-Language': 'pt-BR' } }
-            )
-            const data = await res.json()
-            if (data.display_name) {
-              const short = data.display_name.split(',').slice(0, 3).join(',')
-              setPickupAddress(short)
-            }
-          } catch {}
-          setLocationLoading(false)
-        },
-        () => {
-          setPickupAddress('Localização atual')
-          setLocationLoading(false)
+    api.get('/ride-categories')
+      .then(({ data }) => {
+        const cats = (data?.data ?? data) as RideCategory[]
+        if (Array.isArray(cats) && cats.length > 0) {
+          setRideCategories(cats.filter(c => c.active))
+          setVehicleType(prev => {
+            const stillValid = cats.some(c => c.code === prev)
+            return stillValid ? prev : (cats.find(c => c.vehicleType === 'car')?.code || 'car_basic')
+          })
         }
-      )
-    } else {
-      setLocationLoading(false)
-    }
+      })
+      .catch(() => {})
   }, [])
+
+  const [enabledPaymentMethods, setEnabledPaymentMethods] = useState<string[]>([])
+
+  // Load enabled payment methods from settings
+  useEffect(() => {
+    api.get('/settings')
+      .then(({ data }) => {
+        const body = data?.data ?? data
+        const methods = body?.enabledPaymentMethods
+        if (Array.isArray(methods) && methods.length > 0) {
+          setEnabledPaymentMethods(methods)
+        }
+      })
+      .catch(() => {})
+  }, [])
+
+  const availablePaymentOptions = enabledPaymentMethods.length > 0
+    ? PAYMENT_OPTIONS.filter(p => enabledPaymentMethods.includes(p.value))
+    : PAYMENT_OPTIONS
+
+  useEffect(() => {
+    if (availablePaymentOptions.length > 0 && !availablePaymentOptions.some(p => p.value === paymentMethod)) {
+      setPaymentMethod(availablePaymentOptions[0].value)
+    }
+  }, [enabledPaymentMethods])
+
+  const vehicleBases = [
+    { key: 'car', label: 'Carro', icon: '🚗' },
+    { key: 'moto', label: 'Moto', icon: '🏍️' },
+    { key: 'taxi', label: 'Táxi', icon: '🚕' },
+  ] as const
+
+  const carCategories = rideCategories.filter(c => c.vehicleType === 'car')
+  const motoCategories = rideCategories.filter(c => c.vehicleType === 'moto')
+  const taxiCategories = rideCategories.filter(c => c.vehicleType === 'taxi')
+  const visibleCategories = rideCategories.filter(c => c.vehicleType !== 'taxi' || serviceCategory === 'driver')
+  const currentVehicleBase: 'car' | 'moto' | 'taxi' = vehicleType.startsWith('moto') ? 'moto' : vehicleType.startsWith('taxi') ? 'taxi' : 'car'
+  const currentCategory = rideCategories.find(c => c.code === vehicleType)
+  const vehicleMultiplier = currentCategory?.multiplier ?? (currentVehicleBase === 'moto' ? 0.7 : currentVehicleBase === 'taxi' ? 1.1 : 1)
+
+  const selectVehicleBase = (base: 'car' | 'moto' | 'taxi') => {
+    const cats = base === 'car' ? carCategories : base === 'moto' ? motoCategories : taxiCategories
+    setVehicleType(cats.find(c => c.active)?.code || (base === 'taxi' ? 'taxi' : `${base}_basic`))
+  }
+
+  const hasRoute = Boolean(pickupLat && pickupLng && dropoffLat && dropoffLng)
+
+  const pricesByCategory = useMemo(() => {
+    const out: Record<string, number> = {}
+    if (estimatedDistance === null || !selectedService) return out
+    for (const c of visibleCategories) {
+      const m = c.multiplier ?? 1
+      const base = Math.round((c.basePrice ?? selectedService.basePrice) * m * 100) / 100
+      const perKm = Math.round((c.perKm ?? selectedService.perKm) * m * 100) / 100
+      const fare = Math.round(estimatedDistance * perKm * 100) / 100
+      const surge = surgeEnabled ? Math.round((base + fare) * (surgeMultiplier - 1) * 100) / 100 : 0
+      out[c.code] = Math.round((base + fare + surge) * 100) / 100
+    }
+    return out
+  }, [estimatedDistance, visibleCategories, selectedService, surgeEnabled, surgeMultiplier])
+
+  useEffect(() => {
+    if (serviceCategory !== 'driver' && vehicleType.startsWith('taxi')) {
+      setVehicleType(carCategories.find(c => c.active)?.code || 'car_basic')
+    }
+  }, [serviceCategory, vehicleType, carCategories])
+
+  // Auto-detect current location for pickup
+  const detectCurrentLocation = useCallback(() => {
+    if (!navigator.geolocation) {
+      setPickupAddress('Localização atual')
+      setLocationLoading(false)
+      return
+    }
+    setLocationLoading(true)
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lat = pos.coords.latitude
+        const lng = pos.coords.longitude
+        setPickupLat(lat)
+        setPickupLng(lng)
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`,
+            { headers: { 'Accept-Language': 'pt-BR' } }
+          )
+          const data = await res.json()
+          if (data.display_name) {
+            setPickupAddress(data.display_name.split(',').slice(0, 3).join(','))
+          } else {
+            setPickupAddress('Localização atual')
+          }
+        } catch {
+          setPickupAddress('Localização atual')
+        }
+        setLocationLoading(false)
+      },
+      (err) => {
+        setLocationLoading(false)
+        if (err.code === err.PERMISSION_DENIED) {
+          showToast('Permita o acesso à localização para usar sua posição atual', 'error')
+        } else {
+          setPickupAddress('Localização atual')
+        }
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
+    )
+  }, [showToast])
+
+  useEffect(() => {
+    detectCurrentLocation()
+  }, [detectCurrentLocation])
 
   // Calculate distance/price when both points are set
   useEffect(() => {
@@ -131,9 +234,11 @@ export default function RideRequestPage() {
       const dist = haversineDistance(pickupLat, pickupLng, dropoffLat, dropoffLng)
       setEstimatedDistance(Math.round(dist * 100) / 100)
       if (selectedService) {
-        const vehicle = VEHICLE_OPTIONS.find(v => v.value === vehicleType) || VEHICLE_OPTIONS[0]
-        const base = Math.round(selectedService.basePrice * vehicle.multiplier * 100) / 100
-        const perKm = Math.round(selectedService.perKm * vehicle.multiplier * 100) / 100
+        const m = vehicleMultiplier
+        const baseInput = currentCategory?.basePrice ?? selectedService.basePrice
+        const perKmInput = currentCategory?.perKm ?? selectedService.perKm
+        const base = Math.round(baseInput * m * 100) / 100
+        const perKm = Math.round(perKmInput * m * 100) / 100
         const distFare = Math.round(dist * perKm * 100) / 100
         setBaseFare(base)
         setDistanceFare(distFare)
@@ -335,26 +440,16 @@ export default function RideRequestPage() {
           </div>
         </div>
 
-        {/* Vehicle */}
-        <div className="ride-req-card">
-          <div className="ride-req-card-title">Veículo</div>
-          <div className="ride-req-vehicle">
-            {VEHICLE_OPTIONS.map(v => (
-              <button
-                key={v.value}
-                type="button"
-                className={`ride-req-vehicle-opt ${vehicleType === v.value ? 'active' : ''}`}
-                onClick={() => setVehicleType(v.value)}
-              >
-                <span className="ride-req-vehicle-icon">{v.icon}</span>
-                <span>{v.label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
         {/* Addresses */}
         <div className="ride-req-card">
+          <button
+            type="button"
+            className="ride-req-locate-btn"
+            onClick={detectCurrentLocation}
+            disabled={locationLoading}
+          >
+            {locationLoading ? <span>⏳ Detectando...</span> : <><span>📍</span> Usar minha localização atual</>}
+          </button>
           <div className="ride-req-addresses">
             <div className="ride-req-address-group" ref={pickupRef}>
               <div className="ride-req-dot green" />
@@ -414,6 +509,63 @@ export default function RideRequestPage() {
             value={dropoffComplement}
             onChange={e => setDropoffComplement(e.target.value)}
           />
+        </div>
+
+        {/* Vehicle — opções com preços aparecem após origem + destino */}
+        <div className="ride-req-card">
+          <div className="ride-req-card-title">Veículo</div>
+          {!hasRoute ? (
+            <div className="ride-req-vehicle-hint">
+              Informe a origem e o destino acima para ver os valores de cada opção de veículo.
+            </div>
+          ) : (
+            <>
+              <div className="ride-req-vehicle">
+                {vehicleBases
+                  .filter(v => v.key !== 'taxi' || serviceCategory === 'driver')
+                  .filter(v => rideCategories.some(c => c.vehicleType === v.key && c.active))
+                  .map(v => (
+                    <button
+                      key={v.key}
+                      type="button"
+                      className={`ride-req-vehicle-opt ${currentVehicleBase === v.key ? 'active' : ''}`}
+                      onClick={() => selectVehicleBase(v.key)}
+                    >
+                      <span className="ride-req-vehicle-icon">{v.icon}</span>
+                      <span>{v.label}</span>
+                    </button>
+                  ))}
+              </div>
+              {(currentVehicleBase === 'car' ? carCategories : currentVehicleBase === 'moto' ? motoCategories : taxiCategories)
+                .filter(c => c.active)
+                .length > 0 ? (
+                <div className="ride-req-categories">
+                  {(currentVehicleBase === 'car' ? carCategories : currentVehicleBase === 'moto' ? motoCategories : taxiCategories)
+                    .filter(c => c.active)
+                    .map(c => (
+                      <button
+                        key={c.code}
+                        type="button"
+                        className={`ride-req-category ${vehicleType === c.code ? 'active' : ''}`}
+                        onClick={() => setVehicleType(c.code)}
+                      >
+                        <span className="ride-req-category-icon">{c.icon || '🚗'}</span>
+                        <span className="ride-req-category-info">
+                          <span className="ride-req-category-name">{c.label}</span>
+                          <span className="ride-req-category-desc">{c.description}</span>
+                        </span>
+                        <span className="ride-req-category-price">
+                          {pricesByCategory[c.code] != null ? formatCurrency(pricesByCategory[c.code]) : '—'}
+                          <span className="ride-req-category-mult">{(c.multiplier || 1).toFixed(2)}x</span>
+                        </span>
+                      </button>
+                    ))}
+                </div>
+              ) : (
+                <div className="ride-req-vehicle-hint">Nenhuma categoria ativa para este tipo de veículo.</div>
+              )}
+            </>
+          )}
         </div>
 
         {/* Estimation */}
@@ -541,7 +693,7 @@ export default function RideRequestPage() {
         <div className="ride-req-card">
           <div className="ride-req-card-title">Pagamento</div>
           <div className="ride-req-payments">
-            {PAYMENT_OPTIONS.map(m => (
+            {availablePaymentOptions.map(m => (
               <button
                 key={m.value}
                 type="button"

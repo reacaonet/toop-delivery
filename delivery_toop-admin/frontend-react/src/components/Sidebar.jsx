@@ -63,6 +63,7 @@ const Sidebar = () => {
       children: [
         { type: 'header', label: 'Cadastros' },
         { path: '/mobility/services', label: 'Serviços' },
+        { path: '/mobility/ride-categories', label: 'Categorias de Veículos' },
         { path: '/mobility/document-types', label: 'Tipos de Documento' },
         { path: '/mobility/documents', label: 'Documentos' },
         { path: '/mobility/peak-hours', label: 'Pico Horário' },

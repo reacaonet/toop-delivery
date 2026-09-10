@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import { env } from '../config';
 import { AppError } from '../middleware/errorHandler';
 import { PaymentTransactionModel } from '../models/PaymentTransaction';
+import { getGatewayConfig } from './settings.service';
 
 interface GatewayToken {
   value: string;
@@ -33,8 +34,36 @@ export class PaymentGatewayService {
     return env.PAYMENT_URL.replace(/\/$/, '');
   }
 
-  private get sandbox(): boolean {
+  private envSandbox(): boolean {
     return env.PAYMENT_DEV_MODE === 'true';
+  }
+
+  async isSandbox(): Promise<boolean> {
+    try {
+      const config = await getGatewayConfig();
+      if (config.mode) return config.mode === 'sandbox';
+    } catch {
+      // fall through to env default
+    }
+    return this.envSandbox();
+  }
+
+  async provider(): Promise<string> {
+    try {
+      const config = await getGatewayConfig();
+      return config.provider || 'PAGARME';
+    } catch {
+      return 'PAGARME';
+    }
+  }
+
+  async webhookUrl(): Promise<string | undefined> {
+    try {
+      const config = await getGatewayConfig();
+      return config.webhookUrl || undefined;
+    } catch {
+      return undefined;
+    }
   }
 
   private randomId(prefix: string): string {
@@ -100,8 +129,9 @@ export class PaymentGatewayService {
   }
 
   async record(input: RecordInput) {
+    const gateway = input.gateway || (await this.provider());
     return PaymentTransactionModel.create({
-      gateway: input.gateway || 'PAGARME',
+      gateway,
       operation: input.operation,
       method: input.method,
       amount: input.amount,
@@ -120,7 +150,7 @@ export class PaymentGatewayService {
 
   // ---------- cards ----------
   async tokenizeCard(data: Record<string, unknown>): Promise<any> {
-    if (this.sandbox) {
+    if (await this.isSandbox()) {
       return { success: true, data: { token: this.randomId('devtok') } };
     }
     return this.request('/payment/card', { method: 'POST', data });
@@ -140,7 +170,7 @@ export class PaymentGatewayService {
   }
 
   async pagarmeTransaction(data: Record<string, unknown>): Promise<any> {
-    if (this.sandbox) {
+    if (await this.isSandbox()) {
       return {
         success: true,
         data: { id: this.randomId('devtrx'), status: 'paid', amount: data.amount },
@@ -150,14 +180,14 @@ export class PaymentGatewayService {
   }
 
   async cancelTransaction(paymentId: string): Promise<any> {
-    if (this.sandbox) {
+    if (await this.isSandbox()) {
       return { success: true, data: { id: paymentId, status: 'canceled' } };
     }
     return this.request(`/cancellation/${encodeURIComponent(paymentId)}`, { method: 'POST' });
   }
 
   async cancelTransactionPartial(paymentId: string, data: Record<string, unknown>): Promise<any> {
-    if (this.sandbox) {
+    if (await this.isSandbox()) {
       return { success: true, data: { id: paymentId, status: 'partial_canceled', ...data } };
     }
     return this.request(`/cancellation-partial/${encodeURIComponent(paymentId)}`, {
@@ -168,7 +198,7 @@ export class PaymentGatewayService {
 
   // ---------- PIX ----------
   async pixCharge(data: Record<string, unknown>): Promise<any> {
-    if (this.sandbox) {
+    if (await this.isSandbox()) {
       const id = this.randomId('devpix');
       return {
         success: true,

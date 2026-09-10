@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document } from 'mongoose';
+import { BookingVehicleType, BOOKING_VEHICLE_TYPES } from './RideCategory';
 
 export interface IBooking extends Document {
   bookingNumber: string;
@@ -7,7 +8,7 @@ export interface IBooking extends Document {
   driverModel?: 'Driver' | 'Deliveryman';
   company: mongoose.Types.ObjectId;
   serviceCategory: 'driver' | 'delivery' | 'package';
-  vehicleType?: 'car' | 'moto';
+  vehicleType?: BookingVehicleType;
   status: 'pending' | 'matching' | 'accepted' | 'in_progress' | 'completed' | 'cancelled';
   pickup: {
     address: string;
@@ -47,6 +48,9 @@ export interface IBooking extends Document {
   promoDiscount?: number;
   paymentMethod: string;
   paymentStatus: 'pending' | 'paid' | 'failed' | 'refunded';
+  pixTxid?: string;
+  pixQrcode?: string;
+  gatewayTransactionId?: string;
   notes?: string;
   rating?: {
     client?: number;
@@ -76,7 +80,7 @@ const BookingSchema = new Schema<IBooking>(
     driverModel: { type: String, enum: ['Driver', 'Deliveryman'], default: 'Driver' },
     company: { type: Schema.Types.ObjectId, ref: 'Company' },
     serviceCategory: { type: String, enum: ['driver', 'delivery', 'package'], default: 'driver' },
-    vehicleType: { type: String, enum: ['car', 'moto'], default: 'car' },
+    vehicleType: { type: String, enum: BOOKING_VEHICLE_TYPES, default: 'car' },
     status: {
       type: String,
       enum: ['pending', 'matching', 'accepted', 'in_progress', 'completed', 'cancelled'],
@@ -120,6 +124,9 @@ const BookingSchema = new Schema<IBooking>(
     promoDiscount: Number,
     paymentMethod: { type: String, required: true },
     paymentStatus: { type: String, enum: ['pending', 'paid', 'failed', 'refunded'], default: 'pending' },
+    pixTxid: String,
+    pixQrcode: String,
+    gatewayTransactionId: String,
     notes: String,
     rating: {
       client: { type: Number, min: 1, max: 5 },

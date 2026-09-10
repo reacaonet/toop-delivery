@@ -35,6 +35,7 @@ import MobilityPeakHours from './pages/MobilityPeakHours';
 import MobilitySupportSubjects from './pages/MobilitySupportSubjects';
 import Reviews from './pages/Reviews';
 import MobilityQrCodes from './pages/MobilityQrCodes';
+import RideCategories from './pages/RideCategories';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 
@@ -72,6 +73,7 @@ function AdminLayout() {
             <Route path="/mobility/support-subjects" element={<MobilitySupportSubjects />} />
             <Route path="/reviews" element={<Reviews />} />
             <Route path="/mobility/qr-codes" element={<MobilityQrCodes />} />
+            <Route path="/mobility/ride-categories" element={<RideCategories />} />
             <Route path="/wallet" element={<WalletPage />} />
             <Route path="/wallet/withdrawals" element={<Withdrawals />} />
             <Route path="/payments" element={<Payments />} />

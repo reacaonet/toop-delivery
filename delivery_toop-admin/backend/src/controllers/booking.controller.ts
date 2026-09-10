@@ -13,11 +13,23 @@ async function notifyNearbyDrivers(booking: any, rejectedDriverIds: string[] = [
 
     const maxDistance = 50000;
 
+    const rawVehicle = booking.vehicleType || "car";
+    const wantsMoto = String(rawVehicle).startsWith("moto");
+    const wantsTaxi = String(rawVehicle).startsWith("taxi") || String(rawVehicle) === "taxi";
+    const allowedDriverVehicles = wantsMoto
+      ? ["motorcycle", "bike"]
+      : wantsTaxi
+      ? ["taxi", "car", "van"]
+      : ["car", "van"];
+    const allowedServices = wantsTaxi ? ["driver", "taxi"] : ["driver"];
+
     const nearbyDeliverymen = await DeliverymanModel.find({
       isDriver: true,
       driverOnline: true,
       driverAvailable: true,
       active: true,
+      serviceCategories: { $in: allowedServices },
+      vehicleType: { $in: allowedDriverVehicles },
       _id: { $nin: rejectedDriverIds },
       currentLocation: {
         $near: {
@@ -31,7 +43,8 @@ async function notifyNearbyDrivers(booking: any, rejectedDriverIds: string[] = [
       online: true,
       available: true,
       active: true,
-      "serviceCategories": "driver",
+      serviceCategories: { $in: allowedServices },
+      vehicleType: { $in: allowedDriverVehicles },
       _id: { $nin: rejectedDriverIds },
       currentLocation: {
         $near: {
@@ -45,6 +58,7 @@ async function notifyNearbyDrivers(booking: any, rejectedDriverIds: string[] = [
       bookingId: booking._id,
       bookingNumber: booking.bookingNumber,
       serviceCategory: booking.serviceCategory,
+      vehicleType: booking.vehicleType,
       pickup: booking.pickup,
       dropoff: booking.dropoff,
       distance: booking.distance,

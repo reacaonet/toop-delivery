@@ -1992,4 +1992,23 @@ export const mobileQrCodeService = {
   },
 };
 
+export const rideCategoryService = {
+  getAll: async (params = {}) => {
+    const r = await api.get('/ride-categories', { params: { ...params, all: true } });
+    return r.data?.data ?? r.data;
+  },
+  create: async (d) => {
+    const r = await api.post('/ride-categories', d);
+    return r.data?.data ?? r.data;
+  },
+  update: async (id, d) => {
+    const r = await api.put(`/ride-categories/${id}`, d);
+    return r.data?.data ?? r.data;
+  },
+  remove: async (id) => {
+    const r = await api.delete(`/ride-categories/${id}`);
+    return r.data?.data ?? r.data;
+  },
+};
+
 export default api;

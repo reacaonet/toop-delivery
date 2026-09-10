@@ -5,9 +5,9 @@ export interface IDriver extends Document {
   email: string;
   phone: string;
   cpf?: string;
-  vehicleType: 'bike' | 'motorcycle' | 'car' | 'van';
+  vehicleType: 'bike' | 'motorcycle' | 'car' | 'van' | 'taxi';
   vehiclePlate?: string;
-  serviceCategories: ('driver' | 'delivery' | 'package')[];
+  serviceCategories: ('driver' | 'delivery' | 'package' | 'taxi')[];
   active: boolean;
   available: boolean;
   online: boolean;
@@ -43,9 +43,9 @@ const DriverSchema = new Schema<IDriver>(
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     phone: { type: String, required: true, trim: true },
     cpf: { type: String, trim: true },
-    vehicleType: { type: String, enum: ['bike', 'motorcycle', 'car', 'van'], default: 'motorcycle' },
+    vehicleType: { type: String, enum: ['bike', 'motorcycle', 'car', 'van', 'taxi'], default: 'motorcycle' },
     vehiclePlate: { type: String, trim: true },
-    serviceCategories: [{ type: String, enum: ['driver', 'delivery', 'package'], default: ['driver'] }],
+    serviceCategories: [{ type: String, enum: ['driver', 'delivery', 'package', 'taxi'], default: ['driver'] }],
     active: { type: Boolean, default: true },
     available: { type: Boolean, default: false },
     online: { type: Boolean, default: false },

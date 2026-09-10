@@ -7,12 +7,14 @@ const VEHICLE_LABELS = {
   bike: 'Bicicleta',
   car: 'Carro',
   van: 'Van',
+  taxi: 'Táxi',
 };
 
 const SERVICE_LABELS = {
   driver: 'Corridas',
   delivery: 'Entregas',
   package: 'Pacotes',
+  taxi: 'Táxi',
 };
 
 const STATUS_COLORS = {
@@ -347,6 +349,7 @@ const Drivers = () => {
                   <select value={formData.vehicleType} onChange={e => setFormData({...formData, vehicleType: e.target.value})}>
                     <option value="motorcycle">Moto</option>
                     <option value="car">Carro</option>
+                    <option value="taxi">Táxi</option>
                     <option value="bike">Bicicleta</option>
                     <option value="van">Van</option>
                   </select>
@@ -359,7 +362,7 @@ const Drivers = () => {
               <div className="form-group">
                 <label>Categorias de Serviço</label>
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                  {['driver', 'delivery', 'package'].map(cat => (
+                  {[['driver', 'Corridas'], ['delivery', 'Entregas'], ['package', 'Pacotes'], ['taxi', 'Táxi']].map(([cat, label]) => (
                     <button
                       key={cat}
                       type="button"
@@ -374,7 +377,7 @@ const Drivers = () => {
                         fontSize: '0.85rem',
                       }}
                     >
-                      {SERVICE_LABELS[cat]}
+                      {label}
                     </button>
                   ))}
                 </div>

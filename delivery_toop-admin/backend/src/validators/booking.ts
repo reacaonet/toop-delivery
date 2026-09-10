@@ -1,8 +1,10 @@
 import { z } from "zod";
+import { BOOKING_VEHICLE_TYPES } from "../models/RideCategory";
 
 export const createBookingSchema = z.object({
   body: z.object({
     serviceCategory: z.enum(["driver", "delivery", "package"]),
+    vehicleType: z.enum(BOOKING_VEHICLE_TYPES).optional(),
     pickup: z.object({
       address: z.string().min(1, "Endereço de origem é obrigatório"),
       lat: z.number().min(-90).max(90),

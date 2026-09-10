@@ -483,7 +483,7 @@ export default function RideTrackingPage() {
             <div className="track-driver-avatar">{booking.driver.name?.charAt(0)?.toUpperCase()}</div>
             <div className="track-driver-info">
               <strong>{booking.driver.name}</strong>
-              <span>{booking.driver.vehicleType === 'car' ? '🚗' : '🏍️'} {booking.driver.vehiclePlate || ''} · ⭐ {booking.driver.rating?.toFixed(1) || '5.0'}</span>
+              <span>{booking.driver.vehicleType === 'taxi' ? '🚕' : booking.driver.vehicleType === 'car' || booking.driver.vehicleType === 'van' ? '🚗' : '🏍️'} {booking.driver.vehiclePlate || ''} · ⭐ {booking.driver.rating?.toFixed(1) || '5.0'}</span>
             </div>
             {showDriverTracking && eta && (
               <div className="track-eta-badge">
@@ -634,6 +634,36 @@ export default function RideTrackingPage() {
                 <span>R$ {booking.cancelFee.toFixed(2)}</span>
               </div>
             )}
+          </div>
+        )}
+
+        {/* PIX payment */}
+        {booking.paymentMethod === 'pix' && booking.pixQrcode && (
+          <div className="track-pix-card">
+            <div className="track-pix-title">💳 Pagamento PIX</div>
+            <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: '0 0 0.75rem' }}>
+              Escaneie o QR Code (copie-e-cola) abaixo para pagar sua corrida de
+              R$ {(booking.proposedPrice || booking.estimatedPrice || 0).toFixed(2)}.
+            </p>
+            <textarea
+              readOnly
+              rows={4}
+              value={booking.pixQrcode}
+              style={{ width: '100%', fontFamily: 'monospace', fontSize: '0.68rem', padding: '0.5rem', border: '1px solid #e5e7eb', borderRadius: 8, resize: 'none', background: '#f9fafb' }}
+            />
+            {booking.pixTxid && (
+              <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: '0.35rem' }}>
+                TXID: {booking.pixTxid}
+              </div>
+            )}
+            <button
+              className="ride-req-promo-btn"
+              type="button"
+              onClick={() => navigator.clipboard?.writeText(booking.pixQrcode || '')}
+              style={{ marginTop: '0.75rem' }}
+            >
+              Copiar código PIX
+            </button>
           </div>
         )}
 

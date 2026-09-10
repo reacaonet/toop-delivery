@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, Settings as SettingsIcon, User, Building2, Mail, CheckCircle, XCircle, Clock, Percent, Save, Car } from 'lucide-react';
+import { Bell, Settings as SettingsIcon, User, Building2, Mail, CheckCircle, XCircle, Clock, Percent, Save, Car, CreditCard } from 'lucide-react';
 import { notificationService, settingsService } from '../services/api';
+
+const GATEWAY_PROVIDERS = ['BRASPAG', 'PAGARME', 'IUGU', 'CIELO', 'PIX'];
+const ALL_PAYMENT_METHODS = [
+  { value: 'credit_card', label: 'Cartão de Crédito' },
+  { value: 'debit_card', label: 'Cartão de Débito' },
+  { value: 'pix', label: 'PIX' },
+  { value: 'cash', label: 'Dinheiro' },
+];
 
 const Settings = () => {
   const [notifications, setNotifications] = useState([]);
@@ -13,7 +21,18 @@ const Settings = () => {
     emailAlerts: true,
     companyFeePercentage: 15,
     deliverymanFeePercentage: 10,
-    platformFeePercentage: 20
+    platformFeePercentage: 20,
+    paymentGateway: {
+      provider: 'PAGARME',
+      mode: 'sandbox',
+      merchantId: '',
+      merchantKey: '',
+      apiKey: '',
+      token: '',
+      webhookUrl: '',
+      splitEnabled: false,
+    },
+    enabledPaymentMethods: ['credit_card', 'debit_card', 'pix', 'cash'],
   });
 
   useEffect(() => {
@@ -36,7 +55,14 @@ const Settings = () => {
     try {
       const data = await settingsService.getSettings();
       if (data) {
-        setSettings(prev => ({ ...prev, ...data }));
+        setSettings(prev => ({
+          ...prev,
+          ...data,
+          paymentGateway: { ...prev.paymentGateway, ...(data.paymentGateway || {}) },
+          enabledPaymentMethods: Array.isArray(data.enabledPaymentMethods) && data.enabledPaymentMethods.length > 0
+            ? data.enabledPaymentMethods
+            : prev.enabledPaymentMethods,
+        }));
       }
     } catch {
       const saved = localStorage.getItem('systemSettings');
@@ -51,6 +77,24 @@ const Settings = () => {
       ...prev,
       [setting]: value
     }));
+  };
+
+  const handleGatewayChange = (field, value) => {
+    setSettings(prev => ({
+      ...prev,
+      paymentGateway: { ...prev.paymentGateway, [field]: value }
+    }));
+  };
+
+  const togglePaymentMethod = (method) => {
+    setSettings(prev => {
+      const has = prev.enabledPaymentMethods.includes(method);
+      let next = has
+        ? prev.enabledPaymentMethods.filter(m => m !== method)
+        : [...prev.enabledPaymentMethods, method];
+      if (next.length === 0) next = [method];
+      return { ...prev, enabledPaymentMethods: next };
+    });
   };
 
   const saveSettings = async () => {
@@ -342,6 +386,143 @@ const Settings = () => {
                 </>
               )}
             </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Gateway de Pagamentos */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '2rem', marginTop: '2rem' }}>
+        <div className="card">
+          <div className="card-header">
+            <h3>
+              <CreditCard size={20} style={{ marginRight: '0.5rem' }} />
+              Formas de Pagamento
+            </h3>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {ALL_PAYMENT_METHODS.map(m => (
+              <label key={m.value} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <input
+                  type="checkbox"
+                  checked={settings.enabledPaymentMethods.includes(m.value)}
+                  onChange={() => togglePaymentMethod(m.value)}
+                />
+                {m.label}
+              </label>
+            ))}
+            <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: '0.25rem 0 0' }}>
+              Formas disponíveis para clientes escolherem nos pedidos e corridas.
+              Formas desabilitadas não disparam cobranças no gateway.
+            </p>
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="card-header">
+            <h3>
+              <CreditCard size={20} style={{ marginRight: '0.5rem' }} />
+              Gateway de Pagamentos
+            </h3>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem 2rem' }}>
+            <div className="form-group">
+              <label htmlFor="gatewayProvider">Provedor</label>
+              <select
+                id="gatewayProvider"
+                value={settings.paymentGateway.provider}
+                onChange={(e) => handleGatewayChange('provider', e.target.value)}
+              >
+                {GATEWAY_PROVIDERS.map(gp => <option key={gp} value={gp}>{gp}</option>)}
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="gatewayMode">Modo</label>
+              <select
+                id="gatewayMode"
+                value={settings.paymentGateway.mode}
+                onChange={(e) => handleGatewayChange('mode', e.target.value)}
+              >
+                <option value="sandbox">Sandbox (testes)</option>
+                <option value="production">Produção</option>
+              </select>
+              <p style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.25rem' }}>
+                Em sandbox as cobranças retornam IDs fictícios sem chamar o gateway.
+              </p>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="merchantId">Merchant ID</label>
+              <input
+                type="text"
+                id="merchantId"
+                value={settings.paymentGateway.merchantId}
+                onChange={(e) => handleGatewayChange('merchantId', e.target.value)}
+                placeholder="Identificação do lojista no gateway"
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="merchantKey">Merchant Key</label>
+              <input
+                type="password"
+                id="merchantKey"
+                value={settings.paymentGateway.merchantKey}
+                onChange={(e) => handleGatewayChange('merchantKey', e.target.value)}
+                placeholder="Chave de autenticação"
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="apiKey">API Key</label>
+              <input
+                type="password"
+                id="apiKey"
+                value={settings.paymentGateway.apiKey}
+                onChange={(e) => handleGatewayChange('apiKey', e.target.value)}
+                placeholder="Chave de API"
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="gatewayToken">Token</label>
+              <input
+                type="password"
+                id="gatewayToken"
+                value={settings.paymentGateway.token}
+                onChange={(e) => handleGatewayChange('token', e.target.value)}
+                placeholder="Token de acesso"
+              />
+            </div>
+
+            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+              <label htmlFor="webhookUrl">URL de Webhook (notificações do gateway)</label>
+              <input
+                type="url"
+                id="webhookUrl"
+                value={settings.paymentGateway.webhookUrl}
+                onChange={(e) => handleGatewayChange('webhookUrl', e.target.value)}
+                placeholder="https://..."
+              />
+              <p style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.25rem' }}>
+                Usada como postback_url nas cobranças de cartão (crédito/débito).
+              </p>
+            </div>
+
+            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <input
+                  type="checkbox"
+                  checked={settings.paymentGateway.splitEnabled}
+                  onChange={(e) => handleGatewayChange('splitEnabled', e.target.checked)}
+                />
+                Habilitar Split de Pagamento
+              </label>
+              <p style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.25rem' }}>
+                Divide os recebimentos entre empresa, entregador e plataforma.
+              </p>
+            </div>
           </div>
         </div>
       </div>

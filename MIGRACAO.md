@@ -471,6 +471,38 @@ Rotas orfas removidas; App.jsx e Sidebar reescritos (grupos: Dashboard | Motoris
 - Runtime: /drivers vazio (0 docs) x /deliverymen 1 doc; pagina /wallet passa a exibir o entregador cadastrado com saldo 0 (wallet criado sob demanda).
 - Nenhum commit feito (conforme combinado).
 
+## 10/09/2026 - Corridas: taxi, localização atual na origem e preços antes de escolher o veículo
+### Mudancas
+1. Backend RideCategory: vehicleType/enum agora `car | moto | taxi`; BOOKING_VEHICLE_TYPES ganhou `taxi`; nova categoria default `taxi` (Táxi, 🚕, multiplier 1.1, sortOrder 7). Seed virou upsert por `code` (`$setOnInsert`) — adiciona o taxi em DB já populado sem sobrescrever edições do admin.
+2. Backend Driver/Deliveryman: `vehicleType` enum ganhou `taxi`; `serviceCategories` ganhou `taxi` — um motorista pode ser entregador + motorista + taxista (array multi-seleção no admin).
+3. Backend booking.controller.notifyNearbyDrivers: filter por vehicleType da corrida — moto -> motorcycle/bike; taxi -> taxi/car/van; carro -> car/van; e serviceCategories `$in ['driver']` (ou `['driver','taxi']` p/ taxi).
+4. Admin RideCategories.jsx: opção "🚕 Táxi" no select de tipo + badge Táxi na listagem. Admin Drivers.jsx/Deliverymen.jsx: label/ícone Táxi + opção no select de veículo; Drivers.jsx ganhou checkbox "Táxi" nas Categorias de Serviço.
+5. Web-client RideRequestPage: origem agora pega a **localização atual** (auto-detect + botão "📍 Usar minha localização atual" que re-dispara geoloc com high accuracy e reverse geocode; caso tenha sido negada, pede permissão). Os **tipos de veículo só aparecem após origem + destino preenchidos** (card Veículo movido para depois dos endereços) e cada categoria exibe o **valor estimado antes de escolher** (Carro Básico, Confort, Black, Moto..., Táxi com R$). Táxi só aparece para o serviço Corrida.
+6. Web-client RideTrackingPage: ícone do motorista exibe 🚕 para veículo taxi.
+
+### Validacoes
+- Backend tsc --noEmit OK; web-client tsc --noEmit OK; admin vite build OK; vite dev transform OK (RideRequestPage/RideTrackingPage). Containers admin-api, frontend-react, web-client reiniciados.
+- Runtime: GET /ride-categories retorna 7 categorias (inclusive taxi x1.1 — seed upsert em DB existente). POST /bookings vehicleType=taxi serviceCategory=driver paymentMethod=pix -> booking criado (est 22.33 com multiplier 1.1), notifyNearbyDrivers sem erro, PaymentTransaction gravada. Booking de teste removido do Mongo.
+- Nenhum commit feito (conforme combinado).
+
+## 10/09/2026 - Ride Categories (corridas estilo Uber/99) + Gateway de pagamentos no admin
+### Mudancas
+1. Backend RideCategory (models/RideCategory.ts; services/ride-category.service.ts; routes/ride-category.routes.ts montado em `/ride-categories`): code, vehicleType (car/moto), label, icon, description, multiplier, basePrice, perKm, active, sortOrder. Seed automatico com 6 defaults: car_basic (1.0), car_comfort (1.35), car_black (1.8), moto_basic (0.7), moto_comfort (0.9), moto_black (1.2). Rotas: GET / publico, POST/PUT/DELETE (auth).
+2. Booking: enum `vehicleType` expandido para car|moto|car_basic|car_comfort|car_black|moto_basic|moto_comfort|moto_black + campos `pixTxid`, `pixQrcode`, `gatewayTransactionId`. `calculatePriceComponents` busca multiplier/basePrice/perKm da RideCategory no DB; `processBookingPayment` dispara PIX (gera QR + registra PaymentTransaction) ou cobra card salvo (se nao houver, deixa pending) e valida `enabledPaymentMethods` do Settings.
+3. Booking controller: `notifyNearbyDrivers` filtra motoristas por vehicleType (car/van p/ categorias de carro; motorcycle/bike p/ moto); `vehicleType` incluido no rideRequestData.
+4. Settings (models/Settings.ts; services/settings.service.ts): expandido com `paymentGateway` (provider, mode sandbox/production, merchantId, merchantKey, apiKey, token, webhookUrl, splitEnabled) + `enabledPaymentMethods[]`. Helpers `getGatewayConfig()`, `getEnabledPaymentMethods()`, `setGatewayConfig()`; `ensureSettings()` grava defaults se ausente.
+5. PaymentGatewayService (services/payment-gateway.service.ts): `isSandbox()`/`provider()`/`webhookUrl()` agora leem o Settings do DB (fallback env); `record()` usa provider do settings; cobrancas usam `await this.isSandbox()`.
+6. PaymentTransaction schema registrado ao disparar pix (operation pix_charge, gateway do settings, gatewayId = txid).
+7. Admin painel: Settings.jsx ganhou secoes "Formas de Pagamento" (checkboxes credit_card/debit_card/pix/cash) e "Gateway de Pagamentos" (provider, mode, merchantId, merchantKey, apiKey, token, webhookUrl, splitEnabled); RideCategories.jsx (rota /mobility/ride-categories, Sidebar > Mobilidade > Cadastros) com CRUD (DataTable + modal inline); api.js ganhou rideCategoryService.
+8. Web-client RideRequestPage: categorias dinamicas via GET /ride-categories; UI estilo Uber/99 (botoes base + chips de sub-categoria); preco com multiplier; payment methods filtrados por enabledPaymentMethods. RideTrackingPage: bloco "Pagamento PIX" exibe copia-e-cola + TXID quando o booking tem pixQrcode.
+
+### Validacoes
+- Backend npx tsc --noEmit OK; builds admin vite OK; vite dev transform OK (web-client pages + admin RideCategories/Settings); containers admin-api, frontend-react, web-client reiniciados.
+- Runtime: GET /ride-categories retorna 6 defaults seed; GET /settings inclui paymentGateway (provider PAGARME, mode sandbox) + methods credit_card,debit_card,pix,cash.
+- Runtime POST /bookings car_comfort pagamento=pix: booking BK17... criado, estimatedPrice com multiplier, pixTxid + pixQrcode gerados, gatewayTransactionId preenchido, PaymentTransaction gravada no Mongo (operation pix_charge, gateway PAGARME, amount 24.5, status pending).
+- Runtime POST /bookings car_black credit_card sem card salvo: cria booking pending sem erro (fallback).
+- Nenhum commit feito (conforme combinado).
+
 ## 10/09/2026 - Admin Wallet residuo: saques com filtros e lista de motoristas
 ### Mudancas
 1. backend wallet.service.listWithdrawals: quando o filtro era "all" o codigo caia no else e forcava status=pending, entao o botao "Todos" da pagina nunca mostrava aprovados/rejeitados. Removido o else: "all" agora nao aplica filtro de status (continua filtrando type=debit).

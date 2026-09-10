@@ -7,6 +7,7 @@ const VEHICLE_LABELS = {
   bike: 'Bicicleta',
   car: 'Carro',
   van: 'Van',
+  taxi: 'Táxi',
 };
 
 const VEHICLE_ICONS = {
@@ -14,6 +15,7 @@ const VEHICLE_ICONS = {
   bike: '🚴',
   car: '🚗',
   van: '🚐',
+  taxi: '🚕',
 };
 
 const Deliverymen = () => {
@@ -365,6 +367,7 @@ const Deliverymen = () => {
                     <option value="bike">Bicicleta</option>
                     <option value="car">Carro</option>
                     <option value="van">Van</option>
+                    <option value="taxi">Táxi</option>
                   </select>
                 </div>
                 <div className="form-group">
