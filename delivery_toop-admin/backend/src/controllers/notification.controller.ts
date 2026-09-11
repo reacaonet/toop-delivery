@@ -55,6 +55,57 @@ export class NotificationController {
       next(error);
     }
   }
+
+  async listMine(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = req.user!._id;
+      const role = (req.query.role as string) || req.user!.role || "customer";
+      const result = await notificationService.listForUser(userId, role, req.query as any);
+      return res.status(200).json({ success: true, data: result });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async unreadCount(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = req.user!._id;
+      const role = (req.query.role as string) || req.user!.role || "customer";
+      const count = await notificationService.unreadCount(userId, role);
+      return res.status(200).json({ success: true, data: { count } });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async markAllRead(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = req.user!._id;
+      const role = (req.body.role as string) || req.user!.role || "customer";
+      const result = await notificationService.markAllRead(userId, role);
+      return res.status(200).json({ success: true, data: result });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async markRead(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await notificationService.markRead(req.params.id, req.user!._id);
+      return res.status(200).json({ success: true, data: result });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async dismiss(req: Request, res: Response, next: NextFunction) {
+    try {
+      const result = await notificationService.dismiss(req.params.id, req.user!._id);
+      return res.status(200).json({ success: true, data: result });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 
 export default new NotificationController();

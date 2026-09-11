@@ -1,4 +1,5 @@
 import { NotificationModel, INotification } from "../models/Notification";
+import { UserModel } from "../models/User";
 import { AppError } from "../middleware/errorHandler";
 import firebaseTopicService from "./notification-topic.service";
 
@@ -118,6 +119,99 @@ export class NotificationService {
     }
 
     return { notification, push };
+  }
+
+  private async resolveCompanyId(userId: string): Promise<string | null> {
+    const user = await UserModel.findById(userId).lean();
+    if (!user?.company) return null;
+    return user.company.toString();
+  }
+
+  private buildVisibilityFilter(role: string, userId: string, companyId?: string | null): any {
+    if (["admin", "manager", "operator"].includes(role)) {
+      return {};
+    }
+    const or: any[] = [];
+    if (role === "customer") {
+      or.push({ target: "all" });
+      or.push({ target: "users" });
+      or.push({ targetId: userId });
+    } else if (role === "deliveryman") {
+      or.push({ target: "all" });
+      or.push({ target: "deliverymen" });
+      or.push({ targetId: userId });
+    } else if (role === "store") {
+      or.push({ target: "all" });
+      or.push({ target: "companies" });
+      if (companyId) or.push({ targetId: companyId });
+      or.push({ targetId: userId });
+    }
+    return or.length > 0 ? { $or: or } : {};
+  }
+
+  async listForUser(userId: string, role: string, query: PaginationQuery): Promise<PaginatedResult> {
+    const companyId = role === "store" ? await this.resolveCompanyId(userId) : null;
+    const visibility = this.buildVisibilityFilter(role, userId, companyId);
+    const page = Math.max(1, parseInt(query.page || "1", 10));
+    const limit = Math.min(100, Math.max(1, parseInt(query.limit || "20", 10)));
+    const skip = (page - 1) * limit;
+
+    const filter: any = {
+      ...visibility,
+      dismissedBy: { $ne: userId },
+    };
+
+    const [rawData, total] = await Promise.all([
+      NotificationModel.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
+      NotificationModel.countDocuments(filter),
+    ]);
+
+    const data = rawData.map((n) => {
+      const obj = n.toObject();
+      return { ...obj, read: (n.readBy || []).some((id) => id.toString() === userId) };
+    });
+
+    return { data, total, page, pages: Math.ceil(total / limit) };
+  }
+
+  async unreadCount(userId: string, role: string): Promise<number> {
+    const companyId = role === "store" ? await this.resolveCompanyId(userId) : null;
+    const visibility = this.buildVisibilityFilter(role, userId, companyId);
+    return NotificationModel.countDocuments({
+      ...visibility,
+      readBy: { $ne: userId },
+      dismissedBy: { $ne: userId },
+    });
+  }
+
+  async markRead(id: string, userId: string) {
+    const notification = await NotificationModel.findByIdAndUpdate(
+      id,
+      { $addToSet: { readBy: userId } },
+      { new: true }
+    );
+    if (!notification) throw new AppError("Notificação não encontrada", 404);
+    return { ...notification.toObject(), read: true };
+  }
+
+  async markAllRead(userId: string, role: string) {
+    const companyId = role === "store" ? await this.resolveCompanyId(userId) : null;
+    const visibility = this.buildVisibilityFilter(role, userId, companyId);
+    await NotificationModel.updateMany(
+      { ...visibility, readBy: { $ne: userId }, dismissedBy: { $ne: userId } },
+      { $addToSet: { readBy: userId } }
+    );
+    return { success: true };
+  }
+
+  async dismiss(id: string, userId: string) {
+    const notification = await NotificationModel.findByIdAndUpdate(
+      id,
+      { $addToSet: { dismissedBy: userId } },
+      { new: true }
+    );
+    if (!notification) throw new AppError("Notificação não encontrada", 404);
+    return notification;
   }
 }
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom'
-import { Home, Package, Truck, History, User, Car, Navigation, Wallet, FileText, LogOut, X } from 'lucide-react'
+import { Home, Package, Truck, History, User, Car, Navigation, Wallet, FileText, LogOut, X, Bell, HelpCircle } from 'lucide-react'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import Layout from './components/Layout'
 import LoginPage from './pages/LoginPage'
@@ -14,6 +14,8 @@ import AvailableRidesPage from './pages/AvailableRidesPage'
 import ActiveRidePage from './pages/ActiveRidePage'
 import EarningsPage from './pages/EarningsPage'
 import DocumentsPage from './pages/DocumentsPage'
+import NotificationsPage from './pages/NotificationsPage'
+import HelpPage from './pages/HelpPage'
 
 function BottomNav() {
   const location = useLocation()
@@ -29,6 +31,8 @@ function BottomNav() {
   }
 
   const menuItems = [
+    { label: 'Notificações', icon: <Bell size={18} />, path: '/notifications' },
+    { label: 'Ajuda', icon: <HelpCircle size={18} />, path: '/help' },
     { label: 'Perfil', icon: <User size={18} />, path: '/profile' },
     { label: 'Histórico', icon: <History size={18} />, path: '/history' },
     { label: 'Entregas disponíveis', icon: <Package size={18} />, path: '/available' },
@@ -120,6 +124,8 @@ function ProtectedLayout() {
           <Route path="/active-ride" element={<ActiveRidePage />} />
           <Route path="/earnings" element={<EarningsPage />} />
           <Route path="/documents" element={<DocumentsPage />} />
+          <Route path="/notifications" element={<NotificationsPage />} />
+          <Route path="/help" element={<HelpPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Layout>

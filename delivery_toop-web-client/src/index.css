@@ -3715,3 +3715,232 @@ img { max-width: 100%; display: block; }
   justify-content: center;
   border: 2px solid #fff;
 }
+
+/* Notifications */
+.notifications-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.notification-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md, 8px);
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.notification-item:hover {
+  background: var(--bg-secondary);
+}
+
+.notification-item.unread {
+  border-left: 3px solid var(--primary);
+  background: var(--primary-light, #fff5f5);
+}
+
+.notification-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.notification-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--primary);
+  flex-shrink: 0;
+}
+
+.notification-message {
+  margin: 4px 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.notification-date {
+  font-size: 12px;
+  color: var(--text-tertiary, #999);
+}
+
+.notification-info { border-left-color: var(--info); }
+.notification-success { border-left-color: var(--success); }
+.notification-warning { border-left-color: var(--warning); }
+.notification-error { border-left-color: var(--error); }
+
+/* Pagination */
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+}
+
+/* Help */
+.help-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.help-tab {
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md, 8px);
+  background: var(--surface);
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--text-secondary);
+  transition: all 0.2s;
+}
+
+.help-tab.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.help-tab:hover:not(.active) {
+  background: var(--bg-secondary);
+}
+
+/* FAQ */
+.faq-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.faq-item {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md, 8px);
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.faq-question {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--surface);
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-size: 15px;
+  color: var(--text-primary);
+}
+
+.faq-question:hover {
+  background: var(--bg-secondary);
+}
+
+.faq-toggle {
+  font-size: 18px;
+  color: var(--text-secondary);
+}
+
+.faq-answer {
+  padding: 0 16px 12px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.6;
+  border-top: 1px solid var(--border);
+}
+
+/* Contact */
+.contact-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md, 8px);
+  padding: 16px;
+}
+
+.contact-row {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+
+.contact-row:last-child {
+  border-bottom: none;
+}
+
+.contact-row a {
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.contact-row a:hover {
+  text-decoration: underline;
+}
+
+/* Tickets */
+.tickets-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.ticket-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md, 8px);
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+
+.ticket-item:hover {
+  background: var(--bg-secondary);
+}
+
+.ticket-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ticket-item p {
+  margin: 4px 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+/* Interactions */
+.interactions-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.interaction-item {
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.interaction-item:last-child {
+  border-bottom: none;
+}
+
+.interaction-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.interaction-author {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: capitalize;
+}
+
+.interaction-item p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-primary);
+}

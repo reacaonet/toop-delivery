@@ -16,6 +16,8 @@ import StockItemsPage from './pages/StockItemsPage'
 import StockBatchesPage from './pages/StockBatchesPage'
 import StockMovementsPage from './pages/StockMovementsPage'
 import BranchesPage from './pages/BranchesPage'
+import NotificationsPage from './pages/NotificationsPage'
+import HelpPage from './pages/HelpPage'
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, loading } = useAuth()
@@ -64,6 +66,8 @@ function App() {
                   <Route path="/stock/branches" element={<BranchesPage />} />
                   <Route path="/settings" element={<SettingsPage />} />
                   <Route path="/reports" element={<ReportsPage />} />
+                  <Route path="/notifications" element={<NotificationsPage />} />
+                  <Route path="/help" element={<HelpPage />} />
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </Layout>

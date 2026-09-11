@@ -1807,3 +1807,59 @@ body {
   border-color: #334155;
   border-top-color: #60a5fa;
 }
+
+/* Notifications */
+.notifications-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.notification-item {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.notification-item:last-child {
+  border-bottom: none;
+}
+
+.notification-item:hover {
+  background: var(--bg);
+}
+
+.notification-item.unread {
+  border-left: 3px solid var(--primary);
+  background: #fff5f5;
+}
+
+.notification-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.notification-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--primary);
+  flex-shrink: 0;
+}
+
+.notification-message {
+  margin: 4px 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.notification-date {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.notification-info { border-left-color: var(--info); }
+.notification-success { border-left-color: var(--success); }
+.notification-warning { border-left-color: var(--warning); }
+.notification-error { border-left-color: var(--danger); }

@@ -25,6 +25,8 @@ export default function Layout() {
 
   const menuItems = isAuthed
     ? [
+        { label: 'Notificações', icon: '🔔', path: '/notifications' },
+        { label: 'Ajuda', icon: '❓', path: '/help' },
         { label: 'Perfil', icon: '👤', path: '/profile' },
         { label: 'Endereços', icon: '📍', path: '/addresses' },
         { label: 'Meus Cartões', icon: '💳', path: '/payment-methods' },

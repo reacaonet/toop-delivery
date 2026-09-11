@@ -1835,3 +1835,9 @@ a {
 .rating-msg { font-size: 0.8rem; margin-bottom: 10px; font-weight: 600; color: var(--primary); }
 .rating-actions { display: flex; gap: 10px; justify-content: center; }
 .rating-actions .btn { min-width: 100px; }
+
+/* Notifications */
+.notification-info { border-left-color: var(--info) !important; }
+.notification-success { border-left-color: var(--success) !important; }
+.notification-warning { border-left-color: var(--warning) !important; }
+.notification-error { border-left-color: var(--danger) !important; }

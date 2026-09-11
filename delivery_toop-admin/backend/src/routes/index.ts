@@ -88,6 +88,7 @@ import shoppingOrderRoutes from "./shopping-order.routes";
 import pixRoutes from "./pix.routes";
 import braspagRoutes from "./braspag.routes";
 import addonRoutes from "./addon.routes";
+import platformRoutes from "./platform.routes";
 import { authenticate } from "../middleware/auth";
 
 const router = Router();
@@ -182,5 +183,6 @@ router.use("/shopping/cart", authenticate, shoppingCartRoutes);
 router.use("/shopping/order", authenticate, shoppingOrderRoutes);
 router.use("/pix", authenticate, pixRoutes);
 router.use("/braspag", braspagRoutes);
+router.use("/platform", platformRoutes);
 
 export default router;

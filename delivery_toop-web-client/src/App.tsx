@@ -17,6 +17,8 @@ import PaymentMethodsPage from './pages/PaymentMethodsPage'
 import RideRequestPage from './pages/RideRequestPage'
 import RideTrackingPage from './pages/RideTrackingPage'
 import RideHistoryPage from './pages/RideHistoryPage'
+import NotificationsPage from './pages/NotificationsPage'
+import HelpPage from './pages/HelpPage'
 import type { ReactNode } from 'react'
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
@@ -57,6 +59,8 @@ function AppRoutes() {
         <Route path="/rides" element={<RideHistoryPage />} />
         <Route path="/rides/new" element={<RideRequestPage />} />
         <Route path="/rides/:id" element={<RideTrackingPage />} />
+        <Route path="/notifications" element={<NotificationsPage />} />
+        <Route path="/help" element={<HelpPage />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

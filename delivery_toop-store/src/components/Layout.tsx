@@ -1,6 +1,6 @@
 import { Fragment } from 'react'
 import { NavLink } from 'react-router-dom'
-import { LayoutDashboard, Package, ShoppingCart, Settings, LogOut, Store, Monitor, FileText, Warehouse, GitBranch, Boxes, ArrowLeftRight, Tags, Pizza } from 'lucide-react'
+import { LayoutDashboard, Package, ShoppingCart, Settings, LogOut, Store, Monitor, FileText, Warehouse, GitBranch, Boxes, ArrowLeftRight, Tags, Pizza, Bell, HelpCircle } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 
 interface LayoutProps {
@@ -23,6 +23,8 @@ const Layout = ({ children }: LayoutProps) => {
     { path: '/stock/movements', icon: ArrowLeftRight, label: 'Movimentacoes' },
     { path: '/stock/branches', icon: Store, label: 'Filiais' },
     { path: '/reports', icon: FileText, label: 'Relatorios' },
+    { path: '/notifications', icon: Bell, label: 'Notificações' },
+    { path: '/help', icon: HelpCircle, label: 'Ajuda' },
     { path: '/settings', icon: Settings, label: 'Configuracoes', divider: true },
   ]
 

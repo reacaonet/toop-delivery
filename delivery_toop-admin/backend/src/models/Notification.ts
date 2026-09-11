@@ -7,6 +7,8 @@ export interface INotification extends Document {
   target: 'all' | 'users' | 'deliverymen' | 'companies';
   targetId?: mongoose.Types.ObjectId;
   read: boolean;
+  readBy: mongoose.Types.ObjectId[];
+  dismissedBy: mongoose.Types.ObjectId[];
   data?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
@@ -20,6 +22,8 @@ const NotificationSchema = new Schema<INotification>(
     target: { type: String, enum: ['all', 'users', 'deliverymen', 'companies'], default: 'all' },
     targetId: { type: Schema.Types.ObjectId },
     read: { type: Boolean, default: false },
+    readBy: { type: [Schema.Types.ObjectId], default: [] },
+    dismissedBy: { type: [Schema.Types.ObjectId], default: [] },
     data: { type: Schema.Types.Mixed },
   },
   { timestamps: true, toJSON: { transform(_doc, ret) { const { __v: _v, ...rest } = ret; return rest; } } }

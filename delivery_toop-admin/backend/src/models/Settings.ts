@@ -36,6 +36,13 @@ export interface ISettings extends Document {
   emailAlerts: boolean;
   paymentGateway: IPaymentGatewayConfig;
   enabledPaymentMethods: PaymentMethod[];
+  contact: {
+    supportEmail: string;
+    supportPhone: string;
+    whatsapp: string;
+    website: string;
+    supportHours: string;
+  };
   updatedAt: Date;
 }
 
@@ -49,6 +56,17 @@ const PaymentGatewaySchema = new Schema<IPaymentGatewayConfig>(
     token: { type: String, default: '' },
     webhookUrl: { type: String, default: '' },
     splitEnabled: { type: Boolean, default: false },
+  },
+  { _id: false }
+);
+
+const ContactSchema = new Schema(
+  {
+    supportEmail: { type: String, default: '' },
+    supportPhone: { type: String, default: '' },
+    whatsapp: { type: String, default: '' },
+    website: { type: String, default: 'https://gojadelivery.app.br' },
+    supportHours: { type: String, default: 'Seg a Sex, 8h às 18h' },
   },
   { _id: false }
 );
@@ -68,6 +86,7 @@ const SettingsSchema = new Schema<ISettings>(
       enum: PAYMENT_METHODS,
       default: ['credit_card', 'debit_card', 'pix', 'cash'],
     },
+    contact: { type: ContactSchema, default: () => ({}) },
   },
   { timestamps: true }
 );

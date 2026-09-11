@@ -2,11 +2,19 @@ import { HelpTicketModel } from "../models/HelpTicket";
 import { TicketInteractionModel } from "../models/TicketInteraction";
 import { FaqModel } from "../models/Faq";
 import { AppError } from "../middleware/errorHandler";
+import crypto from "crypto";
+
+function generateProtocol(): string {
+  const timePart = Date.now().toString(36).toUpperCase().slice(-4);
+  const randPart = crypto.randomBytes(2).toString("hex").toUpperCase();
+  return `TKT-${timePart}-${randPart}`;
+}
 
 interface PaginationQuery {
   page?: string;
   limit?: string;
   company?: string;
+  person?: string;
   status?: string;
   q?: string;
 }
@@ -20,7 +28,8 @@ function parsePagination(query: PaginationQuery) {
 export class HelpDeskService {
   // ---------- Tickets ----------
   async createTicket(data: any) {
-    const ticket = await HelpTicketModel.create(data);
+    const tickedId = String(data.tickedId || "").trim() || generateProtocol();
+    const ticket = await HelpTicketModel.create({ ...data, tickedId });
     // cria interação inicial automaticamente (como no legado)
     const origin = data.name ? "user" : "company";
     const author = data.name ? data.name : (data.companyName || "");
@@ -37,6 +46,7 @@ export class HelpDeskService {
     const { page, limit, skip } = parsePagination(query);
     const filter: any = { deletedAt: { $exists: false } };
     if (query.company) filter.company = query.company;
+    if (query.person) filter.person = query.person;
     if (query.status) filter.status = query.status;
     if (query.q) {
       filter.$or = [

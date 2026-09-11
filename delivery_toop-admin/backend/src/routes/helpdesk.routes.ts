@@ -7,6 +7,7 @@ const router = Router();
 // ---------- Tickets ----------
 router.get("/tickets", authenticate, helpdeskController.listTickets);
 router.post("/tickets", authenticate, helpdeskController.createTicket);
+router.get("/tickets/my", authenticate, helpdeskController.listMyTickets);
 router.get("/tickets/protocol/:protocol", authenticate, helpdeskController.getTicketByProtocol);
 router.get("/tickets/:id", authenticate, helpdeskController.getTicket);
 router.put("/tickets/:id", authenticate, helpdeskController.updateTicket);

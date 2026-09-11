@@ -2,7 +2,7 @@
 
 > Documento de controle do que **ainda não foi migrado** do sistema legado para o backend/painel moderno (TypeScript + React). Cada item tem etapas e um checkbox `[ ]` para marcarmos `[x]` conforme for realizado.
 
-**Última atualização:** 10/09/2026
+**Última atualização:** 11/09/2026
 
 ---
 
@@ -578,4 +578,21 @@ Rotas orfas removidas; App.jsx e Sidebar reescritos (grupos: Dashboard | Motoris
 ### Validacoes
 - npx tsc --noEmit OK e vite build OK no container toop-store-dev; container reiniciado (HTTP 200 em 4203).
 - Backend de cancelamento com motivo ja validado em runtime no item anterior (mesmo endpoint).
+- Nenhum commit feito (aguardando usuario).
+
+## 11/09/2026 - Notificacoes + Ajuda (FAQ/Contato/Chamados) nas 3 apps web
+### Backend
+1. models/Notification.ts: campos aditivos `readBy: [ObjectId]` e `dismissedBy: [ObjectId]` para leitura/dismiss por usuario (mantido `read` booleano p/ compatibilidade admin).
+2. services/notification.service.ts: novos metodos `listForUser(userId, role, query)` (filtra por target: all|users|deliverymen|companies + targetId=company quando role store; resolve `company` do User no DB pois o JWT nao carrega), `unreadCount`, `markRead` (adiciona userId em readBy), `markAllRead`, `dismiss`.
+3. controllers/notification.controller.ts + routes/notification.routes.ts: `GET /notifications/my/unread-count`, `GET /notifications/my`, `PUT /notifications/my/read-all`, `PUT /notifications/my/:id/read`, `PUT /notifications/my/:id/dismiss` (antes de `/:id`).
+4. models/Settings.ts: sub-schema `contact` (supportEmail/supportPhone/whatsapp/website/supportHours) com defaults. Rota publica `GET /platform/contact` (routes/platform.routes.ts, montada em /platform; fallback de defaults quando campos vazios).
+5. HelpDesk p/ apps: helpdesk.service (protocolo auto `TKT-<base36>-<hex>` quando ausente, filtro `person` no list), helpdesk.controller (resolveScope por role; createTicket auto-preenche `person`=user._id e `company` (loja) a partir do JWT; createInteraction origem/author da role/email; listMyTickets) + rota `GET /helpdesk/tickets/my`.
+6. Notificacoes automaticas no ciclo do pedido (services/order.service.ts): helper `notify()` defensivo (nunca quebra o fluxo do pedido) + hooks em create (loja), updateStatus (cliente por status), acceptOrder (entregador) e cancel (quem cancelou + aviso de estorno quando refunded).
+### Apps (web-client 4200, store 4203, deliveryman 4204)
+- Pagina Notificacoes (rota /notifications, item no menu/nav): lista paginada, badge de nao-lidas, marcar lida ao clicar e marcar todas lidas.
+- Pagina Ajuda (rota /help, item no menu/nav): abas FAQ (accordion de /faq?status=true), Contato (/platform/contact com links mailto/tel/wa.me/site) e Chamados (listar/criar com departamento+prioridade/ver detalhe com interacoes + responder, tudo via /helpdesk/tickets/my).
+- CSS dedicado adicionado ao index.css das 3 apps.
+### Validacoes
+- Backend npx tsc --noEmit OK; vite build OK nos 3 containers; containers reiniciados.
+- Runtime (8100): GET /platform/contact 200 publico (fallback de defaults); login admin (`POST /auth`) + POST /notifications (target all) -> GET /my/unread-count 1, mark-read True; login loja (`loja@teste.com.br`/`loja123`) + create ticket auto-preenche person (Pizzaria da Vila Teste) + company, protocolo TKT-*; interaction com origin store/author email; detalhe por protocolo com 2 interacoes; notif target=companies+targetId -> visivel no /notifications/my da loja (targetId resolvido pelo company); unreadCount 2. Dados de teste (notificacoes e ticket) removidos apos validacao.
 - Nenhum commit feito (aguardando usuario).

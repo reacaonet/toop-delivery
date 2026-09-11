@@ -8,6 +8,7 @@ import { incOrder } from "../middleware/metrics";
 import walletService from "./wallet.service";
 import repasseService from "./repasse.service";
 import paymentGatewayService from "./payment-gateway.service";
+import notificationService from "./notification.service";
 import { env } from "../config";
 import crypto from "crypto";
 
@@ -29,6 +30,22 @@ interface PaginatedResult {
 }
 
 export class OrderService {
+  private async notify(
+    target: "all" | "users" | "deliverymen" | "companies",
+    targetId: string,
+    title: string,
+    message: string
+  ) {
+    try {
+      await notificationService.create({ target, targetId, title, message });
+    } catch (err) {
+      console.error("[Order] Erro ao gerar notificação:", err);
+    }
+  }
+
+  private currency(value: number | undefined | null): string {
+    return (Number(value || 0)).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  }
   async create(data: {
     company: string;
     customer: string;
@@ -191,6 +208,13 @@ export class OrderService {
       });
     }
 
+    await this.notify(
+      "companies",
+      order.company.toString(),
+      "Novo pedido recebido!",
+      `Pedido #${order.orderNumber} no valor de ${this.currency(order.total)} acabou de chegar.`
+    );
+
     return order;
   }
 
@@ -305,6 +329,22 @@ export class OrderService {
     if (status === "delivered") incOrder("completed");
     else if (status === "cancelled") incOrder("cancelled");
 
+    if (updated) {
+      const num = updated.orderNumber;
+      const custId = updated.customer?.toString?.();
+      if (status === "confirmed" && custId) {
+        await this.notify("users", custId, "Pedido confirmado", `Seu pedido #${num} foi confirmado pela loja.`);
+      } else if (status === "preparing" && custId) {
+        await this.notify("users", custId, "Pedido em preparo", `Seu pedido #${num} está sendo preparado.`);
+      } else if (status === "ready" && custId) {
+        await this.notify("users", custId, "Pedido pronto!", `Seu pedido #${num} está pronto e aguardando o entregador!`);
+      } else if (status === "delivering" && custId) {
+        await this.notify("users", custId, "Pedido saiu para entrega", `Seu pedido #${num} saiu para entrega!`);
+      } else if (status === "delivered" && custId) {
+        await this.notify("users", custId, "Pedido entregue", `Seu pedido #${num} foi entregue com sucesso. Bom apetite!`);
+      }
+    }
+
     return updated;
   }
 
@@ -339,6 +379,13 @@ export class OrderService {
     if (!order) {
       throw new AppError("Pedido não está mais disponível para entrega", 400);
     }
+
+    await this.notify(
+      "deliverymen",
+      deliverymanId,
+      "Entrega aceita",
+      `Você aceitou o pedido #${order.orderNumber}! Vá até o local de retirada.`
+    );
 
     return order;
   }
@@ -438,6 +485,27 @@ export class OrderService {
     await order.save();
 
     incOrder("cancelled");
+
+    const orderNum = order.orderNumber;
+    const custId = order.customer?.toString?.();
+    const compId = order.company?.toString?.();
+    const reasonText = reason ? ` Motivo: ${reason}.` : "";
+    const refundText = refunded ? " O estorno foi processado." : "";
+    const baseMsg = orderNum
+      ? `O pedido #${orderNum} foi cancelado.${reasonText}${refundText}`
+      : `O pedido foi cancelado.${reasonText}${refundText}`;
+
+    if (actor === "customer" && compId) {
+      await this.notify("companies", compId, "Pedido cancelado pelo cliente", baseMsg);
+    } else if ((actor === "store" || actor === "deliveryman") && custId && compId) {
+      await this.notify("users", custId, "Pedido cancelado", baseMsg);
+      await this.notify("companies", compId, "Pedido cancelado", baseMsg);
+    } else if (actor === "admin" && custId && compId) {
+      await this.notify("users", custId, "Pedido cancelado pelo admin", baseMsg);
+      await this.notify("companies", compId, "Pedido cancelado pelo admin", baseMsg);
+    } else if (custId) {
+      await this.notify("users", custId, "Pedido cancelado", baseMsg);
+    }
 
     return order;
   }
