@@ -19,7 +19,7 @@ const statusColor = {
 };
 const priorityLabel = { LOW: 'Baixa', MEDIUM: 'Média', HIGH: 'Alta' };
 const deptLabel = { ADMINISTRATIVE: 'Administrativo', COMMERCIAL: 'Comercial', MARKETING: 'Marketing', FINANCIAL: 'Financeiro', SUPPORT: 'Suporte', TI: 'TI' };
-const ticketStatusLabel = { NEW: 'Novo', IN_PROGRESS: 'Em andamento', ON_HOLD: 'Aguardando', SOLVED: 'Resolvido' };
+const ticketStatusLabel = { NEW: 'Aberto', IN_PROGRESS: 'Em andamento', ON_HOLD: 'Aguardando', SOLVED: 'Resolvido' };
 
 const HelpDesk = () => {
   const [tab, setTab] = useState('tickets');
@@ -62,6 +62,7 @@ const TicketsTab = () => {
   const [saving, setSaving] = useState(false);
   const [detail, setDetail] = useState(null);
   const [interaction, setInteraction] = useState('');
+  const [statusForm, setStatusForm] = useState('NEW');
 
   const load = async () => {
     try {
@@ -93,23 +94,34 @@ const TicketsTab = () => {
   const openDetail = async (it) => {
     try {
       const d = await helpdeskService.getByProtocol(it.tickedId);
-      setDetail(d); setInteraction('');
+      setDetail(d); setStatusForm(d.status || 'NEW'); setInteraction('');
     } catch (err) { alert('Erro ao carregar: ' + (err.response?.data?.error || err.message)); }
+  };
+
+  const updateStatus = async () => {
+    try {
+      await helpdeskService.updateTicket(detail._id, { status: statusForm });
+      const d = await helpdeskService.getByProtocol(detail.tickedId);
+      setDetail(d); setStatusForm(d.status || 'NEW');
+    } catch (err) { alert('Erro ao atualizar status: ' + (err.response?.data?.error || err.message)); }
   };
 
   const addInteraction = async (e) => {
     e.preventDefault();
     try {
-      await helpdeskService.createInteraction(detail._id, { description: interaction, origin: 'company', author: 'admin' });
+      let author = 'admin';
+      try { const u = JSON.parse(localStorage.getItem('user') || '{}'); author = u.name || u.email || 'admin'; } catch { /* */ }
+      await helpdeskService.createInteraction(detail._id, { description: interaction, origin: 'company', author });
       const d = await helpdeskService.getByProtocol(detail.tickedId);
-      setDetail(d); setInteraction('');
+      setDetail(d); setStatusForm(d.status || 'NEW'); setInteraction('');
     } catch (err) { alert('Erro: ' + (err.response?.data?.error || err.message)); }
   };
 
   const columns = [
     { key: 'tickedId', title: 'Protocolo', render: (v) => <b>{v}</b> },
     { key: 'subject', title: 'Assunto', render: (v) => v || '-' },
-    { key: 'name', title: 'Solicitante', render: (v) => v || '-' },
+    { key: 'name', title: 'Solicitante', render: (v, item) => (item?.person?.name || v) ? <span>{item?.person?.name || v}{item?.person?.email ? <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>{item.person.email}</div> : null}</span> : '-' },
+    { key: 'company', title: 'Empresa', render: (v) => v?.name || '-' },
     { key: 'priority', title: 'Prioridade', render: (v) => <span style={{ fontWeight: 700, color: v === 'HIGH' ? '#ef4444' : v === 'MEDIUM' ? '#f59e0b' : '#6b7280' }}>{priorityLabel[v] || v}</span> },
     { key: 'status', title: 'Status', render: (v) => <span style={{ fontWeight: 700, color: statusColor[v] || '#000' }}>{ticketStatusLabel[v] || v}</span> },
     { key: 'createdAt', title: 'Criado', render: (v) => v ? new Date(v).toLocaleString('pt-BR') : '-' },
@@ -125,7 +137,7 @@ const TicketsTab = () => {
         </div>
       </div>
 
-      <DataTable data={items} columns={columns} onEdit={openEdit} onDelete={remove} loading={loading} emptyMessage="Nenhum ticket" />
+      <DataTable data={items} columns={columns} onView={openDetail} onEdit={openEdit} onDelete={remove} loading={loading} emptyMessage="Nenhum ticket" />
       <div style={{ marginTop: '0.75rem' }}>
         <button className="btn btn-secondary" disabled={!detail} onClick={() => setDetail(null)} style={{ display: 'none' }}></button>
       </div>
@@ -138,8 +150,17 @@ const TicketsTab = () => {
           <table className="table">
             <tbody>
               <tr><td style={{ fontWeight: 700, width: '140px' }}>Descrição</td><td>{detail.description}</td></tr>
-              <tr><td style={{ fontWeight: 700 }}>Solicitante</td><td>{detail.name} {detail.email ? `(${detail.email})` : ''}</td></tr>
-              <tr><td style={{ fontWeight: 700 }}>Prioridade</td><td>{priorityLabel[detail.priority] || detail.priority} / {ticketStatusLabel[detail.status] || detail.status}</td></tr>
+              <tr><td style={{ fontWeight: 700 }}>Solicitante</td><td>{detail.person?.name || detail.name || '-'} {detail.person?.email || detail.email ? `(${detail.person?.email || detail.email})` : ''}</td></tr>
+              <tr><td style={{ fontWeight: 700 }}>Prioridade</td><td>{priorityLabel[detail.priority] || detail.priority}</td></tr>
+              <tr><td style={{ fontWeight: 700 }}>Status</td><td>
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <select className="form-control" value={statusForm} onChange={(e) => setStatusForm(e.target.value)} style={{ width: 'auto' }}>
+                    {STATUS.map((s) => <option key={s} value={s}>{ticketStatusLabel[s]}</option>)}
+                  </select>
+                  <button className="btn btn-secondary" onClick={updateStatus}>Salvar status</button>
+                  <span style={{ fontWeight: 700, color: statusColor[detail.status] || '#000' }}>{ticketStatusLabel[detail.status] || detail.status}</span>
+                </div>
+              </td></tr>
               <tr><td style={{ fontWeight: 700 }}>Empresa</td><td>{detail.company?.name || '-'}</td></tr>
             </tbody>
           </table>
