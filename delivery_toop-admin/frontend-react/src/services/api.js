@@ -140,8 +140,8 @@ export const orderService = {
     const response = await api.put(`/orders/${id}/status`, payload);
     return response.data?.data ?? response.data;
   },
-  cancelOrder: async (id) => {
-    const response = await api.put(`/orders/${id}/cancel`);
+  cancelOrder: async (id, payload = {}) => {
+    const response = await api.put(`/orders/${id}/cancel`, payload);
     return response.data?.data ?? response.data;
   }
 };

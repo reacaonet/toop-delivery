@@ -53,6 +53,12 @@ export const updateOrderStatusSchema = z.object({
   }),
 });
 
+export const cancelOrderSchema = z.object({
+  body: z.object({
+    reason: z.string().max(300).optional(),
+  }),
+});
+
 export type CreateOrderInput = z.infer<typeof createOrderSchema>["body"];
 export type UpdateOrderStatusInput = z.infer<
   typeof updateOrderStatusSchema

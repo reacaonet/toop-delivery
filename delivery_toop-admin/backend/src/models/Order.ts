@@ -37,6 +37,7 @@ export interface IOrder extends Document {
   deliveredAt?: Date;
   cancelledAt?: Date;
   cancelReason?: string;
+  cancelledBy?: 'customer' | 'store' | 'admin' | 'deliveryman' | 'system';
   shoppingCart?: mongoose.Types.ObjectId;
   deliveryMode?: 'own' | 'online';
   schedule?: Record<string, unknown>;
@@ -101,6 +102,10 @@ const OrderSchema = new Schema<IOrder>(
     deliveredAt: { type: Date },
     cancelledAt: { type: Date },
     cancelReason: { type: String },
+    cancelledBy: {
+      type: String,
+      enum: ['customer', 'store', 'admin', 'deliveryman', 'system'],
+    },
     shoppingCart: { type: Schema.Types.ObjectId, ref: 'ShoppingCart' },
     deliveryMode: { type: String, enum: ['own', 'online'] },
     schedule: { type: Schema.Types.Mixed },

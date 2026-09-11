@@ -2,7 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { Bell, Settings as SettingsIcon, User, Building2, Mail, CheckCircle, XCircle, Clock, Percent, Save, Car, CreditCard } from 'lucide-react';
 import { notificationService, settingsService } from '../services/api';
 
-const GATEWAY_PROVIDERS = ['BRASPAG', 'PAGARME', 'IUGU', 'CIELO', 'PIX'];
+const GATEWAY_PROVIDERS = [
+  { value: 'BRASPAG', label: 'Braspag' },
+  { value: 'PAGARME', label: 'Pagar.me' },
+  { value: 'IUGU', label: 'Iugu' },
+  { value: 'CIELO', label: 'Cielo' },
+  { value: 'PIX', label: 'PIX (direto)' },
+  { value: 'ASAAS', label: 'Asaas' },
+  { value: 'MERCADO_PAGO', label: 'Mercado Pago' },
+  { value: 'PAGSEGURO', label: 'PagSeguro' },
+];
 const ALL_PAYMENT_METHODS = [
   { value: 'credit_card', label: 'Cartão de Crédito' },
   { value: 'debit_card', label: 'Cartão de Débito' },
@@ -433,7 +442,7 @@ const Settings = () => {
                 value={settings.paymentGateway.provider}
                 onChange={(e) => handleGatewayChange('provider', e.target.value)}
               >
-                {GATEWAY_PROVIDERS.map(gp => <option key={gp} value={gp}>{gp}</option>)}
+                {GATEWAY_PROVIDERS.map(gp => <option key={gp.value} value={gp.value}>{gp.label}</option>)}
               </select>
             </div>
 

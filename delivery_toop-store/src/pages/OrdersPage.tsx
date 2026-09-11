@@ -23,6 +23,14 @@ const STATUS_COLOR: Record<string, string> = {
   cancelled: '#ef4444',
 }
 
+const CANCEL_BY_LABELS: Record<string, string> = {
+  customer: 'Cliente',
+  store: 'Loja',
+  admin: 'Admin',
+  deliveryman: 'Entregador',
+  system: 'Sistema',
+}
+
 interface OrderItem {
   name: string
   quantity: number
@@ -42,6 +50,9 @@ interface Order {
   customer?: { name?: string } | null
   items?: OrderItem[]
   address?: { street?: string; number?: string }
+  paymentStatus?: string
+  cancelReason?: string
+  cancelledBy?: string
 }
 
 const OrdersPage = () => {
@@ -49,6 +60,9 @@ const OrdersPage = () => {
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
   const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [cancelTarget, setCancelTarget] = useState<Order | null>(null)
+  const [cancelReason, setCancelReason] = useState('')
+  const [cancelling, setCancelling] = useState(false)
 
   useEffect(() => {
     if (companyId) loadOrders()
@@ -87,6 +101,36 @@ const OrdersPage = () => {
         return { label: 'Pronto', next: 'ready', className: 'btn-success' }
       default:
         return null
+    }
+  }
+
+  const openCancel = (order: Order) => {
+    setCancelReason('')
+    setCancelTarget(order)
+  }
+
+  const submitCancel = async () => {
+    if (!cancelTarget) return
+    if (!cancelReason.trim()) {
+      alert('Informe o motivo do cancelamento')
+      return
+    }
+    setCancelling(true)
+    try {
+      await api.put(`/orders/${cancelTarget._id}/cancel`, { reason: cancelReason.trim() })
+      setOrders((prev) =>
+        prev.map((o) =>
+          o._id === cancelTarget._id
+            ? { ...o, status: 'cancelled', cancelledBy: 'store', cancelReason: cancelReason.trim() }
+            : o
+        )
+      )
+      setCancelTarget(null)
+      setCancelReason('')
+    } catch (err: any) {
+      alert('Erro ao cancelar pedido: ' + (err.response?.data?.error || err.message))
+    } finally {
+      setCancelling(false)
     }
   }
 
@@ -216,14 +260,35 @@ const OrdersPage = () => {
                         </div>
                       </div>
 
-                      {action && (
+                      {order.status === 'cancelled' && (
+                        <div className="order-detail-row">
+                          <span className="detail-label">Cancelamento:</span>
+                          <span>
+                            {order.paymentStatus === 'refunded' ? 'Pagamento estornado. ' : ''}
+                            {CANCEL_BY_LABELS[order.cancelledBy || ''] || order.cancelledBy || ''}
+                            {order.cancelReason ? ` - ${order.cancelReason}` : ''}
+                          </span>
+                        </div>
+                      )}
+
+                      {(action || !['delivered', 'cancelled'].includes(order.status)) && (
                         <div className="order-status-actions">
-                          <button
-                            className={`btn ${action.className}`}
-                            onClick={() => updateStatus(order._id, action.next)}
-                          >
-                            {action.label}
-                          </button>
+                          {action && (
+                            <button
+                              className={`btn ${action.className}`}
+                              onClick={() => updateStatus(order._id, action.next)}
+                            >
+                              {action.label}
+                            </button>
+                          )}
+                          {!['delivered', 'cancelled'].includes(order.status) && (
+                            <button
+                              className="btn btn-danger"
+                              onClick={() => openCancel(order)}
+                            >
+                              Cancelar
+                            </button>
+                          )}
                         </div>
                       )}
                     </div>
@@ -234,6 +299,48 @@ const OrdersPage = () => {
           </div>
         )}
       </div>
+
+      {cancelTarget && (
+        <div className="modal-overlay" onClick={() => setCancelTarget(null)}>
+          <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 440 }}>
+            <div className="modal-header">
+              <h3>Cancelar Pedido #{cancelTarget.orderNumber}</h3>
+              <button className="close-btn" onClick={() => setCancelTarget(null)}>
+                ✕
+              </button>
+            </div>
+            <div style={{ padding: 20 }}>
+              {cancelTarget.paymentStatus === 'paid' && (
+                <p style={{ color: '#ef4444', marginBottom: 12, fontSize: '0.9rem' }}>
+                  Este pedido já foi pago. O pagamento será estornado.
+                </p>
+              )}
+              <div className="form-group">
+                <label>Motivo do cancelamento *</label>
+                <textarea
+                  value={cancelReason}
+                  onChange={e => setCancelReason(e.target.value)}
+                  placeholder="Ex.: sem ingredientes no momento"
+                  rows={3}
+                  style={{ width: '100%', padding: 10, border: '1px solid #d1d5db', borderRadius: 8, resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box', fontSize: '0.9rem' }}
+                />
+              </div>
+              <div className="form-actions">
+                <button className="btn btn-secondary" onClick={() => setCancelTarget(null)}>
+                  Voltar
+                </button>
+                <button
+                  className="btn btn-danger"
+                  onClick={submitCancel}
+                  disabled={cancelling || !cancelReason.trim()}
+                >
+                  {cancelling ? 'Cancelando...' : 'Confirmar Cancelamento'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

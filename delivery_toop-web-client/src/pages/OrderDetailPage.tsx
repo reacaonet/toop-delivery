@@ -15,6 +15,8 @@ interface Order {
   paymentStatus?: string
   pixTxid?: string
   pixQrcode?: string
+  cancelReason?: string
+  cancelledBy?: string
   notes: string
   items: Array<{ name: string; quantity: number; price: number; total: number; addons?: Array<{ addonId: string; name: string; price: number }> }>
   deliveryAddress: {
@@ -71,6 +73,9 @@ export default function OrderDetailPage() {
   const [reviewRating, setReviewRating] = useState(5)
   const [reviewComment, setReviewComment] = useState('')
   const [submittingReview, setSubmittingReview] = useState(false)
+  const [showCancelModal, setShowCancelModal] = useState(false)
+  const [cancelReason, setCancelReason] = useState('')
+  const [cancelling, setCancelling] = useState(false)
 
   useEffect(() => {
     if (!id) return
@@ -112,6 +117,26 @@ export default function OrderDetailPage() {
       setSubmittingReview(false)
     }
   }
+
+  const submitCancel = async () => {
+    if (!order) return
+    setCancelling(true)
+    try {
+      const { data } = await api.put(`/orders/${order._id}/cancel`, {
+        reason: cancelReason.trim() || undefined,
+      })
+      setOrder(data.data)
+      setShowCancelModal(false)
+      setCancelReason('')
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Erro ao cancelar pedido')
+    } finally {
+      setCancelling(false)
+    }
+  }
+
+  const canCancel =
+    ['pending', 'confirmed', 'preparing'].includes(order?.status || '')
 
   if (loading) return <div className="loading">Carregando pedido...</div>
   if (!order) return <div className="empty-state">Pedido não encontrado</div>
@@ -158,6 +183,34 @@ export default function OrderDetailPage() {
               </div>
             ))}
           </div>
+        )}
+
+        {canCancel && (
+          <button className="btn btn-danger btn-full" style={{ marginBottom: 16 }} onClick={() => setShowCancelModal(true)}>
+            Cancelar pedido
+          </button>
+        )}
+
+        {isCancelled && (
+          <section className="order-section">
+            <h2>Cancelamento</h2>
+            {order.paymentStatus === 'refunded' && (
+              <p style={{ color: 'var(--success, #16a34a)' }}>Pagamento estornado.</p>
+            )}
+            <p>
+              Cancelado por:{' '}
+              {order.cancelledBy === 'customer'
+                ? 'Cliente'
+                : order.cancelledBy === 'store'
+                  ? 'Loja'
+                  : order.cancelledBy === 'deliveryman'
+                    ? 'Entregador'
+                    : order.cancelledBy === 'admin'
+                      ? 'Administração'
+                      : 'Sistema'}
+            </p>
+            {order.cancelReason && <p>Motivo: {order.cancelReason}</p>}
+          </section>
         )}
 
         <section className="order-section">
@@ -343,6 +396,38 @@ export default function OrderDetailPage() {
                 disabled={submittingReview}
               >
                 {submittingReview ? 'Enviando...' : 'Enviar Avaliação'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    {showCancelModal && (
+        <div className="modal-overlay" onClick={() => setShowCancelModal(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: 400 }}>
+            <button className="modal-close" onClick={() => setShowCancelModal(false)}>✕</button>
+            <div style={{ padding: 20 }}>
+              <h2 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: 16 }}>
+                Cancelar pedido {order?.orderNumber ? `#${order.orderNumber}` : ''}
+              </h2>
+              {order?.paymentStatus === 'paid' && (
+                <p style={{ color: 'var(--danger, #dc2626)', marginBottom: 12, fontSize: '0.9rem' }}>
+                  Seu pagamento será estornado.
+                </p>
+              )}
+              <textarea
+                value={cancelReason}
+                onChange={e => setCancelReason(e.target.value)}
+                placeholder="Motivo do cancelamento (opcional)"
+                rows={3}
+                style={{ width: '100%', padding: 10, border: '1px solid var(--border)', borderRadius: 8, resize: 'vertical', fontFamily: 'inherit' }}
+              />
+              <button
+                className="btn btn-danger btn-full"
+                style={{ marginTop: 12 }}
+                onClick={submitCancel}
+                disabled={cancelling}
+              >
+                {cancelling ? 'Cancelando...' : 'Confirmar cancelamento'}
               </button>
             </div>
           </div>

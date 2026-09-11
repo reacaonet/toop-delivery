@@ -8,6 +8,9 @@ export const GATEWAYS = [
   'PIX_DIRECT',
   'CARD_MACHINE',
   'MONEY',
+  'ASAAS',
+  'MERCADO_PAGO',
+  'PAGSEGURO',
 ] as const;
 
 export const TX_OPERATIONS = [

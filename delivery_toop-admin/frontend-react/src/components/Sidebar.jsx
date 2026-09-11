@@ -13,7 +13,8 @@ import {
   UserRound,
   ChevronDown,
   LayoutGrid,
-  BarChart3
+  BarChart3,
+  ShoppingCart
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { deliverymanService } from '../services/api';
@@ -192,6 +193,15 @@ const Sidebar = () => {
         >
           <UserRound size={20} />
           Usuários / Clientes
+        </Link>
+
+        <Link
+          to="/orders"
+          className={`nav-item ${isActivePath('/orders') ? 'active' : ''}`}
+          style={{ position: 'relative' }}
+        >
+          <ShoppingCart size={20} />
+          Pedidos
         </Link>
 
         {groups.map(group => {

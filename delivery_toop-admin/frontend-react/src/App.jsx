@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
+import Orders from './pages/Orders';
 import Users from './pages/Users';
 import Companies from './pages/Companies';
 import AppCategories from './pages/AppCategories';
@@ -48,6 +49,7 @@ function AdminLayout() {
         <div className="content">
           <Routes>
             <Route path="/" element={<Dashboard />} />
+            <Route path="/orders" element={<Orders />} />
             <Route path="/companies" element={<Companies />} />
             <Route path="/app-categories" element={<AppCategories />} />
             <Route path="/banners" element={<Banners />} />

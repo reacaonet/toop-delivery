@@ -36,6 +36,14 @@ const STATUS_COLORS: Record<string, string> = {
   cancelled: '#ef4444',
 }
 
+const CANCEL_BY_LABELS: Record<string, string> = {
+  customer: 'Cliente',
+  store: 'Loja',
+  admin: 'Admin',
+  deliveryman: 'Entregador',
+  system: 'Sistema',
+}
+
 const PAYMENT_LABELS: Record<string, string> = {
   credit_card: 'Cartão de Crédito',
   debit_card: 'Cartão de Débito',
@@ -88,6 +96,8 @@ interface Order {
   total: number
   paymentMethod?: string
   paymentStatus?: string
+  cancelReason?: string
+  cancelledBy?: string
   notes?: string
   createdAt: string
 }
@@ -115,6 +125,9 @@ export default function PainelPage() {
   const [pendingOrderId, setPendingOrderId] = useState<string | null>(null)
   const [dragId, setDragId] = useState<string | null>(null)
   const [overColumn, setOverColumn] = useState<string | null>(null)
+  const [cancelTarget, setCancelTarget] = useState<Order | null>(null)
+  const [cancelReason, setCancelReason] = useState('')
+  const [cancelling, setCancelling] = useState(false)
   const { user, companyId, logout } = useAuth()
 
   const loadOrders = useCallback(async () => {
@@ -177,17 +190,28 @@ export default function PainelPage() {
     }
   }
 
-  const cancelOrder = async (id: string) => {
-    if (!window.confirm('Cancelar este pedido?')) return
-    setUpdating(true)
+  const openCancel = (order: Order) => {
+    setCancelReason('')
+    setCancelTarget(order)
+  }
+
+  const submitCancel = async () => {
+    if (!cancelTarget) return
+    if (!cancelReason.trim()) {
+      alert('Informe o motivo do cancelamento')
+      return
+    }
+    setCancelling(true)
     try {
-      await api.put(`/orders/${id}/status`, { status: 'cancelled' })
+      await api.put(`/orders/${cancelTarget._id}/cancel`, { reason: cancelReason.trim() })
       await loadOrders()
-      setSelected(null)
-    } catch {
-      alert('Erro ao cancelar')
+      if (selected?._id === cancelTarget._id) await loadDetail(cancelTarget._id)
+      setCancelTarget(null)
+      setCancelReason('')
+    } catch (e: any) {
+      alert(e?.response?.data?.error || 'Erro ao cancelar pedido')
     } finally {
-      setUpdating(false)
+      setCancelling(false)
     }
   }
 
@@ -269,7 +293,7 @@ export default function PainelPage() {
       if (s === 'preparing') actions.push(btn('pm-yellow', 'Marcar Pronto', icons.check, () => changeStatus(selected._id, 'ready')))
       if (s === 'ready') actions.push(btn('pm-blue', 'Atribuir Entregador', icons.package, () => handleEnviarEntrega(selected._id)))
       if (s === 'delivering') actions.push(btn('pm-green', 'Finalizar', icons.check, () => changeStatus(selected._id, 'delivered')))
-      if (s !== 'pending') actions.push(btn('pm-red', 'Cancelar', icons.x, () => cancelOrder(selected._id)))
+      actions.push(btn('pm-red', 'Cancelar', icons.x, () => openCancel(selected)))
     }
 
     return (
@@ -314,6 +338,19 @@ export default function PainelPage() {
                   <p className="pm-sub">Status: {selected.paymentStatus || 'N/A'}</p>
                 </div>
               </div>
+
+              {selected.status === 'cancelled' && (
+                <div className="pm-section">
+                  <h4>Cancelamento</h4>
+                  {selected.paymentStatus === 'refunded' && (
+                    <p style={{ color: '#10b981' }}>Pagamento estornado</p>
+                  )}
+                  <p>
+                    Cancelado por {CANCEL_BY_LABELS[selected.cancelledBy || ''] || selected.cancelledBy || 'N/A'}
+                    {selected.cancelReason ? ` - Motivo: ${selected.cancelReason}` : ''}
+                  </p>
+                </div>
+              )}
 
               <div className="pm-section">
                 <h4>Itens</h4>
@@ -441,6 +478,39 @@ export default function PainelPage() {
       </div>
 
       {renderDetails()}
+
+      {cancelTarget && (
+        <div className="pm-modal-backdrop" onClick={() => { setCancelTarget(null); setCancelReason('') }}>
+          <div className={`pm-modal ${cancelling ? 'loading' : ''}`} style={{ maxWidth: 440 }} onClick={e => e.stopPropagation()}>
+            <h3 className="pm-modal-title"><XCircle size={20} /> Cancelar Pedido #{cancelTarget.orderNumber}</h3>
+            {cancelTarget.paymentStatus === 'paid' && (
+              <p style={{ color: '#ef4444', fontSize: '0.85rem', marginBottom: 12 }}>
+                Este pedido já foi pago. O pagamento será estornado.
+              </p>
+            )}
+            <label style={{ display: 'block', fontWeight: 600, marginBottom: 6, fontSize: '0.875rem' }}>
+              Motivo do cancelamento *
+            </label>
+            <textarea
+              value={cancelReason}
+              onChange={e => setCancelReason(e.target.value)}
+              placeholder="Ex.: sem ingredientes no momento"
+              rows={3}
+              style={{ width: '100%', padding: 10, border: '1px solid #d1d5db', borderRadius: 8, resize: 'vertical', fontFamily: 'inherit', boxSizing: 'border-box', fontSize: '0.9rem' }}
+            />
+            <div className="pm-actions">
+              <button className="pm-btn pm-red" onClick={() => { setCancelTarget(null); setCancelReason('') }}>Voltar</button>
+              <button
+                className="pm-btn pm-green"
+                disabled={cancelling || !cancelReason.trim()}
+                onClick={submitCancel}
+              >
+                {cancelling ? 'Cancelando...' : 'Confirmar Cancelamento'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showDmModal && (
         <div className="pm-modal-backdrop" onClick={() => { setShowDmModal(false); setPendingOrderId(null) }}>

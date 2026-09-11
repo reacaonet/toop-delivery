@@ -1,6 +1,15 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
-export const GATEWAY_PROVIDERS = ['BRASPAG', 'PAGARME', 'IUGU', 'CIELO', 'PIX'] as const;
+export const GATEWAY_PROVIDERS = [
+  'BRASPAG',
+  'PAGARME',
+  'IUGU',
+  'CIELO',
+  'PIX',
+  'ASAAS',
+  'MERCADO_PAGO',
+  'PAGSEGURO',
+] as const;
 export type GatewayProvider = (typeof GATEWAY_PROVIDERS)[number];
 
 export const PAYMENT_METHODS = ['credit_card', 'debit_card', 'pix', 'cash'] as const;

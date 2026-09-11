@@ -3,6 +3,7 @@ import orderController from "../controllers/order.controller";
 import { authenticate } from "../middleware/auth";
 import { validate } from "../middleware/validate";
 import {
+  cancelOrderSchema,
   createOrderSchema,
   updateOrderStatusSchema,
 } from "../validators/order";
@@ -24,7 +25,12 @@ router.put(
   orderController.updateStatus
 );
 router.put("/:id/accept", authenticate, orderController.accept);
-router.put("/:id/cancel", authenticate, orderController.cancel);
+router.put(
+  "/:id/cancel",
+  authenticate,
+  validate(cancelOrderSchema),
+  orderController.cancel
+);
 router.delete("/:id", authenticate, orderController.cancel);
 
 export default router;

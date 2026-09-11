@@ -59,7 +59,23 @@ export class OrderController {
 
   async cancel(req: Request, res: Response, next: NextFunction) {
     try {
-      const order = await orderService.cancel(req.params.id);
+      const userId = (req as any).user?._id?.toString();
+      const fullUser = await UserModel.findById(userId).select("role company").lean();
+      const role = fullUser?.role;
+      const companyId = fullUser?.company?.toString();
+
+      let actor: "customer" | "store" | "admin" | "deliveryman" | "system" = "system";
+      if (role === "customer") actor = "customer";
+      else if (role === "store") actor = "store";
+      else if (role === "deliveryman") actor = "deliveryman";
+      else if (role === "admin" || role === "manager" || role === "operator") actor = "admin";
+
+      const order = await orderService.cancel(req.params.id, {
+        userId,
+        companyId,
+        actor,
+        reason: req.body?.reason,
+      });
       return res.status(200).json({ success: true, data: order });
     } catch (error) {
       next(error);

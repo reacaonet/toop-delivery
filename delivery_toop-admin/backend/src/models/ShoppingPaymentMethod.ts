@@ -12,7 +12,7 @@ export const CARD_FLAGS = [
   'OTHERS',
 ] as const;
 
-export const CARD_GATEWAYS = ['BRASPAG', 'PAGARME', 'IUGU'] as const;
+export const CARD_GATEWAYS = ['BRASPAG', 'PAGARME', 'IUGU', 'ASAAS', 'MERCADO_PAGO', 'PAGSEGURO'] as const;
 
 export interface IShoppingPaymentMethod extends Document {
   customer: mongoose.Types.ObjectId;

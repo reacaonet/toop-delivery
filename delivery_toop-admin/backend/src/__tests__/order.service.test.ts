@@ -28,11 +28,18 @@ jest.mock('../models/ShoppingPaymentMethod', () => ({
   },
 }));
 
+jest.mock('../models/PaymentTransaction', () => ({
+  PaymentTransactionModel: {
+    findOne: jest.fn(),
+  },
+}));
+
 jest.mock('../services/payment-gateway.service', () => ({
   __esModule: true,
   default: {
     pagarmeTransaction: jest.fn(),
     pixCharge: jest.fn(),
+    cancelTransaction: jest.fn(),
     record: jest.fn(),
   },
 }));
@@ -40,6 +47,7 @@ jest.mock('../services/payment-gateway.service', () => ({
 import { OrderModel } from '../models/Order';
 import { ShoppingPaymentMethodModel } from '../models/ShoppingPaymentMethod';
 import { UserModel } from '../models/User';
+import { PaymentTransactionModel } from '../models/PaymentTransaction';
 import paymentGatewayService from '../services/payment-gateway.service';
 import orderService from '../services/order.service';
 
@@ -47,6 +55,7 @@ const MockOrderModel = OrderModel as jest.Mocked<typeof OrderModel>;
 const MockPaymentMethodModel = ShoppingPaymentMethodModel as jest.Mocked<typeof ShoppingPaymentMethodModel>;
 const MockUserModel = UserModel as jest.Mocked<typeof UserModel>;
 const MockPaymentGateway = paymentGatewayService as jest.Mocked<typeof paymentGatewayService>;
+const MockPaymentTransaction = PaymentTransactionModel as jest.Mocked<typeof PaymentTransactionModel>;
 
 const baseOrderData = {
   company: 'company123',
@@ -275,25 +284,32 @@ describe('OrderService', () => {
   });
 
   describe('cancel', () => {
-    it('should cancel a pending order', async () => {
-      const mockOrder = { _id: 'order123', status: 'pending', save: jest.fn() };
+    it('should cancel a pending order (system actor)', async () => {
+      const mockOrder = {
+        _id: 'order123',
+        status: 'pending',
+        paymentStatus: 'pending',
+        paymentMethod: 'cash',
+        save: jest.fn(),
+      };
       MockOrderModel.findById.mockResolvedValue(mockOrder as any);
 
       const result = await orderService.cancel('order123');
 
       expect(result.status).toBe('cancelled');
+      expect(result.cancelledBy).toBe('system');
       expect(mockOrder.save).toHaveBeenCalled();
     });
 
     it('should throw if order already cancelled', async () => {
-      const mockOrder = { _id: 'order123', status: 'cancelled' };
+      const mockOrder = { _id: 'order123', status: 'cancelled', paymentMethod: 'cash', paymentStatus: 'pending' };
       MockOrderModel.findById.mockResolvedValue(mockOrder as any);
 
       await expect(orderService.cancel('order123')).rejects.toThrow('Pedido já está cancelado');
     });
 
     it('should throw if order already delivered', async () => {
-      const mockOrder = { _id: 'order123', status: 'delivered' };
+      const mockOrder = { _id: 'order123', status: 'delivered', paymentMethod: 'cash', paymentStatus: 'pending' };
       MockOrderModel.findById.mockResolvedValue(mockOrder as any);
 
       await expect(orderService.cancel('order123')).rejects.toThrow('Não é possível cancelar pedido já entregue');
@@ -303,6 +319,140 @@ describe('OrderService', () => {
       MockOrderModel.findById.mockResolvedValue(null);
 
       await expect(orderService.cancel('nonexistent')).rejects.toThrow('Pedido não encontrado');
+    });
+
+    it('customer cancels own pending order', async () => {
+      const mockOrder = {
+        _id: 'order123',
+        status: 'pending',
+        customer: 'cust1',
+        paymentStatus: 'pending',
+        paymentMethod: 'cash',
+        save: jest.fn(),
+      };
+      MockOrderModel.findById.mockResolvedValue(mockOrder as any);
+
+      const result = await orderService.cancel('order123', {
+        userId: 'cust1',
+        actor: 'customer',
+      });
+
+      expect(result.status).toBe('cancelled');
+      expect(result.cancelledBy).toBe('customer');
+    });
+
+    it('customer cannot cancel another user\'s order', async () => {
+      const mockOrder = {
+        _id: 'order123',
+        status: 'pending',
+        customer: 'cust1',
+        paymentStatus: 'pending',
+        paymentMethod: 'cash',
+      };
+      MockOrderModel.findById.mockResolvedValue(mockOrder as any);
+
+      await expect(
+        orderService.cancel('order123', { userId: 'cust_other', actor: 'customer' })
+      ).rejects.toThrow('Você não pode cancelar um pedido que não é seu');
+    });
+
+    it('customer cannot cancel order in delivering status', async () => {
+      const mockOrder = {
+        _id: 'order123',
+        status: 'delivering',
+        customer: 'cust1',
+        paymentStatus: 'pending',
+        paymentMethod: 'cash',
+      };
+      MockOrderModel.findById.mockResolvedValue(mockOrder as any);
+
+      await expect(
+        orderService.cancel('order123', { userId: 'cust1', actor: 'customer' })
+      ).rejects.toThrow('O pedido já saiu para entrega e não pode mais ser cancelado');
+    });
+
+    it('store cancels order with reason and matching company', async () => {
+      const mockOrder = {
+        _id: 'order123',
+        status: 'pending',
+        company: 'comp1',
+        paymentStatus: 'pending',
+        paymentMethod: 'cash',
+        save: jest.fn(),
+      };
+      MockOrderModel.findById.mockResolvedValue(mockOrder as any);
+
+      const result = await orderService.cancel('order123', {
+        companyId: 'comp1',
+        actor: 'store',
+        reason: 'Sem estoque',
+      });
+
+      expect(result.status).toBe('cancelled');
+      expect(result.cancelledBy).toBe('store');
+      expect(result.cancelReason).toBe('Sem estoque');
+    });
+
+    it('store cannot cancel without reason', async () => {
+      const mockOrder = {
+        _id: 'order123',
+        status: 'pending',
+        company: 'comp1',
+        paymentStatus: 'pending',
+        paymentMethod: 'cash',
+      };
+      MockOrderModel.findById.mockResolvedValue(mockOrder as any);
+
+      await expect(
+        orderService.cancel('order123', { companyId: 'comp1', actor: 'store' })
+      ).rejects.toThrow('Informe o motivo do cancelamento');
+    });
+
+    it('store cannot cancel order from another company', async () => {
+      const mockOrder = {
+        _id: 'order123',
+        status: 'pending',
+        company: 'comp1',
+        paymentStatus: 'pending',
+        paymentMethod: 'cash',
+      };
+      MockOrderModel.findById.mockResolvedValue(mockOrder as any);
+
+      await expect(
+        orderService.cancel('order123', { companyId: 'comp_other', actor: 'store', reason: 'Motivo' })
+      ).rejects.toThrow('Você não é a loja deste pedido');
+    });
+
+    it('paid credit card order triggers refund', async () => {
+      const mockOrder = {
+        _id: 'order123',
+        status: 'confirmed',
+        customer: 'cust1',
+        company: 'comp1',
+        orderNumber: '123456001',
+        total: 50,
+        paymentStatus: 'paid',
+        paymentMethod: 'credit_card',
+        save: jest.fn(),
+      };
+      MockOrderModel.findById.mockResolvedValue(mockOrder as any);
+      MockPaymentTransaction.findOne.mockReturnValue({
+        sort: () => Promise.resolve({ gatewayId: 'devtrx_abc' }),
+      } as any);
+      MockPaymentGateway.cancelTransaction.mockResolvedValue({ status: 'canceled' } as any);
+      MockPaymentGateway.record.mockResolvedValue({} as any);
+
+      const result = await orderService.cancel('order123', {
+        userId: 'cust1',
+        actor: 'customer',
+      });
+
+      expect(MockPaymentGateway.cancelTransaction).toHaveBeenCalledWith('devtrx_abc');
+      expect(MockPaymentGateway.record).toHaveBeenCalledWith(
+        expect.objectContaining({ operation: 'refund', gatewayId: 'devtrx_abc', amount: 50 })
+      );
+      expect(result.status).toBe('cancelled');
+      expect(result.paymentStatus).toBe('refunded');
     });
   });
 });

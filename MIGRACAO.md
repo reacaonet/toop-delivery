@@ -536,3 +536,46 @@ Rotas orfas removidas; App.jsx e Sidebar reescritos (grupos: Dashboard | Motoris
 - Runtime extract: GET /v1/mobility/extract/6a95eb5d3a016b0799194771 success=true data.2026-09 items=1 price=418.11 - extrato do entregador carrega com os bookings.
 - Nota: client nas corridas continua vazio (booking.client aponta para user que nao existe no banco - dado legado).
 - Nenhum commit feito (conforme combinado).
+
+## 11/09/2026 - Novos gateways de pagamento (ASAAS, MERCADO_PAGO, PAGSEGURO) - nivel config/rotulacao
+### Mudancas
+1. backend models/Settings.ts: GATEWAY_PROVIDERS ganhou 'ASAAS', 'MERCADO_PAGO', 'PAGSEGURO' (enum do provider ativo).
+2. backend models/PaymentTransaction.ts: GATEWAYS ganhou os 3 proveedores (registro de transacoes nao rejeita esses labels).
+3. backend models/ShoppingPaymentMethod.ts: CARD_GATEWAYS aceita os 3 novos (cartao salvo com provider selecionado nao quebra validacao).
+4. frontend-react pages/Settings.jsx: select de Provedor agora com labels amigaveis (Braspag, Pagar.me, Iugu, Cielo, PIX (direto), Asaas, Mercado Pago, PagSeguro); valores salvos mantem os codigos antigos.
+5. backend controllers/settings.controller.ts: PUT /settings agora faz merge profundo do paymentGateway - PUT parcial (ex.: so provider) nao apaga mais webhookUrl/splitEnabled/credenciais (bug encontrado em teste).
+### Escopo
+- Nivel 1 apenas (configuracao/rotulacao): o processamento real continua via proxy ao microservico payment (8400, integracao PagarMe/Braspag). Integracao real das APIs Asaas/MP/PagSeguro fica pendente de chaves e e um trabalho separado no microservico.
+### Validacoes
+- Backend npx tsc --noEmit OK; admin frontend-react vite build OK; containers toop-admin-api-dev e toop-frontend-react-dev reiniciados.
+- Runtime: GET /settings retorna provider IUGU (existente); PUT parcial provider=PAGSEGURO persiste e preserva webhookUrl/splitEnabled; revert para IUGU OK.
+- Nenhum commit feito (aguardando usuario).
+
+## 11/09/2026 - Cancelamento de pedidos com motivo, autorizacao por perfil e estorno no gateway
+### Mudancas
+1. models/Order.ts: campo `cancelledBy` (enum: customer|store|admin|deliveryman|system). `cancelReason` e `cancelledAt` ja existiam.
+2. services/order.service.ts: `cancel(id, {userId, companyId, actor, reason})`:
+   - Cliente: so cancela pedido proprio e enquanto pending/confirmed/preparing (antes da entrega).
+   - Loja (store): so pedido da propria empresa (companyId) e motivo obrigatorio; admin/entregador: motivo obrigatorio.
+   - Se o pedido foi pago (credit_card/debit_card/pix), busca a ultima transacao charge e chama paymentGatewayService.cancelTransaction + registra transacao refund; pedido marca paymentStatus=refunded (try/catch para o cancelamento nao quebrar se o estorno falhar).
+3. validators/order.ts: cancelOrderSchema (reason opcional, max 300). routes/order.routes.ts: PUT /orders/:id/cancel usa o validator.
+4. controllers/order.controller.ts: cancela derivando role/company do usuario autenticado (re-fetch no DB, pois o JWT nao carrega company).
+5. web-client OrderDetailPage.tsx: botao "Cancelar pedido" para cliente (pending/confirmed/preparing), modal com motivo opcional (avisa estorno se pago), secao exibindo cancelado por/motivo/estorno.
+6. frontend-react: nova pagina Orders.jsx em /orders (loja ve sua empresa; admin ve todas com filtro por loja/status), cancelamento com modal de motivo obrigatorio; rota em App.jsx, item "Pedidos" no Sidebar; api.js cancelOrder aceita payload.
+### Validacoes
+- Backend npx tsc --noEmit OK; jest: suite order.service.test com novos casos (autorizacao, motivo obrigatorio, estorno) - PASS.
+- Admin frontend-react vite build OK; containers toop-admin-api-dev, toop-web-client-dev e toop-frontend-react-dev reiniciados.
+- Runtime (sandbox PAYMENT_DEV_MODE): loja cancela pedido cash com motivo OK (cancelReason/cancelledBy=store); sem motivo retorna 400; admin cancela pedido pago com cartao -> paymentStatus=refunded + transacao refund registrada (devtrx); cliente cancela pedido proprio sem motivo OK (cancelledBy=customer). Dados de teste criados e removidos apos validacao.
+- Observacao: suite payment-gateway.service.test tem 4 timeouts pre-existentes (isSandbox() chama getGatewayConfig -> depende do banco/instancia de rede nos testes); nao relacionado a esta mudanca.
+- Nenhum commit feito (aguardando usuario).
+
+## 11/09/2026 - App da loja (delivery_toop-store, porta 4203): botao de cancelar pedido com motivo
+### Contexto
+- O painel admin do cancelamento havia sido feito em frontend-react (admin, 4202), mas a loja usa outro app (delivery_toop-store). Lojista nao via botao em /painel nem /orders.
+### Mudancas (delivery_toop-store)
+1. pages/PainelPage.tsx: botao Cancelar agora aparece para qualquer status em andamento (inclusive pedido novo/pending, antes `s !== pending` nao mostrava). Cancelamento deixa de usar PUT /orders/:id/status e passa a chamar PUT /orders/:id/cancel com modal de motivo obrigatorio; avisa "pagamento sera estornado" quando paymentStatus=paid; cancela, recarrega lista e detalhe. Detalhe exibe "Cancelado por X - Motivo" e nota de estorno quando paymentStatus=refunded.
+2. pages/OrdersPage.tsx: adicionado botao Cancelar no pedido expandido (status nao finais), modal de motivo obrigatorio (padrao .modal/.modal-header). Detalhe exibe cancelamento/quem/motivo e estorno.
+### Validacoes
+- npx tsc --noEmit OK e vite build OK no container toop-store-dev; container reiniciado (HTTP 200 em 4203).
+- Backend de cancelamento com motivo ja validado em runtime no item anterior (mesmo endpoint).
+- Nenhum commit feito (aguardando usuario).

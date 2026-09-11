@@ -2,6 +2,7 @@ import { OrderModel } from "../models/Order";
 import { UserModel } from "../models/User";
 import { ShoppingPaymentMethodModel } from "../models/ShoppingPaymentMethod";
 import { SettingsModel } from "../models/Settings";
+import { PaymentTransactionModel } from "../models/PaymentTransaction";
 import { AppError } from "../middleware/errorHandler";
 import { incOrder } from "../middleware/metrics";
 import walletService from "./wallet.service";
@@ -342,7 +343,15 @@ export class OrderService {
     return order;
   }
 
-  async cancel(id: string) {
+  async cancel(
+    id: string,
+    opts: {
+      userId?: string;
+      companyId?: string;
+      actor?: "customer" | "store" | "admin" | "deliveryman" | "system";
+      reason?: string;
+    } = {}
+  ) {
     const order = await OrderModel.findById(id);
 
     if (!order) {
@@ -357,7 +366,75 @@ export class OrderService {
       throw new AppError("Não é possível cancelar pedido já entregue", 400);
     }
 
+    const actor = opts.actor || "system";
+    const reason = (opts.reason || "").trim();
+
+    if (actor === "customer") {
+      if (!opts.userId || order.customer?.toString() !== opts.userId) {
+        throw new AppError("Você não pode cancelar um pedido que não é seu", 403);
+      }
+      if (!["pending", "confirmed", "preparing"].includes(order.status)) {
+        throw new AppError(
+          "O pedido já saiu para entrega e não pode mais ser cancelado",
+          400
+        );
+      }
+    }
+
+    if (actor === "store") {
+      if (!opts.companyId || !order.company || order.company.toString() !== opts.companyId) {
+        throw new AppError("Você não é a loja deste pedido", 403);
+      }
+      if (!reason) {
+        throw new AppError("Informe o motivo do cancelamento", 400);
+      }
+    }
+
+    if ((actor === "admin" || actor === "deliveryman") && !reason) {
+      throw new AppError("Informe o motivo do cancelamento", 400);
+    }
+
+    // estorno no gateway se o pedido já foi pago
+    let refunded = false;
+    if (order.paymentStatus === "paid") {
+      const paidMethods = ["credit_card", "debit_card", "pix"];
+      if (paidMethods.includes(String(order.paymentMethod || "").toLowerCase())) {
+        const tx = await PaymentTransactionModel.findOne({
+          order: order._id,
+          operation: "charge",
+        }).sort({ createdAt: -1 });
+        const gatewayId = tx?.gatewayId || order.pixTxid || order.orderNumber;
+        if (gatewayId) {
+          try {
+            const result = await paymentGatewayService.cancelTransaction(String(gatewayId));
+            await paymentGatewayService.record({
+              gateway: String(order.paymentMethod).toLowerCase() === "pix" ? "PIX" : "PAGARME",
+              operation: "refund",
+              method: String(order.paymentMethod),
+              amount: Number(order.total),
+              fees: 0,
+              status: "refunded",
+              gatewayId: String(gatewayId),
+              gatewayResponse: result,
+              order: order._id.toString(),
+              customer: order.customer?.toString(),
+              company: order.company?.toString(),
+            });
+            refunded = true;
+          } catch (err) {
+            console.error("[Order] Falha ao estornar pedido pago:", err);
+          }
+        }
+      }
+    }
+
     order.status = "cancelled";
+    order.cancelledAt = new Date();
+    order.cancelReason = reason || undefined;
+    order.cancelledBy = actor;
+    if (refunded) {
+      order.paymentStatus = "refunded";
+    }
     await order.save();
 
     incOrder("cancelled");

@@ -2837,6 +2837,27 @@ img { max-width: 100%; display: block; }
     display: flex;
   }
 
+  /* Tracker: mapa menor + painel acima do menu fixo para o botão cancelar não ficar cortado */
+  .track {
+    height: calc(100vh - var(--navbar-h) - 126px);
+  }
+  .track-map-wrap {
+    min-height: 26%;
+    max-height: 36%;
+  }
+  .track-panel {
+    max-height: 70vh;
+  }
+
+  /* Balão do chat acima do menu inferior */
+  .chat-fab {
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 86px);
+    right: 18px;
+  }
+  .chat-toast {
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 150px);
+  }
+
   .login-hero {
     display: none;
   }
@@ -3233,7 +3254,7 @@ img { max-width: 100%; display: block; }
 
 /* RIDE TRACKING - UBER STYLE */
 .track { display: flex; flex-direction: column; height: calc(100vh - var(--navbar-h) - 48px); }
-.track-map-wrap { position: relative; flex: 1; min-height: 45%; overflow: hidden; }
+.track-map-wrap { position: relative; flex: 1; min-height: 28%; max-height: 40%; overflow: hidden; }
 .track-map { width: 100%; height: 100%; position: absolute; inset: 0; }
 .track-back {
   position: absolute; top: 14px; left: 14px; z-index: 1000;
@@ -3276,7 +3297,7 @@ img { max-width: 100%; display: block; }
 .track-panel {
   background: #fff; border-radius: 20px 20px 0 0; padding: 24px 20px;
   box-shadow: 0 -4px 20px rgba(0,0,0,0.08); flex-shrink: 0;
-  display: flex; flex-direction: column; gap: 16px; max-height: 55vh; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 16px; max-height: 68vh; overflow-y: auto;
 }
 .track-panel-header { display: flex; justify-content: space-between; align-items: flex-start; }
 .track-title { font-size: 1.1rem; font-weight: 700; color: #1a1a2e; margin-bottom: 4px; }

@@ -20,6 +20,13 @@ class SettingsController {
       if (!settings) {
         settings = await SettingsModel.create(req.body);
       } else {
+        // merge profundo do paymentGateway para não perder credenciais em PUT parcial
+        if (req.body.paymentGateway && typeof req.body.paymentGateway === 'object') {
+          req.body.paymentGateway = {
+            ...(settings.paymentGateway ? (settings.paymentGateway as any).toObject() : {}),
+            ...req.body.paymentGateway,
+          };
+        }
         Object.assign(settings, req.body);
         await settings.save();
       }
