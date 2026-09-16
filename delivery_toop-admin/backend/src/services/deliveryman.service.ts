@@ -2,6 +2,11 @@ import { DeliverymanModel } from "../models/Deliveryman";
 import { UserModel } from "../models/User";
 import { AppError } from "../middleware/errorHandler";
 import bcrypt from "bcrypt";
+import { classifyVehicleCode } from "./vehicle-category.service";
+
+function ensureServiceCategory(categories: string[], category: string): string[] {
+  return categories.includes(category) ? categories : [...categories, category];
+}
 
 interface PaginationQuery {
   page?: string;
@@ -21,6 +26,9 @@ export class DeliverymanService {
     email: string;
     phone: string;
     vehicleType?: string;
+    vehicleBrand?: string;
+    vehicleModel?: string;
+    vehicleYear?: number;
     password?: string;
   }) {
     const existingDeliveryman = await DeliverymanModel.findOne({
@@ -35,7 +43,13 @@ export class DeliverymanService {
       throw new AppError("Email já está em uso", 409);
     }
 
-    const deliveryman = await DeliverymanModel.create(data);
+    const deliveryman = await DeliverymanModel.create({
+      ...data,
+      rideCategoryCode: classifyVehicleCode(data),
+      serviceCategories: data.vehicleType === 'taxi'
+        ? ensureServiceCategory(['delivery'], 'taxi')
+        : undefined,
+    });
 
     const plainPassword = data.password || "entregador123";
     const hashedPassword = await bcrypt.hash(plainPassword, 10);
@@ -85,6 +99,9 @@ export class DeliverymanService {
       email?: string;
       phone?: string;
       vehicleType?: string;
+      vehicleBrand?: string;
+      vehicleModel?: string;
+      vehicleYear?: number;
       active?: boolean;
       cpf?: string;
       cnh?: string;
@@ -104,6 +121,7 @@ export class DeliverymanService {
         vehicleDocument?: 'pending' | 'approved' | 'rejected';
         photo?: 'pending' | 'approved' | 'rejected';
       };
+      serviceCategories?: string[];
     }
   ) {
     if (data.email) {
@@ -117,6 +135,20 @@ export class DeliverymanService {
     }
 
     const updateData: any = { ...data };
+
+    const vehicleKeys = ['vehicleType', 'vehicleBrand', 'vehicleModel', 'vehicleYear'] as const;
+    const hasVehicleField = vehicleKeys.some((key) => key in data);
+    if (hasVehicleField) {
+      const current = await DeliverymanModel.findById(id);
+      const currentObj: any = current?.toObject() || {};
+      updateData.rideCategoryCode = classifyVehicleCode({ ...currentObj, ...data });
+      const currentServices = currentObj.serviceCategories || [];
+      if (data.vehicleType === 'taxi') {
+        updateData.serviceCategories = ensureServiceCategory(currentServices, 'taxi');
+      } else if (data.vehicleType != null && currentServices.includes('taxi')) {
+        updateData.serviceCategories = currentServices.filter((c: string) => c !== 'taxi');
+      }
+    }
 
     if (data.documentStatus) {
       const current = await DeliverymanModel.findById(id);
@@ -168,6 +200,15 @@ export class DeliverymanService {
     if (!deliveryman.isDriver) {
       deliveryman.driverOnline = false;
       deliveryman.driverAvailable = false;
+    } else {
+      deliveryman.rideCategoryCode = classifyVehicleCode(deliveryman.toObject());
+      deliveryman.serviceCategories = ensureServiceCategory(
+        deliveryman.serviceCategories || [],
+        'driver'
+      ) as any;
+      if (deliveryman.vehicleType === 'taxi') {
+        deliveryman.serviceCategories = ensureServiceCategory(deliveryman.serviceCategories, 'taxi') as any;
+      }
     }
     await deliveryman.save();
     return { isDriver: deliveryman.isDriver, driverOnline: deliveryman.driverOnline, driverAvailable: deliveryman.driverAvailable };

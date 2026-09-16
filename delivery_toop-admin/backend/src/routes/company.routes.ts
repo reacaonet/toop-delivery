@@ -10,8 +10,8 @@ import {
 
 const router = Router();
 
-router.get("/", authenticate, companyController.list);
-router.get("/:id", authenticate, companyController.getById);
+router.get("/", companyController.list);
+router.get("/:id", companyController.getById);
 router.post(
   "/",
   authenticate,

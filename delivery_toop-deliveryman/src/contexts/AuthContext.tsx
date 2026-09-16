@@ -12,7 +12,11 @@ interface User {
     email: string
     phone?: string
     vehicleType?: string
+    vehicleBrand?: string
+    vehicleModel?: string
+    vehicleYear?: number
     vehiclePlate?: string
+    rideCategoryCode?: string
     cpf?: string
     cnh?: string
     avatar?: string

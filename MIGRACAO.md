@@ -2,7 +2,7 @@
 
 > Documento de controle do que **ainda nÃ£o foi migrado** do sistema legado para o backend/painel moderno (TypeScript + React). Cada item tem etapas e um checkbox `[ ]` para marcarmos `[x]` conforme for realizado.
 
-**Ãšltima atualizaÃ§Ã£o:** 11/09/2026
+**Ãšltima atualizaÃ§Ã£o:** 16/09/2026
 
 ---
 
@@ -596,3 +596,39 @@ Rotas orfas removidas; App.jsx e Sidebar reescritos (grupos: Dashboard | Motoris
 - Backend npx tsc --noEmit OK; vite build OK nos 3 containers; containers reiniciados.
 - Runtime (8100): GET /platform/contact 200 publico (fallback de defaults); login admin (`POST /auth`) + POST /notifications (target all) -> GET /my/unread-count 1, mark-read True; login loja (`loja@teste.com.br`/`loja123`) + create ticket auto-preenche person (Pizzaria da Vila Teste) + company, protocolo TKT-*; interaction com origin store/author email; detalhe por protocolo com 2 interacoes; notif target=companies+targetId -> visivel no /notifications/my da loja (targetId resolvido pelo company); unreadCount 2. Dados de teste (notificacoes e ticket) removidos apos validacao.
 - Nenhum commit feito (aguardando usuario).
+
+## 16/09/2026 - Categoria do veiculo do entregador (TÃ¡xi/Confort/Black) por modelo e ano
+### Backend
+1. models/Deliveryman.ts: novos campos `vehicleBrand`, `vehicleModel`, `vehicleYear` e `rideCategoryCode` (classificacao calculada) + indice em rideCategoryCode.
+2. services/vehicle-category.service.ts (novo): classificacao por tabela de regras (marca/modelo/ano). Ex.: Nissan Versa 2023+ = `car_black`, ate 2022 = `car_comfort`; fallback generico = `car_basic` (carro/van) e `moto_basic` (moto/bike). Helpers: `classifyVehicle` (retorna code+label), `driverCategoriesForBooking` (categoria exata + superiores para o booking) e `bookingTypesForDriver` (tipos de corrida aceitaveis pelo motorista).
+3. services/deliveryman.service.ts: create/update recomputam `rideCategoryCode` quando os campos do veiculo mudam; `vehicleType=taxi` adiciona `taxi` em serviceCategories (e remove ao sair de taxi); toggleDriverMode garante categoria + `driver`/`taxi` em serviceCategories ao ativar o modo motorista.
+4. services/auth.service.ts + controllers/auth.controller.ts + validators/auth.ts: cadastro de entregador aceita veiculo taxi + marca/modelo/ano e ja classifica.
+5. Matching por categoria (services/booking.controller.ts notifyNearbyDrivers): Deliverymen agora filtrados por `rideCategoryCode` (categoria exata + superiores), com fallback legado (sem categoria = basico). Rota list de matching tambem filtra por categoria do motorista; accept valida que a categoria do motorista aceita o `vehicleType` da corrida (Deliveryman). DriverModel (mobile) mantido como estava.
+6. validators/deliveryman.ts: enum de vehicleType inclui `taxi`; aceita marca/modelo/ano; serviceCategories inclui `taxi`.
+### App entregador (4204)
+- RegisterPage: opcao "TÃ¡xi" no tipo de veiculo + campos carro (Marca/Modelo/Ano).
+- ProfilePage: opcao "TÃ¡xi", campos Marca/Modelo/Ano enviados ao salvar, e badge "Categoria do veÃ­culo" com preview em tempo real (calculado pelo modelo/ano) e o valor persistido (rideCategoryCode) apos refresh.
+- AuthContext: tipagem com os novos campos.
+### Validacoes
+- Backend npx tsc --noEmit OK; deliveryman tsc + vite build OK; containers reiniciados; API 8100 health 200.
+- Runtime (8100): PUT /deliverymen/:id com Nissan Versa 2022 -> `car_comfort`; 2024 -> `car_black`; `vehicleType=taxi` -> `rideCategoryCode=taxi` e serviceCategories inclui `taxi`; ao voltar para motorcycle -> `moto_basic` e `taxi` removido dos serviceCategories. O usuario de teste (entregador@teste.com.br) restaurado ao estado original (motorcycle).
+- Nenhum commit feito (aguardando usuario).
+
+---
+
+## Regras de Classificação de Veículo editáveis (admin) + autocomplete (entregador) — 16/09/2026
+
+### Backend
+1. models/VehicleCategoryRule.ts (novo): coleção ehiclecategoryrules com brand/model/yearMin/yearMax/category/active/order (timestamps).
+2. services/vehicle-category.service.ts: regras migradas para o Mongo (seed automático das defaults em server.ts, seedVehicleCategoryRules — 118 regras). Classificação agora usa as regras do banco (cache em memória com TTL 60s, invalidação após escrita, fallback para defaults). Novos helpers: listVehicleCategoryRules, upsertVehicleCategoryRule (merge parcial no update, aceita ny/* como "qualquer marca"), deleteVehicleCategoryRule, getVehicleCategoryOptions (marcas/modelos distintos p/ autocomplete) e invalidateVehicleRulesCache.
+3. routes/vehicle-category.routes.ts: GET /vehicle-category/rules (público), POST /vehicle-category/rules, PUT /vehicle-category/rules/:id, DELETE /vehicle-category/rules/:id (escritas autenticadas com uthenticate) e GET /vehicle-category/options?brand= (público, p/ autocomplete).
+4. Correções na classificação (quando aplicadas nas defaults): Onix/HB20/Argo/Versa/Virtus sempre car_basic (removido upgrade por ano); Pulse/Strada/Tracker/T-Cross/EcoSport/Duster/Creta/Civic/etc movidos p/ car_comfort (anti Black); Corolla/Fastback/Taos/Nivus mantidos em níveis corretos. Tabela mensurável token: 118 regras ativas.
+### Painel admin (4202)
+- Pagina /mobility/vehicle-category-rules agora é **editável**: botão Nova Regra, editar, excluir, ativar/desativar (Eye), reordenar (setas ?? — ordem define qual regra bate primeiro) e teste de classificação. ehicleCategoryRuleService em api.js ganhou options, create, update e emove.
+### App entregador (4204)
+- ProfilePage: inputs Marca e Modelo agora têm **autocomplete** (datalist) buscando na tabela de regras (GET /vehicle-category/options): sugere marcas conhecidas e, ao digitar a marca, os modelos cadastrados.
+### Validações
+- Backend 	sc --noEmit OK (exit 0, via container); deliveryman 	sc --noEmit OK; admin frontend e ProfilePage transpilam no vite (dev 200).
+- Runtime (8100): seed 118 regras ativas; /vehicle-category/classify para HB20 2024?car_basic, Versa 2023?car_basic, T-Cross 2022?car_comfort, Onix 2024?car_basic, Tracker 2021?car_comfort, Corolla 2022?car_black; /vehicle-category/options retorna marcas e modelos filtrados por marca (ex.: nissan ? frontier/kicks/march/sentra); CRUD autenticado create(confort)/update(black)/delete OK e classify volta a car_basic após delete.
+- Containers: admin-api, frontend-react e deliveryman-app recriados via compose (saudáveis).
+- Nenhum commit feito (aguardando usuário).

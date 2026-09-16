@@ -2011,4 +2011,31 @@ export const rideCategoryService = {
   },
 };
 
+export const vehicleCategoryRuleService = {
+  getRules: async () => {
+    const r = await api.get('/vehicle-category/rules');
+    return r.data?.data ?? r.data;
+  },
+  classify: async (params = {}) => {
+    const r = await api.get('/vehicle-category/classify', { params });
+    return r.data?.data ?? r.data;
+  },
+  options: async (params = {}) => {
+    const r = await api.get('/vehicle-category/options', { params });
+    return r.data?.data ?? r.data;
+  },
+  create: async (d) => {
+    const r = await api.post('/vehicle-category/rules', d);
+    return r.data?.data ?? r.data;
+  },
+  update: async (id, d) => {
+    const r = await api.put(`/vehicle-category/rules/${id}`, d);
+    return r.data?.data ?? r.data;
+  },
+  remove: async (id) => {
+    const r = await api.delete(`/vehicle-category/rules/${id}`);
+    return r.data?.data ?? r.data;
+  },
+};
+
 export default api;

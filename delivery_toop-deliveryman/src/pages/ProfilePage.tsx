@@ -4,6 +4,14 @@ import { User, Save, Upload, Star, Truck, Phone, Mail, FileText, Image as ImageI
 import api from '../api'
 import { useAuth } from '../contexts/AuthContext'
 
+const CATEGORY_META: Record<string, { label: string; icon: string; color: string }> = {
+  car_basic: { label: 'Carro Básico', icon: '🚗', color: '#6b7280' },
+  car_comfort: { label: 'Confort', icon: '🚘', color: '#667eea' },
+  car_black: { label: 'Black', icon: '🖤', color: '#111827' },
+  moto_basic: { label: 'Moto Básica', icon: '🏍️', color: '#6b7280' },
+  taxi: { label: 'Táxi', icon: '🚕', color: '#f59e0b' },
+}
+
 const ProfilePage: React.FC = () => {
   const { user, deliverymanId, refreshUser } = useAuth()
   const navigate = useNavigate()
@@ -24,6 +32,9 @@ const ProfilePage: React.FC = () => {
     cpf: '',
     cnh: '',
     vehicleType: 'motorcycle',
+    vehicleBrand: '',
+    vehicleModel: '',
+    vehicleYear: '',
     vehiclePlate: '',
     avatar: '',
   })
@@ -43,8 +54,36 @@ const ProfilePage: React.FC = () => {
   const addressTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const addressRef = useRef<HTMLDivElement>(null)
 
+  const [brandOptions, setBrandOptions] = useState<string[]>([])
+  const [modelOptions, setModelOptions] = useState<string[]>([])
+
   useEffect(() => {
-    if (dm) {
+    const loadOptions = async () => {
+      try {
+        const { data: brandData } = await api.get('/vehicle-category/options')
+        if (Array.isArray(brandData?.brands)) setBrandOptions(brandData.brands)
+      } catch { /* opcional */ }
+    }
+    loadOptions()
+  }, [])
+
+  useEffect(() => {
+    const brand = (formData.vehicleBrand || '').trim()
+    if (!brand) { setModelOptions([]); return }
+    let t: ReturnType<typeof setTimeout> | undefined
+    t = setTimeout(async () => {
+      try {
+        const { data: modelData } = await api.get('/vehicle-category/options', { params: { brand } })
+        if (Array.isArray(modelData?.models)) setModelOptions(modelData.models)
+      } catch { /* opcional */ }
+    }, 300)
+    return () => { if (t) clearTimeout(t) }
+  }, [formData.vehicleBrand])
+
+  useEffect(() => {
+    if (deliverymanId) {
+      loadProfile()
+    } else if (dm) {
       setFormData({
         name: dm.name || '',
         email: dm.email || '',
@@ -52,6 +91,9 @@ const ProfilePage: React.FC = () => {
         cpf: dm.cpf || '',
         cnh: dm.cnh || '',
         vehicleType: dm.vehicleType || 'motorcycle',
+        vehicleBrand: dm.vehicleBrand || '',
+        vehicleModel: dm.vehicleModel || '',
+        vehicleYear: dm.vehicleYear ? String(dm.vehicleYear) : '',
         vehiclePlate: dm.vehiclePlate || '',
         avatar: dm.avatar || '',
       })
@@ -64,8 +106,6 @@ const ProfilePage: React.FC = () => {
       setAddressLat(dm.addressLat || null)
       setAddressLng(dm.addressLng || null)
       setLoading(false)
-    } else if (deliverymanId) {
-      loadProfile()
     } else {
       setLoading(false)
     }
@@ -82,6 +122,9 @@ const ProfilePage: React.FC = () => {
         cpf: data.cpf || '',
         cnh: data.cnh || '',
         vehicleType: data.vehicleType || 'motorcycle',
+        vehicleBrand: data.vehicleBrand || '',
+        vehicleModel: data.vehicleModel || '',
+        vehicleYear: data.vehicleYear ? String(data.vehicleYear) : '',
         vehiclePlate: data.vehiclePlate || '',
         avatar: data.avatar || '',
       })
@@ -104,6 +147,35 @@ const ProfilePage: React.FC = () => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
+
+  const [liveCategory, setLiveCategory] = useState('')
+
+  useEffect(() => {
+    let t: ReturnType<typeof setTimeout> | undefined
+    const vt = formData.vehicleType
+    if (vt === 'taxi') { setLiveCategory('taxi'); return }
+    const brand = (formData.vehicleBrand || '').trim()
+    const model = (formData.vehicleModel || '').trim()
+    if (vt !== 'car' || (!brand && !model)) { setLiveCategory(''); return }
+    t = setTimeout(async () => {
+      try {
+        const { data } = await api.get('/vehicle-category/classify', {
+          params: {
+            vehicleType: vt,
+            vehicleBrand: brand,
+            vehicleModel: model,
+            vehicleYear: formData.vehicleYear || undefined,
+          },
+        })
+        const code = data?.code ?? data?.data?.code
+        if (code) setLiveCategory(code)
+      } catch { /* mantem ultimo valor disponivel */ }
+    }, 350)
+    return () => { if (t) clearTimeout(t) }
+  }, [formData.vehicleType, formData.vehicleBrand, formData.vehicleModel, formData.vehicleYear])
+
+  const shownCategory = liveCategory || dm?.rideCategoryCode || ''
+  const shownMeta = CATEGORY_META[shownCategory]
 
   const searchAddress = async (query: string) => {
     if (query.length < 3) { setAddressSuggestions([]); return }
@@ -197,6 +269,9 @@ const ProfilePage: React.FC = () => {
         cpf: formData.cpf,
         cnh: formData.cnh,
         vehicleType: formData.vehicleType,
+        vehicleBrand: formData.vehicleBrand,
+        vehicleModel: formData.vehicleModel,
+        vehicleYear: formData.vehicleYear ? Number(formData.vehicleYear) : undefined,
         vehiclePlate: formData.vehiclePlate,
         avatar: formData.avatar,
         documents,
@@ -366,8 +441,71 @@ const ProfilePage: React.FC = () => {
               <option value="motorcycle">Moto</option>
               <option value="car">Carro</option>
               <option value="van">Van</option>
+              <option value="taxi">Táxi</option>
             </select>
           </div>
+          {formData.vehicleType === 'car' && (
+            <>
+              <div className="form-group">
+                <label>Marca do Veículo</label>
+                <input
+                  type="text"
+                  name="vehicleBrand"
+                  value={formData.vehicleBrand}
+                  onChange={handleChange}
+                  placeholder="ex: Nissan"
+                  list="vehicle-brand-options"
+                />
+                <datalist id="vehicle-brand-options">
+                  {brandOptions.map((b) => <option key={b} value={b} />)}
+                </datalist>
+              </div>
+              <div className="form-group">
+                <label>Modelo</label>
+                <input
+                  type="text"
+                  name="vehicleModel"
+                  value={formData.vehicleModel}
+                  onChange={handleChange}
+                  placeholder="ex: Versa 1.6"
+                  list="vehicle-model-options"
+                />
+                <datalist id="vehicle-model-options">
+                  {modelOptions.map((m) => <option key={m} value={m} />)}
+                </datalist>
+              </div>
+              <div className="form-group">
+                <label>Ano do Veículo</label>
+                <input
+                  type="number"
+                  name="vehicleYear"
+                  min={1990}
+                  max={2100}
+                  value={formData.vehicleYear}
+                  onChange={handleChange}
+                  placeholder="ex: 2022"
+                />
+              </div>
+            </>
+          )}
+          {(liveCategory || dm?.rideCategoryCode) ? (
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: '10px',
+              padding: '12px 14px', borderRadius: '10px',
+              background: '#f3f4f6', border: '1px solid #e5e7eb', marginBottom: '12px',
+            }}>
+              <span style={{ fontSize: '1.4rem' }}>{shownMeta?.icon || '🚗'}</span>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: '0.72rem', textTransform: 'uppercase', color: '#6b7280', letterSpacing: '0.04em' }}>Categoria do veículo</div>
+                <div style={{ fontWeight: 700, color: shownMeta?.color || '#111827' }}>
+                  {shownMeta?.label || 'Carro Básico'}
+                </div>
+              </div>
+              <span style={{ fontSize: '0.7rem', color: '#6b7280', maxWidth: '140px', textAlign: 'right' }}>
+                calculada pelo modelo e ano
+              </span>
+            </div>
+          ) : null}
           <div className="form-group">
             <label>Placa</label>
             <input

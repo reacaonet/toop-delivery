@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useToast } from '../context/ToastContext'
+import { useAuth } from '../context/AuthContext'
 import api from '../api'
 
 const SERVICE_OPTIONS = [
@@ -47,6 +48,7 @@ function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: numbe
 export default function RideRequestPage() {
   const navigate = useNavigate()
   const { showToast } = useToast()
+  const { user } = useAuth()
 
   const [serviceCategory, setServiceCategory] = useState('driver')
   const [vehicleType, setVehicleType] = useState('car_basic')
@@ -377,6 +379,23 @@ export default function RideRequestPage() {
     }
     if (scheduleEnabled && (!scheduleDate || !scheduleTime)) {
       showToast('Preencha data e horário do agendamento', 'error')
+      return
+    }
+
+    // Protege o rascunho para o usuário finalizar após o login
+    const draft = {
+      pickupAddress, pickupLat, pickupLng, pickupComplement,
+      dropoffAddress, dropoffLat, dropoffLng, dropoffComplement,
+      serviceCategory, vehicleType, paymentMethod, notes,
+      scheduleEnabled, scheduleDate, scheduleTime,
+      promoCode,
+    }
+    sessionStorage.setItem('toop_ride_draft', JSON.stringify(draft))
+
+    // Gate de finalização: navegar é livre; login só é exigido aqui
+    if (!user) {
+      showToast('Faça login para solicitar a corrida', 'info')
+      navigate('/login', { state: { from: '/rides/new' } })
       return
     }
 

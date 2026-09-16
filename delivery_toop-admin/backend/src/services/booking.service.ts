@@ -11,6 +11,7 @@ import walletService from "./wallet.service";
 import paymentGatewayService from "./payment-gateway.service";
 import promoService from "./promo.service";
 import { getPlatformFeePercent, getEnabledPaymentMethods } from "./settings.service";
+import { bookingTypesForDriver } from "./vehicle-category.service";
 import QRCode from "qrcode";
 import crypto from "crypto";
 
@@ -281,7 +282,7 @@ export class BookingService {
     return booking;
   }
 
-  async list(query: PaginationQuery & { _excludedDriverId?: string }): Promise<PaginatedResult> {
+  async list(query: PaginationQuery & { _excludedDriverId?: string; _allowedBookingTypes?: string[] }): Promise<PaginatedResult> {
     const page = Math.max(1, parseInt(query.page || "1", 10));
     const limit = Math.min(100, Math.max(1, parseInt(query.limit || "10", 10)));
     const skip = (page - 1) * limit;
@@ -297,6 +298,15 @@ export class BookingService {
       filter.rejectedDrivers = { $ne: query._excludedDriverId };
     }
 
+    // Only show matches compatible with the driver's vehicle category
+    if (query._allowedBookingTypes) {
+      if (query._allowedBookingTypes.length > 0) {
+        filter.vehicleType = { $in: query._allowedBookingTypes };
+      } else {
+        filter._id = { $in: [] };
+      }
+    }
+
     const [data, total] = await Promise.all([
       BookingModel.find(filter)
         .populate('client', 'name email phone')
@@ -309,6 +319,23 @@ export class BookingService {
   }
 
   async accept(bookingId: string, driverId: string, driverModel: string = 'Driver') {
+    const current = await BookingModel.findById(bookingId).lean();
+    if (!current || current.status !== 'matching') {
+      throw new AppError("Corrida não está mais disponível", 400);
+    }
+
+    if (driverModel === 'Deliveryman') {
+      const dm = await DeliverymanModel.findById(driverId).lean();
+      if (!dm) {
+        throw new AppError("Entregador não encontrado", 404);
+      }
+      const allowed = bookingTypesForDriver(dm);
+      const bookingVehicle = String(current.vehicleType || 'car');
+      if (allowed.length === 0 || !allowed.includes(bookingVehicle)) {
+        throw new AppError("Sua categoria de veículo não atende a esta corrida", 400);
+      }
+    }
+
     const booking = await BookingModel.findOneAndUpdate(
       { _id: bookingId, status: 'matching', driver: null },
       { $set: { status: 'accepted', driver: driverId, driverModel } },

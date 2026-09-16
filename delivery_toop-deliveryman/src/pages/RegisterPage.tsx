@@ -13,6 +13,9 @@ const RegisterPage: React.FC = () => {
     phone: '',
     password: '',
     vehicleType: 'motorcycle',
+    vehicleBrand: '',
+    vehicleModel: '',
+    vehicleYear: '',
     cpf: '',
     cnh: '',
     vehiclePlate: '',
@@ -28,7 +31,9 @@ const RegisterPage: React.FC = () => {
     setLoading(true)
 
     try {
-      await api.post('/auth/register-deliveryman', form)
+      const payload: Record<string, unknown> = { ...form }
+      if (form.vehicleYear) payload.vehicleYear = Number(form.vehicleYear)
+      await api.post('/auth/register-deliveryman', payload)
       setSuccess(true)
       setTimeout(() => navigate('/login'), 2000)
     } catch (err: unknown) {
@@ -116,8 +121,48 @@ const RegisterPage: React.FC = () => {
                     <option value="motorcycle">Motocicleta</option>
                     <option value="car">Carro</option>
                     <option value="van">Van</option>
+                    <option value="taxi">Táxi</option>
                   </select>
                 </div>
+                {form.vehicleType === 'car' && (
+                  <>
+                    <div className="form-group">
+                      <label htmlFor="vehicleBrand">Marca do Veículo</label>
+                      <input
+                        id="vehicleBrand"
+                        name="vehicleBrand"
+                        type="text"
+                        value={form.vehicleBrand}
+                        onChange={handleChange}
+                        placeholder="ex: Nissan"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="vehicleModel">Modelo</label>
+                      <input
+                        id="vehicleModel"
+                        name="vehicleModel"
+                        type="text"
+                        value={form.vehicleModel}
+                        onChange={handleChange}
+                        placeholder="ex: Versa 1.6"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="vehicleYear">Ano do Veículo</label>
+                      <input
+                        id="vehicleYear"
+                        name="vehicleYear"
+                        type="number"
+                        min={1990}
+                        max={2100}
+                        value={form.vehicleYear}
+                        onChange={handleChange}
+                        placeholder="ex: 2022"
+                      />
+                    </div>
+                  </>
+                )}
                 <div className="form-group">
                   <label htmlFor="cpf">CPF</label>
                   <input

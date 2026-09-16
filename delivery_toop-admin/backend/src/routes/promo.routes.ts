@@ -4,7 +4,7 @@ import { authenticate } from "../middleware/auth";
 
 const router = Router();
 
-router.post("/validate", authenticate, promoController.validate);
+router.post("/validate", promoController.validate);
 router.get("/", authenticate, promoController.list);
 router.post("/", authenticate, promoController.create);
 router.put("/:id", authenticate, promoController.update);

@@ -40,6 +40,7 @@ function AppRoutes() {
         <Route path="/" element={<HomePage />} />
         <Route path="/company/:id" element={<CompanyPage />} />
         <Route path="/cart" element={<CartPage />} />
+        <Route path="/rides/new" element={<RideRequestPage />} />
       </Route>
 
       {/* Protected routes - require login */}
@@ -57,7 +58,6 @@ function AppRoutes() {
         <Route path="/addresses" element={<AddressesPage />} />
         <Route path="/payment-methods" element={<PaymentMethodsPage />} />
         <Route path="/rides" element={<RideHistoryPage />} />
-        <Route path="/rides/new" element={<RideRequestPage />} />
         <Route path="/rides/:id" element={<RideTrackingPage />} />
         <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/help" element={<HelpPage />} />

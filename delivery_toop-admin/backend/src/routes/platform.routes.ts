@@ -18,9 +18,9 @@ router.get("/contact", async (_req, res, next) => {
       await SettingsModel.create({});
       settings = await SettingsModel.findOne().lean();
     }
-    const contact = { ...DEFAULT_CONTACT, ...(settings!.contact || {}) };
+    const contact: Record<string, string> = { ...DEFAULT_CONTACT, ...(settings!.contact || {}) };
     Object.keys(DEFAULT_CONTACT).forEach((key) => {
-      if (!contact[key]) contact[key] = DEFAULT_CONTACT[key];
+      if (!contact[key]) contact[key] = (DEFAULT_CONTACT as Record<string, string>)[key];
     });
     return res.status(200).json({
       success: true,

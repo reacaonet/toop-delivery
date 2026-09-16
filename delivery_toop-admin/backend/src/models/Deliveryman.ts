@@ -7,7 +7,11 @@ export interface IDeliveryman extends Document {
   cpf?: string;
   cnh?: string;
   vehicleType: 'bike' | 'motorcycle' | 'car' | 'van' | 'taxi';
+  vehicleBrand?: string;
+  vehicleModel?: string;
+  vehicleYear?: number;
   vehiclePlate?: string;
+  rideCategoryCode?: string;
   active: boolean;
   available: boolean;
   isDriver: boolean;
@@ -44,7 +48,11 @@ const DeliverymanSchema = new Schema<IDeliveryman>(
     cpf: { type: String, trim: true },
     cnh: { type: String, trim: true },
     vehicleType: { type: String, enum: ['bike', 'motorcycle', 'car', 'van', 'taxi'], default: 'motorcycle' },
+    vehicleBrand: { type: String, trim: true },
+    vehicleModel: { type: String, trim: true },
+    vehicleYear: { type: Number, min: 1900, max: 2100 },
     vehiclePlate: { type: String, trim: true },
+    rideCategoryCode: { type: String },
     active: { type: Boolean, default: true },
     available: { type: Boolean, default: true },
     isDriver: { type: Boolean, default: false },
@@ -81,5 +89,6 @@ DeliverymanSchema.index({ available: 1 });
 DeliverymanSchema.index({ isDriver: 1 });
 DeliverymanSchema.index({ driverOnline: 1 });
 DeliverymanSchema.index({ 'currentLocation': '2dsphere' });
+DeliverymanSchema.index({ rideCategoryCode: 1 });
 
 export const DeliverymanModel = mongoose.model<IDeliveryman>('Deliveryman', DeliverymanSchema);

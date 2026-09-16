@@ -24,9 +24,9 @@ export class AuthController {
 
   async registerDeliveryman(req: Request, res: Response, next: NextFunction) {
     try {
-      const { name, email, phone, password, vehicleType, cpf, cnh, vehiclePlate } = req.body;
+      const { name, email, phone, password, vehicleType, vehicleBrand, vehicleModel, vehicleYear, cpf, cnh, vehiclePlate } = req.body;
       const result = await authService.registerDeliveryman({
-        name, email, phone, password, vehicleType, cpf, cnh, vehiclePlate,
+        name, email, phone, password, vehicleType, vehicleBrand, vehicleModel, vehicleYear, cpf, cnh, vehiclePlate,
       });
       return res.status(201).json({ success: true, data: result });
     } catch (error) {

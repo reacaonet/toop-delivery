@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import bookingService from "../services/booking.service";
 import { UserModel } from "../models/User";
 import { emitToUser, emitToAll } from "../socket";
+import { driverCategoriesForBooking, bookingTypesForDriver } from "../services/vehicle-category.service";
 
 async function notifyNearbyDrivers(booking: any, rejectedDriverIds: string[] = []) {
   try {
@@ -23,13 +24,29 @@ async function notifyNearbyDrivers(booking: any, rejectedDriverIds: string[] = [
       : ["car", "van"];
     const allowedServices = wantsTaxi ? ["driver", "taxi"] : ["driver"];
 
-    const nearbyDeliverymen = await DeliverymanModel.find({
+    const allowedCategories = driverCategoriesForBooking(String(rawVehicle));
+    const legacyVehicles = wantsTaxi ? ["taxi"] : wantsMoto ? ["motorcycle", "bike"] : ["car", "van"];
+    const legacyApplies = wantsTaxi
+      ? true
+      : wantsMoto
+      ? allowedCategories.includes("moto_basic")
+      : allowedCategories.includes("car_basic");
+    const categoryFilter = legacyApplies
+      ? {
+          $or: [
+            { rideCategoryCode: { $in: allowedCategories } },
+            { rideCategoryCode: { $exists: false }, vehicleType: { $in: legacyVehicles } },
+          ],
+        }
+      : { rideCategoryCode: { $in: allowedCategories } };
+    const driverFilter: any = {
       isDriver: true,
       driverOnline: true,
       driverAvailable: true,
       active: true,
       serviceCategories: { $in: allowedServices },
       vehicleType: { $in: allowedDriverVehicles },
+      ...categoryFilter,
       _id: { $nin: rejectedDriverIds },
       currentLocation: {
         $near: {
@@ -37,7 +54,9 @@ async function notifyNearbyDrivers(booking: any, rejectedDriverIds: string[] = [
           $maxDistance: maxDistance,
         },
       },
-    }).limit(20).lean();
+    };
+
+    const nearbyDeliverymen = await DeliverymanModel.find(driverFilter).limit(20).lean();
 
     const nearbyDrivers = await DriverModel.find({
       online: true,
@@ -198,6 +217,11 @@ export class BookingController {
         let driverObjectId = null;
         if (user?.deliveryman) {
           driverObjectId = user.deliveryman;
+          const dm = await (await import("../models/Deliveryman")).DeliverymanModel.findById(user.deliveryman).lean();
+          if (dm) {
+            const allowed = bookingTypesForDriver(dm);
+            if (allowed.length > 0) query._allowedBookingTypes = allowed;
+          }
         } else if (user?.driver) {
           driverObjectId = user.driver;
         }

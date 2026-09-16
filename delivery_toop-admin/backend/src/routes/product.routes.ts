@@ -4,9 +4,9 @@ import { authenticate } from "../middleware/auth";
 
 const router = Router();
 
-router.get("/", authenticate, productController.list);
-router.get("/company/:companyId", authenticate, productController.listByCompany);
-router.get("/:id", authenticate, productController.getById);
+router.get("/", productController.list);
+router.get("/company/:companyId", productController.listByCompany);
+router.get("/:id", productController.getById);
 router.post("/", authenticate, productController.create);
 router.put("/:id", authenticate, productController.update);
 router.delete("/:id", authenticate, productController.delete);

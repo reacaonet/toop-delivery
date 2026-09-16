@@ -4,6 +4,7 @@ import app from "./app";
 import { env } from "./config";
 import { initSocket } from "./socket";
 import bookingService from "./services/booking.service";
+import { seedVehicleCategoryRules } from "./services/vehicle-category.service";
 
 const PORT = env.PORT || 3000;
 
@@ -11,6 +12,12 @@ async function startServer() {
   try {
     await mongoose.connect(env.URL_MONGO);
     console.log("Conectado ao MongoDB");
+
+    try {
+      await seedVehicleCategoryRules();
+    } catch (err) {
+      console.error('[VehicleCategory] Falha no seed das regras:', err);
+    }
 
     const httpServer = http.createServer(app);
     initSocket(httpServer);

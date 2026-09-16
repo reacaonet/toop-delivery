@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const vehicleTypeEnum = z.enum(["bike", "motorcycle", "car", "van"]);
+const vehicleTypeEnum = z.enum(["bike", "motorcycle", "car", "van", "taxi"]);
 
 export const createDeliverymanSchema = z.object({
   body: z.object({
@@ -8,6 +8,9 @@ export const createDeliverymanSchema = z.object({
     email: z.string().email("Email inválido"),
     phone: z.string().min(1, "Telefone é obrigatório"),
     vehicleType: vehicleTypeEnum.optional(),
+    vehicleBrand: z.string().optional(),
+    vehicleModel: z.string().optional(),
+    vehicleYear: z.coerce.number().int().min(1900, "Ano inválido").max(2100, "Ano inválido").optional(),
   }),
 });
 
@@ -17,6 +20,9 @@ export const updateDeliverymanSchema = z.object({
     email: z.string().email("Email inválido").optional(),
     phone: z.string().optional(),
     vehicleType: vehicleTypeEnum.optional(),
+    vehicleBrand: z.string().optional(),
+    vehicleModel: z.string().optional(),
+    vehicleYear: z.coerce.number().int().min(1900, "Ano inválido").max(2100, "Ano inválido").optional(),
     active: z.boolean().optional(),
     cpf: z.string().optional(),
     cnh: z.string().optional(),
@@ -25,7 +31,7 @@ export const updateDeliverymanSchema = z.object({
     address: z.string().optional(),
     addressLat: z.number().optional(),
     addressLng: z.number().optional(),
-    serviceCategories: z.array(z.enum(['driver', 'delivery', 'package'])).optional(),
+    serviceCategories: z.array(z.enum(['driver', 'delivery', 'package', 'taxi'])).optional(),
     documents: z.object({
       cnh: z.string().optional(),
       vehicleDocument: z.string().optional(),

@@ -8,6 +8,11 @@ import {
   verifyRefreshToken,
 } from "../middleware/auth";
 import { AppError } from "../middleware/errorHandler";
+import { classifyVehicleCode } from "./vehicle-category.service";
+
+function ensureServiceCategory(categories: string[], category: string): string[] {
+  return categories.includes(category) ? categories : [...categories, category];
+}
 
 export class AuthService {
   async login(email: string, password: string) {
@@ -88,6 +93,9 @@ export class AuthService {
     phone: string;
     password: string;
     vehicleType?: string;
+    vehicleBrand?: string;
+    vehicleModel?: string;
+    vehicleYear?: number;
     cpf?: string;
     cnh?: string;
     vehiclePlate?: string;
@@ -107,9 +115,16 @@ export class AuthService {
       email: data.email,
       phone: data.phone,
       vehicleType: data.vehicleType || "motorcycle",
+      vehicleBrand: data.vehicleBrand,
+      vehicleModel: data.vehicleModel,
+      vehicleYear: data.vehicleYear,
       cpf: data.cpf,
       cnh: data.cnh,
       vehiclePlate: data.vehiclePlate,
+      rideCategoryCode: classifyVehicleCode(data),
+      serviceCategories: data.vehicleType === 'taxi'
+        ? ensureServiceCategory(['delivery'], 'taxi')
+        : undefined,
       active: false,
     });
 

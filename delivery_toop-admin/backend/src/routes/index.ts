@@ -89,6 +89,7 @@ import pixRoutes from "./pix.routes";
 import braspagRoutes from "./braspag.routes";
 import addonRoutes from "./addon.routes";
 import platformRoutes from "./platform.routes";
+import vehicleCategoryRoutes from "./vehicle-category.routes";
 import { authenticate } from "../middleware/auth";
 
 const router = Router();
@@ -184,5 +185,6 @@ router.use("/shopping/order", authenticate, shoppingOrderRoutes);
 router.use("/pix", authenticate, pixRoutes);
 router.use("/braspag", braspagRoutes);
 router.use("/platform", platformRoutes);
+router.use("/vehicle-category", vehicleCategoryRoutes);
 
 export default router;
