@@ -1,8 +1,8 @@
 export const APP_URLS = {
-  client: 'http://app.gojadelivery.app.br:4200',
-  store: 'http://loja.gojadelivery.app.br:4203',
-  deliveryman: 'http://entregador.gojadelivery.app.br:4204',
-  admin: 'http://admin.gojadelivery.app.br:4202',
+  client: import.meta.env.VITE_CLIENT_URL || 'https://app.gojadelivery.com.br',
+  store: import.meta.env.VITE_STORE_URL || 'https://loja.gojadelivery.com.br',
+  deliveryman: import.meta.env.VITE_DELIVERYMAN_URL || 'https://entregador.gojadelivery.com.br',
+  admin: import.meta.env.VITE_ADMIN_URL || 'https://admin.gojadelivery.com.br',
 } as const
 
 export const LINKS = {

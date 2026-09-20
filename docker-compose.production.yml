@@ -99,8 +99,6 @@ services:
       context: ./delivery_toop-microservice_payment
       dockerfile: Dockerfile
       target: production
-    ports:
-      - "8400:8400"
     restart: always
     environment:
       NODE_ENV: production
@@ -133,8 +131,6 @@ services:
       context: ./delivery_toop-microservice_notification
       dockerfile: Dockerfile
       target: production
-    ports:
-      - "8200:8200"
     restart: always
     volumes:
       - ${FIREBASE_SERVICE_ACCOUNT_PATH}:/usr/src/app/firebase-adminsdk.json:ro
@@ -172,8 +168,6 @@ services:
       context: ./delivery_toop-microservice_deliveryman
       dockerfile: Dockerfile
       target: production
-    ports:
-      - "8300:8300"
     restart: always
     environment:
       NODE_ENV: production
@@ -197,15 +191,44 @@ services:
         max-size: 10m
         max-file: "3"
 
-  # ─── Frontend ─────────────────────────────────────────
+  # ─── Frontends ────────────────────────────────────────
+  # Proxy externo (Cloudflare/CDN): gojadelivery.com.br -> :80,
+  # admin. -> :8081, loja. -> :8082, entregador. -> :8083,
+  # app. -> :8084, api. -> :8100
 
-  frontend:
-    container_name: toop-frontend-prod
+  landing:
+    container_name: toop-landing-prod
+    build:
+      context: ./delivery_toop-landpage
+      dockerfile: Dockerfile
+      target: production
+      args:
+        VITE_CLIENT_URL: ${VITE_CLIENT_URL:-https://app.gojadelivery.com.br}
+        VITE_STORE_URL: ${VITE_STORE_URL:-https://loja.gojadelivery.com.br}
+        VITE_DELIVERYMAN_URL: ${VITE_DELIVERYMAN_URL:-https://entregador.gojadelivery.com.br}
+        VITE_ADMIN_URL: ${VITE_ADMIN_URL:-https://admin.gojadelivery.com.br}
+    ports:
+      - "80:80"
+    restart: always
+    depends_on:
+      - admin-api
+    networks:
+      - toop-network
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  frontend-admin:
+    container_name: toop-frontend-admin-prod
     build:
       context: ./delivery_toop-admin/frontend-react
       dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL_ADMIN:-https://api.gojadelivery.com.br}
     ports:
-      - "80:80"
+      - "8081:80"
     restart: always
     depends_on:
       admin-api:
@@ -218,7 +241,73 @@ services:
         max-size: 10m
         max-file: "3"
 
-  # ─── Monitoring ───────────────────────────────────────
+  frontend-store:
+    container_name: toop-frontend-store-prod
+    build:
+      context: ./delivery_toop-store
+      dockerfile: Dockerfile
+      target: production
+      args:
+        VITE_API_URL: ${VITE_API_URL_STORE:-https://api.gojadelivery.com.br}
+    ports:
+      - "8082:80"
+    restart: always
+    depends_on:
+      admin-api:
+        condition: service_healthy
+    networks:
+      - toop-network
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  frontend-deliveryman:
+    container_name: toop-frontend-deliveryman-prod
+    build:
+      context: ./delivery_toop-deliveryman
+      dockerfile: Dockerfile
+      target: production
+      args:
+        VITE_API_URL: ${VITE_API_URL_DELIVERYMAN:-https://api.gojadelivery.com.br}
+    ports:
+      - "8083:80"
+    restart: always
+    depends_on:
+      admin-api:
+        condition: service_healthy
+    networks:
+      - toop-network
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  frontend-web-client:
+    container_name: toop-frontend-web-client-prod
+    build:
+      context: ./delivery_toop-web-client
+      dockerfile: Dockerfile
+      target: production
+      args:
+        VITE_API_URL: ${VITE_API_URL_WEB_CLIENT:-https://api.gojadelivery.com.br}
+    ports:
+      - "8084:80"
+    restart: always
+    depends_on:
+      admin-api:
+        condition: service_healthy
+    networks:
+      - toop-network
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  # ─── Monitoring (rede interna) ────────────────────────
 
   prometheus:
     container_name: toop-prometheus-prod
@@ -231,8 +320,6 @@ services:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.retention.time=30d'
       - '--web.enable-lifecycle'
-    ports:
-      - "9090:9090"
     networks:
       - toop-network
     logging:
@@ -253,8 +340,6 @@ services:
     volumes:
       - ./config/grafana/provisioning:/etc/grafana/provisioning:ro
       - grafana_prod_data:/var/lib/grafana
-    ports:
-      - "3000:3000"
     depends_on:
       - prometheus
     networks:
