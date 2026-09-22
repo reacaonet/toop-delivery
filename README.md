@@ -91,20 +91,33 @@ npm run dev
 # Frontend em http://localhost:5173
 ```
 
-### 6. Deploy Produção
+### 6. Deploy Produção (2 VPS)
+
+A infraestrutura de produção usa **duas VPS Docker**:
+
+| VPS | IP | Serviços | Compose |
+|-----|-----|----------|---------|
+| Backend | `69.169.101.230` | API, MongoDB, PostgreSQL, Redis, microserviços, monitoring | `docker-compose.backend.yml` |
+| Frontends | `167.148.161.88` | Landpage, Admin, Store, Entregador, Web-client | `docker-compose.frontends.yml` |
 
 ```bash
-# Criar .env de produção
+# Em cada VPS: criar .env de produção e preencher senhas fortes
 cp .env.production.example .env
-# Editar com senhas fortes
 
-# Build e subir tudo
-docker compose -f docker-compose.production.yml up -d --build
+# VPS Backend (69.169.101.230)
+sudo bash scripts/deploy-backend.sh          # instala Docker, sobe API na :8100
 
-# Verificar
-docker compose -f docker-compose.production.yml ps
-docker compose -f docker-compose.production.yml logs -f
+# VPS Frontends (167.148.161.88)
+sudo bash scripts/deploy-frontends.sh        # sobe os 5 frontends (80/8081-8084)
 ```
+
+DNS:
+- `gojadelivery.com.br` → `167.148.161.88` (landpage, :80)
+- `admin.gojadelivery.com.br` → `167.148.161.88` (:8081)
+- `loja.gojadelivery.com.br` → `167.148.161.88` (:8082)
+- `entregador.gojadelivery.com.br` → `167.148.161.88` (:8083)
+- `app.gojadelivery.com.br` → `167.148.161.88` (:8084)
+- `api.gojadelivery.com.br` → `69.169.101.230` (:8100)
 
 ## Variáveis de Ambiente
 
@@ -204,9 +217,11 @@ toop-delivery-clean/
 ├── config/
 │   ├── prometheus/           # Prometheus config
 │   └── grafana/              # Grafana dashboards
-├── scripts/                  # Init scripts
+├── scripts/                  # Init/deploy scripts
 ├── docker-compose.dev.yml    # Local development
-└── docker-compose.production.yml  # Production
+├── docker-compose.backend.yml    # Production backend (API + dados + Redis)
+├── docker-compose.frontends.yml  # Production frontends (5 apps web)
+└── docker-compose.staging.yml    # Staging (1 servidor)
 ```
 
 ### Testes

@@ -42,7 +42,7 @@
 
 ### FASE 6 - PRODUCAO (CONCLUIDA)
 - [x] Multi-stage Dockerfiles (nao-root nodejs:1001) para 5 servicos
-- [x] docker-compose.production.yml (10 containers)
+- [x] docker-compose.backend.yml + docker-compose.frontends.yml (2 VPS)
 - [x] nginx.conf (SPA fallback, gzip, security headers)
 - [x] Security audit (8 findings corrigidos)
 - [x] .env.production.example

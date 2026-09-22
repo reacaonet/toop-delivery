@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 #
-# GojaDelivery - Deploy de produção na VPS (Ubuntu + Docker)
+# GojaDelivery - Deploy BACKEND na VPS 69.169.101.230 (API + Banco + Redis)
 #
 # Uso:
 #   1. Na VPS:  git clone git@github.com:reacaonet/toop-delivery.git
 #   2. Copiar .env.production.example -> .env e preencher
-#   3. Rodar:   sudo bash scripts/deploy-vps.sh
+#   3. Rodar:   sudo bash scripts/deploy-backend.sh
 #
 set -euo pipefail
 
-COMPOSE_FILE="docker-compose.production.yml"
+COMPOSE_FILE="docker-compose.backend.yml"
 
 echo "==> [1/5] Instalando Docker + Compose (se necessário)"
 if ! command -v docker &>/dev/null; then
@@ -25,16 +25,11 @@ else
   echo "    Docker já instalado: $(docker --version)"
 fi
 
-# UFW allow das portas públicas (proxy externo encaminha para cá)
+# UFW: só API na porta 8100 (microserviços ficam na rede interna)
 echo "==> [2/5] Ajustando firewall (UFW)"
 if command -v ufw &>/dev/null; then
   ufw allow 22/tcp
-  ufw allow 80/tcp
   ufw allow 8100/tcp    # api.gojadelivery.com.br
-  ufw allow 8081/tcp    # admin.gojadelivery.com.br
-  ufw allow 8082/tcp    # loja.gojadelivery.com.br (store)
-  ufw allow 8083/tcp    # entregador.gojadelivery.com.br
-  ufw allow 8084/tcp    # app.gojadelivery.com.br (web-client)
   ufw --force enable
 fi
 
@@ -51,7 +46,7 @@ if [ -n "$missing_keys" ]; then
   echo "$missing_keys"
 fi
 
-echo "==> [4/5] Subindo stack (build em produção)"
+echo "==> [4/5] Subindo stack backend (build em produção)"
 docker compose -f "$COMPOSE_FILE" build
 docker compose -f "$COMPOSE_FILE" up -d
 
@@ -60,18 +55,9 @@ sleep 10
 docker compose -f "$COMPOSE_FILE" ps
 
 echo ""
-echo "Deploy concluído!"
-echo "  API..........: http://SERVER_IP:8100   (api.gojadelivery.com.br)"
-echo "  Admin........: http://SERVER_IP:8081   (admin.gojadelivery.com.br)"
-echo "  Store........: http://SERVER_IP:8082   (loja.gojadelivery.com.br)"
-echo "  Entregador...: http://SERVER_IP:8083   (entregador.gojadelivery.com.br)"
-echo "  Web-client...: http://SERVER_IP:8084   (app.gojadelivery.com.br)"
-echo "  Landpage.....: http://SERVER_IP:80     (gojadelivery.com.br)"
+echo "Backend concluído!"
+echo "  API.........: http://69.169.101.230:8100  -> api.gojadelivery.com.br"
+echo "  Mongo/Postgres/Redis: internos (sem porta pública)"
 echo ""
-echo "Após validar, aponte os registros A/AAAA no DNS para IP da VPS:"
-echo "  gojadelivery.com.br      -> IP   (proxy externo -> :80)"
-echo "  api.gojadelivery.com.br  -> IP   (proxy externo -> :8100)"
-echo "  admin.gojadelivery.com.br-> IP   (proxy externo -> :8081)"
-echo "  loja.gojadelivery.com.br -> IP   (proxy externo -> :8082)"
-echo "  entregador.gojadelivery.com.br -> IP (proxy externo -> :8083)"
-echo "  app.gojadelivery.com.br  -> IP   (proxy externo -> :8084)"
+echo "Após validar, aponte no DNS:"
+echo "  api.gojadelivery.com.br -> 69.169.101.230  (proxiado p/ :8100)"

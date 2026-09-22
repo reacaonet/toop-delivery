@@ -1,0 +1,107 @@
+services:
+  # ─── Frontends ────────────────────────────────────────
+  # Servidor: 167.148.161.88
+  # Proxy externo: gojadelivery.com.br -> :80, admin. -> :8081,
+  # loja. -> :8082, entregador. -> :8083, app. -> :8084
+  # API fica em api.gojadelivery.com.br (69.169.101.230:8100)
+
+  landing:
+    container_name: toop-landing-prod
+    build:
+      context: ./delivery_toop-landpage
+      dockerfile: Dockerfile
+      target: production
+      args:
+        VITE_CLIENT_URL: ${VITE_CLIENT_URL:-https://app.gojadelivery.com.br}
+        VITE_STORE_URL: ${VITE_STORE_URL:-https://loja.gojadelivery.com.br}
+        VITE_DELIVERYMAN_URL: ${VITE_DELIVERYMAN_URL:-https://entregador.gojadelivery.com.br}
+        VITE_ADMIN_URL: ${VITE_ADMIN_URL:-https://admin.gojadelivery.com.br}
+    ports:
+      - "80:80"
+    restart: always
+    networks:
+      - toop-web
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  frontend-admin:
+    container_name: toop-frontend-admin-prod
+    build:
+      context: ./delivery_toop-admin/frontend-react
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL_ADMIN:-https://api.gojadelivery.com.br}
+    ports:
+      - "8081:80"
+    restart: always
+    networks:
+      - toop-web
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  frontend-store:
+    container_name: toop-frontend-store-prod
+    build:
+      context: ./delivery_toop-store
+      dockerfile: Dockerfile
+      target: production
+      args:
+        VITE_API_URL: ${VITE_API_URL_STORE:-https://api.gojadelivery.com.br}
+    ports:
+      - "8082:80"
+    restart: always
+    networks:
+      - toop-web
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  frontend-deliveryman:
+    container_name: toop-frontend-deliveryman-prod
+    build:
+      context: ./delivery_toop-deliveryman
+      dockerfile: Dockerfile
+      target: production
+      args:
+        VITE_API_URL: ${VITE_API_URL_DELIVERYMAN:-https://api.gojadelivery.com.br}
+    ports:
+      - "8083:80"
+    restart: always
+    networks:
+      - toop-web
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  frontend-web-client:
+    container_name: toop-frontend-web-client-prod
+    build:
+      context: ./delivery_toop-web-client
+      dockerfile: Dockerfile
+      target: production
+      args:
+        VITE_API_URL: ${VITE_API_URL_WEB_CLIENT:-https://api.gojadelivery.com.br}
+    ports:
+      - "8084:80"
+    restart: always
+    networks:
+      - toop-web
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+networks:
+  toop-web:
+    driver: bridge
