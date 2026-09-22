@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/uploads/(.*)", "destination": "https://api.gojadelivery.com.br/uploads/$1" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

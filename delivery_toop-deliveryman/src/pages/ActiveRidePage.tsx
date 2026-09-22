@@ -58,7 +58,8 @@ export default function ActiveRidePage() {
 
     const socketUrl = window.location.port === '4204'
       ? 'http://localhost:8100'
-      : window.location.origin
+      : (import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_URL)
+    if (!socketUrl) return
 
     const socket = io(socketUrl, {
       auth: { token },

@@ -149,35 +149,27 @@ jobs:
     if: github.ref == 'refs/heads/master'
     environment: production
 
-    strategy:
-      matrix:
-        include:
-          - name: backend
-            server: PROD_SERVER_BACKEND
-            compose: docker-compose.backend.yml
-          - name: frontends
-            server: PROD_SERVER_FRONTENDS
-            compose: docker-compose.frontends.yml
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Deploy ${{ matrix.name }} to Production Server
+    - name: Deploy to Production Server (Backend)
       uses: appleboy/ssh-action@v1.0.3
       with:
-        host: ${{ secrets[matrix.server] }}
+        host: ${{ secrets.PROD_SERVER_BACKEND }}
         username: ${{ secrets.SSH_USER }}
         key: ${{ secrets.SSH_KEY }}
         script: |
           cd /opt/toopdelivery
           git pull origin master
-          docker-compose -f ${{ matrix.compose }} down
-          docker-compose -f ${{ matrix.compose }} build --no-cache
-          docker-compose -f ${{ matrix.compose }} up -d
+          docker-compose -f docker-compose.backend.yml down
+          docker-compose -f docker-compose.backend.yml build --no-cache
+          docker-compose -f docker-compose.backend.yml up -d
           docker system prune -f
 
-    - name: Health Check (${{ matrix.name }})
+    # Frontends são publicados automaticamente pelo Vercel (GitHub integration)
+
+    - name: Health Check
       run: |
         sleep 30
         curl -f ${{ secrets.PROD_URL }}/api-docs || exit 1

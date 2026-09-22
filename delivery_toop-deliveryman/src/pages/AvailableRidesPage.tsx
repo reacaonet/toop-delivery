@@ -27,16 +27,21 @@ export default function AvailableRidesPage() {
 
     const token = localStorage.getItem('token')
     if (token) {
-      const socket = io('http://localhost:8100', { auth: { token } })
-      socketRef.current = socket
+      const socketUrl = window.location.port === '4204'
+        ? 'http://localhost:8100'
+        : (import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_URL)
+      if (socketUrl) {
+        const socket = io(socketUrl, { auth: { token }, transports: ['websocket', 'polling'] })
+        socketRef.current = socket
 
-      socket.on('booking:ride_taken', (data: { bookingId: string }) => {
-        setBookings(prev => prev.filter(b => b._id !== data.bookingId))
-      })
+        socket.on('booking:ride_taken', (data: { bookingId: string }) => {
+          setBookings(prev => prev.filter(b => b._id !== data.bookingId))
+        })
 
-      socket.on('booking:ride_request', () => {
-        loadBookings()
-      })
+        socket.on('booking:ride_request', () => {
+          loadBookings()
+        })
+      }
     }
 
     return () => {

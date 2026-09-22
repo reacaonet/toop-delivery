@@ -91,33 +91,35 @@ npm run dev
 # Frontend em http://localhost:5173
 ```
 
-### 6. Deploy Produção (2 VPS)
+### 6. Deploy Produção (Vercel + 1 VPS backend)
 
-A infraestrutura de produção usa **duas VPS Docker**:
+| Camada | Onde | Detalhes |
+|--------|------|----------|
+| Frontends (5 apps) | **Vercel** | Build/deploy via GitHub; cada app = 1 projeto no Vercel |
+| Backend (API + dados + Redis) | **VPS `69.169.101.230`** | `docker-compose.backend.yml` |
 
-| VPS | IP | Serviços | Compose |
-|-----|-----|----------|---------|
-| Backend | `69.169.101.230` | API, MongoDB, PostgreSQL, Redis, microserviços, monitoring | `docker-compose.backend.yml` |
-| Frontends | `167.148.161.88` | Landpage, Admin, Store, Entregador, Web-client | `docker-compose.frontends.yml` |
+**Frontends no Vercel** (SPAs estáticos): criar um projeto no Vercel por app,
+conectar ao GitHub (root directory = pasta do app) e definir a env var
+`VITE_API_URL=https://api.gojadelivery.com.br`. Deploy automático no push.
+
+| App | Pasta raiz (root directory) | Domínio |
+|-----|------------------------------|---------|
+| Landpage | `delivery_toop-landpage` | `gojadelivery.com.br` |
+| Admin | `delivery_toop-admin/frontend-react` | `admin.gojadelivery.com.br` |
+| Store | `delivery_toop-store` | `loja.gojadelivery.com.br` |
+| Entregador | `delivery_toop-deliveryman` | `entregador.gojadelivery.com.br` |
+| Web-client | `delivery_toop-web-client` | `app.gojadelivery.com.br` |
+
+Cada projeto já tem `vercel.json` (SPA fallback + proxy `/uploads` → API).
+
+**Backend na VPS:**
 
 ```bash
-# Em cada VPS: criar .env de produção e preencher senhas fortes
-cp .env.production.example .env
-
-# VPS Backend (69.169.101.230)
-sudo bash scripts/deploy-backend.sh          # instala Docker, sobe API na :8100
-
-# VPS Frontends (167.148.161.88)
-sudo bash scripts/deploy-frontends.sh        # sobe os 5 frontends (80/8081-8084)
+cp .env.production.example .env   # preencher senhas
+sudo bash scripts/deploy-backend.sh   # instala Docker + sobe API na :8100
 ```
 
-DNS:
-- `gojadelivery.com.br` → `167.148.161.88` (landpage, :80)
-- `admin.gojadelivery.com.br` → `167.148.161.88` (:8081)
-- `loja.gojadelivery.com.br` → `167.148.161.88` (:8082)
-- `entregador.gojadelivery.com.br` → `167.148.161.88` (:8083)
-- `app.gojadelivery.com.br` → `167.148.161.88` (:8084)
-- `api.gojadelivery.com.br` → `69.169.101.230` (:8100)
+DNS (Cloudflare): subdomínios dos apps → Vercel; `api.gojadelivery.com.br` → `69.169.101.230` (:8100).
 
 ## Variáveis de Ambiente
 
@@ -220,7 +222,6 @@ toop-delivery-clean/
 ├── scripts/                  # Init/deploy scripts
 ├── docker-compose.dev.yml    # Local development
 ├── docker-compose.backend.yml    # Production backend (API + dados + Redis)
-├── docker-compose.frontends.yml  # Production frontends (5 apps web)
 └── docker-compose.staging.yml    # Staging (1 servidor)
 ```
 
