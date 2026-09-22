@@ -64,6 +64,8 @@ services:
     ports:
       - "8100:8100"
     restart: always
+    volumes:
+      - uploads_prod_data:/home/node/app/uploads
     environment:
       NODE_ENV: production
       PORT: 8100
@@ -240,6 +242,7 @@ volumes:
   redis_prod_data:
   prometheus_prod_data:
   grafana_prod_data:
+  uploads_prod_data:
 
 networks:
   toop-network:
