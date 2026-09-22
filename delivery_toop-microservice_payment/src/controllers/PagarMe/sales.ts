@@ -245,7 +245,6 @@ const createLog = async (err: any, errPayload: any) => {
       description: {
         messageErr: err.message,
         err: errPayload,
-        appDebug: appDebug,
       },
       category: 'pagarme',
       originError: 'fail-process-pagarme',
