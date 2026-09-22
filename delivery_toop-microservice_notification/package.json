@@ -37,7 +37,7 @@
     "scripts": {
         "start": "npx yarn build && node ./dist/server.js",
         "dev": "nodemon",
-        "build": "sucrase ./src -d ./dist --transforms imports && npx yarn",
+        "build": "sucrase ./src -d ./dist --transforms imports",
         "test": "mocha"
     }
 }
