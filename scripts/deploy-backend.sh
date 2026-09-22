@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# GojaDelivery - Deploy BACKEND na VPS 69.169.101.230 (API + Banco + Redis)
+# GojaDelivery - Deploy BACKEND na VPS 167.148.161.88 (API + Banco + Redis)
 #
 # Uso:
 #   1. Na VPS:  git clone git@github.com:reacaonet/toop-delivery.git
@@ -56,8 +56,8 @@ docker compose -f "$COMPOSE_FILE" ps
 
 echo ""
 echo "Backend concluído!"
-echo "  API.........: http://69.169.101.230:8100  -> api.gojadelivery.com.br"
+echo "  API.........: http://167.148.161.88:8100  -> api.gojadelivery.com.br"
 echo "  Mongo/Postgres/Redis: internos (sem porta pública)"
 echo ""
 echo "Após validar, aponte no DNS:"
-echo "  api.gojadelivery.com.br -> 69.169.101.230  (proxiado p/ :8100)"
+echo "  api.gojadelivery.com.br -> 167.148.161.88  (proxiado p/ :8100)"

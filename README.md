@@ -96,7 +96,7 @@ npm run dev
 | Camada | Onde | Detalhes |
 |--------|------|----------|
 | Frontends (5 apps) | **Vercel** | Build/deploy via GitHub; cada app = 1 projeto no Vercel |
-| Backend (API + dados + Redis) | **VPS `69.169.101.230`** | `docker-compose.backend.yml` |
+| Backend (API + dados + Redis) | **VPS `167.148.161.88`** | `docker-compose.backend.yml` |
 
 **Frontends no Vercel** (SPAs estáticos): criar um projeto no Vercel por app,
 conectar ao GitHub (root directory = pasta do app) e definir a env var
@@ -119,7 +119,7 @@ cp .env.production.example .env   # preencher senhas
 sudo bash scripts/deploy-backend.sh   # instala Docker + sobe API na :8100
 ```
 
-DNS (Cloudflare): subdomínios dos apps → Vercel; `api.gojadelivery.com.br` → `69.169.101.230` (:8100).
+DNS (Cloudflare): subdomínios dos apps → Vercel; `api.gojadelivery.com.br` → `167.148.161.88` (:8100).
 
 ## Variáveis de Ambiente
 
