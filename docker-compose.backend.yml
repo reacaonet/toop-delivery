@@ -12,6 +12,12 @@ services:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ADMIN_USER}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ADMIN_PASSWORD}
       MONGO_INITDB_DATABASE: ecbr
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.runCommand({ ping: 1 })"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
     networks:
       - toop-network
     logging:
@@ -30,6 +36,12 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
     networks:
       - toop-network
     logging:
@@ -45,6 +57,12 @@ services:
     restart: always
     volumes:
       - redis_prod_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
     networks:
       - toop-network
     logging:
