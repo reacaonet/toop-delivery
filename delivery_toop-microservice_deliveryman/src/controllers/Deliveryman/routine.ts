@@ -10,11 +10,17 @@ export default {
     count: number,
     loop: number,
   ): Promise<void> {
+    if (!database) {
+      return job.stop();
+    }
+
+    const db = database;
+
     if (loop > 3) {
-      await database.ref().child(`notFound_${shopperCompany}`).push({
+      await db.ref().child(`notFound_${shopperCompany}`).push({
         message: 'Nenhum entregador foi encontrado',
       });
-      await database.ref().child(`notFound_${shopperCompany}`).remove();
+      await db.ref().child(`notFound_${shopperCompany}`).remove();
       return job.stop();
     }
 
@@ -39,7 +45,7 @@ export default {
       );
 
       if (deliveryMan[count]) {
-        await database
+        await db
           .ref()
           .child(`new/order?person=${deliveryMan[count].person}`)
           .push({
@@ -50,6 +56,9 @@ export default {
           status: 'WAIT_DELIVERYMAN',
         });
         setTimeout(async () => {
+          if (!database) {
+            return;
+          }
           return await database
             .ref()
             .child(`new/order?person=${deliveryMan[count].person}`)

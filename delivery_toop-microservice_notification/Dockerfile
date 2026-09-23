@@ -22,7 +22,6 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 RUN npm install --legacy-peer-deps --omit=dev && npm cache clean --force
 COPY --from=build --chown=nodejs:nodejs /usr/src/app/dist ./dist
-COPY --from=build --chown=nodejs:nodejs /usr/src/app/src/service/firebase ./dist/service/firebase
 COPY --from=base --chown=nodejs:nodejs /usr/src/app/healthcheck.js ./healthcheck.js
 USER nodejs
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \

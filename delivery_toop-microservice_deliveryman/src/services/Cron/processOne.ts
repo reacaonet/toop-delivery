@@ -24,6 +24,10 @@ const restartService = (): void => {
 
 async function processOne(): Promise<void> {
   try {
+    if (!database) {
+      return restartService();
+    }
+
     const data = await apiEconomizeBr.get(
       '/delivery-man/queue/status/PROCESS?initial=true',
     );
@@ -106,6 +110,10 @@ const sendNotification = async (
   params = {},
 ): Promise<void> => {
   try {
+    if (!database) {
+      return;
+    }
+
     const price = await getDeliveryPrice(orderId, deliveryMan);
 
     await database
@@ -130,6 +138,9 @@ const sendNotification = async (
     // Excluir referência
     setTimeout(async () => {
       try {
+        if (!database) {
+          return;
+        }
         return await database
           .ref()
           .child(

@@ -123,6 +123,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 8400
+      LTS: ${LTS:-v1}
       POSTGRES_HOST: payment-postgres
       POSTGRES_PORT: 5432
       POSTGRES_USER: ${POSTGRES_USER}
@@ -170,6 +171,13 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       FIREBASE_serviceAccount: ${FIREBASE_serviceAccount}
       FIREBASE_databaseURL: ${FIREBASE_databaseURL}
+      FIREBASE_apiKey: ${FIREBASE_apiKey}
+      FIREBASE_authDomain: ${FIREBASE_authDomain}
+      FIREBASE_projectId: ${FIREBASE_projectId}
+      FIREBASE_storageBucket: ${FIREBASE_storageBucket}
+      FIREBASE_messagingSenderId: ${FIREBASE_messagingSenderId}
+      FIREBASE_appId: ${FIREBASE_appId}
+      FIREBASE_measurementId: ${FIREBASE_measurementId}
     depends_on:
       admin-mongodb:
         condition: service_healthy
@@ -199,6 +207,14 @@ services:
       REDIS_PASSWORD: ${REDIS_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
       API_KEY: ${APP_KEY}
+      FIREBASE_apiKey: ${FIREBASE_apiKey}
+      FIREBASE_authDomain: ${FIREBASE_authDomain}
+      FIREBASE_databaseURL: ${FIREBASE_databaseURL}
+      FIREBASE_projectId: ${FIREBASE_projectId}
+      FIREBASE_storageBucket: ${FIREBASE_storageBucket}
+      FIREBASE_messagingSenderId: ${FIREBASE_messagingSenderId}
+      FIREBASE_appId: ${FIREBASE_appId}
+      FIREBASE_measurementId: ${FIREBASE_measurementId}
     depends_on:
       admin-mongodb:
         condition: service_healthy

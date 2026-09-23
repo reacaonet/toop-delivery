@@ -10,8 +10,14 @@ const config = {
   appId: process.env.FIREBASE_appId,
   measurementId: process.env.FIREBASE_measurementId,
 };
-firebase.initializeApp(config);
 
-const database = firebase.database();
+let database: ReturnType<typeof firebase.database> | null = null;
+
+if (config.databaseURL) {
+  firebase.initializeApp(config);
+  database = firebase.database();
+} else {
+  console.warn('FIREBASE_databaseURL not set. Firebase Realtime Database disabled.');
+}
 
 export default database;
