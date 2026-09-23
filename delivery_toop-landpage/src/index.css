@@ -185,6 +185,25 @@ body {
 .lp-cta-inner p { color: rgba(255,255,255,0.85); font-size: 1.1rem; margin-bottom: 36px; }
 .lp-cta-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
 
+/* ===================== BAIXE O APP ===================== */
+.lp-section-apps { position: relative; overflow: hidden; }
+.lp-apps-inner { display: flex; align-items: center; justify-content: space-between; gap: 48px; flex-wrap: wrap; }
+.lp-apps-text { flex: 1 1 420px; max-width: 480px; }
+.lp-apps-text h2 { font-size: 2.4rem; font-weight: 900; margin-bottom: 12px; }
+.lp-apps-text p { font-size: 1.1rem; color: var(--gray-500); margin-bottom: 28px; }
+.lp-apps-buttons { display: flex; gap: 16px; flex-wrap: wrap; }
+.lp-store-badge {
+  display: inline-flex; align-items: center; gap: 12px;
+  background: var(--dark); color: var(--white); border-radius: 12px;
+  padding: 12px 20px; text-decoration: none; transition: transform 0.3s, box-shadow 0.3s;
+}
+.lp-store-badge:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.lp-store-badge-text { display: flex; flex-direction: column; line-height: 1.2; text-align: left; }
+.lp-store-badge-text small { font-size: 0.7rem; opacity: 0.8; }
+.lp-store-badge-text strong { font-size: 1.05rem; font-weight: 800; }
+.lp-apps-note { display: flex; align-items: center; gap: 8px; margin-top: 20px; color: var(--gray-500); font-size: 0.9rem; }
+.lp-apps-visual { flex: 0 1 360px; display: flex; justify-content: center; }
+
 /* ===================== FOOTER ===================== */
 .lp-footer { background: var(--dark); color: var(--gray-300); padding: 60px 0 0; }
 .lp-footer-inner { display: flex; justify-content: space-between; gap: 40px; flex-wrap: wrap; }
@@ -367,4 +386,9 @@ body {
   .lp-footer-bottom { flex-direction: column; gap: 16px; text-align: center; }
   .lp-section-header h2 { font-size: 1.8rem; }
   .lp-cta-inner h2 { font-size: 1.8rem; }
+  .lp-apps-text h2 { font-size: 1.8rem; }
+  .lp-apps-inner { justify-content: center; text-align: center; }
+  .lp-apps-buttons { justify-content: center; }
+  .lp-apps-note { justify-content: center; }
+  .lp-apps-visual { display: none; }
 }

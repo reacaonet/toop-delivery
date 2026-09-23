@@ -12,4 +12,6 @@ export const LINKS = {
   storeRegister: `${APP_URLS.store}/register`,
   deliverymanLogin: `${APP_URLS.deliveryman}/login`,
   deliverymanRegister: `${APP_URLS.deliveryman}/register`,
+  storeAppGoogle: import.meta.env.VITE_STORE_APP_GOOGLE || '/',
+  storeAppApple: import.meta.env.VITE_STORE_APP_APPLE || '/',
 } as const

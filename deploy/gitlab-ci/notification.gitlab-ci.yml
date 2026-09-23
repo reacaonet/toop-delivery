@@ -1,0 +1,27 @@
+# .gitlab-ci.yml — Projeto GitLab: gojadelivery/notification-microservice
+# Este arquivo vive DENTRO do repositório GitLab gojadelivery/notification-microservice
+# (não no monorepo — ele NÃO tem o código, só dispara o deploy remoto).
+#
+# Variáveis do projeto/group (Settings -> CI/CD -> Variables):
+#   SSH_PRIVATE_KEY  -> chave privada que acessa a VPS como root (Protected, Masked)
+#   VPS_HOST         -> 167.148.161.88
+#   VPS_USER         -> root
+#   VPS_PATH         -> /opt/toopdelivery
+
+stages:
+  - deploy
+
+deploy:
+  image: docker:cli
+  stage: deploy
+  before_script:
+    - apk add --no-cache openssh-client
+    - mkdir -p ~/.ssh && chmod 700 ~/.ssh
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa && chmod 600 ~/.ssh/id_rsa
+    - ssh-keyscan -H "${VPS_HOST}" >> ~/.ssh/known_hosts 2>/dev/null
+  script:
+    - |
+      ssh "${VPS_USER}@${VPS_HOST}" \
+        "cd ${VPS_PATH:-/opt/toopdelivery} && git pull --ff-only && docker compose -f docker-compose.backend.yml up -d --build notification-microservice && echo '[DEPLOY OK] notification-microservice'"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push"'

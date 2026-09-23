@@ -1,0 +1,67 @@
+name: Trigger GitLab Deploys
+
+# Dispara o pipeline do projeto GitLab correspondente ao microserviço alterado.
+# Requer secrets no GitHub:
+#   GITLAB_TRIGGER_ADMIN        -> pipeline trigger token do projeto gojadelivery/admin-api
+#   GITLAB_TRIGGER_PAYMENT      -> pipeline trigger token do projeto gojadelivery/payment-microservice
+#   GITLAB_TRIGGER_NOTIFICATION -> pipeline trigger token do projeto gojadelivery/notification-microservice
+#   GITLAB_TRIGGER_DELIVERYMAN  -> pipeline trigger token do projeto gojadelivery/deliveryman-microservice
+
+on:
+  push:
+    branches: [master]
+
+concurrency:
+  group: gitlab-deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  admin-api:
+    runs-on: ubuntu-latest
+    if: github.repository == 'reacaonet/toop-delivery'
+    paths:
+      - 'delivery_toop-admin/backend/**'
+      - 'docker-compose.backend.yml'
+    steps:
+      - name: Trigger admin-api pipeline
+        run: |
+          curl --fail --silent --show-error -X POST \
+            "https://gitlab.com/api/v4/projects/gojadelivery%2Fadmin-api/trigger/pipeline" \
+            -F token=${{ secrets.GITLAB_TRIGGER_ADMIN }} \
+            -F ref=master
+  payment:
+    runs-on: ubuntu-latest
+    paths:
+      - 'delivery_toop-microservice_payment/**'
+      - 'docker-compose.backend.yml'
+    steps:
+      - name: Trigger payment pipeline
+        run: |
+          curl --fail --silent --show-error -X POST \
+            "https://gitlab.com/api/v4/projects/gojadelivery%2Fpayment-microservice/trigger/pipeline" \
+            -F token=${{ secrets.GITLAB_TRIGGER_PAYMENT }} \
+            -F ref=master
+  notification:
+    runs-on: ubuntu-latest
+    paths:
+      - 'delivery_toop-microservice_notification/**'
+      - 'docker-compose.backend.yml'
+    steps:
+      - name: Trigger notification pipeline
+        run: |
+          curl --fail --silent --show-error -X POST \
+            "https://gitlab.com/api/v4/projects/gojadelivery%2Fnotification-microservice/trigger/pipeline" \
+            -F token=${{ secrets.GITLAB_TRIGGER_NOTIFICATION }} \
+            -F ref=master
+  deliveryman:
+    runs-on: ubuntu-latest
+    paths:
+      - 'delivery_toop-microservice_deliveryman/**'
+      - 'docker-compose.backend.yml'
+    steps:
+      - name: Trigger deliveryman pipeline
+        run: |
+          curl --fail --silent --show-error -X POST \
+            "https://gitlab.com/api/v4/projects/gojadelivery%2Fdeliveryman-microservice/trigger/pipeline" \
+            -F token=${{ secrets.GITLAB_TRIGGER_DELIVERYMAN }} \
+            -F ref=master
