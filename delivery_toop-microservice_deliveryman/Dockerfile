@@ -2,6 +2,7 @@
 FROM node:18-alpine AS base
 WORKDIR /usr/src/app
 COPY package*.json ./
+COPY healthcheck.js ./
 RUN npm install --legacy-peer-deps --omit=dev && npm cache clean --force
 
 FROM base AS development
