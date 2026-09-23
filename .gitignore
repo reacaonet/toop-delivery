@@ -12,6 +12,12 @@ yarn-error.log*
 .env.development
 .env.staging
 .env.production
+# Exceções: config prod pública (Firebase web SDK + URLs) para build automático no Vercel
+!delivery_toop-admin/frontend-react/.env.production
+!delivery_toop-store/.env.production
+!delivery_toop-web-client/.env.production
+!delivery_toop-deliveryman/.env.production
+!delivery_toop-landpage/.env.production
 
 # Build outputs
 dist/
