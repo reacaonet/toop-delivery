@@ -41,6 +41,7 @@ RUN npm install --legacy-peer-deps --omit=dev && npm cache clean --force
 # Copy built application
 COPY --from=build --chown=nodejs:nodejs /home/node/app/dist ./dist
 COPY --from=build --chown=nodejs:nodejs /home/node/app/package.json ./
+COPY healthcheck.js ./
 
 # Switch to non-root user
 USER nodejs

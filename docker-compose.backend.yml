@@ -201,12 +201,14 @@ services:
     environment:
       NODE_ENV: production
       PORT: 8300
+      LTS: ${LTS:-v1}
       MONGO_DB_CONNECTION_STRING: mongodb://${MONGO_ADMIN_USER}:${MONGO_ADMIN_PASSWORD}@admin-mongodb:27017/ecbr?retryWrites=true&authSource=admin
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
       API_KEY: ${APP_KEY}
+      API_ECONOMIZE_BR: http://admin-api:8100
       FIREBASE_apiKey: ${FIREBASE_apiKey}
       FIREBASE_authDomain: ${FIREBASE_authDomain}
       FIREBASE_databaseURL: ${FIREBASE_databaseURL}
