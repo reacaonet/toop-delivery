@@ -83,3 +83,4 @@ Que a base do projeto irá atualizar mantendo as alterações do seu microservi�
 Teste deploy via GitLab pipeline (trigger).
 Validacao trigger #2 (fetch-depth fix).
 Validacao trigger #3 (workflow por microservico).
+Validacao trigger #4 (ref=main).
