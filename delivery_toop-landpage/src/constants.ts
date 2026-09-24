@@ -13,5 +13,6 @@ export const LINKS = {
   deliverymanLogin: `${APP_URLS.deliveryman}/login`,
   deliverymanRegister: `${APP_URLS.deliveryman}/register`,
   storeAppGoogle: import.meta.env.VITE_STORE_APP_GOOGLE || 'https://github.com/reacaonet/toop-delivery/releases/download/mobile-apk/goja-cliente.apk',
+  storeAppGoogleEntregador: import.meta.env.VITE_STORE_APP_GOOGLE_ENTREGADOR || 'https://github.com/reacaonet/toop-delivery/releases/download/mobile-apk/goja-entregador.apk',
   storeAppApple: import.meta.env.VITE_STORE_APP_APPLE || '',
 } as const
