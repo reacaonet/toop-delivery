@@ -25,3 +25,6 @@ deploy:
         "cd ${VPS_PATH:-/opt/toopdelivery} && git pull --ff-only && docker compose -f docker-compose.backend.yml up -d --build payment-microservice && echo '[DEPLOY OK] payment-microservice'"
   rules:
     - if: '$CI_PIPELINE_SOURCE == "push"'
+      when: always
+    - if: '$CI_PIPELINE_SOURCE == "trigger" || $CI_PIPELINE_SOURCE == "api"'
+      when: always
