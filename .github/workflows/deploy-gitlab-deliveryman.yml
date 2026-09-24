@@ -1,0 +1,26 @@
+name: Deploy Deliveryman (GitLab)
+
+# Dispara o pipeline gojadelivery/deliveryman-microservice -> deploy na VPS via SSH.
+# Requer secret: GITLAB_TRIGGER_DELIVERYMAN (pipeline trigger token do projeto)
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'delivery_toop-microservice_deliveryman/**'
+      - 'docker-compose.backend.yml'
+
+concurrency:
+  group: gitlab-deploy-deliveryman
+  cancel-in-progress: false
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger deliveryman pipeline
+        run: |
+          curl --fail --silent --show-error -X POST \
+            "https://gitlab.com/api/v4/projects/gojadelivery%2Fdeliveryman-microservice/trigger/pipeline" \
+            -F token=${{ secrets.GITLAB_TRIGGER_DELIVERYMAN }} \
+            -F ref=master

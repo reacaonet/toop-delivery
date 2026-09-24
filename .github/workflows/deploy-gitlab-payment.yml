@@ -1,0 +1,26 @@
+name: Deploy Payment (GitLab)
+
+# Dispara o pipeline gojadelivery/payment-microservice -> deploy na VPS via SSH.
+# Requer secret: GITLAB_TRIGGER_PAYMENT (pipeline trigger token do projeto)
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'delivery_toop-microservice_payment/**'
+      - 'docker-compose.backend.yml'
+
+concurrency:
+  group: gitlab-deploy-payment
+  cancel-in-progress: false
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger payment pipeline
+        run: |
+          curl --fail --silent --show-error -X POST \
+            "https://gitlab.com/api/v4/projects/gojadelivery%2Fpayment-microservice/trigger/pipeline" \
+            -F token=${{ secrets.GITLAB_TRIGGER_PAYMENT }} \
+            -F ref=master

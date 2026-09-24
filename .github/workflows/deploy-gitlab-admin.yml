@@ -1,0 +1,27 @@
+name: Deploy Admin API (GitLab)
+
+# Dispara o pipeline gojadelivery/admin-api -> deploy na VPS via SSH.
+# Requer secret: GITLAB_TRIGGER_ADMIN (pipeline trigger token do projeto)
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'delivery_toop-admin/backend/**'
+      - 'docker-compose.backend.yml'
+
+concurrency:
+  group: gitlab-deploy-admin
+  cancel-in-progress: false
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    if: github.repository == 'reacaonet/toop-delivery'
+    steps:
+      - name: Trigger admin-api pipeline
+        run: |
+          curl --fail --silent --show-error -X POST \
+            "https://gitlab.com/api/v4/projects/gojadelivery%2Fadmin-api/trigger/pipeline" \
+            -F token=${{ secrets.GITLAB_TRIGGER_ADMIN }} \
+            -F ref=master
