@@ -84,3 +84,4 @@ Teste deploy via GitLab pipeline (trigger).
 Validacao trigger #2 (fetch-depth fix).
 Validacao trigger #3 (workflow por microservico).
 Validacao trigger #4 (ref=main).
+Validacao trigger #5 (ver resposta do GitLab).
