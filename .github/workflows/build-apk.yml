@@ -29,6 +29,9 @@ on:
         required: true
         default: '0.1.0'
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -138,5 +141,5 @@ jobs:
             - `https://github.com/reacaonet/toop-delivery/releases/download/mobile-apk/goja-cliente.apk`
             - `https://github.com/reacaonet/toop-delivery/releases/download/mobile-apk/goja-entregador.apk`
           files: ${{ steps.apks.outputs.files }}
-          allowUpdates: true
+          overwrite_files: true
           prerelease: true
