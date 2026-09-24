@@ -16,12 +16,45 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  admin-api:
+  detect-files:
     runs-on: ubuntu-latest
-    if: github.repository == 'reacaonet/toop-delivery'
-    paths:
-      - 'delivery_toop-admin/backend/**'
-      - 'docker-compose.backend.yml'
+    outputs:
+      admin: ${{ steps.detect.outputs.admin }}
+      payment: ${{ steps.detect.outputs.payment }}
+      notification: ${{ steps.detect.outputs.notification }}
+      deliveryman: ${{ steps.detect.outputs.deliveryman }}
+    steps:
+      - name: Compute changed paths
+        id: detect
+        shell: bash
+        env:
+          BASE: ${{ github.event.before }}
+          HEAD: ${{ github.sha }}
+        run: |
+          CHANGED=""
+          CHANGED=$(git diff --name-only "$BASE" "$HEAD")
+          echo "CHANGED: $CHANGED"
+          echo "admin=false" >> "$GITHUB_OUTPUT"
+          echo "payment=false" >> "$GITHUB_OUTPUT"
+          echo "notification=false" >> "$GITHUB_OUTPUT"
+          echo "deliveryman=false" >> "$GITHUB_OUTPUT"
+          for f in $CHANGED; do
+            case "$f" in
+              delivery_toop-admin/backend/*|docker-compose.backend.yml)
+                sed -i 's/^admin=.*/admin=true/' "$GITHUB_OUTPUT" ;;
+              delivery_toop-microservice_payment/*)
+                sed -i 's/^payment=.*/payment=true/' "$GITHUB_OUTPUT" ;;
+              delivery_toop-microservice_notification/*)
+                sed -i 's/^notification=.*/notification=true/' "$GITHUB_OUTPUT" ;;
+              delivery_toop-microservice_deliveryman/*)
+                sed -i 's/^deliveryman=.*/deliveryman=true/' "$GITHUB_OUTPUT" ;;
+            esac
+          done
+
+  admin-api:
+    needs: detect-files
+    runs-on: ubuntu-latest
+    if: needs.detect-files.outputs.admin == 'true'
     steps:
       - name: Trigger admin-api pipeline
         run: |
@@ -30,10 +63,9 @@ jobs:
             -F token=${{ secrets.GITLAB_TRIGGER_ADMIN }} \
             -F ref=master
   payment:
+    needs: detect-files
     runs-on: ubuntu-latest
-    paths:
-      - 'delivery_toop-microservice_payment/**'
-      - 'docker-compose.backend.yml'
+    if: needs.detect-files.outputs.payment == 'true'
     steps:
       - name: Trigger payment pipeline
         run: |
@@ -42,10 +74,9 @@ jobs:
             -F token=${{ secrets.GITLAB_TRIGGER_PAYMENT }} \
             -F ref=master
   notification:
+    needs: detect-files
     runs-on: ubuntu-latest
-    paths:
-      - 'delivery_toop-microservice_notification/**'
-      - 'docker-compose.backend.yml'
+    if: needs.detect-files.outputs.notification == 'true'
     steps:
       - name: Trigger notification pipeline
         run: |
@@ -54,10 +85,9 @@ jobs:
             -F token=${{ secrets.GITLAB_TRIGGER_NOTIFICATION }} \
             -F ref=master
   deliveryman:
+    needs: detect-files
     runs-on: ubuntu-latest
-    paths:
-      - 'delivery_toop-microservice_deliveryman/**'
-      - 'docker-compose.backend.yml'
+    if: needs.detect-files.outputs.deliveryman == 'true'
     steps:
       - name: Trigger deliveryman pipeline
         run: |

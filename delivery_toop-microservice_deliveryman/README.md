@@ -80,3 +80,4 @@ git pull base master
 ```
 
 Que a base do projeto irá atualizar mantendo as alterações do seu microserviço atual do mesmo jeito.
+Teste deploy via GitLab pipeline (trigger).
