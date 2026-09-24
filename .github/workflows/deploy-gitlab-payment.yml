@@ -19,8 +19,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Trigger payment pipeline
+        env:
+          GL_TOKEN: ${{ secrets.GITLAB_TRIGGER_PAYMENT }}
         run: |
-          curl --fail --silent --show-error -X POST \
+          if [ -z "$GL_TOKEN" ]; then echo "ERRO: secret GITLAB_TRIGGER_PAYMENT vazio/nao configurado"; exit 1; fi
+          echo "Token length: ${#GL_TOKEN}"
+          RESP=$(curl -sS -w "\n[HTTP %{http_code}]" -X POST \
             "https://gitlab.com/api/v4/projects/gojadelivery%2Fpayment-microservice/trigger/pipeline" \
-            -F token=${{ secrets.GITLAB_TRIGGER_PAYMENT }} \
-            -F ref=main
+            -F "token=$GL_TOKEN" \
+            -F ref=main)
+          echo "RESPOSTA GITLAB:"
+          echo "$RESP"
+          case "$RESP" in
+            *"[HTTP 201]"*) echo "[DEPLOY TRIGGER OK]" ;;
+            *) echo "[DEPLOY TRIGGER FAIL]"; exit 22 ;;
+          esac
