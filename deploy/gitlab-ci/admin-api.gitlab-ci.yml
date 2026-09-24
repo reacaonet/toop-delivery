@@ -16,12 +16,15 @@ deploy:
   stage: deploy
   before_script:
     - apk add --no-cache openssh-client
+    - if [ -z "$SSH_PRIVATE_KEY" ]; then echo "ERRO: variavel SSH_PRIVATE_KEY vazia (confira Protected/masked e branch protegida)"; exit 1; fi
     - mkdir -p ~/.ssh && chmod 700 ~/.ssh
-    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa && chmod 600 ~/.ssh/id_rsa
+    - printf '%s\n' "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa && chmod 600 ~/.ssh/id_rsa
+    - ssh-keygen -yf ~/.ssh/id_rsa >/dev/null 2>&1 && echo "[OK] chave privada valida" || { echo "[ERRO] chave privada invalida (formato? quebras de linha?)"; exit 1; }
+    - ssh -V
     - ssh-keyscan -H "${VPS_HOST}" >> ~/.ssh/known_hosts 2>/dev/null
   script:
     - |
-      ssh "${VPS_USER}@${VPS_HOST}" \
+      ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new -o IdentitiesOnly=yes -o PubkeyAcceptedKeyTypes=+ssh-rsa "${VPS_USER}@${VPS_HOST}" \
         "cd ${VPS_PATH:-/opt/toopdelivery} && git pull --ff-only && docker compose -f docker-compose.backend.yml up -d --build admin-api && echo '[DEPLOY OK] admin-api'"
   rules:
     - if: '$CI_PIPELINE_SOURCE == "push"'
