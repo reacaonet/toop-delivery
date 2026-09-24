@@ -1,0 +1,126 @@
+name: Build APK (Android)
+
+# Gera o APK Android dos apps Cliente e Entregador (Capacitor) e publica
+# em um GitHub Release com link de download FIXO, para distribuicao direta
+# pela landpage durante a fase de testes:
+#   https://github.com/reacaonet/toop-delivery/releases/download/mobile-apk/goja-cliente.apk
+#   https://github.com/reacaonet/toop-delivery/releases/download/mobile-apk/goja-entregador.apk
+#
+# Fase de testes usa APK assinado com a chave de debug do Android (instala em
+# qualquer aparelho com "fontes desconhecidas" habilitado). Para a Play Store
+# oficial, preparamos a keystore definitiva na hora de publicar.
+#
+# Uso: Actions -> Build APK (Android) -> Run workflow (app: both, versao: X.Y.Z)
+
+on:
+  workflow_dispatch:
+    inputs:
+      app:
+        description: 'Quais apps buildar?'
+        required: true
+        default: 'both'
+        type: choice
+        options:
+          - both
+          - cliente
+          - entregador
+      version:
+        description: 'Versao do build (usada na tag e titulo do release)'
+        required: true
+        default: '0.1.0'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - app: cliente
+            dir: mobile/cliente
+            apk: goja-cliente.apk
+          - app: entregador
+            dir: mobile/entregador
+            apk: goja-entregador.apk
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: ${{ matrix.dir }}/package-lock.json
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+        working-directory: ${{ matrix.dir }}
+
+      - name: Add Android platform
+        run: npx cap add android
+        working-directory: ${{ matrix.dir }}
+
+      - name: Sync Android
+        run: npx cap sync android
+        working-directory: ${{ matrix.dir }}
+
+      - name: Build release APK
+        run: |
+          cd android
+          ./gradlew assembleRelease --console=plain
+        working-directory: ${{ matrix.dir }}
+
+      - name: Collect APK
+        run: |
+          mkdir -p ../../../dist-apk
+          cp android/app/build/outputs/apk/release/app-release.apk ../../../dist-apk/${{ matrix.apk }}
+          ls -la ../../../dist-apk
+        working-directory: ${{ matrix.dir }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: apk-${{ matrix.app }}
+          path: dist-apk/${{ matrix.apk }}
+          retention-days: 7
+
+  publish:
+    needs: build
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist-apk
+          merge-multiple: true
+
+      - name: Verify APKs
+        run: |
+          ls -la dist-apk
+          [ -s dist-apk/goja-cliente.apk ] && echo "cliente OK" || echo "cliente NAO gerado"
+          [ -s dist-apk/goja-entregador.apk ] && echo "entregador OK" || echo "entregador NAO gerado"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: mobile-apk
+          name: GoJá Delivery Android ${{ github.event.inputs.version || 'build' }}
+          body: |
+            Build Android ${{ github.event.inputs.version || 'manual' }}
+
+            - **Cliente**: `goja-cliente.apk`
+            - **Entregador**: `goja-entregador.apk`
+
+            Links diretos para a landpage:
+            - `https://github.com/reacaonet/toop-delivery/releases/download/mobile-apk/goja-cliente.apk`
+            - `https://github.com/reacaonet/toop-delivery/releases/download/mobile-apk/goja-entregador.apk`
+          files: |
+            dist-apk/goja-cliente.apk
+            dist-apk/goja-entregador.apk
+          allowUpdates: true
+          prerelease: true

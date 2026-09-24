@@ -198,6 +198,10 @@ body {
   padding: 12px 20px; text-decoration: none; transition: transform 0.3s, box-shadow 0.3s;
 }
 .lp-store-badge:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.lp-store-badge-disabled {
+  cursor: not-allowed; opacity: 0.55; filter: grayscale(0.6);
+}
+.lp-store-badge-disabled:hover { transform: none; box-shadow: none; }
 .lp-store-badge-text { display: flex; flex-direction: column; line-height: 1.2; text-align: left; }
 .lp-store-badge-text small { font-size: 0.7rem; opacity: 0.8; }
 .lp-store-badge-text strong { font-size: 1.05rem; font-weight: 800; }
