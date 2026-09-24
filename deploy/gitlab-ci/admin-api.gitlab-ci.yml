@@ -26,7 +26,7 @@ deploy:
   script:
     - |
       ssh -o BatchMode=yes -o StrictHostKeyChecking=accept-new -o IdentitiesOnly=yes -o PubkeyAcceptedKeyTypes=+ssh-rsa "${VPS_USER}@${VPS_HOST}" \
-        "cd ${VPS_PATH:-/opt/toopdelivery} && git pull --ff-only && docker compose -f docker-compose.backend.yml up -d --build admin-api && echo '[DEPLOY OK] admin-api'"
+        "cd ${VPS_PATH:-/opt/toopdelivery} && git pull --ff-only && docker-compose -f docker-compose.backend.yml up -d --build admin-api && echo '[DEPLOY OK] admin-api'"
   rules:
     - if: '$CI_PIPELINE_SOURCE == "push"'
       when: always
