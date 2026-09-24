@@ -24,6 +24,9 @@ jobs:
       notification: ${{ steps.detect.outputs.notification }}
       deliveryman: ${{ steps.detect.outputs.deliveryman }}
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
       - name: Compute changed paths
         id: detect
         shell: bash
