@@ -6,9 +6,9 @@ name: Build APK (Android)
 #   https://github.com/reacaonet/toop-delivery/releases/download/mobile-apk/goja-cliente.apk
 #   https://github.com/reacaonet/toop-delivery/releases/download/mobile-apk/goja-entregador.apk
 #
-# Fase de testes usa APK assinado com a chave de debug do Android (instala em
-# qualquer aparelho com "fontes desconhecidas" habilitado). Para a Play Store
-# oficial, preparamos a keystore definitiva na hora de publicar.
+# Fase de testes usa APK release assinado com a chave de debug do Android
+# (instala em qualquer aparelho com "fontes desconhecidas" habilitado).
+# Para a Play Store oficial, preparamos a keystore definitiva na hora de publicar.
 #
 # Uso: Actions -> Build APK (Android) -> Run workflow (app: both, versao: X.Y.Z)
 
@@ -74,17 +74,18 @@ jobs:
         run: npx cap sync android
         working-directory: ${{ matrix.dir }}
 
-      - name: Build release APK
+      - name: Build release APK (signed with debug key)
         run: |
           cd android
+          sed -i 's/minifyEnabled false/minifyEnabled false\n            signingConfig signingConfigs.debug/' app/build.gradle
           ./gradlew assembleRelease --console=plain
         working-directory: ${{ matrix.dir }}
 
       - name: Collect APK
         run: |
-          mkdir -p ../../../dist-apk
-          cp android/app/build/outputs/apk/release/app-release.apk ../../../dist-apk/${{ matrix.apk }}
-          ls -la ../../../dist-apk
+          mkdir -p ../../dist-apk
+          cp android/app/build/outputs/apk/release/app-release.apk ../../dist-apk/${{ matrix.apk }}
+          ls -la ../../dist-apk
         working-directory: ${{ matrix.dir }}
 
       - uses: actions/upload-artifact@v4
