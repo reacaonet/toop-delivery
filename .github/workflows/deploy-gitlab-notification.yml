@@ -23,4 +23,4 @@ jobs:
           curl --fail --silent --show-error -X POST \
             "https://gitlab.com/api/v4/projects/gojadelivery%2Fnotification-microservice/trigger/pipeline" \
             -F token=${{ secrets.GITLAB_TRIGGER_NOTIFICATION }} \
-            -F ref=master
+            -F ref=main
