@@ -39,6 +39,9 @@ export class PaymentGatewayService {
   }
 
   async isSandbox(): Promise<boolean> {
+    if (this.envSandbox()) {
+      return true;
+    }
     try {
       const config = await getGatewayConfig();
       if (config.mode) return config.mode === 'sandbox';
